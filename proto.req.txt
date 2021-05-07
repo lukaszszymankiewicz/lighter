@@ -1,0 +1,4 @@
+numpy
+flake8
+black
+isort
