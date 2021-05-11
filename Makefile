@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS := --std=c99 -Wall 
-LINKS = `pkg-config --cflags --libs sdl2` 
+LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 TARGET = lighter
 
 all:
