@@ -1,9 +1,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
- 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
-#define TICK_INTERVAL 30
+#include <math.h>
+#include <stdio.h>
+
+#define SCREEN_WIDTH 512
+#define SCREEN_HEIGHT 512
 
 enum sprites {
     HERO_SPRITE_FRONT,
@@ -13,17 +14,23 @@ enum sprites {
     SPIRTES_TOTAL,
 };
 
-// global declarations
-SDL_Window* window = NULL;
-SDL_Surface* surface = NULL;
-SDL_Surface* current_sprite = NULL;
-SDL_Surface* sprites_collection[SPIRTES_TOTAL];
-
 // headers
 SDL_Surface* load_sprite(char *filepath);
 int init_game();
 void load_frames();
 void close_game();
+
+// global declarations
+SDL_Window* window = NULL;
+SDL_Surface* surface = NULL;
+SDL_Surface* current_sprite = NULL;
+SDL_Surface* sprites_collection[SPIRTES_TOTAL];
+SDL_Surface* loaded_sprite = NULL;
+SDL_Renderer* renderer = NULL;
+
+
+int radius = 100;
+float pi = 3.14;
 
 int init_game() {
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -31,29 +38,38 @@ int init_game() {
         return 0;
     }
 
-    else {
-        window = SDL_CreateWindow(
-           "Lighter",
-           SDL_WINDOWPOS_UNDEFINED,
-           SDL_WINDOWPOS_UNDEFINED,
-           SCREEN_WIDTH,
-           SCREEN_HEIGHT,
-           SDL_WINDOW_SHOWN
-        );
-        surface = SDL_GetWindowSurface(window);
+    // initializing window
+    window = SDL_CreateWindow(
+       "Lighter",
+       SDL_WINDOWPOS_UNDEFINED,
+       SDL_WINDOWPOS_UNDEFINED,
+       SCREEN_WIDTH,
+       SCREEN_HEIGHT,
+       SDL_WINDOW_SHOWN
+    );
 
+    // initializing renderer
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+    // initializing PNG
+    int imgFlags = IMG_INIT_PNG;
+    if( !( IMG_Init( imgFlags ) & imgFlags ) ) {
+        printf("Fatal Error!");
+        return 0;
     }
+
     return 1;
 }
 
 SDL_Surface* load_sprite(char *filepath) {
-    SDL_Surface* sprite = SDL_LoadBMP(filepath);
+    SDL_Surface* loaded_sprite = IMG_Load(filepath);
 
-    if(sprite == NULL) {
+    if(loaded_sprite == NULL) {
         printf("unable to locate image: %s", filepath);
     }
 
-    return sprite;
+    return loaded_sprite;
 }
 
 void load_frames() {
@@ -65,28 +81,34 @@ void load_frames() {
     current_sprite = sprites_collection[HERO_SPRITE_BACK];
 }
 
-
 void close_game() {
     SDL_FreeSurface(sprites_collection[HERO_SPRITE_FRONT]);
     SDL_FreeSurface(sprites_collection[HERO_SPRITE_BACK]);
     SDL_FreeSurface(sprites_collection[HERO_SPRITE_LEFT]);
     SDL_FreeSurface(sprites_collection[HERO_SPRITE_RIGHT]);
 
-    SDL_DestroyWindow(window);
     window = NULL;
+    renderer = NULL;
 
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+
+    IMG_Quit();
     SDL_Quit();
 }
 
 int main(int argc, char* args[]) {
     int loop = 1;
+
+    float QuaterRadDeg = 0.5 * pi / (2 * radius - 3);
     SDL_Event event;
 
-    load_frames();
     init_game();
+    load_frames();
 
     while(loop) {
 
+        // handle events
         while(SDL_PollEvent(&event) != 0) {
             if(event.type == SDL_QUIT) {
                 loop = 0;
@@ -112,17 +134,42 @@ int main(int argc, char* args[]) {
                 }
             }
 
-        //Apply the image stretched
+        // Rendering
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_RenderClear(renderer);
+
+        int hero_width = 10;
+        int hero_height = 15;
+        int scale = 3;
+        int correction = 1;
+
+        int hero_x = SCREEN_HEIGHT / 2;
+        int hero_y = SCREEN_WIDTH / 2;
+
+        // show light
+        for (int i=0; i< 2*radius-2; i++) {
+            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);     
+            float RadDeg = i * QuaterRadDeg;
+
+            int new_x = floor(hero_x + cos(RadDeg) * radius);
+            int new_y = floor(hero_y + sin(RadDeg) * radius);
+
+            SDL_RenderDrawLine(renderer, hero_x, hero_y, new_x, new_y);
+            SDL_RenderDrawLine(renderer, hero_x, hero_y, new_x, 2 * hero_y - new_y);
+            SDL_RenderDrawLine(renderer, hero_x, hero_y, 2 * hero_x - new_x, new_y);
+            SDL_RenderDrawLine(renderer, hero_x, hero_y, 2 * hero_x - new_x, 2 * hero_y - new_y);
+
+            SDL_RenderPresent(renderer);
+        }
+
+        // Sprites
+        surface = SDL_GetWindowSurface(window);
         SDL_Rect stretchRect;
 
-        stretchRect.x = 0;
-        stretchRect.y = 0;
-        stretchRect.w = 31;
-        stretchRect.h = 46;
-
-        surface = SDL_GetWindowSurface(window);
-        SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
-        SDL_UpdateWindowSurface(window);
+        stretchRect.w = hero_width * scale + correction;  // 31
+        stretchRect.h = hero_height * scale + correction; // 46
+        stretchRect.x = SCREEN_HEIGHT / 2 - (hero_width * scale) / 2;
+        stretchRect.y = SCREEN_WIDTH / 2 - (hero_height * scale) / 2;
 
         SDL_BlitScaled(current_sprite, NULL, surface, &stretchRect);
         SDL_UpdateWindowSurface(window);
