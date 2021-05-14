@@ -7,14 +7,15 @@ Features to be implemented:
  - 2D game enginge,
  - simple raycasting engine (dynamic light),
 
-
 How to start developing:
- - ensure that you have 'make' and 'gcc' on you system (other compiler than gcc also work but to use
-   makefile as-it-is gcc is required),
- - ensure that you have SDL2 on your system (neat installation guide can be found here:
-   https://lazyfoo.net/tutorials/SDL/01_hello_SDL/index.php),
- - game is using some SDL extensions, please ensure that you have 'libsdl2-image-dev' package
-   installed as well.
+
+1) Linux:
+ - install make
+ - install gcc
+ - install SDL2 (neat installation guide can be found here: https://lazyfoo.net/tutorials/SDL/01_hello_SDL/index.php),
+
+2) Windows:
+ - All you need to know (and set) is in this video: https://www.youtube.com/watch?v=tmGBhM8AEj8https://www.youtube.com/watch?v=tmGBhM8AEj8
 
 You can start developing!
 
@@ -24,10 +25,16 @@ You can start developing!
 ```
 make lighter
 ```
- - ensure that lighter.o file is executable (if not use 'chmod +x lighter.o'),
- - run game by running object file: './lighter',
+ - run game by using command: 
+```
+./lighter,
+```
+
+On Visual Studio Code use default compile & run options.
+
 
 How to use prototype scripts:
+
 Prototype scripts are for testing only, and it is not required (at all) to run any of the game code.
 Here lays some mathematical concepts for further implementation/checking etc.
 
