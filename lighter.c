@@ -158,9 +158,9 @@ int main(int argc, char* args[]) {
             SDL_RenderDrawLine(renderer, hero_x, hero_y, new_x, 2 * hero_y - new_y);
             SDL_RenderDrawLine(renderer, hero_x, hero_y, 2 * hero_x - new_x, new_y);
             SDL_RenderDrawLine(renderer, hero_x, hero_y, 2 * hero_x - new_x, 2 * hero_y - new_y);
-
-            SDL_RenderPresent(renderer);
         }
+
+        SDL_RenderPresent(renderer);
 
         // Sprites
         surface = SDL_GetWindowSurface(window);
