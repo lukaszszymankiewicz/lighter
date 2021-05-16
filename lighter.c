@@ -74,10 +74,10 @@ SDL_Surface* load_sprite(char *filepath) {
 }
 
 void load_frames() {
-    sprites_collection[HERO_SPRITE_FRONT] = load_sprite("player_front.bmp");
-    sprites_collection[HERO_SPRITE_BACK] = load_sprite("player_back.bmp");
-    sprites_collection[HERO_SPRITE_LEFT] = load_sprite("player_left.bmp");
-    sprites_collection[HERO_SPRITE_RIGHT] = load_sprite("player_right.bmp");
+    sprites_collection[HERO_SPRITE_FRONT] = load_sprite("sprites/player_front.bmp");
+    sprites_collection[HERO_SPRITE_BACK] = load_sprite("sprites/player_back.bmp");
+    sprites_collection[HERO_SPRITE_LEFT] = load_sprite("sprites/player_left.bmp");
+    sprites_collection[HERO_SPRITE_RIGHT] = load_sprite("sprites/player_right.bmp");
 
     current_sprite = sprites_collection[HERO_SPRITE_BACK];
 }
