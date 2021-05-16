@@ -31,24 +31,3 @@ make lighter
 ```
 
 On Visual Studio Code use default compile & run options.
-
-
-How to use prototype scripts:
-
-Prototype scripts are for testing only, and it is not required (at all) to run any of the game code.
-Here lays some mathematical concepts for further implementation/checking etc.
-
- - ensure you have Python3.5+ on your system,
- - create virtual enviroment in main folder of this project:
-```
-python3.8 -m venv venv
-```
- - activate virtual enviroment,
-```
-source venv/bin/activate
-```
- - install required packages:
-```
-pip install -r proto.req.txt
-```
-Now you can run all prototype scripts!
