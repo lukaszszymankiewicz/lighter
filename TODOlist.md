@@ -1,0 +1,3 @@
+ - [ ] add hero movement
+ - [ ] add walls
+ - [ ] rays collission with walls

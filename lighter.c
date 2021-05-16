@@ -29,8 +29,9 @@ SDL_Surface* loaded_sprite = NULL;
 SDL_Renderer* renderer = NULL;
 
 
-int radius = 100;
-float pi = 3.14;
+int radius = 128;
+int s_radius_ratio = 2;
+float half_pi = 1.57;
 
 int init_game() {
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -97,12 +98,24 @@ void close_game() {
     SDL_Quit();
 }
 
+
 int main(int argc, char* args[]) {
     int loop = 1;
 
-    float QuaterRadDeg = 0.5 * pi / (2 * radius - 3);
-    SDL_Event event;
+    int hero_width = 10;
+    int hero_height = 15;
+    int scale = 3;
+    int correction = 1;
 
+    int hero_x = SCREEN_HEIGHT / 2;
+    int hero_y = SCREEN_WIDTH / 2;
+
+    int resolution = 128;
+
+    // because we calculate hero rays for quater of full circle (other are just symetries)
+    float deg_res = half_pi / 2 / resolution; 
+
+    SDL_Event event;
     init_game();
     load_frames();
 
@@ -138,26 +151,20 @@ int main(int argc, char* args[]) {
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(renderer);
 
-        int hero_width = 10;
-        int hero_height = 15;
-        int scale = 3;
-        int correction = 1;
-
-        int hero_x = SCREEN_HEIGHT / 2;
-        int hero_y = SCREEN_WIDTH / 2;
-
-        // show light
-        for (int i=0; i< 2*radius-2; i++) {
+        // render light
+        for (float deg=0; deg<half_pi; deg+=deg_res) {
             SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);     
-            float RadDeg = i * QuaterRadDeg;
 
-            int new_x = floor(hero_x + cos(RadDeg) * radius);
-            int new_y = floor(hero_y + sin(RadDeg) * radius);
+            int ray_end_x = floor(hero_x + cos(deg) * radius);
+            int ray_end_y = floor(hero_y + sin(deg) * radius);
 
-            SDL_RenderDrawLine(renderer, hero_x, hero_y, new_x, new_y);
-            SDL_RenderDrawLine(renderer, hero_x, hero_y, new_x, 2 * hero_y - new_y);
-            SDL_RenderDrawLine(renderer, hero_x, hero_y, 2 * hero_x - new_x, new_y);
-            SDL_RenderDrawLine(renderer, hero_x, hero_y, 2 * hero_x - new_x, 2 * hero_y - new_y);
+            int ray_beg_x = floor(hero_x + cos(deg) * (radius >> s_radius_ratio));
+            int ray_beg_y = floor(hero_y + sin(deg) * (radius >> s_radius_ratio));
+
+            SDL_RenderDrawLine(renderer, ray_beg_x, ray_beg_y, ray_end_x, ray_end_y);
+            SDL_RenderDrawLine(renderer, ray_beg_x, 2 * hero_y - ray_beg_y, ray_end_x, 2 * hero_y - ray_end_y);
+            SDL_RenderDrawLine(renderer, 2 * hero_x - ray_beg_x, ray_beg_y, 2 * hero_x - ray_end_x, ray_end_y);
+            SDL_RenderDrawLine(renderer, 2 * hero_x - ray_beg_x, 2 * hero_y - ray_beg_y, 2 * hero_x - ray_end_x, 2 * hero_y - ray_end_y);
         }
 
         SDL_RenderPresent(renderer);
