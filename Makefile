@@ -2,13 +2,14 @@ CC = gcc
 CFLAGS := --std=c99 -Wall
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 LIBS = -lm
-TARGET = lighter
+OBJ = lighter
+TARGET = lighter.c tex.c
 
 all:
 	$(TARGET)
 
-$(TARGET): $(TARGET).c
-	$(CC) $(CFLAGS) $(TARGET).c -o $(TARGET) $(LINKS) $(LIBS)
+lighter: 
+	$(CC) $(CFLAGS) $(TARGET) -o $(OBJ) $(LINKS) $(LIBS)
 
 clean:
-	$(RM) $(TARGET)
+	$(RM) $(OBJ)
