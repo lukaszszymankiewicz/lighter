@@ -2,93 +2,37 @@
 #include <SDL2/SDL_image.h>
 #include <math.h>
 #include <stdio.h>
-#include "tex.h"
+#include "draw.h"
 
 #define SCREEN_WIDTH 512
 #define SCREEN_HEIGHT 512
 
-enum sprites {
-    HERO_SPRITE_FRONT,
-    HERO_SPRITE_BACK,
-    HERO_SPRITE_LEFT,
-    HERO_SPRITE_RIGHT,
-    SPIRTES_TOTAL,
-};
-
-int init_game();
-void load_frames();
+void init_game();
 void close_game();
 
-// global declarations
-SDL_Window* window = NULL;
-SDL_Surface* surface = NULL;
-Texture* current_sprite = NULL;
-Texture* sprites_collection[SPIRTES_TOTAL];
-SDL_Renderer* renderer = NULL;
-
+int hero_state = 1;
 int radius = 128;
 int s_radius_ratio = 2;
 float half_pi = 1.57;
 
-int init_game() {
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf("Fatal Error!");
-        return 0;
-    }
-
-    // initializing window
-    window = SDL_CreateWindow(
-       "Lighter",
-       SDL_WINDOWPOS_UNDEFINED,
-       SDL_WINDOWPOS_UNDEFINED,
-       SCREEN_WIDTH,
-       SCREEN_HEIGHT,
-       SDL_WINDOW_SHOWN
-    );
-
-    // initializing renderer
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-    // initializing PNG
-    int imgFlags = IMG_INIT_PNG;
-    if( !( IMG_Init( imgFlags ) & imgFlags ) ) {
-        printf("Fatal Error!");
-        return 0;
-    }
-
-    return 1;
-}
-
-void load_frames() {
-    sprites_collection[HERO_SPRITE_FRONT] = init_texture("sprites/player_front.bmp", renderer);
-    sprites_collection[HERO_SPRITE_BACK] = init_texture("sprites/player_back.bmp", renderer);
-    sprites_collection[HERO_SPRITE_LEFT] = init_texture("sprites/player_left.bmp", renderer);
-    sprites_collection[HERO_SPRITE_RIGHT] = init_texture("sprites/player_right.bmp", renderer);
-
-    current_sprite = sprites_collection[HERO_SPRITE_BACK];
-}
+enum hero_states {
+    HERO_STANDING_FRONT = 0,
+    HERO_STANDING_LEFT = 1,
+    HERO_STANDING_BACK = 2,
+    HERO_STANDING_RIGHT = 3,
+};
 
 void close_game() {
-    free_texture(sprites_collection[HERO_SPRITE_FRONT]);
-    free_texture(sprites_collection[HERO_SPRITE_BACK]);
-    free_texture(sprites_collection[HERO_SPRITE_LEFT]);
-    free_texture(sprites_collection[HERO_SPRITE_RIGHT]);
+    free_graphics();
+};
 
-    window = NULL;
-    renderer = NULL;
-
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-
-    IMG_Quit();
-    SDL_Quit();
-}
-
+void init_game() {
+    init_graphics(SCREEN_WIDTH, SCREEN_HEIGHT);
+    load_frames();
+};
 
 int main(int argc, char* args[]) {
     int loop = 1;
-    int scale = 3;
 
     int x = SCREEN_HEIGHT / 2;
     int y = SCREEN_WIDTH / 2;
@@ -99,7 +43,6 @@ int main(int argc, char* args[]) {
 
     SDL_Event event;
     init_game();
-    load_frames();
 
     while(loop) {
 
@@ -112,56 +55,46 @@ int main(int argc, char* args[]) {
             else if(event.type == SDL_KEYDOWN) {
                 switch(event.key.keysym.sym) {
                     case SDLK_UP:
-                    current_sprite = sprites_collection[HERO_SPRITE_BACK];
+                    hero_state = HERO_STANDING_BACK;
                     break;
 
                     case SDLK_DOWN:
-                    current_sprite = sprites_collection[HERO_SPRITE_FRONT];
+                    hero_state = HERO_STANDING_FRONT;
                     break;
 
                     case SDLK_RIGHT:
-                    current_sprite = sprites_collection[HERO_SPRITE_RIGHT];
+                    hero_state = HERO_STANDING_RIGHT;
                     break;
 
                     case SDLK_LEFT:
-                    current_sprite = sprites_collection[HERO_SPRITE_LEFT];
+                    hero_state = HERO_STANDING_LEFT;
                     break;
                 }
             }
 
-        // Rendering
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-        SDL_RenderClear(renderer);
+        clear_screen();
 
         // render light
         for (float deg=0; deg<half_pi; deg+=deg_res) {
-            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);     
-
             int ray_end_x = floor(x + cos(deg) * radius);
             int ray_end_y = floor(y + sin(deg) * radius);
 
             int ray_beg_x = floor(x + cos(deg) * (radius >> s_radius_ratio));
             int ray_beg_y = floor(y + sin(deg) * (radius >> s_radius_ratio));
 
-            SDL_RenderDrawLine(renderer, ray_beg_x, ray_beg_y, ray_end_x, ray_end_y);
-            SDL_RenderDrawLine(renderer, ray_beg_x, 2 * y - ray_beg_y, ray_end_x, 2 * y - ray_end_y);
-            SDL_RenderDrawLine(renderer, 2 * x - ray_beg_x, ray_beg_y, 2 * x - ray_end_x, ray_end_y);
-            SDL_RenderDrawLine(renderer, 2 * x - ray_beg_x, 2 * y - ray_beg_y, 2 * x - ray_end_x, 2 * y - ray_end_y);
+            draw_ray(ray_beg_x, ray_beg_y, ray_end_x, ray_end_y);
+            draw_ray(ray_beg_x, 2 * y - ray_beg_y, ray_end_x, 2 * y - ray_end_y);
+            draw_ray(2 * x - ray_beg_x, ray_beg_y, 2 * x - ray_end_x, ray_end_y);
+            draw_ray(2 * x - ray_beg_x, 2 * y - ray_beg_y, 2 * x - ray_end_x, 2 * y - ray_end_y);
         }
 
-        // Sprites
-        surface = SDL_GetWindowSurface(window);
+        draw_hero_sprite(x-15, y-22, hero_state);
+        update_graphics();
 
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-        render_texture(renderer, current_sprite, scale, x-15, y-22);
-
-        SDL_RenderPresent(renderer);
-
-        SDL_UpdateWindowSurface(window);
         }
     }
 
     close_game();
 	return 0;
 }
+
