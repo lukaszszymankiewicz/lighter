@@ -7,17 +7,44 @@ typedef struct texture {
     int height;
 } Texture;
 
-SDL_Window* create_window(int width, int height);
-void init_video();
-SDL_Renderer* init_renderer(SDL_Window* window);
-void init_png();
+typedef struct intersection_point {
+    float x;
+    float y;
+    float T1;
+    bool found;
+} IntersectionPoint;
+
+typedef struct point {
+    float x; 
+    float y; 
+} Point;
+
+typedef struct line {
+    float x1;
+    float y1;
+    float x2;
+    float y2; 
+} Line;
+
+typedef struct polygon {
+    Line lines[10];
+    int len;
+} Polygon;
+
+// INIT
 int init_graphics(int width, int height);
-Texture *init_texture(char *filepath);
 void load_frames();
-void free_texture(Texture *texture);
+
+// FREE
 void free_graphics();
-void render_texture(Texture* texture, SDL_Rect* clip, int x, int y);
-void draw_hero_sprite(int x, int y, int hero_state);
 void clear_screen();
+
+// UPDATE
 void update_graphics();
-void draw_ray(int x1, int y1, int x2, int y2);
+
+// DRAW
+void draw_hero_sprite(int x, int y, int hero_state);
+void draw_circle(int center_x, int center_y, int r, int power);
+void draw_wall(int x0, int y0, int x1, int y1);
+void draw_walls(Polygon *obstacles);
+void draw_rays(float st_x, float st_y, Polygon *obstacles);
