@@ -38,20 +38,18 @@ int main(int argc, char* args[]) {
         10,
     };
 
-    Point hero_pos = {
-        SCREEN_WIDTH / 2,
-        SCREEN_HEIGHT / 2
-    };
+    int x=SCREEN_WIDTH / 2;
+    int y=SCREEN_HEIGHT / 2;
 
     SDL_Event event;
     init_game();
 
     while(loop) {
-        handle_events(&event, &loop, &hero_state);
+        handle_events(&event, &loop, &hero_state, &x, &y);
         clear_screen();
         draw_walls(&poly);
-        draw_rays(hero_pos.x, hero_pos.y, &poly);
-        draw_hero_sprite(hero_pos.x-15, hero_pos.y-22, hero_state);
+        draw_rays(x, y, &poly);
+        draw_hero_sprite(x-15, y-22, hero_state);
         update_graphics();
     }
 

@@ -226,22 +226,38 @@ IntersectionPoint choose_closest_point(IntersectionPoint closest, IntersectionPo
     }
 };
 
+// for each corner of wall three ays are drawn (one directly into corner, one a little bit to left, 
+// and one a little bit to right). This allows to calculate map pieces where there is high lightness
+// and where there is only a little bit of it (rays which are a little bit offseted will mark it).
 void draw_rays(float st_x, float st_y, Polygon *obstacles){ 
-    int resolution = 50;
-
-    for(float angle=0.0; angle<pi*2; angle += (pi*2)/resolution)
+    for(int i=0; i<obstacles->len; i++)
     {
-        IntersectionPoint closest = {0, 0, 0, false};
+        // ray cast directly into corner of the wall
+        Line ray = {st_x, st_y, obstacles->lines[i].x1, obstacles->lines[i].y1};
+        Line ray_l = {st_x, st_y, obstacles->lines[i].x1, obstacles->lines[i].y1+1};
+        Line ray_r = {st_x, st_y, obstacles->lines[i].x1, obstacles->lines[i].y1-1};
 
-        Line ray = {st_x, st_y, st_x + cos(angle), st_y + sin(angle)};
-
+        // because we cast ay directly into some point we could assume that it will be at least 
+        // closest point of intersection.
+        IntersectionPoint closest = find_intersection_point(ray, obstacles->lines[i]);
+        IntersectionPoint closest_l = find_intersection_point(ray_l, obstacles->lines[i]);
+        IntersectionPoint closest_r = find_intersection_point(ray_r, obstacles->lines[i]);
+        
         for (int j = 0; j<obstacles->len; j++) {
             IntersectionPoint candidate = find_intersection_point(ray, obstacles->lines[j]);
             closest = choose_closest_point(closest, candidate);
+
+            IntersectionPoint candidate_l = find_intersection_point(ray_l, obstacles->lines[j]);
+            closest_l = choose_closest_point(closest_l, candidate_l);
+
+            IntersectionPoint candidate_r = find_intersection_point(ray_r, obstacles->lines[j]);
+            closest_r = choose_closest_point(closest_r, candidate_r);
         }
 
-        if (closest.found == true) {
-            draw_wall(st_x, st_y, closest.x, closest.y);
-        }
+        draw_wall(st_x, st_y, closest.x, closest.y);
+        draw_wall(st_x, st_y, closest_l.x, closest_l.y);
+        draw_wall(st_x, st_y, closest_r.x, closest_r.y);
+
     }
 };
+
