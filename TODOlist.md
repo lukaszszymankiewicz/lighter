@@ -1,3 +1,4 @@
- - [ ] add hero movement
+ - [x] add hero movement
  - [x] add walls
  - [x] rays collission with walls
+ - [x] fill light! (and obstacles polygons if that matters!)
