@@ -27,7 +27,7 @@ make lighter
 ```
  - run game by using command: 
 ```
-./lighter,
+./lighter
 ```
 
 On Visual Studio Code use default compile & run options.
