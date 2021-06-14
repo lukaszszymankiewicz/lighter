@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "draw.h"
 
+#define DEBUG 0
+
 Texture* hero_sprites;
 SDL_Rect hero_texture_clips[ 4 ];
 
@@ -155,37 +157,6 @@ void LRE_update_graphics() {
     SDL_UpdateWindowSurface(window);
 };
 
-float find_intersection_coef(
-    float ray_x1, float ray_y1,
-    float ray_x2, float ray_y2,
-    float wall_x1, float wall_y1,
-    float wall_x2, float wall_y2
-)
-{
-	float ray_dx = ray_x2 - ray_x1;
-	float ray_dy = ray_y2 - ray_y1;
-	float wall_dx = wall_x2 - wall_x1;
-	float wall_dy = wall_y2 - wall_y1;
-
-	float r_mag = sqrt(ray_dx * ray_dx + ray_dy * ray_dy);
-	float s_mag = sqrt(wall_dx * wall_dx + wall_dy * wall_dy);
-
-	if(ray_dx/r_mag==wall_dx/s_mag && ray_dy/r_mag==wall_dy/s_mag) {return -1;}
-
-	float T2 = (ray_dx*(wall_y1-ray_y1) + ray_dy*(ray_x1-wall_x1))/(wall_dx*ray_dy - wall_dy*ray_dx);
-	float T1 = (wall_x1+wall_dx*T2-ray_x1)/ray_dx;
-
-	if (T1<0 || T2<0 || T2>1) {return -1;}
-
-    return T1;
-};
-
-int is_better_coef(float a, float b) {
-    if (a == -1 && b != -1) {return 1;}
-    else if (a!=-1 && b!=-1 && a>b) {return 1;}
-    else {return 0;}
-};
-
 
 void LRE_draw_colored_line(float x1, float y1, float x2, float y2, int r, int g, int b, int a) {
     SDL_SetRenderDrawColor(renderer, r, g, b, a);     
@@ -202,77 +173,228 @@ float angle(int ax, int ay, int bx, int by) {
 
 // Function to insert a given node at its correct sorted position into a given
 // list sorted in increasing order
-void insert_LightPoint(struct LightPoint** head, struct LightPoint* new_point) {
-    struct LightPoint** currentRef = head;
-    while (*currentRef != NULL && (*currentRef)->angle < new_point->angle) {
-        currentRef = &((*currentRef)->next);
-    }
- 
-    new_point->next = *currentRef;
-    *currentRef = new_point;
-}
- 
-// Helper function to return a new node of the linked list
-struct LightPoint* new_Point(int x, int y, int st_x, int st_y) {
+
+struct LightPoint* new_Point(
+    int x,        int y,
+    int st_x,     int st_y,
+    int wall_id
+)
+{
     struct LightPoint* new_point = (struct LightPoint*)malloc(sizeof(struct LightPoint));
     new_point->x = x;
     new_point->y = y;
+    new_point->wall_id = wall_id;
     new_point->angle = angle(x, y, st_x, st_y);
     new_point->next = NULL;
 
     return new_point;
 }
 
+void insert_LightPoint(
+    struct LightPoint** head,
+    int x1, int y1,
+    int x2, int y2,
+    int wall_id
+) 
+{
+
+    struct LightPoint* current;
+    struct LightPoint* new_pt = new_Point(x1, y1, x2, y2, wall_id);
+
+    if (*head == NULL || (*head)->angle >= new_pt->angle)
+    {
+        new_pt->next = *head;
+        *head = new_pt;
+    }
+    else 
+    {
+        current = *head;
+
+        while (current->next != NULL && current->next->angle < new_pt->angle) 
+        {
+            current = current->next;
+        }
+
+        new_pt->next = current->next;
+        current->next = new_pt;
+    }
+
+}
+ 
+int lines_intersects(
+    int x1, int y1,     // second line
+    int x2, int y2,     // second line
+    int x3, int y3,     // second line
+    int x4, int y4,     // second line
+    int *i_x, int *i_y  // intersection points
+)
+{
+    float s_numer, t_numer, denom, t;
+    float dx13, dy13;
+    float dx21, dx43, dy21, dy43;
+
+    dx21 = x2 - x1; dy21 = y2 - y1; dx43 = x4 - x3; dy43 = y4 - y3;
+    denom = dx21 * dy43 - dx43 * dy21;
+
+    if (denom == 0)
+        return 0; // Collinear
+
+    bool denomPositive = denom > 0;
+
+    dx13 = x1 - x3; dy13 = y1 - y3;
+    s_numer = dx21 * dy13 - dy21 * dx13;
+
+    if ((s_numer < 0) == denomPositive)
+        return 0; // No collision
+
+    t_numer = dx43 * dy13 - dy43 * dx13;
+    if ((t_numer < 0) == denomPositive)
+        return 0; // No collision
+
+    if (((s_numer > denom) == denomPositive) || ((t_numer > denom) == denomPositive))
+        return 0; // No collision
+
+    // Collision detected
+    t = t_numer / denom;
+    if (i_x != NULL)
+        *i_x = (int)x1 + (t * dx21);
+    if (i_y != NULL)
+        *i_y = (int)y1 + (t * dy21);
+
+    return 1;
+}
+
+// rays are always cast from hero standing point so ray_x1 and ray_y1 wil be equal to hero pos
+// ray_x2 and ray_y2 are corrds of current polygon point (for main ray)
+// ray_x2 and ray_y2 are corrds offseted points behind the level (for aux rays), offeseted points
+// are calculated from polar coordinates (we take big radius and calculate appripriate angle)
+void LRE_find_shortest_ray(
+    int ray_x1, int ray_y1,
+    int ray_x2, int ray_y2,
+    int * best_x, int * best_y,
+    PolyLine * walls, int * wall_id
+)
+{ 
+        int shortest_x = ray_x2;
+        int shortest_y = ray_y2;
+        int cur_x = shortest_x; 
+        int cur_y = shortest_y;
+        int id = 0; // if resulted best ray will have wall id equal to zero it means that no intersection occures
+
+        PolyLine * hit_wall = NULL;
+        hit_wall = walls;
+
+        for(; hit_wall; hit_wall=hit_wall->next) 
+        {
+            id++;
+            if (lines_intersects(
+                ray_x1,       ray_y1,       shortest_x,   shortest_y,    
+                hit_wall->x1, hit_wall->y1, hit_wall->x2, hit_wall->y2,
+                &cur_x,       &cur_y                                    )
+            )
+            {
+                if (abs(ray_x1 - cur_x) < abs(ray_x1 - shortest_x))
+                {
+                    shortest_x = cur_x; shortest_y = cur_y; *wall_id = id;
+                }
+            }
+        }
+
+    *best_x = (int)shortest_x;
+    *best_y = (int)shortest_y;
+}
+// Light polygon has many points and a number of it is redundant and can be deleted withaout any
+// heasitation. this function does exacly this
+void LRE_optim_LightPoly(struct LightPoint* poly)
+{
+    while (poly->next != NULL && poly->next->next != NULL)
+    {
+        struct LightPoint* cur_cone = poly->next;
+
+        if (cur_cone->next->wall_id == poly->wall_id && cur_cone->next->wall_id == cur_cone->wall_id)
+        {
+            // there is same wall id behing current cone and after current cone - so current
+            // cone can be deleted.
+            //
+            //             current
+            //               | 
+            //               v
+            //    +------+-------+-------+
+            //    |  5   |   5   |   5   |  ... 
+            //    +------+-------+-------+
+            poly->next = cur_cone->next;            
+            free(cur_cone);
+        }
+        else 
+        {
+            // there isnt same wall id behing current cone and after current cone - we`re moving on
+            //
+            //             current
+            //               | 
+            //               v
+            //    +------+-------+-------+
+            //    |  5   |   5   |   3   |  ... 
+            //    +------+-------+-------+
+            //
+            //               OR
+            //
+            //             current
+            //               | 
+            //               v
+            //    +------+-------+-------+
+            //    |  3   |   5   |   5   |  ... 
+            //    +------+-------+-------+
+            poly=poly->next;
+        }
+    }
+}
+
 // for each corner of wall three ays are drawn (one directly into corner, one a little bit to left, 
 // and one a little bit to right). This allows to calculate map pieces where there is high lightness
 // and where there is only a little bit of it (rays which are a little bit offseted will mark it).
 void LRE_draw_rays(Position hero_pos, PolyLine * walls) { 
-    
-    int correction[] = {0, -5, 5};
-    int corrections = 3;
 
-    // Start of the light polygon to be drawn
     struct LightPoint* light_poly = NULL;
+    PolyLine * cur_wall = NULL;
+    cur_wall = walls;
+    int wall_id = 0; // this will monitor current wall id to optimize light triangle
 
-    for(int c=0; c<corrections; c++) {
-        int corr = correction[c];
-        PolyLine * cur_wall = NULL;
-        cur_wall = walls;
+    for(; cur_wall; cur_wall=cur_wall->next) {
+        // "base" intersection - not corrected rays always hits it target, corrected rays can
+        // overshoot - but because level is always an closed polygon, ray always hits smth but
+        // only is to find what
+        float pl_angle = angle(hero_pos.x, hero_pos.y, cur_wall->x1, cur_wall->y1);
+        float corr = 0.01;
+        int big_r = 1000;
+        int shortest_x, shortest_y;
 
-        for(; cur_wall; cur_wall=cur_wall->next) {
-            float best_x = cur_wall->x1;
-            float best_y = cur_wall->y1;
+        // main ray
+        LRE_find_shortest_ray(
+            hero_pos.x,                                hero_pos.y,
+            cur_wall->x1,                              cur_wall->y1,
+            &shortest_x,                               &shortest_y,
+            walls,                                     &wall_id
+        );
+        insert_LightPoint(&light_poly, shortest_x, shortest_y, hero_pos.x, hero_pos.y, wall_id);
 
-            // "base" intersection - not corrected rays always hits it target, corrected rays can
-            // overshoot - but because level is always an closed polygon, ray always hits smth but
-            // only is to find what
-            float intersection_coef = find_intersection_coef(
-                hero_pos.x, hero_pos.y,
-                cur_wall->x1, cur_wall->y1 + corr,    
-                cur_wall->x1, cur_wall->y1,    
-                cur_wall->x2, cur_wall->y2    
-            );
-            
-            PolyLine * hit_wall = NULL;
-            hit_wall = walls;
+        // shifted ray
+        LRE_find_shortest_ray(
+            hero_pos.x,                                hero_pos.y,
+            hero_pos.x - sin(pl_angle + corr) * big_r, hero_pos.y - cos(pl_angle + corr) * big_r,
+            &shortest_x,                               &shortest_y,
+            walls,                                     &wall_id
+        );
+        insert_LightPoint(&light_poly, shortest_x, shortest_y, hero_pos.x, hero_pos.y, wall_id);
 
-            for(; hit_wall; hit_wall=hit_wall->next) {
-                float new_intersection_coef = find_intersection_coef(
-                    hero_pos.x, hero_pos.y,
-                    cur_wall->x1, cur_wall->y1 + corr,    
-                    hit_wall->x1, hit_wall->y1,    
-                    hit_wall->x2, hit_wall->y2    
-                );
+        // shifted ray
+        LRE_find_shortest_ray(
+            hero_pos.x,                                hero_pos.y,
+            hero_pos.x - sin(pl_angle - corr) * big_r, hero_pos.y - cos(pl_angle - corr) * big_r,
+            &shortest_x,                               &shortest_y,
+            walls,                                     &wall_id
+        );
+        insert_LightPoint(&light_poly, shortest_x, shortest_y, hero_pos.x, hero_pos.y, wall_id);
 
-                // closer intersection is found. x and y coef for ray is stored.
-                if (is_better_coef(intersection_coef, new_intersection_coef)) {
-                    intersection_coef = new_intersection_coef;
-                    best_x = hero_pos.x + (cur_wall->x1 - hero_pos.x) * intersection_coef;
-                    best_y = hero_pos.y + (cur_wall->y1 + corr - hero_pos.y) * intersection_coef;
-                }
-            }
-            insert_LightPoint(&light_poly, new_Point(best_x, best_y, hero_pos.x, hero_pos.y));
-        }
     }
 
     struct LightPoint* ptr = light_poly;
@@ -281,7 +403,10 @@ void LRE_draw_rays(Position hero_pos, PolyLine * walls) {
     int last_y = ptr->y; // we will save it for later on
 
     // iterating by light polygon points and drawing triangle by triangle
+    int len = 0;
+
     while (ptr) {
+        len++;
         int first_x = ptr->x; 
         int first_y = ptr->y; 
         ptr = ptr->next;
@@ -294,16 +419,20 @@ void LRE_draw_rays(Position hero_pos, PolyLine * walls) {
         int second_y = ptr->y; 
         LRE_fill_triangle(first_x, first_y, second_x, second_y, hero_pos.x, hero_pos.y, 50, 50, 50, 255);
     }
-    
+
     // debug lines, comments if not needed
-    // ptr = light_poly;
-    // while (ptr)
-    // {
-    //     LRE_draw_colored_line(hero_pos.x, hero_pos.y, ptr->x, ptr->y, 255, 255, 255, 255);
-    //     ptr = ptr->next;
-    // }
+    LRE_optim_LightPoly(light_poly);
 
-
+    if (DEBUG)
+    {
+        ptr = light_poly;
+        while (ptr)
+        {
+            LRE_draw_colored_line(hero_pos.x, hero_pos.y, ptr->x, ptr->y, 255, 255, 255, 255);
+            ptr = ptr->next;
+        }
+        free_PolyLine(ptr);
+    }
     free_PolyLine(light_poly);
 };
 

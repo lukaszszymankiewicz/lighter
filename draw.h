@@ -5,6 +5,7 @@
 struct LightPoint {
     int x;
     int y;
+    int wall_id;
     float angle;
     struct LightPoint* next;
 };
@@ -50,11 +51,11 @@ void render_texture(Texture* texture, SDL_Rect* clip, int x, int y);
 
 // DRAW
 void LRE_draw_hero_sprite(int x, int y, int hero_state);
-void LRE_draw_rays(Position hero_pos, PolyLine * walls); 
 void LRE_fill_triangle(int x1, int y1, int x2, int y2, int x3, int y3, int r, int g, int b, int a);
+void LRE_draw_rays(Position hero_pos, PolyLine * walls); 
 
 // STRUCTURES
 PolyLine * new_PolyLine(int x1, int y1, int x2, int y2);
-void insert_LightPoint(struct LightPoint** head, struct LightPoint* new_point);
+void insert_LightPoint(struct LightPoint** head, int x1, int y1, int x2, int y2, int wall_id);
 void insert_PolyLine(PolyLine** head, PolyLine* new_PolyLine);
 void free_PolyLine(struct LightPoint* head);

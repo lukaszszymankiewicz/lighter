@@ -45,7 +45,7 @@ int main(int argc, char* args[]) {
         LRE_clear_screen();
         LRE_draw_rays(hero_pos, walls);
 
-        // such walls is only for debug purposes
+        // such walls is only for presentation purposes
         LRE_fill_triangle(300, 450, 500, 430, 500, 500, 28, 73, 102, 255);
         LRE_fill_triangle(30, 170, 150, 20, 200, 200, 28, 73, 102, 255);
         LRE_fill_triangle(500, 20, 300, 130, 400, 230, 28, 73, 102, 255);

@@ -2,3 +2,5 @@
  - [x] add walls
  - [x] rays collission with walls
  - [x] fill light! (and obstacles polygons if that matters!)
+ - [x] make sure that point is always expressed in integer numbers (not floats!)
+ - [ ] fill full polygon, not set of triangles
