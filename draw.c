@@ -174,13 +174,13 @@ float angle(int ax, int ay, int bx, int by) {
 // Function to insert a given node at its correct sorted position into a given
 // list sorted in increasing order
 
-struct LightPoint* new_Point(
+lightpoint_t* new_Point(
     int x,        int y,
     int st_x,     int st_y,
     int wall_id
 )
 {
-    struct LightPoint* new_point = (struct LightPoint*)malloc(sizeof(struct LightPoint));
+    lightpoint_t* new_point = (lightpoint_t*)malloc(sizeof(lightpoint_t));
     new_point->x = x;
     new_point->y = y;
     new_point->wall_id = wall_id;
@@ -191,15 +191,15 @@ struct LightPoint* new_Point(
 }
 
 void insert_LightPoint(
-    struct LightPoint** head,
+    lightpoint_t** head,
     int x1, int y1,
     int x2, int y2,
     int wall_id
 ) 
 {
 
-    struct LightPoint* current;
-    struct LightPoint* new_pt = new_Point(x1, y1, x2, y2, wall_id);
+    lightpoint_t* current;
+    lightpoint_t* new_pt = new_Point(x1, y1, x2, y2, wall_id);
 
     if (*head == NULL || (*head)->angle >= new_pt->angle)
     {
@@ -272,7 +272,7 @@ void LRE_find_shortest_ray(
     int ray_x1, int ray_y1,
     int ray_x2, int ray_y2,
     int * best_x, int * best_y,
-    PolyLine * walls, int * wall_id
+    polyline_t * walls, int * wall_id
 )
 { 
         int shortest_x = ray_x2;
@@ -281,7 +281,7 @@ void LRE_find_shortest_ray(
         int cur_y = shortest_y;
         int id = 0; // if resulted best ray will have wall id equal to zero it means that no intersection occures
 
-        PolyLine * hit_wall = NULL;
+        polyline_t * hit_wall = NULL;
         hit_wall = walls;
 
         for(; hit_wall; hit_wall=hit_wall->next) 
@@ -305,11 +305,11 @@ void LRE_find_shortest_ray(
 }
 // Light polygon has many points and a number of it is redundant and can be deleted withaout any
 // heasitation. this function does exacly this
-void LRE_optim_LightPoly(struct LightPoint* poly)
+void LRE_optim_lightpoly(lightpoint_t* poly)
 {
     while (poly->next != NULL && poly->next->next != NULL)
     {
-        struct LightPoint* cur_cone = poly->next;
+        lightpoint_t* cur_cone = poly->next;
 
         if (cur_cone->next->wall_id == poly->wall_id && cur_cone->next->wall_id == cur_cone->wall_id)
         {
@@ -320,7 +320,7 @@ void LRE_optim_LightPoly(struct LightPoint* poly)
             //               | 
             //               v
             //    +------+-------+-------+
-            //    |  5   |   5   |   5   |  ... 
+            //    |  5   |   5   |   5   |  
             //    +------+-------+-------+
             poly->next = cur_cone->next;            
             free(cur_cone);
@@ -329,21 +329,12 @@ void LRE_optim_LightPoly(struct LightPoint* poly)
         {
             // there isnt same wall id behing current cone and after current cone - we`re moving on
             //
-            //             current
-            //               | 
-            //               v
-            //    +------+-------+-------+
-            //    |  5   |   5   |   3   |  ... 
-            //    +------+-------+-------+
-            //
-            //               OR
-            //
-            //             current
-            //               | 
-            //               v
-            //    +------+-------+-------+
-            //    |  3   |   5   |   5   |  ... 
-            //    +------+-------+-------+
+            //             current                            current
+            //               |                                   |
+            //               v                  OR               v
+            //    +------+-------+-------+            +------+------+------+
+            //    |  5   |   5   |   3   |            |   5  |   3  |   3  |
+            //    +------+-------+-------+            +------+------+------+
             poly=poly->next;
         }
     }
@@ -352,10 +343,10 @@ void LRE_optim_LightPoly(struct LightPoint* poly)
 // for each corner of wall three ays are drawn (one directly into corner, one a little bit to left, 
 // and one a little bit to right). This allows to calculate map pieces where there is high lightness
 // and where there is only a little bit of it (rays which are a little bit offseted will mark it).
-void LRE_draw_rays(Position hero_pos, PolyLine * walls) { 
+void LRE_draw_rays(position_t hero_pos, polyline_t * walls) { 
 
-    struct LightPoint* light_poly = NULL;
-    PolyLine * cur_wall = NULL;
+    lightpoint_t* light_poly = NULL;
+    polyline_t * cur_wall = NULL;
     cur_wall = walls;
     int wall_id = 0; // this will monitor current wall id to optimize light triangle
 
@@ -397,7 +388,7 @@ void LRE_draw_rays(Position hero_pos, PolyLine * walls) {
 
     }
 
-    struct LightPoint* ptr = light_poly;
+    lightpoint_t* ptr = light_poly;
 
     int last_x = ptr->x; // we will save it for later on
     int last_y = ptr->y; // we will save it for later on
@@ -421,7 +412,7 @@ void LRE_draw_rays(Position hero_pos, PolyLine * walls) {
     }
 
     // debug lines, comments if not needed
-    LRE_optim_LightPoly(light_poly);
+    LRE_optim_lightpoly(light_poly);
 
     if (DEBUG)
     {
@@ -431,9 +422,9 @@ void LRE_draw_rays(Position hero_pos, PolyLine * walls) {
             LRE_draw_colored_line(hero_pos.x, hero_pos.y, ptr->x, ptr->y, 255, 255, 255, 255);
             ptr = ptr->next;
         }
-        free_PolyLine(ptr);
+        free_polyline(ptr);
     }
-    free_PolyLine(light_poly);
+    free_polyline(light_poly);
 };
 
 
@@ -460,33 +451,33 @@ void LRE_fill_triangle(int x1, int y1, int x2, int y2, int x3, int y3, int r, in
     }
 };
 
-PolyLine * new_PolyLine(int x1, int y1, int x2, int y2) {
-    PolyLine * new_PolyLine = (PolyLine *)malloc(sizeof(PolyLine *));
-    new_PolyLine->x1 = x1;
-    new_PolyLine->y1 = y1;
-    new_PolyLine->x2 = x2;
-    new_PolyLine->y2 = y2;
-    new_PolyLine->next = NULL;
+polyline_t * init_polyline(int x1, int y1, int x2, int y2) {
+    polyline_t * new_polyline = (polyline_t *)malloc(sizeof(polyline_t *));
+    new_polyline->x1 = x1;
+    new_polyline->y1 = y1;
+    new_polyline->x2 = x2;
+    new_polyline->y2 = y2;
+    new_polyline->next = NULL;
 
-    return new_PolyLine;
+    return new_polyline;
 }
 
-void insert_PolyLine(PolyLine** head, PolyLine* new_PolyLine) {
-    PolyLine** currentRef = head;
+void insert_polyline(polyline_t** head, polyline_t* new_polyline) {
+    polyline_t** currentRef = head;
 
     while (*currentRef != NULL) {
         currentRef = &((*currentRef)->next);
     }
 
-    new_PolyLine->next = *currentRef;
-    *currentRef = new_PolyLine;
+    new_polyline->next = *currentRef;
+    *currentRef = new_polyline;
 }
 
-void free_PolyLine(struct LightPoint* head) {
-    struct LightPoint* currentRef = head;
+void free_polyline(lightpoint_t* head) {
+    lightpoint_t* currentRef = head;
 
     while (currentRef != NULL) {
-        struct LightPoint * temp = currentRef->next;
+        lightpoint_t * temp = currentRef->next;
         free(currentRef);
         currentRef = temp;
     }

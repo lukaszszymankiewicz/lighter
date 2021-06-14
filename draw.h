@@ -2,13 +2,13 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
-struct LightPoint {
+typedef struct lightpoint {
     int x;
     int y;
     int wall_id;
     float angle;
-    struct LightPoint* next;
-};
+    struct lightpoint* next;
+} lightpoint_t;
 
 typedef struct polyline {
     int x1;
@@ -16,7 +16,7 @@ typedef struct polyline {
     int x2;
     int y2;
     struct polyline * next;
-} PolyLine;
+} polyline_t;
 
 typedef struct texture {
     SDL_Texture* surface;
@@ -27,7 +27,7 @@ typedef struct texture {
 typedef struct position {
     int x; 
     int y; 
-} Position;
+} position_t;
 
 // INIT
 SDL_Window* create_window(int width, int height);
@@ -52,10 +52,10 @@ void render_texture(Texture* texture, SDL_Rect* clip, int x, int y);
 // DRAW
 void LRE_draw_hero_sprite(int x, int y, int hero_state);
 void LRE_fill_triangle(int x1, int y1, int x2, int y2, int x3, int y3, int r, int g, int b, int a);
-void LRE_draw_rays(Position hero_pos, PolyLine * walls); 
+void LRE_draw_rays(position_t hero_pos, polyline_t * walls); 
 
 // STRUCTURES
-PolyLine * new_PolyLine(int x1, int y1, int x2, int y2);
-void insert_LightPoint(struct LightPoint** head, int x1, int y1, int x2, int y2, int wall_id);
-void insert_PolyLine(PolyLine** head, PolyLine* new_PolyLine);
-void free_PolyLine(struct LightPoint* head);
+polyline_t * init_polyline(int x1, int y1, int x2, int y2);
+void insert_lightpoint(lightpoint_t** head, int x1, int y1, int x2, int y2, int wall_id);
+void insert_polyline(polyline_t** head, polyline_t* new_polyline);
+void free_polyline(lightpoint_t* head);

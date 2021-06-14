@@ -19,23 +19,23 @@ void init_game() {
 int main(int argc, char* args[]) {
     int loop = 1;
     int hero_state = 1;
-    Position hero_pos = {256, 100};
+    position_t hero_pos = {256, 100};
 
     // yeah, it should be taken from some file or something but let it be like this by now
-    PolyLine * walls = NULL;
-    insert_PolyLine(&walls, new_PolyLine(300, 450, 500, 430));
-    insert_PolyLine(&walls, new_PolyLine(500, 430, 500, 500));
-    insert_PolyLine(&walls, new_PolyLine(500, 500, 300, 450));
-    insert_PolyLine(&walls, new_PolyLine(30, 170, 150, 20));
-    insert_PolyLine(&walls, new_PolyLine(150, 20, 200, 200));
-    insert_PolyLine(&walls, new_PolyLine(200, 200, 30, 170));
-    insert_PolyLine(&walls, new_PolyLine(500, 20, 300, 130));
-    insert_PolyLine(&walls, new_PolyLine(300, 130, 400, 230));
-    insert_PolyLine(&walls, new_PolyLine(400, 230, 500, 20));
-    insert_PolyLine(&walls, new_PolyLine(1, 1, 510, 1));
-    insert_PolyLine(&walls, new_PolyLine(510, 1, 510, 510));
-    insert_PolyLine(&walls, new_PolyLine(510, 510, 1, 510));
-    insert_PolyLine(&walls, new_PolyLine(1, 510, 1, 1));
+    polyline_t * walls = NULL;
+    insert_polyline(&walls, init_polyline(300, 450, 500, 430));
+    insert_polyline(&walls, init_polyline(500, 430, 500, 500));
+    insert_polyline(&walls, init_polyline(500, 500, 300, 450));
+    insert_polyline(&walls, init_polyline(30, 170, 150, 20));
+    insert_polyline(&walls, init_polyline(150, 20, 200, 200));
+    insert_polyline(&walls, init_polyline(200, 200, 30, 170));
+    insert_polyline(&walls, init_polyline(500, 20, 300, 130));
+    insert_polyline(&walls, init_polyline(300, 130, 400, 230));
+    insert_polyline(&walls, init_polyline(400, 230, 500, 20));
+    insert_polyline(&walls, init_polyline(1, 1, 510, 1));
+    insert_polyline(&walls, init_polyline(510, 1, 510, 510));
+    insert_polyline(&walls, init_polyline(510, 510, 1, 510));
+    insert_polyline(&walls, init_polyline(1, 510, 1, 1));
 
     SDL_Event event;
     init_game();
