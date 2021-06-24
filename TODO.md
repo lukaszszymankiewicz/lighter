@@ -4,3 +4,5 @@
  - [x] fill light! (and obstacles polygons if that matters!)
  - [x] make sure that point is always expressed in integer numbers (not floats!)
  - [x] fill full polygon, not set of triangles
+ - [ ] cut code into segments (light/primitives/shared structs etc)
+ - [ ] get rid of strange artifacts while endering texture
