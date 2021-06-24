@@ -10,6 +10,11 @@ typedef struct lightpoint {
     struct lightpoint* next;
 } lightpoint_t;
 
+typedef struct x_intersection {
+    int x;
+    struct x_intersection* next;
+} x_intersection_t;
+
 typedef struct polyline {
     int x1;
     int y1;
@@ -30,7 +35,7 @@ typedef struct position {
 } position_t;
 
 // INIT
-SDL_Window* create_window(int width, int height);
+SDL_Window* create_window(int w, int h);
 SDL_Renderer* init_renderer(SDL_Window* window);
 int init_graphics(int width, int height);
 void load_frames();
@@ -52,10 +57,15 @@ void render_texture(Texture* texture, SDL_Rect* clip, int x, int y);
 // DRAW
 void LRE_draw_hero_sprite(int x, int y, int hero_state);
 void LRE_fill_triangle(int x1, int y1, int x2, int y2, int x3, int y3, int r, int g, int b, int a);
-void LRE_draw_rays(position_t hero_pos, polyline_t * walls); 
+void LRE_draw_lightpoly(position_t hero_pos, polyline_t * walls); 
+void LRE_draw_bg();
 
 // STRUCTURES
 polyline_t * init_polyline(int x1, int y1, int x2, int y2);
 void insert_lightpoint(lightpoint_t** head, int x1, int y1, int x2, int y2, int wall_id);
 void insert_polyline(polyline_t** head, polyline_t* new_polyline);
-void free_polyline(lightpoint_t* head);
+void free_lightpoint(lightpoint_t* head);
+void free_closed_lightpoly(lightpoint_t* head, int len);
+void free_lightpoly(polyline_t* head);
+void free_x_intersection(x_intersection_t* head);
+void LRE_draw_ligh_gradient(int x, int y);
