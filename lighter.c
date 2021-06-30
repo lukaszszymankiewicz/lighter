@@ -1,14 +1,16 @@
-#include "light.h"
+#include "config.h"
 #include "events.h"
 #include "gfx.h"
-#include "sprites.h"
+#include "hero.h"
 #include "level.h"
-#include "config.h"
+#include "light.h"
+#include "sprites.h"
 
 
-void close_game() {
+void close_game(hero_t * hero_o) {
     GFX_free();
     TXTR_free_all();
+    HERO_free(hero_o);
 };
 
 void init_game() {
@@ -19,28 +21,27 @@ void init_game() {
 
 int main(int argc, char* args[]) {
     int loop = 1;
-    int hero_state = 1;
-
-    int hero_x = 256;
-    int hero_y = 256;
-
-    tiles_list_t * tiles = NULL;
-    tiles = LVL_read_level();
 
     SDL_Event event;
     init_game();
 
+    hero_t * our_hero = NULL;
+    our_hero = HERO_init();
+
+    tiles_list_t * tiles = NULL;
+    tiles = LVL_read_level();
+
     while(loop) {
-        EVNT_handle_events(&event, &loop, &hero_state, &(hero_x), &(hero_y));
+        EVNT_handle_events(&event, &loop, our_hero);
         GFX_clear_screen();
-        TXTR_draw_light(hero_x, hero_y);
-        LIG_draw_light_effect(hero_x, hero_y, tiles);
+        LIG_draw_light_effect(our_hero->x, our_hero->y, tiles, our_hero->light_source);
         LVL_draw(tiles);
-        TXTR_draw_hero(hero_x-15, hero_y-22, hero_state);
+        HERO_draw(our_hero);
         GFX_update();
+
     }
 
-    close_game();
+    close_game(our_hero);
 	return 0;
 }
 

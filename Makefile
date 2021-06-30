@@ -3,7 +3,18 @@ CFLAGS := --std=c99 -Wall
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 LIBS = -lm
 OBJ = lighter
-TARGET = lighter.c events.c gfx.c level.c light.c sprites.c segment.c intersection.c lightpt.c tile.c
+TARGET =            \
+	events.c        \
+	gfx.c           \
+	hero.c          \
+	intersection.c  \
+	level.c         \
+	light.c         \
+	lighter.c       \
+	lightpt.c       \
+	segment.c       \
+	sprites.c       \
+	tile.c          \
 
 all:
 	$(TARGET)

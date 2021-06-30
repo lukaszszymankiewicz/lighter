@@ -1,6 +1,4 @@
-#include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "tile.h"
 #include "config.h"
 
 SDL_Window* window = NULL;
@@ -89,5 +87,29 @@ void GFX_draw_colored_line(float x1, float y1, float x2, float y2, int r, int g,
 {
     SDL_SetRenderDrawColor(renderer, r, g, b, a);     
     SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+};
+
+
+// point are sorted by y increasingly, we could use full more sofisticated sorting, but here it is
+// so basic that this task handled easily by f-conditions. Points should be sorted in a way that y1
+// < y2 < y3 (x-coords are not taken into sorting).
+void GFX_fill_triangle(int x1, int y1, int x2, int y2, int x3, int y3, int r, int g, int b, int a){
+    int swapx;
+    int swapy;
+    
+    if (y1 > y3) {swapx=x3; swapy=y3; x3=x1; y3=y1; x1=swapx; y1=swapy;}
+    if (y2 > y3) {swapx=x3; swapy=y3; x3=x2; y3=y2; x2=swapx; y2=swapy;}
+    if (y1 > y2) {swapx=x2, swapy=y2; x2=x1; y2=y1; x1=swapx; y1=swapy;}
+    
+    for (int y=y1; y<y2; y++) {
+        float linex1 = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
+        float linex2 = x1 + (x3 - x1) * (y - y1) / (y3 - y1);
+        GFX_draw_colored_line(linex1, y, linex2, y, r, g, b, a);
+    }
+    for (int y=y2; y<y3; y++) {
+        float linex1 = x2 + (x3 - x2) * (y - y2) / (y3 - y2);
+        float linex2 = x1 + (x3 - x1) * (y - y1) / (y3 - y1);
+        GFX_draw_colored_line(linex1, y, linex2, y, r, g, b, a);
+    }
 };
 
