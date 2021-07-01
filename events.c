@@ -1,5 +1,6 @@
 #include "events.h"
 #include "hero.h"
+#include "light.h"
 
 enum hero_states {
     HERO_STANDING_FRONT = 0,
@@ -8,7 +9,7 @@ enum hero_states {
     HERO_STANDING_RIGHT = 3,
 };
 
-void EVNT_handle_events(SDL_Event *event, int *game_loop, hero_t * hero_o)
+void EVNT_handle_events(SDL_Event *event, int *game_loop, hero_t * hero_o, int * light_source)
 {
 while(SDL_PollEvent(event) != 0) {
     if(event->type == SDL_QUIT) {
@@ -20,7 +21,7 @@ while(SDL_PollEvent(event) != 0) {
         switch(event->key.keysym.sym) {
 
             case SDLK_SPACE:
-            // HERO_change_light_source(&(hero_o->light_source));
+            LIG_change_source(light_source);
             break;
 
             case SDLK_RIGHT:

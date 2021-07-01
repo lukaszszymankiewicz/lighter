@@ -9,7 +9,23 @@
 #include "sprites.h"
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))  // yeah, good old ANSI C tricks here
-#define MIN(a,b) ((a) < (b) ? (a) : (b))  // yeah, good old ANSI C tricks here
+#define MIN(a,b) ((a) < (b) ? (a) : (b)) 
+
+enum light_sources {
+    LANTERN = 0,
+    FLASHLIGHT = 1,
+    ALL = 2,
+};
+
+light_t * LIG_init()
+{
+    light_t* light_o = (light_t*)malloc(sizeof(light_t));
+
+    light_o->source = LANTERN;
+    light_o->sprite = TXTR_init_texture("sprites/gradient.png");
+
+    return light_o;
+}
 
 int LIG_lines_intersects(
     int x1,   int y1,     // first line
@@ -185,7 +201,6 @@ void LIG_draw_dark_sectors(lightpoint_t* pts)
         }
         INTSC_free(intersections);
     }
-
 }
 
 void LIG_debug_rays(lightpoint_t* light_poly, int st_x, int st_y)
@@ -264,7 +279,7 @@ void LIG_fill_lightpoly(lightpoint_t* light_poly, int st_x, int st_y)
 // point, we draw not the polygon itself but rather its inverse (and fill it black, as it is
 // shadow). Having light texture on bottom, newly created shadow fills place where light cannot be
 // casted.
-void LIG_draw_lanternt_light_effect(int hero_x, int hero_y, tiles_list_t * tiles) { 
+void LIG_draw_lanternt_light_effect(light_t * light_o, int hero_x, int hero_y, tiles_list_t * tiles) { 
     int obstacle_id = 0; // each intersection points has id of segement in which its hits
     int shortest_x = 0;  // end of shortest ray coords stored here
     int shortest_y = 0;  // end of shortest ray coords stored here
@@ -281,7 +296,7 @@ void LIG_draw_lanternt_light_effect(int hero_x, int hero_y, tiles_list_t * tiles
     obstacles = LIG_calculate_ray_obstacles(tiles);
 
     // light gradient texture on back 
-    TXTR_draw_light(hero_x, hero_y);
+    TXTR_render_texture(light_o->sprite, NULL, hero_x-256, hero_y-256);
 
     // for each corner of each segment rays are casted
     for(segment_t * corner = obstacles; corner; corner=corner->next) {
@@ -322,24 +337,32 @@ void LIG_draw_lanternt_light_effect(int hero_x, int hero_y, tiles_list_t * tiles
     LIG_draw_dark_sectors(light_pts);
 
     // comment debugs if not needed
-    if (DEBUG){LIG_fill_lightpoly(light_pts, hero_x, hero_y);}
-    if (DEBUG){LIG_debug_dark_sectors(light_pts);}
-    if (DEBUG){LIG_debug_rays(light_pts, hero_x, hero_y);}
+    // if (DEBUG){LIG_fill_lightpoly(light_pts, hero_x, hero_y);}
+    // if (DEBUG){LIG_debug_dark_sectors(light_pts);}
+    // if (DEBUG){LIG_debug_rays(light_pts, hero_x, hero_y);}
 
     SEG_free(obstacles);
     LIGPT_free(light_pts);
 };
 
 
-void LIG_draw_flashlight_light_effect(int hero_x, int hero_y, tiles_list_t * tiles) { 
+void LIG_draw_flashlight_light_effect(light_t * light_o, int hero_x, int hero_y, tiles_list_t * tiles) { 
     // nothing by now
 };
 
 void (*functions[2])() = {LIG_draw_lanternt_light_effect, LIG_draw_flashlight_light_effect};
 
-void LIG_draw_light_effect(int hero_x, int hero_y, tiles_list_t * tiles, int light_source)
+void LIG_draw_light_effect(light_t * light_o, int hero_x, int hero_y, tiles_list_t * tiles)
 {
-    LIG_draw_lanternt_light_effect(hero_x, hero_y, tiles);
-    // functions[light_source](hero_x, hero_x, tiles);    
+    functions[light_o->source](light_o, hero_x, hero_y, tiles);    
 };
 
+void LIG_change_source(int * light_source)
+{
+    *light_source = ((*light_source) + 1) % ALL;
+}
+
+void LIG_free(light_t * light_o)
+{
+    TXTR_free(light_o->sprite);
+}

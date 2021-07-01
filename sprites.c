@@ -1,7 +1,6 @@
 #include "sprites.h"
 #include "gfx.h"
 
-Texture* light_gradient;
 
 Texture * TXTR_init_texture(char *filepath) 
 {
@@ -25,11 +24,6 @@ Texture * TXTR_init_texture(char *filepath)
     return p;
 };
 
-void TXTR_load_frames() 
-{
-    light_gradient = TXTR_init_texture("sprites/gradient.png");
-};
-
 void TXTR_render_texture(Texture* texture, SDL_Rect* clip, int x, int y) 
 {
     SDL_Rect render_quad = {x, y, texture->width, texture->height};
@@ -43,18 +37,8 @@ void TXTR_render_texture(Texture* texture, SDL_Rect* clip, int x, int y)
     SDL_RenderCopy(renderer, texture->surface, clip, &render_quad);
 };
 
-void TXTR_draw_light(int x, int y) 
-{
-    TXTR_render_texture(light_gradient, NULL, x-256, y-256);
-};
-
 void TXTR_free(Texture *texture) 
 {
     SDL_DestroyTexture(texture->surface);
     free(texture);
-};
-
-void TXTR_free_all() 
-{
-    TXTR_free(light_gradient);
 };
