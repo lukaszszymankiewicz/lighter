@@ -8,6 +8,7 @@
 #include "segment.h"
 #include "sprites.h"
 
+#define PI 3.1415
 #define MAX(a,b) ((a) > (b) ? (a) : (b))  // yeah, good old ANSI C tricks here
 #define MIN(a,b) ((a) < (b) ? (a) : (b)) 
 
@@ -23,6 +24,7 @@ light_t * LIG_init()
 
     light_o->source = LANTERN;
     light_o->sprite = TXTR_init_texture("sprites/gradient.png");
+    light_o->angle = RIGHT_RAD;
 
     return light_o;
 }
@@ -279,7 +281,8 @@ void LIG_fill_lightpoly(lightpoint_t* light_poly, int st_x, int st_y)
 // point, we draw not the polygon itself but rather its inverse (and fill it black, as it is
 // shadow). Having light texture on bottom, newly created shadow fills place where light cannot be
 // casted.
-void LIG_draw_lanternt_light_effect(light_t * light_o, int hero_x, int hero_y, tiles_list_t * tiles) { 
+void LIG_draw_lanternt_light_effect(light_t * light_o, int st_x, int st_y, segment_t * obstacles)
+{ 
     int obstacle_id = 0; // each intersection points has id of segement in which its hits
     int shortest_x = 0;  // end of shortest ray coords stored here
     int shortest_y = 0;  // end of shortest ray coords stored here
@@ -289,45 +292,41 @@ void LIG_draw_lanternt_light_effect(light_t * light_o, int hero_x, int hero_y, t
                          // range. Having ray end such far away make that we must find shorted
                          // intersection on a way.
 
-    segment_t * obstacles = NULL;
     lightpoint_t* light_pts = NULL;
 
-    // tiles from level needs to be converted into list of segments into which rays can hit
-    obstacles = LIG_calculate_ray_obstacles(tiles);
-
     // light gradient texture on back 
-    TXTR_render_texture(light_o->sprite, NULL, hero_x-256, hero_y-256);
+    TXTR_render_texture(light_o->sprite, NULL, st_x-256, st_y-256);
 
     // for each corner of each segment rays are casted
     for(segment_t * corner = obstacles; corner; corner=corner->next) {
-        angle = LIGPT_calculate_angle(hero_x, hero_y, corner->x1, corner->y1);
+        angle = LIGPT_calculate_angle(st_x, st_y, corner->x1, corner->y1);
 
         // base ray - such ray will always at least hit its base end point
         LIG_find_shortest_ray(
-            hero_x,                                    hero_y,
+            st_x,                                      st_y,
             corner->x1,                                corner->y1,
             &shortest_x,                               &shortest_y,
             obstacles,                                 &obstacle_id
         );
-        LIGPT_insert(&light_pts, shortest_x, shortest_y, hero_x, hero_y, obstacle_id);
+        LIGPT_insert(&light_pts, shortest_x, shortest_y, st_x, st_y, obstacle_id);
 
         // shifted ray - ray moved by a little angle from base ray
         LIG_find_shortest_ray(
-            hero_x,                                    hero_y,
-            hero_x - sin(angle + corr) * big_r,        hero_y - cos(angle + corr) * big_r,
+            st_x,                                      st_y,
+            st_x - sin(angle + corr) * big_r,          st_y - cos(angle + corr) * big_r,
             &shortest_x,                               &shortest_y,
             obstacles,                                 &obstacle_id
         );
-        LIGPT_insert(&light_pts, shortest_x, shortest_y, hero_x, hero_y, obstacle_id);
+        LIGPT_insert(&light_pts, shortest_x, shortest_y, st_x, st_y, obstacle_id);
 
         // second shift shifted ray
         LIG_find_shortest_ray(
-            hero_x,                                    hero_y,
-            hero_x - sin(angle - corr) * big_r,        hero_y - cos(angle - corr) * big_r,
+            st_x,                                      st_y,
+            st_x - sin(angle - corr) * big_r,          st_y - cos(angle - corr) * big_r,
             &shortest_x,                               &shortest_y,
             obstacles,                                 &obstacle_id
         );
-        LIGPT_insert(&light_pts, shortest_x, shortest_y, hero_x, hero_y, obstacle_id);
+        LIGPT_insert(&light_pts, shortest_x, shortest_y, st_x, st_y, obstacle_id);
     }
 
     // polygon point optimization process
@@ -337,24 +336,141 @@ void LIG_draw_lanternt_light_effect(light_t * light_o, int hero_x, int hero_y, t
     LIG_draw_dark_sectors(light_pts);
 
     // comment debugs if not needed
-    // if (DEBUG){LIG_fill_lightpoly(light_pts, hero_x, hero_y);}
+    // if (DEBUG){LIG_fill_lightpoly(light_pts, st_x, st_y);}
     // if (DEBUG){LIG_debug_dark_sectors(light_pts);}
-    // if (DEBUG){LIG_debug_rays(light_pts, hero_x, hero_y);}
+    // if (DEBUG){LIG_debug_rays(light_pts, st_x, st_y);}
 
     SEG_free(obstacles);
     LIGPT_free(light_pts);
 };
 
+float LIG_sign (int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    return (x1 - x3) * (y2- y3) - (x2 - x3) * (y1 - y3);
+}
 
-void LIG_draw_flashlight_light_effect(light_t * light_o, int hero_x, int hero_y, tiles_list_t * tiles) { 
-    // nothing by now
+bool LIG_point_in_triangle (
+    int pt_x, int pt_y,
+    int x1, int y1,
+    int x2, int y2,
+    int x3, int y3
+)
+{
+    float d1, d2, d3;
+    bool has_neg, has_pos;
+
+    d1 = LIG_sign(pt_x, pt_y, x1, y1, x2, y2);
+    d2 = LIG_sign(pt_x, pt_y, x2, y2, x3, y3);
+    d3 = LIG_sign(pt_x, pt_y, x3, y3, x1, y1);
+
+    has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+    return !(has_neg && has_pos);
+}
+
+void LIG_draw_flashlight_light_effect(light_t * light_o, int st_x, int st_y, segment_t * obstacles) 
+{ 
+    float light_width = PI / 8;
+    int obstacle_id = 0; 
+    int shortest_x = 0;           // end of shortest ray coords stored here
+    int shortest_y = 0;           // end of shortest ray coords stored here
+    float corr = 0.01;            // coef for calculating how big is the shift from main ray
+    float angle = light_o->angle; // base angle
+    int big_r = 1200;             // base length of ray big enought to be sure that it will end abroad level 
+
+    lightpoint_t* light_pts = NULL;
+
+    // border rays which will create triangle of light
+    int ray_a_x = (int) st_x - sin(angle - light_width) * big_r;
+    int ray_a_y = (int) st_y - cos(angle - light_width) * big_r;
+    int ray_b_x = (int) st_x - sin(angle + light_width) * big_r;
+    int ray_b_y = (int) st_y - cos(angle + light_width) * big_r;
+
+    // light gradient texture on back 
+    TXTR_render_texture(light_o->sprite, NULL, st_x-256, st_y-256);
+
+    // first of all, check for intersections between two border rays.
+    // first border ray
+    LIG_find_shortest_ray(
+        st_x,                                      st_y,
+        ray_a_x,                                   ray_a_y,
+        &shortest_x,                               &shortest_y,
+        obstacles,                                 &obstacle_id
+    );
+    LIGPT_insert(&light_pts, shortest_x, shortest_y, st_x, st_y, obstacle_id);
+
+    // second border ray
+    LIG_find_shortest_ray(
+        st_x,                                      st_y,
+        ray_b_x,                                   ray_b_y,
+        &shortest_x,                               &shortest_y,
+        obstacles,                                 &obstacle_id
+    );
+    LIGPT_insert(&light_pts, shortest_x, shortest_y, st_x, st_y, obstacle_id);
+
+    for(segment_t * corner = obstacles; corner; corner=corner->next)
+    {
+        if (LIG_point_in_triangle(
+            corner->x1,                                corner->y1,
+            st_x,                                      st_y,
+            ray_a_x,                                   ray_a_y,
+            ray_b_x,                                   ray_b_y
+        )) 
+        {
+            angle = LIGPT_calculate_angle(st_x, st_y, corner->x1, corner->y1);
+            LIG_find_shortest_ray(
+                st_x,                                      st_y,
+                corner->x1,                                corner->y1,
+                &shortest_x,                               &shortest_y,
+                obstacles,                                 &obstacle_id
+            );
+            LIGPT_insert(&light_pts, shortest_x, shortest_y, st_x, st_y, 0);
+
+            // first shift shifted ray
+            LIG_find_shortest_ray(
+                st_x,                                      st_y,
+                st_x - sin(angle + corr) * big_r,          st_y - cos(angle + corr) * big_r,
+                &shortest_x,                               &shortest_y,
+                obstacles,                                 &obstacle_id
+            );
+            LIGPT_insert(&light_pts, shortest_x, shortest_y, st_x, st_y, obstacle_id);
+
+            // second shift shifted ray
+            LIG_find_shortest_ray(
+                st_x,                                      st_y,
+                st_x - sin(angle - corr) * big_r,          st_y - cos(angle - corr) * big_r,
+                &shortest_x,                               &shortest_y,
+                obstacles,                                 &obstacle_id
+            );
+            LIGPT_insert(&light_pts, shortest_x, shortest_y, st_x, st_y, obstacle_id);
+        }
+
+    }
+
+    // lighter light polygon must have initial point as one of the corners
+    LIGPT_insert(&light_pts, st_x, st_y, st_x, st_y, 0);
+
+    // polygon point optimization process
+    LIGPT_optim(light_pts);
+
+    // drawing the shadow (sound dark)
+    LIG_draw_dark_sectors(light_pts);
+
+    SEG_free(obstacles);
+    LIGPT_free(light_pts);
+
 };
 
 void (*functions[2])() = {LIG_draw_lanternt_light_effect, LIG_draw_flashlight_light_effect};
 
 void LIG_draw_light_effect(light_t * light_o, int hero_x, int hero_y, tiles_list_t * tiles)
 {
-    functions[light_o->source](light_o, hero_x, hero_y, tiles);    
+    // tiles from level needs to be converted into list of segments into which rays can hit
+    segment_t * obstacles = NULL;
+    obstacles = LIG_calculate_ray_obstacles(tiles);
+
+    functions[light_o->source](light_o, hero_x, hero_y, obstacles);    
 };
 
 void LIG_change_source(int * light_source)

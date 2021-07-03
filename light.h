@@ -6,6 +6,7 @@
 
 typedef struct light {
     int source;
+    float angle;
     Texture * sprite;
 } light_t;
 
