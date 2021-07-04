@@ -99,8 +99,8 @@ bool SEG_intersects
     // collision detected
     t = t_numer / denom;
 
-    intersection->y = (int) first.beg.y + (t * dy21);
     intersection->x = (int) first.beg.x + (t * dx21);
+    intersection->y = (int) first.beg.y + (t * dy21);
 
     return true;
 }
