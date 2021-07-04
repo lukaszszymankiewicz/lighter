@@ -11,7 +11,7 @@ typedef struct lightpoint {
 
 void LIGPT_free(lightpoint_t* head);
 void LIGPT_optim(lightpoint_t* poly);
-void LIGPT_insert(lightpoint_t** head, int x1, int y1, int x2, int y2, int wall_id);
+void LIGPT_insert(lightpoint_t** head, short int x1, short int y1, float angle, short int wall_id); 
 float LIGPT_calculate_angle(int ax, int ay, int bx, int by);
 
 #endif

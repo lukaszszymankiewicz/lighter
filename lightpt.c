@@ -11,16 +11,15 @@ float LIGPT_calculate_angle(int ax, int ay, int bx, int by)
 }
 
 lightpoint_t* LIGPT_new(
-    int x,        int y,
-    int st_x,     int st_y,
-    int wall_id
+    short int x, short int y,
+    float angle, int wall_id
 )
 {
     lightpoint_t* new_point = (lightpoint_t*)malloc(sizeof(lightpoint_t));
     new_point->x = x;
     new_point->y = y;
     new_point->wall_id = wall_id;
-    new_point->angle = LIGPT_calculate_angle(x, y, st_x, st_y);
+    new_point->angle = angle;
     new_point->next = NULL;
 
     return new_point;
@@ -32,13 +31,12 @@ lightpoint_t* LIGPT_new(
 // order). This works only if we know that we are expecting such polygont from points.
 void LIGPT_insert(
     lightpoint_t** head,
-    int x1, int y1,
-    int x2, int y2,
-    int wall_id
+    short int x1, short int y1,
+    float angle, short int wall_id
 ) 
 {
     lightpoint_t* current;
-    lightpoint_t* new_pt = LIGPT_new(x1, y1, x2, y2, wall_id);
+    lightpoint_t* new_pt = LIGPT_new(x1, y1, angle, wall_id);
 
     if (*head == NULL)
     {
