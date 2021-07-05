@@ -233,18 +233,21 @@ void LIG_fill_lightpoly(lightpoint_t* light_poly, int st_x, int st_y)
 // casted.
 void LIG_draw_lanternt_light_effect(light_t * light_o, point_t st, segment_t * obstacles)
 { 
-    float angle;
-    short int hit_wall_id;
+    float angle = 0.0;
+    short int hit_wall_id = 0;
     float corr = 0.01;
     int big_r = 1200;    
                          
     lightpoint_t* light_pts = NULL;
 
     // light gradient texture on back 
-    TXTR_render_texture(light_o->sprite, NULL, st.x-256, st.y-256);
+    // TXTR_render_texture(light_o->sprite, NULL, st.x-256, st.y-256);
 
     // for each corner of each segment rays are casted
     for(segment_t * corner = obstacles; corner; corner=corner->next) {
+        corner=corner->next;
+        corner=corner->next;
+
         angle = LIGPT_calculate_angle(st.x, st.y, corner->beg.x, corner->beg.y);
 
         segment_t * main_ray = NULL;
@@ -255,18 +258,20 @@ void LIG_draw_lanternt_light_effect(light_t * light_o, point_t st, segment_t * o
         aux_ray1 = SEG_init(st.x, st.y, st.x - sin(angle + corr) * big_r, st.y - cos(angle + corr) * big_r);
         aux_ray2 = SEG_init(st.x, st.y, st.x - sin(angle - corr) * big_r, st.y - cos(angle - corr) * big_r);
 
-         hit_wall_id = LIG_find_closest_intersection_with_wall(main_ray, obstacles);
-         LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle, hit_wall_id);
+        hit_wall_id = LIG_find_closest_intersection_with_wall(main_ray, obstacles);
+        LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle, hit_wall_id);
 
-         hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray1, obstacles);
-         LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle+corr, hit_wall_id);
+        hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray1, obstacles);
+        LIGPT_insert(&light_pts, aux_ray1->end.x, aux_ray1->end.y, angle+corr, hit_wall_id);
 
-         hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
-         LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle-corr, hit_wall_id);
+        hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
+        LIGPT_insert(&light_pts, aux_ray2->end.x, aux_ray2->end.y, angle-corr, hit_wall_id);
+
+        break;
     }
 
     // polygon point optimization process
-    LIGPT_optim(light_pts);
+    // LIGPT_optim(light_pts);
 
     // drawing the shadow (sound dark)
     // LIG_draw_dark_sectors(light_pts);

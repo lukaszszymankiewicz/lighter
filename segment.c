@@ -59,6 +59,48 @@ void SEG_free(segment_t * segments)
 
 }
 
+int LIG_lines_intersects(
+    int x1,   int y1,     // first line
+    int x2,   int y2,     // first line
+    int x3,   int y3,     // second line
+    int x4,   int y4,     // second line
+    int *i_x, int *i_y    // intersection points
+)
+{
+    float s_numer, t_numer, denom, t;
+    float dx13, dy13;
+    float dx21, dx43, dy21, dy43;
+
+    dx21 = x2 - x1; dy21 = y2 - y1; dx43 = x4 - x3; dy43 = y4 - y3;
+    denom = dx21 * dy43 - dx43 * dy21;
+
+    if (denom == 0)
+        return 0; // collinear
+
+    bool denomPositive = denom > 0;
+
+    dx13 = x1 - x3; dy13 = y1 - y3;
+    s_numer = dx21 * dy13 - dy21 * dx13;
+
+    if ((s_numer < 0) == denomPositive)
+        return 0; // no collision
+
+    t_numer = dx43 * dy13 - dy43 * dx13;
+    if ((t_numer < 0) == denomPositive)
+        return 0; // no collision
+
+    if (((s_numer >= denom) == denomPositive) || ((t_numer >= denom) == denomPositive))
+        return 0; // no collision
+
+    // collision detected
+    t = t_numer / denom;
+    if (i_x != NULL)
+        *i_x = (int)x1 + (t * dx21);
+    if (i_y != NULL)
+        *i_y = (int)y1 + (t * dy21);
+
+    return 1;
+}
 bool SEG_intersects
 (
     segment_t first,
