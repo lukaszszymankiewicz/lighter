@@ -2,8 +2,8 @@
 #define SEGMENT_H
 
 typedef struct point {
-    short int x;
-    short int y;
+    int x;
+    int y;
 } point_t;
 
 typedef struct segment {
@@ -12,10 +12,10 @@ typedef struct segment {
     struct segment* next;
 } segment_t;
 
-void SEG_push(segment_t** head, short int x1, short int y1, short int x2, short int y2);
+void SEG_push(segment_t** head, int x1, int y1, int x2, int y2);
 void SEG_free(segment_t * segments);
-bool SEG_intersects(segment_t first, segment_t second, point_t * intersection);
-segment_t * SEG_init(short int x1, short int y1, short int x2, short int y2);
-point_t * PT_init(short int x, short int y);
-
+int SEG_intersects (segment_t first, segment_t second, point_t * intersection);
+segment_t * SEG_init(int x1, int y1, int x2, int y2);
+point_t * PT_init(int x, int y);
+int LIG_lines_intersects(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int *i_x, int *i_y);
 #endif

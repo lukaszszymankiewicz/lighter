@@ -29,48 +29,29 @@ light_t * LIG_init()
     return light_o;
 }
 
-// Function returns id of closest to hit wall
-int LIG_find_closest_intersection_with_wall(
-    segment_t * ray,
-    segment_t * obstacles
+float LIG_sign (int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    return (x1 - x3) * (y2- y3) - (x2 - x3) * (y1 - y3);
+}
+
+bool LIG_point_in_triangle (
+    point_t pt,
+    point_t t1,
+    point_t t2,
+    point_t t3
 )
-{ 
-    segment_t * hit_obstacle = obstacles;
-    point_t * shortest_intersection = PT_init(ray->end.x, ray->end.y);
+{
+    float d1, d2, d3;
+    bool has_neg, has_pos;
 
-    // If resulted best ray will have wall id equal to zero it means that no intersection,
-    // occures. Please note that such event is very unlikely as four corners of the level are
-    // also taken into account when chacking light collision. This value serves mostly as debug
-    // value.
-    short int id = 0; 
-    short int closest_wall_id = 0;
+    d1 = LIG_sign(pt.x, pt.y, t1.x, t1.y, t2.x, t2.y);
+    d2 = LIG_sign(pt.x, pt.y, t2.x, t2.y, t3.x, t3.y);
+    d3 = LIG_sign(pt.x, pt.y, t3.x, t3.y, t1.x, t1.y);
 
-    for(; hit_obstacle; hit_obstacle=hit_obstacle->next) 
-    {
-        id++;
+    has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
 
-        if (SEG_intersects(*ray, *hit_obstacle, shortest_intersection))
-        {
-            // check if newly found intersection point is better than current one, and by better
-            // mean closer to ray begginig. As we found points which is always in one line, full
-            // distance equations is redundant - we don`t need to check full disance as diff in
-            // x coors is enough.
-            if (abs(ray->beg.x - ray->end.x) > abs(ray->beg.x - shortest_intersection->x)) 
-            {
-                ray->end.x = shortest_intersection->x;
-                ray->end.y = shortest_intersection->y;
-                closest_wall_id = id;
-            }
-        }
-    }
-
-    // clip to screen edges
-    ray->end.x = MIN(MAX(0, (int)ray->end.x), SCREEN_HEIGHT);
-    ray->end.y = MIN(MAX(0, (int)ray->end.y), SCREEN_WIDTH);
-
-    free(shortest_intersection);
-
-    return closest_wall_id;
+    return !(has_neg && has_pos);
 }
 
 // scanline is always parallel to y-axis, so simplified equations can be applied. Thus we know that
@@ -93,6 +74,53 @@ int LIG_segment_intersetcs_with_scanline
 {
     return ((y1 < scan_y && y2 >= scan_y) || (y2 < scan_y && y1 >= scan_y));
 }
+
+// Function returns id of closest to hit wall
+int LIG_find_closest_intersection_with_wall(
+    segment_t * ray,
+    segment_t * obstacles
+)
+{ 
+    segment_t * hit_obstacle = NULL;
+    hit_obstacle = obstacles;
+    point_t * shortest_intersection = PT_init(0, 0);
+    
+    // If resulted best ray will have wall id equal to zero it means that no intersection,
+    // occures. Please note that such event is very unlikely as four corners of the level are
+    // also taken into account when chacking light collision. This value serves mostly as debug
+    // value.
+    int id = 0; 
+    int closest_wall_id = 0;
+
+    for(; hit_obstacle; hit_obstacle=hit_obstacle->next) 
+    {
+        id++;
+
+        if(SEG_intersects(*ray, *hit_obstacle, shortest_intersection))
+        {
+            // check if newly found intersection point is better than current one, and by better
+            // mean closer to ray begginig. As we found points which is always in one line, full
+            // distance equations is redundant - we don`t need to check full disance as diff in
+            // x coors is enough.
+
+            if (abs(ray->beg.x - ray->end.x) > abs(ray->beg.x - shortest_intersection->x)) 
+            {
+                ray->end.x = shortest_intersection->x;
+                ray->end.y = shortest_intersection->y;
+                closest_wall_id = id;
+            }
+        }
+    }
+
+    // clip to screen edges
+    // ray->end.x = MIN(MAX(0, (int)ray->end.x), SCREEN_HEIGHT);
+    // ray->end.y = MIN(MAX(0, (int)ray->end.y), SCREEN_WIDTH);
+
+    free(shortest_intersection);
+
+    return closest_wall_id;
+}
+
 
 void LIG_draw_dark_sectors(lightpoint_t* pts)
 {
@@ -234,28 +262,26 @@ void LIG_fill_lightpoly(lightpoint_t* light_poly, int st_x, int st_y)
 void LIG_draw_lanternt_light_effect(light_t * light_o, point_t st, segment_t * obstacles)
 { 
     float angle = 0.0;
-    short int hit_wall_id = 0;
+    int hit_wall_id = 0;
     float corr = 0.01;
     int big_r = 1200;    
                          
     lightpoint_t* light_pts = NULL;
 
     // light gradient texture on back 
-    // TXTR_render_texture(light_o->sprite, NULL, st.x-256, st.y-256);
+    TXTR_render_texture(light_o->sprite, NULL, st.x-256, st.y-256);
 
     // for each corner of each segment rays are casted
     for(segment_t * corner = obstacles; corner; corner=corner->next) {
-        corner=corner->next;
-        corner=corner->next;
-
         angle = LIGPT_calculate_angle(st.x, st.y, corner->beg.x, corner->beg.y);
 
         segment_t * main_ray = NULL;
-        segment_t * aux_ray1 = NULL;
-        segment_t * aux_ray2 = NULL;
-
         main_ray = SEG_init(st.x, st.y, corner->beg.x, corner->beg.y);
+
+        segment_t * aux_ray1 = NULL;
         aux_ray1 = SEG_init(st.x, st.y, st.x - sin(angle + corr) * big_r, st.y - cos(angle + corr) * big_r);
+
+        segment_t * aux_ray2 = NULL;
         aux_ray2 = SEG_init(st.x, st.y, st.x - sin(angle - corr) * big_r, st.y - cos(angle - corr) * big_r);
 
         hit_wall_id = LIG_find_closest_intersection_with_wall(main_ray, obstacles);
@@ -267,48 +293,26 @@ void LIG_draw_lanternt_light_effect(light_t * light_o, point_t st, segment_t * o
         hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
         LIGPT_insert(&light_pts, aux_ray2->end.x, aux_ray2->end.y, angle-corr, hit_wall_id);
 
-        break;
+        SEG_free(main_ray);
+        SEG_free(aux_ray1);
+        SEG_free(aux_ray2);
     }
 
     // polygon point optimization process
-    // LIGPT_optim(light_pts);
+    LIGPT_optim(light_pts);
 
     // drawing the shadow (sound dark)
-    // LIG_draw_dark_sectors(light_pts);
+    LIG_draw_dark_sectors(light_pts);
 
     // comment debugs if not needed
     // if (DEBUG){LIG_fill_lightpoly(light_pts, st_x, st_y);}
     // if (DEBUG){LIG_debug_dark_sectors(light_pts);}
-    if (DEBUG){LIG_debug_rays(light_pts, st.x, st.y);}
+    // if (DEBUG){LIG_debug_rays(light_pts, st.x, st.y);}
 
     SEG_free(obstacles);
     LIGPT_free(light_pts);
 };
 
-float LIG_sign (int x1, int y1, int x2, int y2, int x3, int y3)
-{
-    return (x1 - x3) * (y2- y3) - (x2 - x3) * (y1 - y3);
-}
-
-bool LIG_point_in_triangle (
-    point_t pt,
-    point_t t1,
-    point_t t2,
-    point_t t3
-)
-{
-    float d1, d2, d3;
-    bool has_neg, has_pos;
-
-    d1 = LIG_sign(pt.x, pt.y, t1.x, t1.y, t2.x, t2.y);
-    d2 = LIG_sign(pt.x, pt.y, t2.x, t2.y, t3.x, t3.y);
-    d3 = LIG_sign(pt.x, pt.y, t3.x, t3.y, t1.x, t1.y);
-
-    has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-    has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-    return !(has_neg && has_pos);
-}
 
 void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t * obstacles) 
 { 
@@ -327,7 +331,7 @@ void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t
     int ray_b_y = (int) pos.y - cos(angle + light_width) * big_r;
 
     // light gradient texture on back 
-    TXTR_render_texture(light_o->sprite, NULL, pos.x-256, pos.y-256);
+    // TXTR_render_texture(light_o->sprite, NULL, pos.x-256, pos.y-256);
 
     // first of all, check for intersections between two border rays.
     segment_t * ray_a = NULL;
@@ -351,12 +355,12 @@ void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t
             angle = LIGPT_calculate_angle(pos.x, pos.y, corner->beg.x, corner->beg.y);
 
             segment_t * main_ray = NULL;
-            segment_t * aux_ray1 = NULL;
-            segment_t * aux_ray2 = NULL;
+            // segment_t * aux_ray1 = NULL;
+            // segment_t * aux_ray2 = NULL;
 
             main_ray = SEG_init(pos.x, pos.y, corner->beg.x, corner->beg.y);
-            aux_ray1 = SEG_init(pos.x, pos.y, pos.x - sin(angle + corr) * big_r, pos.y - cos(angle + corr) * big_r);
-            aux_ray2 = SEG_init(pos.x, pos.y, pos.x - sin(angle - corr) * big_r, pos.y - cos(angle - corr) * big_r);
+            // aux_ray1 = SEG_init(pos.x, pos.y, pos.x - sin(angle + corr) * big_r, pos.y - cos(angle + corr) * big_r);
+            // aux_ray2 = SEG_init(pos.x, pos.y, pos.x - sin(angle - corr) * big_r, pos.y - cos(angle - corr) * big_r);
 
             hit_wall_id = LIG_find_closest_intersection_with_wall(main_ray, obstacles);
             LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle, hit_wall_id);
@@ -379,7 +383,13 @@ void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t
     // drawing the shadow (sound dark)
     LIG_draw_dark_sectors(light_pts);
 
+    if (DEBUG){LIG_debug_rays(light_pts, pos.x, pos.y);}
+
+    // if (DEBUG){LIG_fill_lightpoly(light_pts, pos.x, pos.y);}
+
     SEG_free(obstacles);
+    // SEG_free(ray_a);
+    // SEG_free(ray_b);
     LIGPT_free(light_pts);
 
 };
