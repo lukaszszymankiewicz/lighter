@@ -83,12 +83,11 @@ int LIG_find_closest_intersection_with_wall(
 { 
     segment_t * hit_obstacle = NULL;
     hit_obstacle = obstacles;
-    point_t * shortest_intersection = PT_init(0, 0);
+    point_t * shortest_intersection = PT_init(ray->end.x, ray->end.y);
     
     // If resulted best ray will have wall id equal to zero it means that no intersection,
     // occures. Please note that such event is very unlikely as four corners of the level are
-    // also taken into account when chacking light collision. This value serves mostly as debug
-    // value.
+    // also taken into account when checking light collision. 
     int id = 0; 
     int closest_wall_id = 0;
 
@@ -102,7 +101,6 @@ int LIG_find_closest_intersection_with_wall(
             // mean closer to ray begginig. As we found points which is always in one line, full
             // distance equations is redundant - we don`t need to check full disance as diff in
             // x coors is enough.
-
             if (abs(ray->beg.x - ray->end.x) > abs(ray->beg.x - shortest_intersection->x)) 
             {
                 ray->end.x = shortest_intersection->x;
@@ -111,10 +109,6 @@ int LIG_find_closest_intersection_with_wall(
             }
         }
     }
-
-    // clip to screen edges
-    // ray->end.x = MIN(MAX(0, (int)ray->end.x), SCREEN_HEIGHT);
-    // ray->end.y = MIN(MAX(0, (int)ray->end.y), SCREEN_WIDTH);
 
     free(shortest_intersection);
 
@@ -316,7 +310,7 @@ void LIG_draw_lanternt_light_effect(light_t * light_o, point_t st, segment_t * o
 
 void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t * obstacles) 
 { 
-    float light_width = PI / 8;
+    float light_width = PI / 7;
     int hit_wall_id; 
     float corr = 0.01;            // coef for calculating how big is the shift from main ray
     float angle = light_o->angle; // base angle
@@ -331,7 +325,7 @@ void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t
     int ray_b_y = (int) pos.y - cos(angle + light_width) * big_r;
 
     // light gradient texture on back 
-    // TXTR_render_texture(light_o->sprite, NULL, pos.x-256, pos.y-256);
+    TXTR_render_texture(light_o->sprite, NULL, pos.x-256, pos.y-256);
 
     // first of all, check for intersections between two border rays.
     segment_t * ray_a = NULL;
@@ -340,14 +334,6 @@ void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t
     ray_a  = SEG_init(pos.x, pos.y, ray_a_x, ray_a_y);
     ray_b  = SEG_init(pos.x, pos.y, ray_b_x, ray_b_y);
 
-    hit_wall_id = LIG_find_closest_intersection_with_wall(ray_a, obstacles);
-    angle = LIGPT_calculate_angle(pos.x, pos.y, ray_a->end.x, ray_a->end.y);
-    LIGPT_insert(&light_pts, ray_a->end.x, ray_a->end.y, angle, hit_wall_id);
-
-    hit_wall_id = LIG_find_closest_intersection_with_wall(ray_b, obstacles);
-    angle = LIGPT_calculate_angle(pos.x, pos.y, ray_b->end.x, ray_b->end.y);
-    LIGPT_insert(&light_pts, ray_b->end.x, ray_b->end.y, angle, hit_wall_id);
-
     for(segment_t * corner = obstacles; corner; corner=corner->next)
     {
         if (LIG_point_in_triangle(corner->beg, pos, ray_a->end, ray_b->end)) 
@@ -355,24 +341,36 @@ void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t
             angle = LIGPT_calculate_angle(pos.x, pos.y, corner->beg.x, corner->beg.y);
 
             segment_t * main_ray = NULL;
-            // segment_t * aux_ray1 = NULL;
-            // segment_t * aux_ray2 = NULL;
+            segment_t * aux_ray1 = NULL;
+            segment_t * aux_ray2 = NULL;
 
             main_ray = SEG_init(pos.x, pos.y, corner->beg.x, corner->beg.y);
-            // aux_ray1 = SEG_init(pos.x, pos.y, pos.x - sin(angle + corr) * big_r, pos.y - cos(angle + corr) * big_r);
-            // aux_ray2 = SEG_init(pos.x, pos.y, pos.x - sin(angle - corr) * big_r, pos.y - cos(angle - corr) * big_r);
+            aux_ray1 = SEG_init(pos.x, pos.y, pos.x - sin(angle + corr) * big_r, pos.y - cos(angle + corr) * big_r);
+            aux_ray2 = SEG_init(pos.x, pos.y, pos.x - sin(angle - corr) * big_r, pos.y - cos(angle - corr) * big_r);
 
             hit_wall_id = LIG_find_closest_intersection_with_wall(main_ray, obstacles);
             LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle, hit_wall_id);
 
-            // hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray1, obstacles);
-            // LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle+corr, hit_wall_id);
+            hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray1, obstacles);
+            LIGPT_insert(&light_pts, aux_ray1->end.x, aux_ray1->end.y, angle+corr, hit_wall_id);
 
-            // hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
-            // LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle-corr, hit_wall_id);
+            hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
+            LIGPT_insert(&light_pts, aux_ray2->end.x, aux_ray2->end.y, angle-corr, hit_wall_id);
+
+            SEG_free(main_ray);
+            SEG_free(aux_ray1);
+            SEG_free(aux_ray2);
         }
 
     }
+
+    hit_wall_id = LIG_find_closest_intersection_with_wall(ray_a, obstacles);
+    angle = LIGPT_calculate_angle(pos.x, pos.y, ray_a->end.x, ray_a->end.y);
+    LIGPT_insert(&light_pts, ray_a->end.x, ray_a->end.y, angle, hit_wall_id);
+
+    hit_wall_id = LIG_find_closest_intersection_with_wall(ray_b, obstacles);
+    angle = LIGPT_calculate_angle(pos.x, pos.y, ray_b->end.x, ray_b->end.y);
+    LIGPT_insert(&light_pts, ray_b->end.x, ray_b->end.y, angle, hit_wall_id);
 
     // lighter light polygon must have initial point as one of the corners
     LIGPT_insert(&light_pts, pos.x, pos.y, 0, 0);
@@ -383,15 +381,13 @@ void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t
     // drawing the shadow (sound dark)
     LIG_draw_dark_sectors(light_pts);
 
-    if (DEBUG){LIG_debug_rays(light_pts, pos.x, pos.y);}
-
+    // if (DEBUG){LIG_debug_rays(light_pts, pos.x, pos.y);}
     // if (DEBUG){LIG_fill_lightpoly(light_pts, pos.x, pos.y);}
 
     SEG_free(obstacles);
-    // SEG_free(ray_a);
-    // SEG_free(ray_b);
+    SEG_free(ray_a);
+    SEG_free(ray_b);
     LIGPT_free(light_pts);
-
 };
 
 void (*functions[2])() = {LIG_draw_lanternt_light_effect, LIG_draw_flashlight_light_effect};
