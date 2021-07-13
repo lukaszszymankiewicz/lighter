@@ -6,8 +6,8 @@
 hero_t * HERO_init()
 {
     hero_t* hero_o = (hero_t*)malloc(sizeof(hero_t));
-    hero_o->x = 241; // yeah
-    hero_o->y = 234; //yeah
+    hero_o->x = 241;  // yeah
+    hero_o->y = 234;  //yeah
     hero_o->state = 1;
 
     hero_o->sprite = TXTR_init_texture("sprites/hero.png");

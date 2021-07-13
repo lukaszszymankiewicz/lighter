@@ -49,13 +49,14 @@ void SEG_push(
 
 void SEG_free(segment_t * segments)
 {
-    segment_t* currentRef = segments;
+    segment_t* head = segments;
 
-    while (currentRef != NULL) 
+    while (head) 
     {
-        segment_t * temp = currentRef->next;
-        free(currentRef);
-        currentRef = temp;
+        segment_t * temp = NULL;
+        temp = head->next;
+        free(head);
+        head = temp;
     }
 }
 

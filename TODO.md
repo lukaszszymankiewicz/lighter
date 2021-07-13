@@ -6,5 +6,7 @@
  - [x] fill full polygon, not set of triangles
  - [x] cut code into segments (light/primitives/shared structs etc)
  - [x] add new lightsource (lighter)
- - [ ] get rid of strange artifacts while endering texture
-
+ - [ ] add alpha lighting (offset rays should make not fully light)
+ - [ ] get rid of strange artifacts while endering texture (propably another another texture will do
+   the trick)
+ - [ ] add tests (finish it)

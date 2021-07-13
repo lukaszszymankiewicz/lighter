@@ -54,9 +54,9 @@ bool LIG_point_in_triangle (
     return !(has_neg && has_pos);
 }
 
-// scanline is always parallel to y-axis, so simplified equations can be applied. Thus we know that
-// in that point scanline is actually intersect with (x1, y1), (x2, y2) segment. No further checks
-// is needed.
+// scanline is always parallel to y-axis, so simplified equations can be applied. Furthermore, in
+// this step we are assured that given scanline actually intersects with (x1, y1), (x2, y2) segment.
+// No additional checks needs to be done.
 float LIG_scanline_intersection
 (
     int scan_y, 
@@ -114,7 +114,6 @@ int LIG_find_closest_intersection_with_wall(
 
     return closest_wall_id;
 }
-
 
 void LIG_draw_dark_sectors(lightpoint_t* pts)
 {
@@ -177,10 +176,10 @@ void LIG_draw_dark_sectors(lightpoint_t* pts)
     }
 }
 
-void LIG_debug_rays(lightpoint_t* light_poly, int st_x, int st_y)
+void LIG_debug_rays(lightpoint_t* light_poly, int st_x, int st_y, int alpha)
 {
     for(lightpoint_t* ptr = light_poly; ptr; ptr = ptr->next)
-    { GFX_draw_colored_line(st_x, st_y, ptr->x, ptr->y, 255, 255, 255, 255); }
+    { GFX_draw_colored_line(st_x, st_y, ptr->x, ptr->y, alpha, alpha, alpha, 255); }
 }
 
 void LIG_debug_dark_sectors(lightpoint_t* light_poly)
@@ -212,7 +211,12 @@ segment_t * LIG_calculate_ray_obstacles(tiles_list_t * tiles)
     return segments;
 }
 
-void LIG_fill_lightpoly(lightpoint_t* light_poly, int st_x, int st_y)
+void LIG_fill_lightpoly(
+    lightpoint_t* light_poly,
+    int st_x,
+    int st_y,
+    int alpha
+)
 {
     lightpoint_t* ptr = light_poly;
 
@@ -227,14 +231,70 @@ void LIG_fill_lightpoly(lightpoint_t* light_poly, int st_x, int st_y)
 
         if (ptr==NULL) {
             // joining last cone with first patching the whole light poly in one.
-            GFX_fill_triangle(first_x, first_y, last_x, last_y, st_x, st_y, 50, 50, 50, 255);
+            GFX_fill_triangle(first_x, first_y, last_x, last_y, st_x, st_y, alpha, alpha, alpha, 255);
             break;
         }
         int second_x = ptr->x; 
         int second_y = ptr->y; 
-        GFX_fill_triangle(first_x, first_y, second_x, second_y, st_x, st_y, 50, 50, 50, 255);
+        GFX_fill_triangle(first_x, first_y, second_x, second_y, st_x, st_y, alpha, alpha, alpha, 255);
     }
 }
+
+void LIG_draw_lanternt_light_polygon(
+    int x, int y,
+    light_t * light_o,
+    segment_t * obstacles,
+    int alpha
+)
+{ 
+    float angle = 0.0;
+    int hit_wall_id = 0;
+    const float corr = 0.01;
+    const int big_r = 1200;    
+                         
+    lightpoint_t* light_pts = NULL;
+
+    // light gradient texture on back 
+    // TXTR_render_texture(light_o->sprite, NULL, st.x-256, st.y-256);
+
+    // for each corner of each segment rays are casted
+    for(segment_t * corner = obstacles; corner; corner=corner->next) {
+        angle = LIGPT_calculate_angle(x, y, corner->beg.x, corner->beg.y);
+
+        segment_t * main_ray = NULL;
+        segment_t * aux_ray1 = NULL;
+        segment_t * aux_ray2 = NULL;
+
+        main_ray = SEG_init(x, y, corner->beg.x, corner->beg.y);
+        hit_wall_id = LIG_find_closest_intersection_with_wall(main_ray, obstacles);
+        LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle, hit_wall_id);
+        SEG_free(main_ray);
+
+        aux_ray1 = SEG_init(x, y, x - sin(angle + corr) * big_r, y - cos(angle + corr) * big_r);
+        hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray1, obstacles);
+        LIGPT_insert(&light_pts, aux_ray1->end.x, aux_ray1->end.y, angle+corr, hit_wall_id);
+        SEG_free(aux_ray1);
+
+        aux_ray2 = SEG_init(x, y, x - sin(angle - corr) * big_r, y - cos(angle - corr) * big_r);
+        hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
+        LIGPT_insert(&light_pts, aux_ray2->end.x, aux_ray2->end.y, angle-corr, hit_wall_id);
+        SEG_free(aux_ray2);
+    }
+
+    // polygon point optimization process
+    LIGPT_optim(light_pts);
+
+    // drawing the shadow (sound dark)
+    // LIG_draw_dark_sectors(light_pts);
+
+    // comment debugs if not needed
+    if (DEBUG){LIG_fill_lightpoly(light_pts, x, y, alpha);}
+    // (DEBUG){LIG_debug_dark_sectors(light_pts);}
+    // if (DEBUG){LIG_debug_rays(light_pts, x, y, alpha);}
+
+    LIGPT_free(light_pts);
+};
+
 
 // Lantern light sweeps ray all around (infinitly big circle). With distance power of light is
 // weakening - we`re achieveing the this effect by drawing proper gradiented texture. Light collides
@@ -254,59 +314,31 @@ void LIG_fill_lightpoly(lightpoint_t* light_poly, int st_x, int st_y)
 // shadow). Having light texture on bottom, newly created shadow fills place where light cannot be
 // casted.
 void LIG_draw_lanternt_light_effect(light_t * light_o, point_t st, segment_t * obstacles)
-{ 
-    float angle = 0.0;
-    int hit_wall_id = 0;
-    float corr = 0.01;
-    int big_r = 1200;    
-                         
-    lightpoint_t* light_pts = NULL;
+{
+    int corr;
 
-    // light gradient texture on back 
-    TXTR_render_texture(light_o->sprite, NULL, st.x-256, st.y-256);
+    corr = 20;
+    LIG_draw_lanternt_light_polygon(st.x-corr, st.y-corr, light_o, obstacles, 20);
+    LIG_draw_lanternt_light_polygon(st.x+corr, st.y-corr, light_o, obstacles, 20);
+    LIG_draw_lanternt_light_polygon(st.x-corr, st.y+corr, light_o, obstacles, 20);
+    LIG_draw_lanternt_light_polygon(st.x+corr, st.y+corr, light_o, obstacles, 20);
 
-    // for each corner of each segment rays are casted
-    for(segment_t * corner = obstacles; corner; corner=corner->next) {
-        angle = LIGPT_calculate_angle(st.x, st.y, corner->beg.x, corner->beg.y);
+    corr = 12;
+    LIG_draw_lanternt_light_polygon(st.x-corr, st.y-corr, light_o, obstacles, 50);
+    LIG_draw_lanternt_light_polygon(st.x+corr, st.y-corr, light_o, obstacles, 50);
+    LIG_draw_lanternt_light_polygon(st.x-corr, st.y+corr, light_o, obstacles, 50);
+    LIG_draw_lanternt_light_polygon(st.x+corr, st.y+corr, light_o, obstacles, 50);
 
-        segment_t * main_ray = NULL;
-        main_ray = SEG_init(st.x, st.y, corner->beg.x, corner->beg.y);
+    corr = 5;
+    LIG_draw_lanternt_light_polygon(st.x-corr, st.y-corr, light_o, obstacles, 100);
+    LIG_draw_lanternt_light_polygon(st.x+corr, st.y-corr, light_o, obstacles, 100);
+    LIG_draw_lanternt_light_polygon(st.x-corr, st.y+corr, light_o, obstacles, 100);
+    LIG_draw_lanternt_light_polygon(st.x+corr, st.y+corr, light_o, obstacles, 100);
 
-        segment_t * aux_ray1 = NULL;
-        aux_ray1 = SEG_init(st.x, st.y, st.x - sin(angle + corr) * big_r, st.y - cos(angle + corr) * big_r);
-
-        segment_t * aux_ray2 = NULL;
-        aux_ray2 = SEG_init(st.x, st.y, st.x - sin(angle - corr) * big_r, st.y - cos(angle - corr) * big_r);
-
-        hit_wall_id = LIG_find_closest_intersection_with_wall(main_ray, obstacles);
-        LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle, hit_wall_id);
-
-        hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray1, obstacles);
-        LIGPT_insert(&light_pts, aux_ray1->end.x, aux_ray1->end.y, angle+corr, hit_wall_id);
-
-        hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
-        LIGPT_insert(&light_pts, aux_ray2->end.x, aux_ray2->end.y, angle-corr, hit_wall_id);
-
-        SEG_free(main_ray);
-        SEG_free(aux_ray1);
-        SEG_free(aux_ray2);
-    }
-
-    // polygon point optimization process
-    LIGPT_optim(light_pts);
-
-    // drawing the shadow (sound dark)
-    LIG_draw_dark_sectors(light_pts);
-
-    // comment debugs if not needed
-    // if (DEBUG){LIG_fill_lightpoly(light_pts, st_x, st_y);}
-    // if (DEBUG){LIG_debug_dark_sectors(light_pts);}
-    // if (DEBUG){LIG_debug_rays(light_pts, st.x, st.y);}
+    LIG_draw_lanternt_light_polygon(st.x, st.y, light_o, obstacles, 200);
 
     SEG_free(obstacles);
-    LIGPT_free(light_pts);
-};
-
+}
 
 void LIG_draw_flashlight_light_effect(light_t * light_o, point_t pos,  segment_t * obstacles) 
 { 

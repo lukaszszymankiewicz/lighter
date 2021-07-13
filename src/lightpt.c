@@ -25,10 +25,9 @@ lightpoint_t* LIGPT_new(
     return new_point;
 }
 
-// Function to insert a given node at its correct sorted position into a given list sorted in
-// increasing order. This is needed to create light of points which creates simple polygon (no
-// segments of such polygon won`t intersects with another one if all point are in increasing angle
-// order). This works only if we know that we are expecting such polygont from points.
+// Function to insert a given point at its correct sorted position into a given list sorted in
+// increasing order (angle is used as sorting paramter). This is needed for creating points of
+// simple convex polygon (no segments of such polygon won`t intersects with another).
 void LIGPT_insert(
     lightpoint_t** head,
     short int x1, short int y1,

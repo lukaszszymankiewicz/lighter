@@ -16,6 +16,7 @@ x_intersection_t* INTSC_new(int x)
 {
     x_intersection_t* INT_new_x_intersection = (x_intersection_t*)malloc(sizeof(x_intersection_t));
     INT_new_x_intersection->x = x;
+
     return INT_new_x_intersection;
 }
 

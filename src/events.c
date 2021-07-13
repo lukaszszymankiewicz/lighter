@@ -18,7 +18,7 @@ while(SDL_PollEvent(event) != 0) {
     // yeah. this is pretty ugly, but by now it is only for testing purposes
     else if(event->type == SDL_KEYDOWN) {
         switch(event->key.keysym.sym) {
-
+            
             case SDLK_SPACE:
             LIG_change_source(&(light_o->source));
             break;

@@ -14,21 +14,19 @@ typedef struct tiles_list
     struct tiles_list * next;
 } tiles_list_t;
 
-void TILE_push(
-    tiles_list_t** list,
-    short int x1, short int y1,
-    short int x2, short int y2,
-    short int r, short int g, short int b, short int a
-);
-
-void TILE_free(tiles_list_t* list);
-
 tile_t * TILE_init(
     short int x1, short int y1,
     short int x2, short int y2,
     short int r, short int g,
     short int b, short int a
 );
+void TILE_push(
+    tiles_list_t** list,
+    short int x1, short int y1,
+    short int x2, short int y2,
+    short int r, short int g, short int b, short int a
+);
+void TILE_free(tiles_list_t* list);
 
 #endif
 

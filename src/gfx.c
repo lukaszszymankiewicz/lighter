@@ -39,7 +39,7 @@ void GFX_init_png()
     int imgFlags = IMG_INIT_PNG;
     if(!(IMG_Init(imgFlags) & imgFlags)) 
     {
-        printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+        printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
     }
 };
 
@@ -91,7 +91,7 @@ void GFX_draw_colored_line(float x1, float y1, float x2, float y2, int r, int g,
 
 
 // point are sorted by y increasingly, we could use full more sofisticated sorting, but here it is
-// so basic that this task handled easily by f-conditions. Points should be sorted in a way that y1
+// so basic that this task handled easily by if-conditions. Points should be sorted in a way that y1
 // < y2 < y3 (x-coords are not taken into sorting).
 void GFX_fill_triangle(int x1, int y1, int x2, int y2, int x3, int y3, int r, int g, int b, int a){
     int swapx;

@@ -8,6 +8,8 @@ extern SDL_Window* window;
 extern SDL_Surface* surface;
 extern SDL_Renderer* renderer;
 
+SDL_Window* GFX_init_window(int w, int h);
+SDL_Renderer* GFX_init_renderer(SDL_Window* window);
 int GFX_init_graphics(int width, int height);
 void GFX_free();
 void GFX_clear_screen();

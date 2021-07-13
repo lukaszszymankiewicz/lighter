@@ -35,7 +35,6 @@ int main(int argc, char* args[]) {
 
     while(loop) {
         EVNT_handle_events(&event, &loop, hero_o, light_o);
-        // EVNT_handle_events(&event, &loop, hero_o, &(light_o->source));
         GFX_clear_screen();
         LIG_draw_light_effect(light_o, hero_o->x, hero_o->y, tiles);
         LVL_draw(tiles);
