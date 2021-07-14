@@ -17,5 +17,6 @@ point_t * PT_init(int x, int y);
 void SEG_push(segment_t** head, int x1, int y1, int x2, int y2);
 void SEG_free(segment_t * segments);
 int SEG_intersects (segment_t first, segment_t second, point_t * intersection);
+void SEG_append(segment_t* head, int x1, int y1, int x2, int y2);
 
 #endif

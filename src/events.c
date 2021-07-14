@@ -20,7 +20,7 @@ while(SDL_PollEvent(event) != 0) {
         switch(event->key.keysym.sym) {
             
             case SDLK_SPACE:
-            LIG_change_source(&(light_o->source));
+            LIG_change_source(light_o);
             break;
 
             case SDLK_RIGHT:

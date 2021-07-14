@@ -10,7 +10,6 @@ void close_game(hero_t * hero_o, light_t * light_o, tiles_list_t * tiles) {
     GFX_free();
     HERO_free(hero_o);
     TILE_free(tiles);
-    LIG_free(light_o);
 };
 
 void init_game() {
@@ -36,7 +35,7 @@ int main(int argc, char* args[]) {
     while(loop) {
         EVNT_handle_events(&event, &loop, hero_o, light_o);
         GFX_clear_screen();
-        LIG_draw_light_effect(light_o, hero_o->x, hero_o->y, tiles);
+        LIG_draw_light_effect(hero_o->x, hero_o->y, light_o, tiles);
         LVL_draw(tiles);
         HERO_draw(hero_o);
         GFX_update();

@@ -47,6 +47,30 @@ void SEG_push(
     *head = new_segment;
 }
 
+void SEG_append(
+    segment_t* head,
+    int x1, int y1,
+    int x2, int y2
+)
+{
+    segment_t * new_segment = NULL;
+    new_segment = SEG_init(x1, y1, x2, y2);
+
+    if (head == NULL)
+    {
+        head = new_segment;
+    }
+    else
+    {
+        segment_t* cur = head;
+        while(cur->next != NULL)
+        {
+            cur = cur->next;
+        }
+
+        cur->next = new_segment;
+    }
+}
 void SEG_free(segment_t * segments)
 {
     segment_t* head = segments;

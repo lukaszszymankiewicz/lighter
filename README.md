@@ -4,10 +4,6 @@ Custom rougelike game engine (and maybe full game later on).
 
 ![A test image](screenshot.png)
 
-Features to be implemented:
- - 2D game enginge,
- - simple raycasting engine (dynamic light),
-
 How to start developing:
 
 1) Linux:

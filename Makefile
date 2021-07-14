@@ -5,6 +5,7 @@ LIBS = -lm
 OBJ = lighter
 TARGET =                \
 	src/events.c        \
+	src/geometry.c      \
 	src/gfx.c           \
 	src/hero.c          \
 	src/intersection.c  \
