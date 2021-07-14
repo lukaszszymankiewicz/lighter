@@ -1,11 +1,18 @@
 #include <stdbool.h>
 #include <math.h>
 
-float GEO_sign (int x1, int y1, int x2, int y2, int x3, int y3)
+// aux for GEO_pt_in_triangle function.
+float GEO_sign (
+    int x1, int y1,
+    int x2, int y2,
+    int x3, int y3
+)
+
 {
     return (x1 - x3) * (y2- y3) - (x2 - x3) * (y1 - y3);
 }
 
+// checks if given point is inside of the triangle
 bool GEO_pt_in_triangle (
     int pt_x, int pt_y,    // point we`re looking for
     int t1_x, int t1_y,    // triangle

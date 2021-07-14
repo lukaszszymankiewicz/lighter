@@ -112,4 +112,3 @@ void GFX_fill_triangle(int x1, int y1, int x2, int y2, int x3, int y3, int r, in
         GFX_draw_colored_line(linex1, y, linex2, y, r, g, b, a);
     }
 };
-
