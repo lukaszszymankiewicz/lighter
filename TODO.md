@@ -17,6 +17,7 @@
  - [ ] add tests (finish it)
 
  COOL THINGS:
+ - [ ] scale graphics to full screen
  - [ ] lighter in the hand of ther should shake a little bit (up and down) in slowly matter to look more
    realistic
  - [ ] add some frame limit, as now game use 100% of the CPU.
