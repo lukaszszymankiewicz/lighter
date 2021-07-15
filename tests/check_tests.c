@@ -6,8 +6,10 @@
 #include "../src/segment.h"
 #include "../src/sprites.h"
 #include "../src/lightpt.h"
+#include "../src/geometry.h"
 #include "check_events.h"
 #include "check_gfx.h"
+#include "check_geometry.h"
 #include "check_tile.h"
 #include "check_segment.h"
 #include "check_sprites.h"
@@ -22,6 +24,12 @@ int main(void)
 
     // events
     s = events_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
+    // geometry
+    s = geometry_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);

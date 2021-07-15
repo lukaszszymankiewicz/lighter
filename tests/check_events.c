@@ -26,8 +26,7 @@ START_TEST (EVNT_handle_events_check)
 
     // yeah - just faking it.
     light_t* light_o = (light_t*)malloc(sizeof(light_t));
-    light_o->source = 0;
-    light_o->sprite = NULL;
+    light_o->src = 0;
     light_o->angle = RIGHT_RAD;
 
     // WHEN (QUITING)
@@ -43,14 +42,14 @@ START_TEST (EVNT_handle_events_check)
     event.key.keysym.sym = SDLK_SPACE;
     SDL_PushEvent(&event);
     EVNT_handle_events(&event, &loop, hero_o, light_o);
-    ck_assert_int_eq(light_o->source, 1);
+    ck_assert_int_eq(light_o->src_num, 1);
 
     // WHEN (LIGHT CHANGE BACK)
     event.type = SDL_KEYDOWN;
     event.key.keysym.sym = SDLK_SPACE;
     SDL_PushEvent(&event);
     EVNT_handle_events(&event, &loop, hero_o, light_o);
-    ck_assert_int_eq(light_o->source, 0);
+    ck_assert_int_eq(light_o->src_num, 0);
     
     // WHEN (MOVING LEFT)
     event.type = SDL_KEYDOWN;
