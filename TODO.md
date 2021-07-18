@@ -13,8 +13,9 @@
    the trick)
  
  BORING THINGS:
- - [ ] document the code
- - [ ] add tests (finish it)
+ - [ ] document the code (WIP)
+ - [ ] add tests (WIP)
+ - [ ] refactor ray collision (some of function could easly use integers, rather than float)
 
  COOL THINGS:
  - [ ] scale graphics to full screen
@@ -24,7 +25,5 @@
  - [ ] gravity
  - [ ] any of the more sofistaced controls and movements of a hero
  - [ ] scrolling
- - [ ] full-screen window
- - [ ] graphic should scale up to full window
  - [ ] any of the grpahics of a hero
  - [ ] any of the grpahics of level

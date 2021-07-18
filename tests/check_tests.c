@@ -34,11 +34,11 @@ int main(void)
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    // GFX
-    s = gfx_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
+    // GFX  (WIP)
+    // s = gfx_suite();
+    // sr = srunner_create(s);
+    // srunner_run_all(sr, CK_ENV);
+    // number_failed += srunner_ntests_failed(sr);
 
     // lightpt
     s = lightpt_suite();

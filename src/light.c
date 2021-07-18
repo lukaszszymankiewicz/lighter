@@ -81,9 +81,8 @@ void LIG_debug_dark_sectors(lightpoint_t* light_poly)
 }
 
 // Function checks for any of the possible interseciton between rays and set of segments
-// (obstacles). As a result function id of best (closest) wall to be hit by given ray. If function
-// return 0 it means that ray does not hit any of the given segments.
-int LIG_find_closest_intersection_with_wall(
+// (obstacles). As a result function id of best (closest) wall to be hit by given ray.
+void LIG_find_closest_intersection_with_wall(
     segment_t * ray,
     segment_t * obstacles
 )
@@ -96,7 +95,7 @@ int LIG_find_closest_intersection_with_wall(
     // occures. Please note that such event is very unlikely as four ss of the level are
     // also taken into account when checking light collision. 
     int id = 0; 
-    int closest_wall_id = 0;
+
     float best_dist = GEO_distance(ray->beg.x, ray->beg.y, ray->end.x, ray->end.y);
     float new_dist;
 
@@ -111,15 +110,12 @@ int LIG_find_closest_intersection_with_wall(
             {
                 ray->end.x = intersection->x;
                 ray->end.y = intersection->y;
-                closest_wall_id = id;
                 best_dist = new_dist;
             }
         }
     }
 
     free(intersection);
-
-    return closest_wall_id;
 }
 
 // Fills polygon (light polygon in that case) with solid color. Function assumes that points are
@@ -215,8 +211,6 @@ segment_t * LIG_calculate_ray_obstacles(tiles_list_t * tiles)
 // some computing power. 
 void LIG_base_light(int x, int y, float angle, float width, int color, segment_t* obstacles)
 { 
-    int hit_wall_id; 
-
     segment_t* filtered_segs = NULL;
     lightpoint_t* light_pts = NULL;
 
@@ -246,16 +240,16 @@ void LIG_base_light(int x, int y, float angle, float width, int color, segment_t
 
         // check if border rays hit any obstacle (such intersection points will be added as light poly
         // cone)
-        hit_wall_id = LIG_find_closest_intersection_with_wall(ray_a, obstacles);
+        LIG_find_closest_intersection_with_wall(ray_a, obstacles);
         angle = LIGPT_calculate_angle(x, y, ray_a->end.x, ray_a->end.y);
-        LIGPT_insert(&light_pts, ray_a->end.x, ray_a->end.y, angle, hit_wall_id);
+        LIGPT_insert(&light_pts, ray_a->end.x, ray_a->end.y, angle);
 
-        hit_wall_id = LIG_find_closest_intersection_with_wall(ray_b, obstacles);
+        LIG_find_closest_intersection_with_wall(ray_b, obstacles);
         angle = LIGPT_calculate_angle(x, y, ray_b->end.x, ray_b->end.y);
-        LIGPT_insert(&light_pts, ray_b->end.x, ray_b->end.y, angle, hit_wall_id);
+        LIGPT_insert(&light_pts, ray_b->end.x, ray_b->end.y, angle);
 
         // light polygon must have initial point if have any width (cone shape needs to be achieved)
-        LIGPT_insert(&light_pts, x, y, 0, 0);
+        LIGPT_insert(&light_pts, x, y, 0);
 
         SEG_free(ray_a);
         SEG_free(ray_b);
@@ -277,14 +271,14 @@ void LIG_base_light(int x, int y, float angle, float width, int color, segment_t
         aux_ray1 = SEG_init(x, y, x - sin(angle + smol_angle) * R, y - cos(angle + smol_angle) * R);
         aux_ray2 = SEG_init(x, y, x - sin(angle - smol_angle) * R, y - cos(angle - smol_angle) * R);
 
-        hit_wall_id = LIG_find_closest_intersection_with_wall(main_ray, obstacles);
-        LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle, hit_wall_id);
+        LIG_find_closest_intersection_with_wall(main_ray, obstacles);
+        LIGPT_insert(&light_pts, main_ray->end.x, main_ray->end.y, angle);
 
-        hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray1, obstacles);
-        LIGPT_insert(&light_pts, aux_ray1->end.x, aux_ray1->end.y, angle + smol_angle, hit_wall_id);
+        LIG_find_closest_intersection_with_wall(aux_ray1, obstacles);
+        LIGPT_insert(&light_pts, aux_ray1->end.x, aux_ray1->end.y, angle + smol_angle);
 
-        hit_wall_id = LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
-        LIGPT_insert(&light_pts, aux_ray2->end.x, aux_ray2->end.y, angle - smol_angle, hit_wall_id);
+        LIG_find_closest_intersection_with_wall(aux_ray2, obstacles);
+        LIGPT_insert(&light_pts, aux_ray2->end.x, aux_ray2->end.y, angle - smol_angle);
 
         SEG_free(main_ray);
         SEG_free(aux_ray1);

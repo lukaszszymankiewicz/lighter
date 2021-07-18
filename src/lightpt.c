@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include "lightpt.h"
+#include <stdbool.h>
+
+#define EPSILON 0.1
 
 // atan2 function from math is used to calculate angle, more naive and faster approach can be taken
 // as this is rather slow function. Please note that not direct angle is used in here as it is only
@@ -11,14 +14,14 @@ float LIGPT_calculate_angle(int ax, int ay, int bx, int by)
 }
 
 lightpoint_t* LIGPT_new(
-    short int x, short int y,
-    float angle, int wall_id
+    short int x, 
+    short int y,
+    float angle 
 )
 {
     lightpoint_t* new_point = (lightpoint_t*)malloc(sizeof(lightpoint_t));
     new_point->x = x;
     new_point->y = y;
-    new_point->wall_id = wall_id;
     new_point->angle = angle;
     new_point->next = NULL;
 
@@ -30,18 +33,20 @@ lightpoint_t* LIGPT_new(
 // simple convex polygon (no segments of such polygon won`t intersects with another).
 void LIGPT_insert(
     lightpoint_t** head,
-    short int x1, short int y1,
-    float angle, short int wall_id
+    short int x,
+    short int y,
+    float angle 
 ) 
 {
     lightpoint_t* current;
-    lightpoint_t* new_pt = LIGPT_new(x1, y1, angle, wall_id);
+    lightpoint_t* new_pt = LIGPT_new(x, y, angle);
 
     if (*head == NULL)
     {
         new_pt->next = *head;
         *head = new_pt;
     }
+
     // place new point at begininng
     else if ((*head)->angle >= new_pt->angle)
     {
@@ -61,25 +66,70 @@ void LIGPT_insert(
     }
 }
 
-// Some point can be considered redundant. Light polygon is created only from lines that already are
-// in the level (walls edges for example). Having three points on one segment makes ht middle point
-// really just a waster resources, as intersection needs to be calculated two times.
+
+bool LIGPT_pt_in_segment(
+    int pt_x, int pt_y,       // C
+    int seg_x1, int seg_y1,   // A
+    int seg_x2, int seg_y2    // B
+)
+{
+    float cross, dot, box;
+
+    cross = (pt_y - seg_y1) * (seg_x2 - seg_x1) - (pt_x - seg_x1) * (seg_y2 - seg_y1);
+
+    // compare versus epsilon for floating point values, or != 0 if using integers
+    if (abs(cross) > EPSILON) {return false;}
+
+    dot = (pt_x - seg_x1) * (seg_x2 - seg_x1) + (pt_y - seg_y1) * (seg_y2 - seg_y1);
+
+    if (dot < 0) {return false;}
+
+    box = (seg_x2 - seg_x1) * (seg_x2 - seg_x1) + (seg_y2 - seg_y1) * (seg_y2 - seg_y1);
+
+    if (dot > box) {return false;}
+
+    return true;
+}
+
+// Some point can be considered redundant. Light polygon is created mostly from lines that already
+// are in the level (walls edges for example). Having three points laying in one segment makes the
+// middle point really just a waste resources, as intersection needs to be calculated two times.
 void LIGPT_optim(lightpoint_t* poly)
 {
     lightpoint_t* ptr = NULL;
+    lightpoint_t* first = NULL;
+    first = poly;  // yeah, just for the checking of first to last point
     ptr = poly;
 
     // cut all redundant in between
     while (ptr->next != NULL && ptr->next->next != NULL)
     { 
-       lightpoint_t* cur_cone = ptr->next;
-       if (cur_cone->next->wall_id == ptr->wall_id && cur_cone->next->wall_id == cur_cone->wall_id)
-       {
-           ptr->next = cur_cone->next; free(cur_cone);
-       }
-       else 
-       { ptr=ptr->next; }
+        lightpoint_t* between = ptr->next;
+        lightpoint_t* prev = ptr;
+        lightpoint_t* next = ptr->next->next;
+
+        if(LIGPT_pt_in_segment(between->x, between->y, prev->x, prev->y, next->x, next->y))
+        {
+            ptr->next = between->next;
+            free(between);
+        }
+        else 
+        {
+            ptr=ptr->next; 
+        }
     }
+
+    // last point to first point
+    lightpoint_t* between = ptr->next;
+    lightpoint_t* prev = ptr;
+    lightpoint_t* next = first;
+
+    if(LIGPT_pt_in_segment(between->x, between->y, prev->x, prev->y, next->x, next->y))
+    {
+        ptr->next = NULL;
+    }
+    
+    // new poly is set to optimized set of points
     poly = ptr;
 }
 
