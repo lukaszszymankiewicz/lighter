@@ -16,6 +16,7 @@ TARGET =                \
 	src/segment.c       \
 	src/sprites.c       \
 	src/tile.c          \
+	src/timer.c         \
 
 all:
 	$(TARGET)

@@ -17,34 +17,32 @@ lightsource_t lantern =
     .width = 0.0,
     .n_poly = 13,
     .polys = {
-        {-20,     -20,       20    },
-        { 20,     -20,       20    },
-        {-20,     -20,       20    },
-        {-20,      20,       20    },
-        {-12,     -12,       50    },
-        { 12,     -12,       50    },
-        {-12,     -12,       50    },
-        {-12,      12,       50    },
-        {-5,       -5,      100    },
-        { 5,       -5,      100    },
-        {-5,       -5,      100    },
-        {-5,        5,      100    },
-        { 0,        0,      200    },
+        {-20,     -20,        5    },
+        { 20,     -20,        5    },
+        {-20,     -20,        5    },
+        {-20,      20,        5    },
+        {-12,     -12,       10    },
+        { 12,     -12,       10    },
+        {-12,     -12,       10    },
+        {-12,      12,       10    },
+        {-5,       -5,       20    },
+        { 5,       -5,       20    },
+        {-5,       -5,       20    },
+        {-5,        5,       20    },
+        { 0,        0,       50    },
     }
 };
 
 lightsource_t lighter = 
 {
     .width = PI / 7,
-    .n_poly = 7,
+    .n_poly = 5,
     .polys = {
-        {-20,       0,       20    },
-        { 20,       0,       20    },
-        {-10,       0,       50    },
-        { 10,       0,       50    },
-        { -5,       0,       100   },
-        {  5,       0,       100   },
-        {  0,       0,       200   },
+        {  0,      -5,       10    },
+        {  0,       5,       10    },
+        { -5,       0,       30    },
+        {  5,       0,       30    },
+        {  0,       0,       50    },
     }
 };
 
@@ -158,7 +156,7 @@ void LIG_fill_lightpoly(lightpoint_t* pts, int clr)
         // if there is two intersection just draw line between them
         if (n==2)
         {
-            GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, clr, clr, clr, 255);
+            GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 169, 169, 169, clr);
             continue;
         }
 
@@ -167,7 +165,7 @@ void LIG_fill_lightpoly(lightpoint_t* pts, int clr)
         {
             while(intersections)
             {
-                GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, clr, clr, clr, 255); 
+                GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 169, 169, 169, clr); 
                 intersections=intersections->next->next;
             }
         }

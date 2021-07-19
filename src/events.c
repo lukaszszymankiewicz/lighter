@@ -2,10 +2,8 @@
 #include "config.h"
 
 enum hero_states {
-    HERO_STANDING_FRONT = 0,
+    HERO_STANDING_RIGHT = 0,
     HERO_STANDING_LEFT = 1,
-    HERO_STANDING_BACK = 2,
-    HERO_STANDING_RIGHT = 3,
 };
 
 void EVNT_handle_events(SDL_Event *event, int *game_loop, hero_t * hero_o, light_t * light_o)

@@ -1,7 +1,7 @@
-#include <stdlib.h>
 #include <math.h>
-#include "lightpt.h"
 #include <stdbool.h>
+#include <stdlib.h>
+#include "lightpt.h"
 
 #define EPSILON 0.1
 
@@ -68,9 +68,9 @@ void LIGPT_insert(
 
 
 bool LIGPT_pt_in_segment(
-    int pt_x, int pt_y,       // C
-    int seg_x1, int seg_y1,   // A
-    int seg_x2, int seg_y2    // B
+    int pt_x, int pt_y,
+    int seg_x1, int seg_y1,
+    int seg_x2, int seg_y2
 )
 {
     float cross, dot, box;

@@ -8,7 +8,15 @@ SDL_Renderer* renderer = NULL;
 
 SDL_Window* GFX_init_window(int w, int h) 
 {
-    window = SDL_CreateWindow("Lighter", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow(
+        "Lighter",
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        1366,
+        768,
+        SDL_WINDOW_FULLSCREEN
+    );
+
     if (window == NULL) 
     {
         printf("window cannot be created");
@@ -26,7 +34,10 @@ void GFX_init_video()
 
 SDL_Renderer* GFX_init_renderer(SDL_Window* window) 
 {
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+    SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
     if (renderer == NULL) 
     {
         printf("renderer cannot be initialized!");
@@ -74,6 +85,12 @@ void GFX_free()
 void GFX_clear_screen() 
 {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
+    SDL_RenderClear(renderer);
+};
+
+void GFX_blender() 
+{
+    SDL_SetRenderDrawColor(renderer, 250, 250, 250, 10);
     SDL_RenderClear(renderer);
 };
 

@@ -7,19 +7,16 @@ tiles_list_t * LVL_read_level()
     tiles_list_t * tiles = NULL;
 
     //dummy
-    TILE_push(&tiles, 10, 256, 60, 506, 30, 73, 102, 255);
-    TILE_push(&tiles, 150, 306, 200, 506, 30, 73, 102, 255);
-    TILE_push(&tiles, 50, 456, 150, 506, 30, 73, 102, 255);
-    TILE_push(&tiles, 150, 256, 492, 306, 30, 73, 102, 255);
-    TILE_push(&tiles, 150, 256, 492, 306, 30, 73, 102, 255);
-
-    TILE_push(&tiles, 50, 50, 100, 100, 30, 73, 102, 255);
-    TILE_push(&tiles, 330, 50, 380, 100, 30, 73, 102, 255);
-    TILE_push(&tiles, 300, 100, 492, 150, 30, 73, 102, 255);
-    TILE_push(&tiles, 442, 150, 492, 256, 30, 73, 102, 255);
+    TILE_push(&tiles, 10, 10, 74, 42, 30, 73, 102, 255);
+    TILE_push(&tiles, 10, 10, 106, 42, 30, 73, 102, 255);
+    TILE_push(&tiles, 10, 42, 42, 189, 30, 73, 102, 255);
+    TILE_push(&tiles, 42, 157, 309, 189, 30, 73, 102, 255);
+    TILE_push(&tiles, 267, 93, 309, 157, 30, 73, 102, 255);
+    TILE_push(&tiles, 267, 10, 309, 42, 30, 73, 102, 255);
+    TILE_push(&tiles, 74, 74, 106, 128, 30, 73, 102, 255);
 
     // border
-    TILE_push(&tiles, 1, 1, 511, 511, 12, 12, 12, 0);
+    TILE_push(&tiles, 1, 1, 319, 199, 12, 12, 12, 0);
 
     return tiles;
 }

@@ -11,19 +11,20 @@
  - [x] add alpha lighting (for lighter light source)
  - [x] get rid of strange artifacts while endering texture (propably another another texture will do
    the trick)
- 
+ - [x] add some frame limit, as now game use 100% of the CPU.
+ - [x] any of the grpahics of a hero
+
  BORING THINGS:
  - [ ] document the code (WIP)
  - [ ] add tests (WIP)
  - [ ] refactor ray collision (some of function could easly use integers, rather than float)
 
  COOL THINGS:
+ - [ ] calculate exact place of light source
  - [ ] scale graphics to full screen
  - [ ] lighter in the hand of ther should shake a little bit (up and down) in slowly matter to look more
    realistic
- - [ ] add some frame limit, as now game use 100% of the CPU.
  - [ ] gravity
  - [ ] any of the more sofistaced controls and movements of a hero
  - [ ] scrolling
- - [ ] any of the grpahics of a hero
  - [ ] any of the grpahics of level
