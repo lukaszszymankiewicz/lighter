@@ -11,6 +11,7 @@ void close_game(hero_t * hero_o, light_t * light_o, tiles_list_t * tiles) {
     GFX_free();
     HERO_free(hero_o);
     TILE_free(tiles);
+    LIG_free(light_o);
 };
 
 void init_game() {
@@ -20,8 +21,7 @@ void init_game() {
 
 int main(int argc, char* args[]) {
     int loop = 1;
-    int counted_frames = 0;
-
+    int frame = 0;
     int frame_ticks;
 
     SDL_Event event;
@@ -47,26 +47,23 @@ int main(int argc, char* args[]) {
         TIMER_start(cap_timer);
         EVNT_handle_events(&event, &loop, hero_o, light_o);
         GFX_clear_screen();
-        // TXTR_render_texture(bg, NULL, 10, 10);  // please be nice, this is temporary!
-        LIG_draw_light_effect(
-            HERO_light_x(hero_o),
-            HERO_light_y(hero_o),
-            light_o,
-            tiles
-        );
+        TXTR_render_texture(bg, NULL, 10, 10);  // please be nice, this is temporary!
+        LIG_draw_light_effect(HERO_light_x(hero_o), HERO_light_y(hero_o), light_o, tiles, frame);
         LVL_draw(tiles);
         HERO_draw(hero_o);
         GFX_update();
-        ++counted_frames;
 
         frame_ticks = TIMER_get_ticks(cap_timer);
         if(frame_ticks < SCREEN_TICKS_PER_FRAME )
         {
+            frame = (frame + 1);
             SDL_Delay(SCREEN_TICKS_PER_FRAME - frame_ticks);
         }
     }
 
     close_game(hero_o, light_o, tiles);
+    TIMER_free(cap_timer);
+    TIMER_free(fps_timer);
 
 	return 0;
 }

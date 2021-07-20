@@ -95,3 +95,8 @@ bool TIMER_is_paused(game_timer_t* timer)
 {
     return timer->paused && timer->started;
 }
+
+void TIMER_free(game_timer_t* timer)
+{
+    free(timer);
+}
