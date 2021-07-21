@@ -14,6 +14,8 @@
  - [x] add some frame limit, as now game use 100% of the CPU.,
  - [x] any of the grpahics of a hero,
  - [x] calculate exact place of light source (done for lighter).
+ - [x] lighter in the hand of ther should shake a little bit (up and down) in slowly matter to look more
+   realistic,
 
  BORING THINGS:
  - [ ] document the code (WIP),
@@ -25,8 +27,7 @@
  - [ ] cleanup lighter.c file
 
  COOL THINGS:
- - [ ] lighter in the hand of ther should shake a little bit (up and down) in slowly matter to look more
-   realistic,
+ - [ ] hero animation
  - [ ] implement radius of the light effect,
  - [ ] implement framebuffer for light effect (right now the whole light scene is drawn n times,
    where n is the number of polygon from which light effect is made. For Example lighter is using 5
@@ -35,3 +36,6 @@
  - [ ] any of the more sofisticated controls and movements of a hero,
  - [ ] scrolling,
  - [ ] any of the gaphics of level.
+
+ MILESTONES:
+ - GUI level editor
