@@ -1,7 +1,6 @@
 CC = gcc
 CsegmentFLAGS := -Wall -g
 TARGET =                   \
-	check_events.c         \
 	check_gfx.c            \
 	check_geometry.c       \
 	check_lightpt.c        \
@@ -9,10 +8,8 @@ TARGET =                   \
 	check_sprites.c        \
 	check_tests.c          \
 	check_tile.c           \
-	../src/events.c        \
 	../src/gfx.c           \
 	../src/geometry.c      \
-	../src/hero.c          \
 	../src/intersection.c  \
 	../src/level.c         \
 	../src/light.c         \

@@ -1,10 +1,7 @@
 #include "events.h"
 #include "config.h"
+#include "hero.h"
 
-enum hero_states {
-    HERO_STANDING_RIGHT = 0,
-    HERO_STANDING_LEFT = 1,
-};
 
 void EVNT_handle_events(SDL_Event *event, int *game_loop, hero_t * hero_o, light_t * light_o)
 {
@@ -22,13 +19,13 @@ while(SDL_PollEvent(event) != 0) {
             break;
 
             case SDLK_RIGHT:
-            hero_o->state = HERO_STANDING_RIGHT;
+            hero_o->direction = RIGHT;
             hero_o->x += 20;
             light_o->angle = RIGHT_RAD;
             break;
 
             case SDLK_LEFT:
-            hero_o->state = HERO_STANDING_LEFT;
+            hero_o->direction = LEFT;
             hero_o->x -= 20;
             light_o->angle = LEFT_RAD;
             break;

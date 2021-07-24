@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include "hero.h"
 #include "sprites.h"
@@ -11,20 +12,34 @@ hero_t * HERO_init()
     hero_t* hero_o = (hero_t*)malloc(sizeof(hero_t));
     hero_o->x = 160;  // yeah
     hero_o->y = 137;  //yeah
-    hero_o->state = 1;
 
-    hero_o->sprite = TXTR_init_texture("sprites/her2.png");
+    hero_o->state = STANDING;
+    hero_o->direction = LEFT;
+    hero_o->sprites=TXTR_init_animation_sheet("sprites/her2.png", MAX_STATE);
+    hero_o->frame=0;
+    hero_o->frame_t=0;
 
-    hero_o->clips[ 0 ].x =  0;
-    hero_o->clips[ 0 ].y =  0;
-    hero_o->clips[ 0 ].w =  9;
-    hero_o->clips[ 0 ].h = 20;
+    TXTR_push_animation(
+        hero_o->sprites,
+        STANDING,
+        (int[]){0, 9},
+        (int[]){0, 0},
+        (int[]){9, 9},
+        (int[]){20, 20},
+        20,
+        2
+    );
 
-    //Set top right sprite
-    hero_o->clips[ 1 ].x = 9;
-    hero_o->clips[ 1 ].y = 0;
-    hero_o->clips[ 1 ].w = 9;
-    hero_o->clips[ 1 ].h = 20;
+    TXTR_push_animation(
+        hero_o->sprites,
+        IDLE,
+        (int[]){0},
+        (int[]){20},
+        (int[]){9},
+        (int[]){20},
+        20,
+        1
+    );
 
     return hero_o;
 }
@@ -38,17 +53,36 @@ int HERO_light_y(hero_t* hero_o)
     return hero_o->y + lightpos_y_corr[hero_o->state];
 }
 
-void HERO_draw(hero_t * hero_o)
+void HERO_update(hero_t* hero_o)
+{
+    hero_o->frame_t++;
+    int del = hero_o->sprites->animations[hero_o->state].delay;
+    int len = hero_o->sprites->animations[hero_o->state].len;
+
+    if (hero_o->frame_t >= del)
+    {
+        hero_o->frame_t=0;
+        hero_o->frame++; 
+
+        if (hero_o->frame >= len)
+        {
+            hero_o->frame=0;
+        }
+    }
+}
+
+void HERO_draw(hero_t* hero_o)
 {
     TXTR_render_texture(
-        hero_o->sprite,
-        &((hero_o->clips)[hero_o->state]),
+        hero_o->sprites->texture,
+        &(hero_o->sprites->animations[hero_o->state].frames[hero_o->frame]),
         hero_o->x,
-        hero_o->y
+        hero_o->y,
+        hero_o->direction
     );
 }
 
 void HERO_free(hero_t * hero_o)
 {
-    TXTR_free(hero_o->sprite);
+    TXTR_free_animation_sheet(hero_o->sprites);
 }

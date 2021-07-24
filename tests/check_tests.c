@@ -1,13 +1,13 @@
 #include <check.h>
 #include <stdlib.h>
-#include "../src/events.h"
+// #include "../src/events.h"
 #include "../src/gfx.h"
 #include "../src/tile.h"
 #include "../src/segment.h"
 #include "../src/sprites.h"
 #include "../src/lightpt.h"
 #include "../src/geometry.h"
-#include "check_events.h"
+// #include "check_events.h"
 #include "check_gfx.h"
 #include "check_geometry.h"
 #include "check_tile.h"
@@ -23,10 +23,10 @@ int main(void)
     SRunner *sr;
 
     // events
-    s = events_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
+    // s = events_suite();
+    // sr = srunner_create(s);
+    // srunner_run_all(sr, CK_ENV);
+    // number_failed += srunner_ntests_failed(sr);
 
     // geometry
     s = geometry_suite();

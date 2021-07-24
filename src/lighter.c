@@ -47,10 +47,11 @@ int main(int argc, char* args[]) {
         TIMER_start(cap_timer);
         EVNT_handle_events(&event, &loop, hero_o, light_o);
         GFX_clear_screen();
-        TXTR_render_texture(bg, NULL, 10, 10);  // please be nice, this is temporary!
+        TXTR_render_texture(bg, NULL, 10, 10, 0);  // please be nice, this is temporary!
         LIG_draw_light_effect(HERO_light_x(hero_o), HERO_light_y(hero_o), light_o, tiles, frame);
         LVL_draw(tiles);
         HERO_draw(hero_o);
+        HERO_update(hero_o);
         GFX_update();
 
         frame_ticks = TIMER_get_ticks(cap_timer);
