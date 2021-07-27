@@ -12,22 +12,17 @@ START_TEST (EVNT_handle_events_check)
     // GIVEN
     int loop = 1;
 
+    // hero_t* hero_o = HERO_init();
+    light_t* light_o = LIG_init();
+
+    // sprites are really unused here, so there are not initialized really
     hero_t* hero_o = (hero_t*)malloc(sizeof(hero_t));
-    hero_o->state = 1;
-    hero_o->x = 100;
-    hero_o->y = 100;
-    hero_o->sprite = NULL;
-
-    // yeah - just faking it.
-    hero_o->clips[0].x = 0; hero_o->clips[0].y = 0; hero_o->clips[0].w = 0; hero_o->clips[0].h = 0;
-    hero_o->clips[1].x = 0; hero_o->clips[1].y = 0; hero_o->clips[1].w = 0; hero_o->clips[1].h = 0;
-    hero_o->clips[2].x = 0; hero_o->clips[3].y = 0; hero_o->clips[2].w = 0; hero_o->clips[2].h = 0;
-    hero_o->clips[3].x = 0; hero_o->clips[3].y = 0; hero_o->clips[3].w = 0; hero_o->clips[3].h = 0;
-
-    // yeah - just faking it.
-    light_t* light_o = (light_t*)malloc(sizeof(light_t));
-    light_o->src = 0;
-    light_o->angle = RIGHT_RAD;
+    hero_o->x = 160;
+    hero_o->y = 137;
+    hero_o->state = STANDING;
+    hero_o->direction = LEFT;
+    hero_o->frame=0;
+    hero_o->frame_t=0;
 
     // WHEN (QUITING)
     SDL_Event event;
@@ -50,24 +45,28 @@ START_TEST (EVNT_handle_events_check)
     SDL_PushEvent(&event);
     EVNT_handle_events(&event, &loop, hero_o, light_o);
     ck_assert_int_eq(light_o->src_num, 0);
-    
+
     // WHEN (MOVING LEFT)
     event.type = SDL_KEYDOWN;
     event.key.keysym.sym = SDLK_LEFT;
     SDL_PushEvent(&event);
     EVNT_handle_events(&event, &loop, hero_o, light_o);
-    ck_assert_int_eq(hero_o->x, 80);
-    ck_assert_int_eq(hero_o->y, 100);
-    ck_assert_int_eq(hero_o->state, 1);
+    ck_assert_int_eq(hero_o->x, 140);
+    ck_assert_int_eq(hero_o->y, 137);
+    ck_assert_int_eq(hero_o->state, 0);
 
     // WHEN (MOVING RGHT)
     event.type = SDL_KEYDOWN;
     event.key.keysym.sym = SDLK_RIGHT;
     SDL_PushEvent(&event);
     EVNT_handle_events(&event, &loop, hero_o, light_o);
-    ck_assert_int_eq(hero_o->x, 100);
-    ck_assert_int_eq(hero_o->y, 100);
-    ck_assert_int_eq(hero_o->state, 3);
+    ck_assert_int_eq(hero_o->x, 160);
+    ck_assert_int_eq(hero_o->y, 137);
+    ck_assert_int_eq(hero_o->state, 0);
+
+    // CLEANING
+    free(hero_o);
+    LIG_free(light_o);
 }
 END_TEST
 

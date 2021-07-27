@@ -2,4 +2,4 @@
 #include <stdlib.h>
 #include "../src/lightpt.h"
 
-Suite * lightpt_suite(void);
+Suite* lightpt_suite(void);

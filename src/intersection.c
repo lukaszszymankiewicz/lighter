@@ -1,17 +1,6 @@
 #include "intersection.h"
 
 
-void INTSC_free(x_intersection_t* head) 
-{
-    x_intersection_t* currentRef = head;
-
-    while (currentRef != NULL) {
-        x_intersection_t * temp = currentRef->next;
-        free(currentRef);
-        currentRef = temp;
-    }
-}
-
 x_intersection_t* INTSC_new(int x)
 {
     x_intersection_t* INT_new_x_intersection = (x_intersection_t*)malloc(sizeof(x_intersection_t));
@@ -60,3 +49,15 @@ int INTSC_get_last(x_intersection_t* intersections)
     }
     return ptr->x;
 }
+
+void INTSC_free(x_intersection_t* head) 
+{
+    x_intersection_t* currentRef = head;
+
+    while (currentRef != NULL) {
+        x_intersection_t * temp = currentRef->next;
+        free(currentRef);
+        currentRef = temp;
+    }
+}
+

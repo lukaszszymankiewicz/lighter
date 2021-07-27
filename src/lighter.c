@@ -28,7 +28,7 @@ int main(int argc, char* args[]) {
     init_game();
 
     hero_t * hero_o = NULL;
-    hero_o = HERO_init();
+    hero_o = HERO_init(NULL);
 
     tiles_list_t * tiles = NULL;
     tiles = LVL_read_level();

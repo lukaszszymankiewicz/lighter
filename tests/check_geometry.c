@@ -107,10 +107,10 @@ START_TEST (GEO_if_seg_intersect_with_y_check_positive)
     ck_assert_float_eq(result, 1);
 
     result = GEO_if_seg_intersect_with_y(0, 0, 10);
-    ck_assert_float_eq(result, 1);
+    ck_assert_float_eq(result, 0);
 
     result = GEO_if_seg_intersect_with_y(0, 10, 0);
-    ck_assert_float_eq(result, 1);
+    ck_assert_float_eq(result, 0);
 
     result = GEO_if_seg_intersect_with_y(10, 0, 10);
     ck_assert_float_eq(result, 1);
@@ -125,10 +125,29 @@ START_TEST (GEO_if_seg_intersect_with_y_check_positive)
     ck_assert_float_eq(result, 0);
 }
 END_TEST
+
+START_TEST (GEO_distance_check)
+{
+    // GIVEN
+    float dist;
+    
+    // WHEN && THEN
+    dist = GEO_distance(0, 10, 10, 10);
+    ck_assert_float_eq(dist, 10);
+
+    dist = GEO_distance(10, 10, -10, 10);
+    ck_assert_float_eq(dist, 20);
+
+    dist = GEO_distance(10, 10, 20, 20);
+    ck_assert_float_ge(dist, 1.41*10);
+    ck_assert_float_ge(dist, 1.41*10+0.01);
+}
+END_TEST
+
 Suite* geometry_suite(void)
 {
-    Suite *s;
-    TCase *tc_core;
+    Suite* s;
+    TCase* tc_core;
 
     s = suite_create("geometry");
     tc_core = tcase_create("Core");
@@ -138,6 +157,7 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_pt_in_triangle_check_negative);
     tcase_add_test(tc_core, GEO_seg_intersection_with_y_check);
     tcase_add_test(tc_core, GEO_if_seg_intersect_with_y_check_positive);
+    tcase_add_test(tc_core, GEO_distance_check);
 
     suite_add_tcase(s, tc_core);
 

@@ -4,18 +4,23 @@
 #include "sprites.h"
 
 // do it dynamically!
-int lightpos_x_corr[] = {9, 0};
+int lightpos_x_corr[] = {5, 0};
 int lightpos_y_corr[] = {11, 11};
 
-hero_t * HERO_init()
+hero_t* HERO_init(char* animation_sheet)
 {
     hero_t* hero_o = (hero_t*)malloc(sizeof(hero_t));
-    hero_o->x = 160;  // yeah
-    hero_o->y = 137;  //yeah
+    hero_o->x = 160;          // yeah
+    hero_o->y = 137;          //yeah
 
     hero_o->state = STANDING;
     hero_o->direction = LEFT;
-    hero_o->sprites=TXTR_init_animation_sheet("sprites/her2.png", MAX_STATE);
+
+    if (animation_sheet == NULL)
+    { hero_o->sprites = TXTR_init_animation_sheet("sprites/her2.png", MAX_STATE);}
+    else
+    { hero_o->sprites = TXTR_init_animation_sheet(animation_sheet, MAX_STATE);}
+
     hero_o->frame=0;
     hero_o->frame_t=0;
 
@@ -46,11 +51,12 @@ hero_t * HERO_init()
 
 int HERO_light_x(hero_t* hero_o)
 {
-    return hero_o->x + lightpos_x_corr[hero_o->state];
+    return hero_o->x + lightpos_x_corr[hero_o->direction];
 }
+
 int HERO_light_y(hero_t* hero_o)
 {
-    return hero_o->y + lightpos_y_corr[hero_o->state];
+    return hero_o->y + lightpos_y_corr[hero_o->direction];
 }
 
 void HERO_update(hero_t* hero_o)

@@ -5,12 +5,6 @@
 #define LIGHT_H
 
 
-enum light_sources {
-    LANTERN = 0,
-    FLASHLIGHT = 1,
-    ALL = 2,
-};
-
 // this is used as column numbers in polys matrix (lightsource_t) - first column determines x offset
 // for given poly, second: y-offset and third: color of given lightpoly.
 enum polydata {
@@ -19,6 +13,14 @@ enum polydata {
     COLOR = 2,
 };
 
+// lightsouces names
+enum light_sources {
+    LANTERN = 0,
+    FLASHLIGHT = 1,
+    ALL = 2,
+};
+
+// lightsources is basically thing which makes any of light
 typedef struct lightsource
 {
     float width;                  // width (in rad) of light cone (0.0 if light takes whole radius)
@@ -29,13 +31,14 @@ typedef struct lightsource
     int polys[][3];               // x_correction, y_correction, color
 } lightsource_t;
 
+// instance of light
 typedef struct light {
     lightsource_t* src;           // current light source
     short int src_num;            // id of light source
     float angle;                  // current angle in which light is cast
 } light_t;
 
-light_t * LIG_init();
+light_t* LIG_init();
 void LIG_draw_light_effect(int x, int y, light_t* lght, tiles_list_t * tiles, int frame);
 void LIG_change_source(light_t* lght);
 void LIG_free(light_t* lght);

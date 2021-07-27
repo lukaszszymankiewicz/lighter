@@ -2,4 +2,4 @@
 #include <stdlib.h>
 #include "../src/gfx.h"
 
-Suite * gfx_suite(void);
+Suite* gfx_suite(void);

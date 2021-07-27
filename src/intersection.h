@@ -13,4 +13,3 @@ int INTSC_get_last(x_intersection_t* intersections);
 void INTSC_free(x_intersection_t* head);
 
 #endif
-
