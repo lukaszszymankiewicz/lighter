@@ -16,10 +16,11 @@
  - [x] calculate exact place of light source (done for lighter).
  - [x] lighter in the hand of ther should shake a little bit (up and down) in slowly matter to look more
    realistic,
+ - [x] add tests (WIP) - reliable number of unit tests added.
+ - [x] hero animation
 
  BORING THINGS:
  - [ ] document the code (WIP),
- - [ ] add tests (WIP),
  - [ ] refactor ray collision (some of function could easly use integers, rather than float),
  - [ ] scale graphics to full screen - because perfect pixel-for-pixel graphics is important in
    this, project, unfortunatly not all resolutions will looks good. Some function to determine input
@@ -27,7 +28,6 @@
  - [ ] cleanup lighter.c file
 
  COOL THINGS:
- - [ ] hero animation
  - [ ] implement radius of the light effect,
  - [ ] implement framebuffer for light effect (right now the whole light scene is drawn n times,
    where n is the number of polygon from which light effect is made. For Example lighter is using 5
@@ -38,4 +38,4 @@
  - [ ] any of the gaphics of level.
 
  MILESTONES:
- - GUI level editor
+ - [ ] GUI level editor
