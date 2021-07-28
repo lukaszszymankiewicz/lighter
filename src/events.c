@@ -1,13 +1,21 @@
+#include <stdbool.h>
 #include "events.h"
 #include "config.h"
 #include "hero.h"
 
 
-void EVNT_handle_events(SDL_Event *event, int *game_loop, hero_t * hero_o, light_t * light_o)
+// handles input from player and manipulating game window (resize, exit etc)
+void EVNT_handle_events(
+    SDL_Event* event,
+    bool* game_loop,
+    hero_t* hero_o,
+    light_t* light_o
+)
 {
 while(SDL_PollEvent(event) != 0) {
-    if(event->type == SDL_QUIT) {
-        *game_loop = 0;
+    if(event->type == SDL_QUIT) 
+    {
+        *game_loop = false;
     }
 
     // yeah. this is pretty ugly, but by now it is only for testing purposes

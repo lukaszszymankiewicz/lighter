@@ -1,5 +1,7 @@
 #include "intersection.h"
 
+// intersections are a simple sorted linked list. It is used for poperly drawing light effect (by
+// now). Nothing really special here.
 
 x_intersection_t* INTSC_new(int x)
 {
@@ -9,6 +11,7 @@ x_intersection_t* INTSC_new(int x)
     return INT_new_x_intersection;
 }
 
+// inserts new x-intersection value and place it in right sorted order
 void INTSC_insert(x_intersection_t** head, int x) 
 {
     x_intersection_t* current;
@@ -38,6 +41,7 @@ void INTSC_insert(x_intersection_t** head, int x)
     }
 }
 
+// returns last element from linked list
 int INTSC_get_last(x_intersection_t* intersections)
 {
     x_intersection_t* ptr = NULL;

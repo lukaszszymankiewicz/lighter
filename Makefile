@@ -11,7 +11,7 @@ TARGET =                \
 	src/intersection.c  \
 	src/level.c         \
 	src/light.c         \
-	src/lighter.c       \
+	src/game.c          \
 	src/lightpt.c       \
 	src/segment.c       \
 	src/sprites.c       \

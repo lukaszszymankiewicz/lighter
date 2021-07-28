@@ -33,8 +33,8 @@ bool GEO_pt_in_triangle (
     return !(has_neg && has_pos);
 }
 
-// checks where y-line intersect with given segment. As y coord of such point is knows from the
-// begginig function only return x-coord od such intersection point
+// Checks where y-line intersect with given segment. As y coord of such point is known from the
+// begginig - function only return x-coord of such intersection point.
 float GEO_seg_intersection_with_y
 (
     int y,                   // y-line coord
@@ -45,9 +45,10 @@ float GEO_seg_intersection_with_y
     return x1 + (x2 - x1) * (y - y1) / (y2 - y1);
 }
 
-// checks if y-line intersects with given segment. Please note that to do that only y-coord of
+// Checks if y-line intersects with given segment. Please note that to do that only y-coord of
 // segment is needed to be known. Function will work no matter what is the order of the segment
-// points
+// points. Note that there is not strict condition from one side of segment end:
+// (y1 < scan_y rather than y1 <= scan_y)
 bool GEO_if_seg_intersect_with_y
 (
     int scan_y,             // y-line coord
@@ -58,7 +59,7 @@ bool GEO_if_seg_intersect_with_y
     return ((y1 < scan_y && y2 >= scan_y) || (y2 < scan_y && y1 >= scan_y));
 }
 
-// calculates distance between two points. Simple equations is used, can be optimised for something
+// Calculates distance between two points. Simple equations is used, can be optimised for something
 // better as this is only use to distinguish which point is closer to (0, 0) point.
 float GEO_distance(
     int x1, int y1,         // first point

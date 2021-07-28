@@ -18,6 +18,7 @@
    realistic,
  - [x] add tests (WIP) - reliable number of unit tests added.
  - [x] hero animation
+ - [x] cleanup lighter.c file
 
  BORING THINGS:
  - [ ] document the code (WIP),
@@ -25,7 +26,6 @@
  - [ ] scale graphics to full screen - because perfect pixel-for-pixel graphics is important in
    this, project, unfortunatly not all resolutions will looks good. Some function to determine input
    resolution and scale factor is needed.,
- - [ ] cleanup lighter.c file
 
  COOL THINGS:
  - [ ] implement radius of the light effect,
@@ -39,3 +39,5 @@
 
  MILESTONES:
  - [ ] GUI level editor
+ - [ ] prepare something what will make stand-alone distribution of game for linux
+ - [ ] prepare something what will make stand-alone distribution of game for Windows (I`m sorry :C )

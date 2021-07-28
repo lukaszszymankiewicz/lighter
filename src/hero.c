@@ -10,6 +10,7 @@ int lightpos_y_corr[] = {11, 11};
 hero_t* HERO_init(char* animation_sheet)
 {
     hero_t* hero_o = (hero_t*)malloc(sizeof(hero_t));
+
     hero_o->x = 160;          // yeah
     hero_o->y = 137;          //yeah
 
