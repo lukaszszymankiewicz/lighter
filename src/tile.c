@@ -1,15 +1,17 @@
 #include <stdlib.h>
 #include "tile.h"
 
-tile_t * TILE_init(
+//methods for holding and operating with level tiles. Basic implementation by now, will propably be
+//changed in near future
+tile_t* TILE_init(
     short int x1, short int y1,
     short int x2, short int y2,
     short int r, short int g,
     short int b, short int a
 )
 {
-    tile_t * new_tile = NULL;
-    new_tile = (tile_t *)malloc(sizeof(tile_t *));
+    tile_t* new_tile = NULL;
+    new_tile = (tile_t*)malloc(sizeof(tile_t*));
 
     new_tile->x1 = x1;
     new_tile->y1 = y1;
@@ -31,10 +33,10 @@ void TILE_push(
     short int r, short int g, short int b, short int a
 )
 {
-    tiles_list_t * new_level_tile = NULL;
-    new_level_tile = (tiles_list_t *)malloc(sizeof(tiles_list_t));
+    tiles_list_t* new_level_tile = NULL;
+    new_level_tile = (tiles_list_t*)malloc(sizeof(tiles_list_t));
 
-    tile_t * new_tile = TILE_init(x1, y1, x2, y2, r, g, b, a);
+    tile_t* new_tile = TILE_init(x1, y1, x2, y2, r, g, b, a);
     new_level_tile->tile = new_tile;
     new_level_tile->next = *list;
 
@@ -47,7 +49,7 @@ void TILE_free(tiles_list_t* list)
     tiles_list_t* currentRef = list;
 
     while (currentRef != NULL) {
-        tiles_list_t * temp = currentRef->next;
+        tiles_list_t* temp = currentRef->next;
         free(currentRef->tile);
         free(currentRef);
         currentRef = temp;

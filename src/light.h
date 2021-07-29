@@ -7,18 +7,10 @@
 
 // this is used as column numbers in polys matrix (lightsource_t) - first column determines x offset
 // for given poly, second: y-offset and third: color of given lightpoly.
-enum polydata {
-    X = 0,
-    Y = 1,
-    COLOR = 2,
-};
+enum polydata { X, Y, COLOR };
 
 // lightsouces names
-enum light_sources {
-    LANTERN = 0,
-    FLASHLIGHT = 1,
-    ALL = 2,
-};
+enum light_sources { LANTERN, FLASHLIGHT, ALL };
 
 // lightsources is basically thing which makes any of light
 typedef struct lightsource

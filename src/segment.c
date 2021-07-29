@@ -3,8 +3,10 @@
 #include <stdbool.h>
 #include "segment.h"
 
+
 point_t * PT_init(
-    int x, int y
+    int x,
+    int y
 )
 {
     point_t * new_pt = NULL;
@@ -34,6 +36,9 @@ segment_t * SEG_init(
     return new_segment;
 }
 
+// segment is a single implementation of linked list - so it creates polygon representation
+
+// this push new segment to begginig of polygon
 void SEG_push(
     segment_t** head,
     int x1, int y1,
@@ -47,6 +52,7 @@ void SEG_push(
     *head = new_segment;
 }
 
+// this push new segment to end of polygon
 void SEG_append(
     segment_t* head,
     int x1, int y1,
@@ -71,7 +77,8 @@ void SEG_append(
         cur->next = new_segment;
     }
 }
-void SEG_free(segment_t * segments)
+
+void SEG_free(segment_t* segments)
 {
     segment_t* head = segments;
 
@@ -84,6 +91,7 @@ void SEG_free(segment_t * segments)
     }
 }
 
+// checks if two segments intersects, if so result is stored in 'intersection'
 int SEG_intersects
 (
     segment_t first,

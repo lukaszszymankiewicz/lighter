@@ -5,7 +5,7 @@
 #define SPRITES_H
 
 typedef struct texture {
-    SDL_Texture * surface;
+    SDL_Texture* surface;
     int width;
     int height;
 } Texture;

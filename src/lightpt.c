@@ -5,6 +5,11 @@
 
 #define EPSILON 0.1
 
+// lightpoints are linked list of points which represent polygon. Such polygon is rendered as
+// 'light' on 2D screen. Lightpoints are stored sorted, to sort angle which each point makes with
+// player position is used. Such implementation ease further drawing
+
+
 // atan2 function from math is used to calculate angle, more naive and faster approach can be taken
 // as this is rather slow function. Please note that not direct angle is used in here as it is only
 // for sorting purposes - some more naive implementation coudl be easily used.
@@ -66,7 +71,7 @@ void LIGPT_insert(
     }
 }
 
-
+// checks is lightpoint is inside segment
 bool LIGPT_pt_in_segment(
     int pt_x, int pt_y,
     int seg_x1, int seg_y1,

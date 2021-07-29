@@ -9,6 +9,11 @@
 #include "segment.h"
 #include "sprites.h"
 
+
+// light calculation and rendering implementation. Basically each lightsource creates some light
+// rays which is used to calculate polygon where light can reach. Such polygon is drawn with higher
+// alpha value which creates realisitc effect
+
 #define R 1200
 #define smol_angle 0.01
 

@@ -2,10 +2,14 @@
 #include "sprites.h"
 #include "gfx.h"
 
+// implementation of game sprite
+
+
+// creates animation sheet (set of animations)
 animation_sheet_t* TXTR_init_animation_sheet
 (
-    char *filepath,
-    int n_animations
+    char *filepath,     // path to animation sheet image
+    int n_animations    // number of animation to created from sheet
 )
 {
     animation_sheet_t* new_sheet = malloc(sizeof(animation_sheet_t));
@@ -18,11 +22,17 @@ animation_sheet_t* TXTR_init_animation_sheet
     return new_sheet;
 }
 
+
+// creates animations (set of sprites wit given delay and length). Each sprite from animation is
+// just SDL_Rect indicating area to be cut from image sheet.
 animation_t* TXTR_init_animation
 (
-    int xs[], int ys[],
-    int ws[], int hs[],
-    int delay, int len
+    int xs[],      // x-axis points of rect begginig
+    int ys[],      // y-axis points of rect begginig
+    int ws[],      // rect widths
+    int hs[],      // rect heaights
+    int delay,     // delay (in game-frames) before next frame animations occures
+    int len        // animation lengths (number of sprites creating given animation)
 )
 {
     animation_t* new_animation = malloc(sizeof(animation_t));
@@ -39,18 +49,23 @@ animation_t* TXTR_init_animation
     return new_animation;
 }
 
+// cuts animation sheet according to inputted rects and change it into animation struct
 void TXTR_push_animation
 (
-    animation_sheet_t* sheet,
-    int index,
-    int xs[], int ys[],
-    int ws[], int hs[],
-    int delay, int len
+    animation_sheet_t* sheet, // animation sheet stuct holding image to be cut
+    int index,     // index of animation (every animation should have unique index value)
+    int xs[],      // x-axis points of rect begginig
+    int ys[],      // y-axis points of rect begginig
+    int ws[],      // rect widths
+    int hs[],      // rect heaights
+    int delay,     // delay (in game-frames) before next frame animations occures
+    int len        // animation lengths (number of sprites creating given animation)
 )
 {
     sheet->animations[index] = *(TXTR_init_animation(xs, ys, ws, hs, delay, len));
 }
 
+// initalize texture stuct from given image file
 Texture* TXTR_init_texture(char *filepath) 
 {
 	SDL_Texture* new_texture = NULL;
@@ -62,7 +77,7 @@ Texture* TXTR_init_texture(char *filepath)
 
     new_texture = SDL_CreateTextureFromSurface(renderer, loaded_surface);
 
-    Texture *p = malloc(sizeof(Texture));
+    Texture* p = malloc(sizeof(Texture));
 
     p->surface = new_texture;
     p->width = loaded_surface->w;
@@ -73,11 +88,19 @@ Texture* TXTR_init_texture(char *filepath)
     return p;
 };
 
-void TXTR_render_texture(Texture* texture, SDL_Rect* clip, int x, int y, bool flip) 
+// renders texture to screen
+void TXTR_render_texture(
+    Texture* texture,     // Texture to be rendered
+    SDL_Rect* clip,       // rect from texture to be rendered
+    int x,                // x coord of screen to have texture rendered
+    int y,                // y coord of screen to have texture rendered
+    bool flip             // indiaction if texture should be flipped horizontally
+) 
 {
     SDL_Rect render_quad = {x, y, texture->width, texture->height};
     SDL_RendererFlip flip_tex;
 
+    // if clip is not given render whole texture
     if(clip != NULL) 
     {
         render_quad.w = clip->w;
@@ -96,19 +119,13 @@ void TXTR_free(Texture *texture)
     free(texture);
 };
 
-void TXTR_free_animation_sheet
-(
-    animation_sheet_t* sheet
-)
+void TXTR_free_animation_sheet(animation_sheet_t* sheet)
 {
     TXTR_free(sheet->texture);
     free(sheet);
 }
 
-void TXTR_free_animation
-(
-    animation_t* animation
-)
+void TXTR_free_animation(animation_t* animation)
 {
     free(animation);
 }
