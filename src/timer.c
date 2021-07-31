@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <SDL2/SDL.h>
-#include <stdbool.h>
-#include <stdlib.h>
 #include "timer.h"
-
 
 // Basically the https://lazyfoo.net/tutorials/SDL/25_capping_frame_rate/index.php implementation
 // but in ANSI C

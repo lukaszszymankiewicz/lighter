@@ -4,19 +4,19 @@ LINKS = `pkg-config --cflags --libs sdl2 SDL2_image`
 LIBS = -lm
 OBJ = lighter
 TARGET =                \
-	src/events.c        \
-	src/geometry.c      \
-	src/gfx.c           \
-	src/hero.c          \
-	src/intersection.c  \
-	src/level.c         \
-	src/light.c         \
 	src/game.c          \
+	src/gfx.c           \
+	src/sprites.c       \
+	src/events.c        \
+	src/hero.c          \
+	src/timer.c         \
+	src/tile.c          \
+	src/level.c         \
+	src/geometry.c      \
+	src/intersection.c  \
+	src/light.c         \
 	src/lightpt.c       \
 	src/segment.c       \
-	src/sprites.c       \
-	src/tile.c          \
-	src/timer.c         \
 
 all:
 	$(TARGET)

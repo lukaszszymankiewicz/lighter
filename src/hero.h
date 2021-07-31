@@ -3,8 +3,10 @@
 #ifndef HERO_H
 #define HERO_H
 
-enum state { STANDING, IDLE, MAX_STATE };
+enum state { STANDING, WALKING, MAX_STATE };
 enum direction { RIGHT, LEFT };
+
+typedef short int direction_t;
 
 typedef struct hero {
     int state;
@@ -13,6 +15,8 @@ typedef struct hero {
     int direction;
     int frame;
     int frame_t;
+    int x_vel;
+    int y_vel;
     animation_sheet_t* sprites;
 } hero_t;
 
@@ -22,5 +26,6 @@ void HERO_free(hero_t* hero_o);
 int HERO_light_x(hero_t* hero_o);
 int HERO_light_y(hero_t* hero_o);
 void HERO_update(hero_t* hero_o);
+void HERO_move(hero_t* hero_o, direction_t direction);
 
 #endif

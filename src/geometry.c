@@ -1,5 +1,4 @@
-#include <stdbool.h>
-#include <math.h>
+#include "def.h"
 
 // aux for GEO_pt_in_triangle function.
 float GEO_sign (

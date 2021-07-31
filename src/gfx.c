@@ -1,5 +1,4 @@
-#include <SDL2/SDL_image.h>
-#include "config.h"
+#include "gfx.h"
 
 SDL_Window* window = NULL;
 SDL_Surface* surface = NULL;

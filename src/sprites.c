@@ -1,9 +1,7 @@
-#include <stdbool.h>
 #include "sprites.h"
 #include "gfx.h"
 
 // implementation of game sprite
-
 
 // creates animation sheet (set of animations)
 animation_sheet_t* TXTR_init_animation_sheet
@@ -72,7 +70,6 @@ Texture* TXTR_init_texture(char *filepath)
     SDL_Surface* loaded_surface = NULL;
 
     loaded_surface = IMG_Load(filepath);
-
     SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
 
     new_texture = SDL_CreateTextureFromSurface(renderer, loaded_surface);

@@ -1,6 +1,4 @@
-#include <math.h>
-#include <stdbool.h>
-#include <stdlib.h>
+#include "def.h"
 #include "lightpt.h"
 
 #define EPSILON 0.1

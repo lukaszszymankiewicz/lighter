@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "def.h"
 #include "tile.h"
 
 //methods for holding and operating with level tiles. Basic implementation by now, will propably be

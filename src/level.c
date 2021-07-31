@@ -1,5 +1,5 @@
 #include "gfx.h"
-#include "tile.h"
+#include "level.h"
 
 
 tiles_list_t * LVL_read_level()
