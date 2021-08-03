@@ -20,7 +20,7 @@ void GAME_close(game_t* game)
  TIMER_free(game->fps_timer);
 };
 
-game_t * GAME_init() 
+game_t* GAME_init() 
 {
     game_t* game = (game_t*)malloc(sizeof(game_t));
 
@@ -37,10 +37,7 @@ game_t * GAME_init()
 
     game->keys_state = SDL_GetKeyboardState(NULL);
     game->keys_cooldown = NULL;
-
-    int n_keyboard_keys;
-    SDL_GetKeyboardState(&n_keyboard_keys);
-    game->keys_cooldown = (Uint8 *)malloc(sizeof(Uint8) * n_keyboard_keys);
+    game->keys_cooldown = (Uint8 *)malloc(sizeof(Uint8) * MAX_KEYS);
 
     return game;
 };
@@ -61,18 +58,15 @@ int main(int argc, char* args[]) {
     // TODO: this can be surely in game struct?
     GFX_init_graphics(SCREEN_WIDTH, SCREEN_HEIGHT);
     game_t* game = GAME_init();
-    EVNT_init();
-
     Texture* bg = TXTR_init_texture("sprites/wall.png");
 
+    EVNT_init();
     TIMER_start(game->fps_timer);
 
     while(game->loop) 
     {
         TIMER_start(game->cap_timer);
-
         EVNT_handle_events(game);
-
         GFX_clear_screen();
         TXTR_render_texture(bg, NULL, 10, 10, 0);
         LIG_draw_light_effect(

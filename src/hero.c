@@ -5,8 +5,6 @@ static int MAX_VEL = 5;
 static int MOVE_POWUH = 2;
 static int X_FRICTION = 1;
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) > (b) ? (b) : (a))
 
 // do it dynamically!
 int lightpos_x_corr[] = {5, 0};
@@ -115,6 +113,7 @@ void HERO_move(hero_t* hero_o, direction_t direction)
     }
     hero_o->direction = direction;
 }
+
 
 SDL_Rect* HERO_current_frame(hero_t* hero_o)
 {

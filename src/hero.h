@@ -4,9 +4,6 @@
 #define HERO_H
 
 enum state { STANDING, WALKING, MAX_STATE };
-enum direction { RIGHT, LEFT };
-
-typedef short int direction_t;
 
 typedef struct hero {
     int state;

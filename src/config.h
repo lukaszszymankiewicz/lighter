@@ -5,9 +5,15 @@
 #define SCREEN_FPS 20                             // Frame per second
 #define SCREEN_TICKS_PER_FRAME 1000 / SCREEN_FPS  // ticks per frame in ms
 #define PI 3.1415                                 // best approximation of pi known to mankind
-#define LEFT_RAD PI/2;                            // angle on which hero looks left
-#define RIGHT_RAD (3 * PI) / 2;                   // angle on which hero looks right
+#define LEFT_RAD PI/2                             // angle on which hero looks left
+#define RIGHT_RAD (3 * PI) / 2                    // angle on which hero looks right
+#define DEG30 PI/6                                // shortcut
+#define DEG15 PI/12                               // shortcut
 #define SCREEN_WIDTH 320                          // screen width in pixels
 #define SCREEN_HEIGHT 200                         // screen height in pixels
+#define MAX_KEYS SDL_NUM_SCANCODES                // SDL max keys supported
+
+typedef short int direction_t;
+enum direction { RIGHT, LEFT, UP, DOWN, NONE };
 
 #endif

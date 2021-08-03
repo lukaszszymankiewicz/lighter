@@ -14,6 +14,16 @@
 #define R 1200
 #define smol_angle 0.01
 
+static int wobble_dir = 1;
+static float wobble = 0;
+
+float lightpos_up_down_corr[2][5] = 
+{
+  // LEFT  RIGHT  UP               DOWN             NONE
+     {0,   0,     RIGHT_RAD+DEG30, RIGHT_RAD-DEG30, RIGHT_RAD},     // RIGHT 
+     {0,   0,     LEFT_RAD-DEG30,  LEFT_RAD+DEG30,  LEFT_RAD}       // LEFT 
+};
+
 lightsource_t lantern = 
 {
     .width = 0.0,
@@ -59,6 +69,25 @@ light_t * LIG_init()
     light_o->angle = LEFT_RAD;
 
     return light_o;
+}
+
+// calculates small angle correction to make light effect be more realistic. Charachteristic
+// "wobblig" effect is achieved while changing angle in small amount slowly.
+float LIG_wobble_angle(light_t* lght, int frame)
+{
+    if ((frame % lght->src->wobble_change_dir_coef) == 0) 
+    {
+        wobble_dir = (-1) * wobble_dir;
+    }
+
+    wobble += lght->src->wobble_corr * wobble_dir;
+
+    return wobble;
+}
+
+void LIG_move_lightsource(light_t* light_o, direction_t light_dir, direction_t hero_dir, int frame)
+{
+    light_o->angle = lightpos_up_down_corr[hero_dir][light_dir] + LIG_wobble_angle(light_o, frame);
 }
 
 // DEBUG function
@@ -331,19 +360,9 @@ void LIG_change_source(light_t* lght)
     lght->src = lightsources[lght->src_num];
 }
 
-void LIG_corr_light_angle(light_t* lght, int frame)
-{
-    static bool sign;
-
-    if ((frame % lght->src->wobble_change_dir_coef) == 0) { sign = !sign; }
-    if (sign) { lght->angle += lght->src->wobble_corr; }
-    else { lght->angle -= lght->src->wobble_corr; }
-}
-
 void LIG_draw_light_effect(int x, int y, light_t* lght, tiles_list_t * tiles, int frame)
 {
     segment_t* obstacles = LIG_calculate_ray_obstacles(tiles);
-    LIG_corr_light_angle(lght, frame);
     LIG_draw_light_polygons(x, y, lght, obstacles);
 };
 

@@ -5,12 +5,12 @@
    resolution and scale factor is needed.,
 
  COOL THINGS:
+ - [x] any of the more sofisticated controls and movements of a hero (looking up/down with lighter)
  - [ ] implement radius of the light effect,
  - [ ] implement framebuffer for light effect (right now the whole light scene is drawn n times,
    where n is the number of polygon from which light effect is made. For Example lighter is using 5
    polygons),
  - [ ] gravity,
- - [ ] any of the more sofisticated controls and movements of a hero,
  - [ ] scrolling,
  - [ ] any working level mechanism for placing/drawing tiles.
 
