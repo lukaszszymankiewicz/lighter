@@ -30,7 +30,7 @@ typedef struct light {
 light_t *LIG_init();
 void LIG_change_source(light_t *lght);
 void LIG_free(light_t *lght);
-void LIG_draw_light_effect(int x, int y, light_t* lght, tiles_list_t * tiles, int frame);
 void LIG_move_lightsource(light_t* light_o, direction_t light_dir, direction_t hero_dir, int frame);
+void LIG_draw_light_effect(int x, int y, light_t* lght, segment_t* obstacles);
 
 #endif

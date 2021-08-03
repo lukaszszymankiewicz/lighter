@@ -1,3 +1,5 @@
+#include "segment.h"
+
 #ifndef TILE_H
 #define TILE_H
 
@@ -22,6 +24,7 @@ tile_t *TILE_init(short int x1, short int y1, short int x2, short int y2,
 void TILE_push(tiles_list_t **list, short int x1, short int y1, short int x2,
                short int y2, short int r, short int g, short int b,
                short int a);
+segment_t* TILE_calculate_ray_obstacles(tiles_list_t * tiles);
 void TILE_free(tiles_list_t *list);
 
 #endif

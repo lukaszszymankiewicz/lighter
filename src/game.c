@@ -70,7 +70,10 @@ int main(int argc, char* args[]) {
         GFX_clear_screen();
         TXTR_render_texture(bg, NULL, 10, 10, 0);
         LIG_draw_light_effect(
-            HERO_light_x(game->hero), HERO_light_y(game->hero), game->light, game->tiles, game->frame
+            HERO_light_x(game->hero),
+            HERO_light_y(game->hero),
+            game->light,
+            TILE_calculate_ray_obstacles(game->tiles)
         );
         LVL_draw(game->tiles);
         HERO_draw(game->hero);

@@ -1,3 +1,4 @@
+#include "light.h"
 #include "game.h"
 
 #ifndef EVENTS_H

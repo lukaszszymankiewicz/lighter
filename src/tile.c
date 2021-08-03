@@ -1,5 +1,6 @@
 #include "def.h"
 #include "tile.h"
+#include "segment.h"
 
 //methods for holding and operating with level tiles. Basic implementation by now, will propably be
 //changed in near future
@@ -44,6 +45,25 @@ void TILE_push(
 
 }
 
+// Converts tiles of level to list of segments on which ray light can hit.
+segment_t* TILE_calculate_ray_obstacles(tiles_list_t* tiles)
+{
+    segment_t * segments = NULL;
+    tiles_list_t * ptr = NULL;
+    ptr = tiles;
+
+    while (ptr)
+    {
+        SEG_push(&segments, ptr->tile->x1, ptr->tile->y1, ptr->tile->x1, ptr->tile->y2);
+        SEG_push(&segments, ptr->tile->x1, ptr->tile->y2, ptr->tile->x2, ptr->tile->y2);
+        SEG_push(&segments, ptr->tile->x2, ptr->tile->y2, ptr->tile->x2, ptr->tile->y1);
+        SEG_push(&segments, ptr->tile->x2, ptr->tile->y1, ptr->tile->x1, ptr->tile->y1);
+
+        ptr=ptr->next;
+    }
+    return segments;
+}
+
 void TILE_free(tiles_list_t* list) 
 {
     tiles_list_t* currentRef = list;
@@ -55,4 +75,5 @@ void TILE_free(tiles_list_t* list)
         currentRef = temp;
     }
 }
+
 

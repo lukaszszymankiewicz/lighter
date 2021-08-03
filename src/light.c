@@ -58,7 +58,7 @@ lightsource_t lighter =
     }
 };
 
-lightsource_t* lightsources[] = {&lantern, &lighter};
+lightsource_t* lightsources[] = {&lighter, &lantern};
 
 light_t * LIG_init()
 {
@@ -211,25 +211,6 @@ void LIG_fill_lightpoly(lightpoint_t* pts, int clr)
     }
 }
 
-// Converts tiles of level to list of segments on which ray light can hit.
-segment_t * LIG_calculate_ray_obstacles(tiles_list_t * tiles)
-{
-    segment_t * segments = NULL;
-    tiles_list_t * ptr = NULL;
-    ptr = tiles;
-
-    while (ptr)
-    {
-        SEG_push(&segments, ptr->tile->x1, ptr->tile->y1, ptr->tile->x1, ptr->tile->y2);
-        SEG_push(&segments, ptr->tile->x1, ptr->tile->y2, ptr->tile->x2, ptr->tile->y2);
-        SEG_push(&segments, ptr->tile->x2, ptr->tile->y2, ptr->tile->x2, ptr->tile->y1);
-        SEG_push(&segments, ptr->tile->x2, ptr->tile->y1, ptr->tile->x1, ptr->tile->y1);
-
-        ptr=ptr->next;
-    }
-    return segments;
-}
-
 // Light sweeps ray all around (full circles). Some of the lightsources cuts this circle leaving
 // only part of the circle left (eg.: lighter). Light collides with each wall - point where rays are
 // colliding needs to be calculated. For each of obstacle three rays are casted (one directly into
@@ -334,12 +315,18 @@ void LIG_base_light(int x, int y, float angle, float width, int color, segment_t
     LIGPT_free(light_pts);
 };
 
+void LIG_change_source(light_t* lght)
+{
+    lght->src_num = ((lght->src_num) + 1) % ALL;
+    lght->src = lightsources[lght->src_num];
+}
+
 // calculates and draws light polygons. Every of the light source needs several polygons to be drawn
 // - every one of them is slightly moved to another which makes light looks more "natural".
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
 // looking like "gradient". Number of the polygons and shift coords are defined by its lightsource.
-void LIG_draw_light_polygons(int x, int y, light_t* lght, segment_t* obstacles) 
-{ 
+void LIG_draw_light_effect(int x, int y, light_t* lght, segment_t* obstacles)
+{
     for (int i=0; i < lght->src->n_poly; i++)
     {
         LIG_base_light(
@@ -352,18 +339,6 @@ void LIG_draw_light_polygons(int x, int y, light_t* lght, segment_t* obstacles)
         );
     }
     SEG_free(obstacles);
-}
-
-void LIG_change_source(light_t* lght)
-{
-    lght->src_num = ((lght->src_num) + 1) % ALL;
-    lght->src = lightsources[lght->src_num];
-}
-
-void LIG_draw_light_effect(int x, int y, light_t* lght, tiles_list_t * tiles, int frame)
-{
-    segment_t* obstacles = LIG_calculate_ray_obstacles(tiles);
-    LIG_draw_light_polygons(x, y, lght, obstacles);
 };
 
 void LIG_free(light_t* lght)
