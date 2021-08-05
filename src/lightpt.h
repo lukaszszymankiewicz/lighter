@@ -4,7 +4,6 @@
 typedef struct lightpoint {
     int x;
     int y;
-    int wall_id;
     float angle;
     struct lightpoint* next;
 } lightpoint_t;
