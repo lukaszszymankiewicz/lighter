@@ -16,7 +16,7 @@ TARGET =                \
 	src/intersection.c  \
 	src/light.c         \
 	src/lightpt.c       \
-	src/segment.c       \
+	src/obstacle.c      \
 
 all:
 	$(TARGET)

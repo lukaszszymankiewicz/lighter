@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define DEBUG 0                                   // set to zero to get rid of all DEBUG graphics
+#define DEBUG 1                                   // set to zero to get rid of all DEBUG graphics
 #define SCREEN_FPS 20                             // Frame per second
 #define SCREEN_TICKS_PER_FRAME 1000 / SCREEN_FPS  // ticks per frame in ms
 #define PI 3.1415                                 // best approximation of pi known to mankind

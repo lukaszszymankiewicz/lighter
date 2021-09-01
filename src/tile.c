@@ -1,6 +1,7 @@
 #include "def.h"
 #include "tile.h"
-#include "segment.h"
+#include "primitives.h"
+#include "obstacle.h"
 
 //methods for holding and operating with level tiles. Basic implementation by now, will propably be
 //changed in near future
@@ -46,22 +47,20 @@ void TILE_push(
 }
 
 // Converts tiles of level to list of segments on which ray light can hit.
-segment_t* TILE_calculate_ray_obstacles(tiles_list_t* tiles)
-{
-    segment_t * segments = NULL;
-    tiles_list_t * ptr = NULL;
+obstacle_t* TILE_calculate_ray_obstacles(tiles_list_t* tiles) {
+    obstacle_t* obstacles = NULL;
+    tiles_list_t* ptr = NULL;
     ptr = tiles;
 
-    while (ptr)
-    {
-        SEG_push(&segments, ptr->tile->x1, ptr->tile->y1, ptr->tile->x1, ptr->tile->y2);
-        SEG_push(&segments, ptr->tile->x1, ptr->tile->y2, ptr->tile->x2, ptr->tile->y2);
-        SEG_push(&segments, ptr->tile->x2, ptr->tile->y2, ptr->tile->x2, ptr->tile->y1);
-        SEG_push(&segments, ptr->tile->x2, ptr->tile->y1, ptr->tile->x1, ptr->tile->y1);
+    while (ptr) {
+        OBS_push(&obstacles, ptr->tile->x1, ptr->tile->y1, ptr->tile->x1, ptr->tile->y2);
+        OBS_push(&obstacles, ptr->tile->x1, ptr->tile->y2, ptr->tile->x2, ptr->tile->y2);
+        OBS_push(&obstacles, ptr->tile->x2, ptr->tile->y2, ptr->tile->x2, ptr->tile->y1);
+        OBS_push(&obstacles, ptr->tile->x2, ptr->tile->y1, ptr->tile->x1, ptr->tile->y1);
 
         ptr=ptr->next;
     }
-    return segments;
+    return obstacles;
 }
 
 void TILE_free(tiles_list_t* list) 

@@ -63,12 +63,11 @@ int main(int argc, char* args[]) {
     EVNT_init();
     TIMER_start(game->fps_timer);
 
-    while(game->loop) 
-    {
+    while(game->loop) {
         TIMER_start(game->cap_timer);
         EVNT_handle_events(game);
         GFX_clear_screen();
-        TXTR_render_texture(bg, NULL, 10, 10, 0);
+        // TXTR_render_texture(bg, NULL, 10, 10, 0);
         LIG_draw_light_effect(
             HERO_light_x(game->hero),
             HERO_light_y(game->hero),
