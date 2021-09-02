@@ -6,7 +6,6 @@ float GEO_sign (
     int x2, int y2,
     int x3, int y3
 )
-
 {
     return (x1 - x3) * (y2- y3) - (x2 - x3) * (y1 - y3);
 }

@@ -15,7 +15,7 @@ TARGET =                \
 	src/geometry.c      \
 	src/intersection.c  \
 	src/light.c         \
-	src/lightpt.c       \
+	src/vertex.c        \
 	src/obstacle.c      \
 
 all:
