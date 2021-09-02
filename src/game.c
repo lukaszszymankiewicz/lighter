@@ -68,13 +68,13 @@ int main(int argc, char* args[]) {
         EVNT_handle_events(game);
         GFX_clear_screen();
         // TXTR_render_texture(bg, NULL, 10, 10, 0);
+        LVL_draw(game->tiles);
         LIG_draw_light_effect(
             HERO_light_x(game->hero),
             HERO_light_y(game->hero),
             game->light,
             TILE_calculate_ray_obstacles(game->tiles)
         );
-        LVL_draw(game->tiles);
         HERO_draw(game->hero);
         HERO_update(game->hero);
         GFX_update();
