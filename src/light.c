@@ -268,8 +268,8 @@ lightpoint_t* LIG_calc_light_polygon(int x, int y, float angle, float width, obs
         // If light source has any width "border" there are two rays which is closing light polygon.
         // Below code calculates such border rays.
         // If this value is 0 light is casted on whole radius, and such border rays is not needed
-        ray_t ray_a = (ray_t){x, y, (int)(x - sin(angle - width) * R), (int)(y - cos(angle - width) * R)};
-        ray_t ray_b = (ray_t){x, y, (int)(x - sin(angle + width) * R), (int)(y - cos(angle + width) * R)};
+        ray_t ray_a = (ray_t){x, y, x - sin(angle - width) * R, y - cos(angle - width) * R};
+        ray_t ray_b = (ray_t){x, y, x - sin(angle + width) * R, y - cos(angle + width) * R};
 
         // we need to filter those level obstacles for which we will cast rays - points which is
         // inside triangle made from two border rays and player position is taken.
@@ -297,13 +297,8 @@ lightpoint_t* LIG_calc_light_polygon(int x, int y, float angle, float width, obs
     // if light width=0 (full radius), all obstacles are taken. No other calculations is needed
     else { filtered_obstacles = obstacles; }
 
-    for (lightpoint_t* ptr = light_pts; ptr; ptr=ptr->next) {
-        printf("%i, %i \n", ptr->x, ptr->y);
-    }
-    printf("\n");
     // for each of obstacle corner three rays is casted
     for(obstacle_t* s=filtered_obstacles; s; s=s->next) {
-        break;
         angle = LIGPT_calculate_angle(x, y, s->x1, s->y1);
 
         ray_t main_ray = (ray_t){x, y, s->x1, s->y1};
@@ -311,20 +306,20 @@ lightpoint_t* LIG_calc_light_polygon(int x, int y, float angle, float width, obs
         ray_t aux_ray2 = (ray_t){x, y, x - sin(angle - smol_angle) * R, y - cos(angle - smol_angle) * R};
 
         LIG_find_closest_intersection_with_wall(&main_ray, obstacles);
-        // LIGPT_insert(&light_pts, main_ray.x2, main_ray.y2, angle);
+        LIGPT_insert(&light_pts, main_ray.x2, main_ray.y2, angle);
 
-        // LIG_find_closest_intersection_with_wall(&aux_ray1, obstacles);
-        // LIGPT_insert(&light_pts, aux_ray1.x2, aux_ray1.y2, angle + smol_angle);
+        LIG_find_closest_intersection_with_wall(&aux_ray1, obstacles);
+        LIGPT_insert(&light_pts, aux_ray1.x2, aux_ray1.y2, angle + smol_angle);
 
-        // LIG_find_closest_intersection_with_wall(&aux_ray2, obstacles);
-        // LIGPT_insert(&light_pts, aux_ray2.x2, aux_ray2.y2, angle - smol_angle);
+        LIG_find_closest_intersection_with_wall(&aux_ray2, obstacles);
+        LIGPT_insert(&light_pts, aux_ray2.x2, aux_ray2.y2, angle - smol_angle);
     }
 
     // polygon point optimization process (deleting redundant points)
     LIGPT_optim(light_pts);
 
-    if (DEBUG){LIG_debug_rays(light_pts, x, y, 200);}
-     // if (DEBUG){LIG_debug_dark_sectors(light_pts);}
+    // if (DEBUG){LIG_debug_rays(light_pts, x, y, 200);}
+    // if (DEBUG){LIG_debug_dark_sectors(light_pts);}
 
     return light_pts;
 };
@@ -362,7 +357,7 @@ void LIG_draw_light_effect(int x, int y, light_t* lght, obstacle_t* obstacles) {
         light_polygon = LIG_calc_light_polygon(x+x_corr, y+y_corr, lght->angle, lght->src->width, obstacles);
 
         // drawing the light
-        // LIG_fill_lightpoly(light_polygon, color);
+        LIG_fill_lightpoly(light_polygon, color);
     }
     OBS_free(obstacles);
 };

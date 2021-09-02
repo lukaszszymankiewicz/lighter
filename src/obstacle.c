@@ -12,7 +12,7 @@ obstacle_t * OBS_init(
     new_obstacle = (obstacle_t *)malloc(sizeof(obstacle_t *));
 
     new_obstacle->x1 = x1;
-    new_obstacle->y1 = y2;
+    new_obstacle->y1 = y1;
     new_obstacle->x2 = x2;
     new_obstacle->y2 = y2;
 
