@@ -109,8 +109,10 @@ void LIG_debug_dark_sectors(lightpoint_t* light_poly) {
 // checks if ray intersects with any obstacle. If so ray is shorten to the point of intersection.
 int LIG_obstacle_intersects_with_ray
 (
-    obstacle_t* obstacle,
-    ray_t* ray       
+    obstacle_t* obstacle,    // first
+    ray_t* ray               // second
+    int* inter_x,
+    int* inter_y
 )
 {
     float s_numer, t_numer, denom, t;
@@ -304,14 +306,14 @@ lightpoint_t* LIG_calc_light_polygon(int x, int y, float angle, float width, obs
         ray_t aux_ray1 = (ray_t){x, y, x - sin(angle + smol_angle) * R, y - cos(angle + smol_angle) * R};
         ray_t aux_ray2 = (ray_t){x, y, x - sin(angle - smol_angle) * R, y - cos(angle - smol_angle) * R};
 
-        LIG_find_closest_intersection_with_wall(&main_ray, obstacles);
+        LIG_find_closest_intersection_with_wall(&main_ray, filtered_obstacles);
         LIGPT_insert(&light_pts, main_ray.x2, main_ray.y2, angle);
 
-        LIG_find_closest_intersection_with_wall(&aux_ray1, obstacles);
-        LIGPT_insert(&light_pts, aux_ray1.x2, aux_ray1.y2, angle + smol_angle);
+        // LIG_find_closest_intersection_with_wall(&aux_ray1, obstacles);
+        // LIGPT_insert(&light_pts, aux_ray1.x2, aux_ray1.y2, angle + smol_angle);
 
-        LIG_find_closest_intersection_with_wall(&aux_ray2, obstacles);
-        LIGPT_insert(&light_pts, aux_ray2.x2, aux_ray2.y2, angle - smol_angle);
+        // LIG_find_closest_intersection_with_wall(&aux_ray2, obstacles);
+        // LIGPT_insert(&light_pts, aux_ray2.x2, aux_ray2.y2, angle - smol_angle);
     }
 
     // polygon point optimization process (deleting redundant points)
