@@ -1,4 +1,5 @@
  BORING THINGS:
+ - [ ] refactor Makefile
  - [ ] refactor ray collision (some of function could easly use integers, rather than float),
  - [ ] scale graphics to full screen - because perfect pixel-for-pixel graphics is important in
    this, project, unfortunatly not all resolutions will looks good. Some function to determine input

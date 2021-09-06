@@ -12,9 +12,11 @@
 
 #define R 1200
 #define smol_angle 0.01
+#define empty_hit 69
 
 static int wobble_dir = 1;
 static float wobble = 0;
+static int n_width_rays = 3;
 
 float lightpos_up_down_corr[2][5] = 
 {
@@ -57,10 +59,44 @@ lightsource_t lighter =
     }
 };
 
+
+float sin_angle_corr(float angle, int radius){
+    return sin(angle) * R;
+};
+
+float cos_angle_corr(float angle, int radius){
+    return cos(angle) * R;
+};
+
+float no_corr(float angle, int radius){
+    return 0.0;
+};
+
+float(*width_corr_fun[3][2])(float, int) = {
+    {sin_angle_corr, cos_angle_corr},
+    {sin_angle_corr, cos_angle_corr},
+    {no_corr,        no_corr       }
+};
+
+int width_corrs[3][2] = {
+    { -1, -1 },
+    {  1,  1 },
+    {  1,  0 }
+};
+
+float LIG_calc_angle_corr(float angle, float width, int n_ray, int axis) {
+    int width_corr = width_corrs[n_ray][0];
+    int rad_corr = width_corrs[n_ray][1];
+
+    float corrected_angle = angle + (width_corr * width);
+    float corrected_radius = R * rad_corr;
+
+    return width_corr_fun[n_ray][axis](corrected_angle, corrected_radius);
+}
+
 lightsource_t* lightsources[] = {&lighter, &lantern};
 
-light_t * LIG_init()
-{
+light_t * LIG_init() {
     light_t* light_o = (light_t*)malloc(sizeof(light_t));
 
     light_o->src_num = LANTERN;
@@ -79,7 +115,7 @@ float LIG_wobble_angle(light_t* lght, int frame) {
 
     wobble += lght->src->wobble_corr * wobble_dir;
 
-    return 0;
+    return wobble;
 }
 
 void LIG_move_lightsource(light_t* light_o, direction_t light_dir, direction_t hero_dir, int frame) {
@@ -107,7 +143,7 @@ void LIG_debug_dark_sectors(vertex_t* light_poly) {
 }
 
 // checks if ray intersects with any obstacle. If so ray is shorten to the point of intersection.
-int LIG_obstacle_intersects_with_ray
+void LIG_obstacle_intersects_with_ray
 (
     obstacle_t* obstacle,    // first
     ray_t* ray               // second
@@ -127,7 +163,7 @@ int LIG_obstacle_intersects_with_ray
     denom = dx21 * dy43 - dx43 * dy21;
 
     if (denom == 0)
-        return 0; // collinear
+        return; // collinear
 
     bool denomPositive = denom > 0;
 
@@ -136,14 +172,14 @@ int LIG_obstacle_intersects_with_ray
 
     s_numer = dx21 * dy13 - dy21 * dx13;
     if ((s_numer < 0) == denomPositive)
-        return 0; // no collision
+        return; // no collision
 
     t_numer = dx43 * dy13 - dy43 * dx13;
     if ((t_numer < 0) == denomPositive)
-        return 0; // no collision
+        return; // no collision
 
     if (((s_numer >= denom) == denomPositive) || ((t_numer >= denom) == denomPositive))
-        return 0; // no collision
+        return; // no collision
 
     // collision detected
     t = t_numer / denom;
@@ -158,8 +194,6 @@ int LIG_obstacle_intersects_with_ray
         ray->x2 = new_x;
         ray->y2 = new_y;
     }
-
-    return 1;
 }
 
 // Function checks for any of the possible interseciton between single ray and set of segments
@@ -176,87 +210,32 @@ void LIG_find_closest_intersection_with_wall(
     }
 }
 
-// Fills screen with light and dark lines. Inside of the light polygon is filled with bright lines
-// (with high alpha channel value) and the rest (outside of the light polygon) is filled with dark
-// lines (with very low alpha channel value). Function assumes that points of light polygon are
-// sorted in ascending order. To sort point value of an angle which given point make with player
-// position is used.
-void LIG_fill_lightpoly(vertex_t* pts, int clr)
-{
-    float x_inter;
-
-    // Scan every y for seach of colision with light polygon.
-    for (int scan_y=0; scan_y<SCREEN_HEIGHT; scan_y++) 
-    {
-        int n=0;                                  // number of intersection on given scanline
-        x_intersection_t* intersections = NULL;   // x-intersections on scanline with polygon stored here
-        vertex_t* ptr = pts;                 
-        int first_x = ptr->x;                     // will be used for last segment intersection check
-        int first_y = ptr->y;                     // will be used for last segment intersection check
-        int last_x_intersection = 0;              // will be used later
-
-        for(; ptr->next; ptr=ptr->next)
-        {
-            if (GEO_if_seg_intersect_with_y(scan_y, ptr->y, ptr->next->y))
-            {
-                x_inter = GEO_seg_intersection_with_y(scan_y, ptr->x, ptr->y, ptr->next->x, ptr->next->y);
-                INTSC_insert(&intersections, x_inter);
-                n++;
-            }
-        }
-
-        // last segment
-        if (GEO_if_seg_intersect_with_y(scan_y, ptr->y, first_y)) {
-            x_inter = GEO_seg_intersection_with_y(scan_y, ptr->x, ptr->y, first_x, first_y);
-            INTSC_insert(&intersections, x_inter);
-            n++;
-        }
-
-        // if no intersection found this scanline should be all black 
-        if (n==0) 
-        { GFX_draw_colored_line(0, scan_y, SCREEN_WIDTH, scan_y, 0, 0, 0, 100); continue;}
-
-        // dark segment from left side of screen to first intersection with scanline
-        if (intersections->x > 1)
-        { GFX_draw_colored_line(0, scan_y, intersections->x, scan_y, 0, 0, 0, 100);}
-
-        // dark segment from right side of screen to last intersection with scanline
-        last_x_intersection = INTSC_get_last(intersections);
-        if (last_x_intersection < SCREEN_WIDTH-1) 
-        { GFX_draw_colored_line(last_x_intersection, scan_y, SCREEN_WIDTH, scan_y, 0, 0, 0, 100); }
-
-        // rest of the lines (light and dark sectors)
-        if (n>2)
-        {
-            for (int z=1; z<n-1; z+=2)
-            {
-                GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 169, 169, 169, clr); 
-                intersections=intersections->next;
-
-                GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 0, 0, 0, 100); 
-                intersections=intersections->next;
-            }
-        }
-
-        // last of the dark sector from intesection points
-        GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 169, 169, 169, clr); 
-
-        INTSC_free(intersections);
-    }
-}
-
 // we need to filter those level obstacles for which we will cast rays - points which is
 // inside triangle made from two border rays and player position is taken.
-obstacle_t* LIG_get_visible_obstacles(obstacle_t* obstacles, ray_t ray_a, ray_t ray_b, int x, int y){
+obstacle_t* LIG_get_visible_obstacles(
+    obstacle_t* obstacles,
+    int x, int y,
+    float angle, float width 
+){
     obstacle_t* filtered_obstacles = NULL;
 
     for(obstacle_t* s=obstacles; s; s=s->next) {
-        if (GEO_pt_in_triangle(s->x1, s->y1, x, y, ray_a.x2, ray_a.y2, ray_b.x2, ray_b.y2)) {
+        if (GEO_pt_in_triangle(
+                s->x1, s->y1,
+                x, y,
+                x - LIG_calc_angle_corr(angle, width, 0, X), y - LIG_calc_angle_corr(angle, width, 0, Y),
+                x - LIG_calc_angle_corr(angle, width, 1, X), y - LIG_calc_angle_corr(angle, width, 1, Y)
+            )) {
             OBS_push(&filtered_obstacles, s->x1, s->y1, s->x2, s->y2);
         }
     }
 
     return filtered_obstacles;
+}
+
+void LIG_find_light_vertex_from_ray(obstacle_t* obstacles, ray_t ray, vertex_t** light_polygon){
+    LIG_find_closest_intersection_with_wall(&ray, obstacles);
+    VRTX_insert(light_polygon, &ray);
 }
 
 // Light sweeps ray all around (full circles). Some of the lightsources cuts this circle leaving
@@ -274,68 +253,51 @@ obstacle_t* LIG_get_visible_obstacles(obstacle_t* obstacles, ray_t ray_a, ray_t 
 // each other all middle points can be ommited, we do this before drawing to save some computing
 // power. 
 vertex_t* LIG_calc_light_polygon(int x, int y, float angle, float width, obstacle_t* obstacles) { 
+    int ray_i;
+    float x_corr, y_corr;
+
     obstacle_t* filtered_obstacles = NULL;
-    vertex_t* light_pts = NULL;
+    vertex_t* light_polygon = NULL;
 
     if (width) {
-        // If light source has any width "border" there are two rays which is closing light polygon.
-        // Below code calculates such border rays.
-        // If this value is 0 light is casted on whole radius, and such border rays is not needed
-        ray_t ray_a = (ray_t){x, y, x - sin(angle - width) * R, y - cos(angle - width) * R};
-        ray_t ray_b = (ray_t){x, y, x - sin(angle + width) * R, y - cos(angle + width) * R};
-
-        // we need to filter those level obstacles for which we will cast rays - points which is
-        // inside triangle made from two border rays and player position is taken.
-        for(obstacle_t* s=obstacles; s; s=s->next) {
-            if (GEO_pt_in_triangle(s->x1, s->y1, x, y, ray_a.x2, ray_a.y2, ray_b.x2, ray_b.y2)) {
-                OBS_push(&filtered_obstacles, s->x1, s->y1, s->x2, s->y2);
-            }
-        }
+        filtered_obstacles = LIG_get_visible_obstacles(obstacles, x, y, angle, width);
 
         // check if border rays hit any obstacle - such intersection points will be added as light
-        // poly cone
-        LIG_find_closest_intersection_with_wall(&ray_a, obstacles);
-        angle = LIGPT_calculate_angle(x, y, ray_a.x2, ray_a.y2);
-        VRTX_insert(&light_pts, &ray_a);
+        // poly vertex
+        for (ray_i=0; ray_i<n_width_rays; ray_i++) {
+            x_corr = LIG_calc_angle_corr(angle, width, ray_i, X);
+            y_corr = LIG_calc_angle_corr(angle, width, ray_i, Y);
 
-        LIG_find_closest_intersection_with_wall(&ray_b, obstacles);
-        angle = LIGPT_calculate_angle(x, y, ray_b.x2, ray_b.y2);
-        VRTX_insert(&light_pts, &ray_b);
+            ray_t ray = (ray_t){x, y, x-x_corr, y-y_corr};
 
-        ray_t dummy_ray = (ray_t){x, y, x, y};
-
-        // light polygon must have player positions as one of the conde
-        VRTX_insert(&light_pts, &dummy_ray);
+            LIG_find_light_vertex_from_ray(obstacles, ray, &light_polygon);
+        }
     }
 
-    // if light width=0 (full radius), all obstacles are taken. No other calculations is needed
     else { filtered_obstacles = obstacles; }
 
     // for each of obstacle corner three rays is casted
     for(obstacle_t* s=filtered_obstacles; s; s=s->next) {
-        angle = VRTX_calculate_angle(x, y, s->x1, s->y1);
+        angle = GEO_calculate_angle(x, y, s->x1, s->y1);
 
-        ray_t main_ray = (ray_t){x, y, s->x1, s->y1};
-        ray_t aux_ray1 = (ray_t){x, y, x - sin(angle + smol_angle) * R, y - cos(angle + smol_angle) * R};
-        ray_t aux_ray2 = (ray_t){x, y, x - sin(angle - smol_angle) * R, y - cos(angle - smol_angle) * R};
+        for (ray_i=0; ray_i<n_width_rays; ray_i++) {
+            x_corr = LIG_calc_angle_corr(angle, smol_angle, ray_i, X);
+            y_corr = LIG_calc_angle_corr(angle, smol_angle, ray_i, Y);
 
-        LIG_find_closest_intersection_with_wall(&main_ray, obstacles);
-        VRTX_insert(&light_pts, &main_ray);
+            ray_t ray = (ray_t){x, y, s->x1-x_corr, s->y1-y_corr};
 
-        LIG_find_closest_intersection_with_wall(&aux_ray1, obstacles);
-        VRTX_insert(&light_pts, &aux_ray1);
-
-        LIG_find_closest_intersection_with_wall(&aux_ray2, obstacles);
-        VRTX_insert(&light_pts, &aux_ray2);
+            LIG_find_light_vertex_from_ray(obstacles, ray, &light_polygon);
+        }
     }
 
     // polygon point optimization process (deleting redundant points)
-    VRTX_optim(light_pts);
+    VRTX_optim(light_polygon);
+    VRTX_complete_vertex(light_polygon);
 
-    // if (DEBUG){LIG_debug_rays(light_pts, x, y, 200);}
-    // if (DEBUG){LIG_debug_dark_sectors(light_pts);}
+    // if (DEBUG){LIG_debug_rays(light_polygon, x, y, 200);}
+    // if (DEBUG){LIG_debug_dark_sectors(light_polygon);}
 
-    return light_pts;
+    return light_polygon;
 };
 
 void LIG_change_source(light_t* lght) {
@@ -371,7 +333,7 @@ void LIG_draw_light_effect(int x, int y, light_t* lght, obstacle_t* obstacles) {
         light_polygon = LIG_calc_light_polygon(x+x_corr, y+y_corr, lght->angle, lght->src->width, obstacles);
 
         // drawing the light
-        // LIG_fill_lightpoly(light_polygon, color);
+        GFX_fill_lightpoly(light_polygon, color);
     }
     OBS_free(obstacles);
 };

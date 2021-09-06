@@ -1,5 +1,9 @@
 #include "def.h"
 
+float GEO_calculate_angle(int ax, int ay, int bx, int by) {
+    return atan2(ax - bx, ay - by);
+}
+
 // aux for GEO_pt_in_triangle function.
 float GEO_sign (
     int x1, int y1,
@@ -41,6 +45,18 @@ float GEO_seg_intersection_with_y
 )
 {
     return x1 + (x2 - x1) * (y - y1) / (y2 - y1);
+}
+
+// Checks where y-line intersect with given segment. As y coord of such point is known from the
+// begginig - function only return x-coord of such intersection point.
+float GEO_calc_intersection_with_slope
+(
+    int y,                   // y-line coord
+    int x1,      int y1,     // segment begginig
+    float slope
+)
+{
+    return x1 + (y - y1) * slope;
 }
 
 // Checks if y-line intersects with given segment. Please note that to do that only y-coord of

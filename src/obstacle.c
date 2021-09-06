@@ -2,14 +2,14 @@
 #include "obstacle.h"
 
 
-obstacle_t * OBS_init(
+obstacle_t* OBS_init(
     int x1, int y1,
     int x2, int y2
 )
 {
     obstacle_t * new_obstacle = NULL;
 
-    new_obstacle = (obstacle_t *)malloc(sizeof(obstacle_t *));
+    new_obstacle = (obstacle_t *)malloc(sizeof(obstacle_t));
 
     new_obstacle->x1 = x1;
     new_obstacle->y1 = y1;
@@ -28,9 +28,9 @@ void OBS_push(
     int x2, int y2
 )
 {
-    obstacle_t * new_obstacle = NULL;
-
+    obstacle_t* new_obstacle = NULL;
     new_obstacle = OBS_init(x1, y1, x2, y2);
+    
     new_obstacle->next = *head;
     *head = new_obstacle;
 }

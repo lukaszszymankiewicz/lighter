@@ -50,6 +50,7 @@ void TILE_push(
 obstacle_t* TILE_calculate_ray_obstacles(tiles_list_t* tiles) {
     obstacle_t* obstacles = NULL;
     tiles_list_t* ptr = NULL;
+
     ptr = tiles;
 
     while (ptr) {
