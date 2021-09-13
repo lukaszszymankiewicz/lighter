@@ -115,7 +115,8 @@ float LIG_wobble_angle(light_t* lght, int frame) {
 
     wobble += lght->src->wobble_corr * wobble_dir;
 
-    return wobble;
+    // return wobble;
+    return 0;
 }
 
 void LIG_move_lightsource(light_t* light_o, direction_t light_dir, direction_t hero_dir, int frame) {
