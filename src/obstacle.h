@@ -6,5 +6,9 @@
 obstacle_t* OBS_init(int x1, int y1, int x2, int y2);
 void OBS_push(obstacle_t** head, int x1, int y1, int x2, int y2);
 void OBS_free(obstacle_t* obstacles);
+obstacle_t* VRTX_get_obstacles_from_polygon(vertex_t* poly);
+void OBS_delete(obstacle_t** head, int y);
+obstacle_t* OBS_find_candidates(obstacle_t** head, int y);
+void OBS_merge(obstacle_t** head, obstacle_t* candidates);
 
 #endif

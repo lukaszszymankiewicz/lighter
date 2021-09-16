@@ -334,7 +334,7 @@ void LIG_draw_light_effect(int x, int y, light_t* lght, obstacle_t* obstacles) {
         light_polygon = LIG_calc_light_polygon(x+x_corr, y+y_corr, lght->angle, lght->src->width, obstacles);
 
         // drawing the light
-        GFX_fill_lightpoly(light_polygon, color);
+        GFX_draw_polygon(light_polygon, color);
     }
     OBS_free(obstacles);
 };

@@ -20,5 +20,6 @@ void GFX_update();
 void GFX_draw_colored_line(float x1, float y1, float x2, float y2, int r, int g, int b, int a);
 void GFX_fill_triangle(int x1, int y1, int x2, int y2, int x3, int y3, int r, int g, int b, int a);
 void GFX_fill_lightpoly(vertex_t* vertices, int clr);
+void GFX_draw_polygon(vertex_t* poly, int clr);
 
 #endif

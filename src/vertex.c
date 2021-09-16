@@ -16,7 +16,6 @@ vertex_t* VRTX_new(
     new_vertex->x = x;
     new_vertex->y = y;
     new_vertex->angle = GEO_calculate_angle(start_x, start_y, x, y);
-    new_vertex->slope = -1;      // -1 means slope is not calculated
 
     new_vertex->next = NULL;
     new_vertex->prev = NULL;

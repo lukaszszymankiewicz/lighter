@@ -18,11 +18,16 @@ TARGET =                \
 	src/vertex.c        \
 	src/obstacle.c      \
 
+SAMPLETARGET = sample.c
+
 all:
 	$(TARGET)
 
 lighter: 
 	$(CC) $(CFLAGS) $(TARGET) -o $(OBJ) $(LINKS) $(LIBS)
+
+temp: 
+	$(CC) $(CFLAGS) $(SAMPLETARGET) -o temp $(LINKS) $(LIBS)
 
 clean:
 	$(RM) $(OBJ)

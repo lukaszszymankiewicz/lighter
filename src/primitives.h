@@ -5,6 +5,7 @@
 typedef struct obstacle {
     int x1; int y1;            // first point
     int x2; int y2;            // second point
+    float slope;               // slope coeficient
     struct obstacle* next;     // next obstacle
 } obstacle_t;
 
@@ -21,5 +22,12 @@ typedef struct vertex {
     struct vertex* next;  // next vertex
     struct vertex* prev;  // prev vertex
 } vertex_t;
+
+typedef struct light_obstacle {
+    int x1; int y1;
+    int x2; int y2;
+    float slope;
+    struct light_obstacle* next;
+} light_obstacle_t;
 
 #endif
