@@ -136,36 +136,39 @@ void GFX_draw_scanline(obstacle_t* lines, int y, int clr){
             ptr=ptr->next;
         }
 
-        if (n==1){
-            // sigh, i dont know what to do :C
+        // if no intersection found this scanline should be all black 
+        if (n==0) {
+            // GFX_draw_colored_line(0, y, SCREEN_WIDTH, y, 0, 0, 0, 100);
             return;
         }
 
         // dark segment from left side of screen to first intersection with scanline
         if (points->x > 1) {
-            // GFX_draw_colored_line(0, scan_y, intersections->x, scan_y, 0, 0, 0, 100);
+            // GFX_draw_colored_line(0, y, points->x, y, 0, 0, 0, 100);
         }
 
         // dark segment from right side of screen to last intersection with scanline
         last_intersection = INTSC_get_last(points);
-        if (last_intersection < SCREEN_WIDTH-1) { 
-            // GFX_draw_colored_line(last_x_intersection, scan_y, SCREEN_WIDTH, scan_y, 0, 0, 0, 100); 
+
+        if (last_intersection < SCREEN_WIDTH-1) {
+            // GFX_draw_colored_line(last_intersection, y, SCREEN_WIDTH, y, 0, 0, 0, 100);
         }
 
         // rest of the lines (light and dark sectors)
-        if (n>2) {
-            for (int z=1; z<n-1; z+=2) {
-                GFX_draw_colored_line(points->x, y, points->next->x, y, 255, 255, 255, 200); 
+        if (n>2)
+        {
+            for (int z=1; z<n-1; z+=2)
+            {
+                GFX_draw_colored_line(points->x, y, points->next->x, y, 169, 169, 169, clr); 
                 points=points->next;
 
-                // GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 0, 0, 0, 100); 
+                // GFX_draw_colored_line(points->x, y, points->next->x, y, 0, 0, 0, 255); 
                 points=points->next;
             }
-            // last of the dark sector from intesection points
-            // GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 169, 169, 169, clr); 
         }
 
-        INTSC_free(points);
+        // last of the dark sector from intesection points
+        // GFX_draw_colored_line(points->x, y, points->next->x, y, 169, 169, 169, clr); 
     }
 }
 
@@ -174,6 +177,12 @@ void GFX_draw_polygon(vertex_t* poly, int clr){
     obstacle_t* current_draw = NULL;
     obstacle_t* obstacle_ptr = NULL;
     obstacle_t* candidates = NULL;
+    
+    printf("vertices: \n");
+
+    for (vertex_t* ptr = poly; ptr; ptr=ptr->next){
+        printf("(%i, %i) \n", ptr->x, ptr->y);
+    }
 
     for (int y=0; y<SCREEN_HEIGHT; y++){
 
@@ -199,117 +208,3 @@ void GFX_draw_polygon(vertex_t* poly, int clr){
     }
 }
 
-// Fills screen with light and dark lines. Inside of the light polygon is filled with bright lines
-// (with high alpha channel value) and the rest (outside of the light polygon) is filled with dark
-// lines (with very low alpha channel value). Function assumes that points of light polygon are
-// sorted in ascending order. To sort point value of an angle which given point make with player
-// position is used.
-void GFX_fill_lightpoly(vertex_t* vertices, int clr) {
-    int scan_y=0;
-    int n;
-    int last_x_intersection;
-    float x_inter;
-
-    vertex_t* current_vertices = NULL;
-    vertex_t* ptr = NULL;
-    vertex_t* waiting_vertices = NULL;
-    x_intersection_t* intersections;
-
-    // we start with all vertices waiting to be drawn
-    waiting_vertices = vertices;
-
-    // Scan every y for seach of colision with light polygon.
-    for (scan_y=0; scan_y<SCREEN_HEIGHT; scan_y++) {
-        intersections=NULL;   // clean the intersections
-        n=0;                  // number of itersection
-
-        // delete old vertices
-        ptr = current_vertices;
-        while(ptr && ptr->next) {
-            if (ptr->y < scan_y && ptr->next->y < scan_y){
-                if (!(ptr->prev)) {
-                    ptr->next->prev = NULL;
-                }
-                else {
-                    ptr->prev->next = ptr->next;
-                    ptr->next->prev = ptr->prev;
-                }
-                free(ptr);
-            }
-            ptr=ptr->next;
-        }
-
-        // add new vertices to draw
-        ptr = waiting_vertices;
-        while(ptr && ptr->next) {
-            if (ptr->y == scan_y || ptr->next->y == scan_y) {
-                VRTX_push(&current_vertices, ptr);
-
-                if (!(ptr->prev)) {
-                    ptr->next->prev = NULL;
-                }
-                else if (!(ptr->next)) {
-                    ptr->prev->next = ptr->next;
-                }
-                else {
-                    ptr->prev->next = ptr->next;
-                    ptr->next->prev = ptr->prev;
-                }
-                free(ptr);
-
-            }
-            ptr=ptr->next;
-        }
-
-        if (!current_vertices){
-            if (!waiting_vertices){
-                GFX_draw_colored_line(0, scan_y, SCREEN_WIDTH, scan_y, 0, 0, 0, 100);
-                break;
-            }
-            else {
-                continue;
-            }
-        }
-
-        // now we got the current_vertices which colision are now calculated
-        ptr = current_vertices;
-
-        while(ptr) {
-            x_inter = ptr->x + (scan_y - ptr->y) * ptr->slope;
-            INTSC_insert(&intersections, x_inter);
-            n++;
-            ptr=ptr->next;
-        }
-
-        if (n==1){
-            continue;
-        }
-
-        // dark segment from left side of screen to first intersection with scanline
-        if (intersections->x > 1) {
-            GFX_draw_colored_line(0, scan_y, intersections->x, scan_y, 0, 0, 0, 100);
-        }
-
-        // dark segment from right side of screen to last intersection with scanline
-        last_x_intersection = INTSC_get_last(intersections);
-        if (last_x_intersection < SCREEN_WIDTH-1) { 
-            GFX_draw_colored_line(last_x_intersection, scan_y, SCREEN_WIDTH, scan_y, 0, 0, 0, 100); 
-        }
-
-        // rest of the lines (light and dark sectors)
-        if (n>2) {
-            for (int z=1; z<n-1; z+=2) {
-                GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 255, 255, 255, 200); 
-                intersections=intersections->next;
-
-                GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 0, 0, 0, 100); 
-                intersections=intersections->next;
-            }
-            // last of the dark sector from intesection points
-            GFX_draw_colored_line(intersections->x, scan_y, intersections->next->x, scan_y, 169, 169, 169, clr); 
-        }
-
-
-        INTSC_free(intersections);
-    }
-}

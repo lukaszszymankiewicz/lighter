@@ -296,7 +296,7 @@ vertex_t* LIG_calc_light_polygon(int x, int y, float angle, float width, obstacl
     VRTX_complete_vertex(light_polygon);
 
     // if (DEBUG){LIG_debug_rays(light_polygon, x, y, 200);}
-    // if (DEBUG){LIG_debug_dark_sectors(light_polygon);}
+    if (DEBUG){LIG_debug_dark_sectors(light_polygon);}
 
     return light_polygon;
 };
