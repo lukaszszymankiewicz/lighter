@@ -110,8 +110,7 @@ float LIG_wobble_angle(light_t* lght, int frame) {
 
     wobble += lght->src->wobble_corr * wobble_dir;
 
-    // return wobble;
-    return 0;
+    return wobble;
 }
 
 void LIG_move_lightsource(light_t* light_o, direction_t light_dir, direction_t hero_dir, int frame) {
@@ -308,10 +307,10 @@ int LIG_get_light_polygon_corr(light_t* lght, int i, int axis){
     return lght->src->polys[i][axis];
 }
 
-// calculates and draws light polygons. Every of the light source needs several polygons to be drawn
+// Calculates and draws light polygons. Every of the light source needs several polygons to be drawn
 // - every one of them is slightly moved to another which makes light looks more "natural".
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
-// looking like "gradient". Number of the polygons and shift coords are defined by its lightsource.
+// looking like "gradient".
 void LIG_draw_light_effect(int x, int y, light_t* lght, obstacle_t* obstacles) {
     int i=0;            // index of current light polygon drawn
     int red;            // color of current light polygon drawn
@@ -331,7 +330,7 @@ void LIG_draw_light_effect(int x, int y, light_t* lght, obstacle_t* obstacles) {
         x_corr = LIG_get_light_polygon_corr(lght, i, X);
         y_corr = LIG_get_light_polygon_corr(lght, i, Y);
 
-        // calculating the light polygon shape :)
+        // calculating the light polygon shape
         light_polygon = LIG_calc_light_polygon(x+x_corr, y+y_corr, lght->angle, lght->src->width, obstacles);
 
         // drawing the light
