@@ -132,20 +132,15 @@ void GFX_draw_light_sectors_in_scanline(
 ){
     x_intersection_t* ptr = NULL;
 
-    int draw_r = ((r == -1) ? (DEFAULT_LIGHT_R) : (r));
-    int draw_g = ((g == -1) ? (DEFAULT_LIGHT_G) : (g));
-    int draw_b = ((b == -1) ? (DEFAULT_LIGHT_B) : (b));
-    int draw_a = ((a == -1) ? (DEFAULT_LIGHT_A) : (a));
-
     if (n==2) {
-        GFX_draw_colored_line(points->x, y, points->next->x, y, draw_r, draw_g, draw_b, draw_a);
+        GFX_draw_colored_line(points->x, y, points->next->x, y, r, g, b, a);
     }
 
     else if (n>2) {
         ptr = points;
 
         while (ptr->next){
-            GFX_draw_colored_line(ptr->x, y, ptr->next->x, y, draw_r, draw_g, draw_b, draw_a);
+            GFX_draw_colored_line(ptr->x, y, ptr->next->x, y, r, g, b, a);
             ptr=ptr->next;
             if (ptr->next == NULL){break;}
             ptr=ptr->next;
@@ -156,29 +151,26 @@ void GFX_draw_light_sectors_in_scanline(
 void GFX_draw_dark_sectors_in_scanline(
     x_intersection_t  *points,
     int                y,
-    int                n,
-    int                r,
-    int                g,
-    int                b,
-    int                a
+    int                n
 ){
     x_intersection_t* ptr = NULL;
 
     int last_intersection = INTSC_get_last(points);
 
-    int draw_r = ((r == -1) ? (DEFAULT_DARK_R) : (r));
-    int draw_g = ((g == -1) ? (DEFAULT_DARK_G) : (g));
-    int draw_b = ((b == -1) ? (DEFAULT_DARK_B) : (b));
-    int draw_a = ((a == -1) ? (DEFAULT_DARK_A) : (a));
-
     // dark segment from left side of screen to first intersection with scanline
     if (points->x > 1) {
-        GFX_draw_colored_line(0, y, points->x, y, draw_r, draw_g, draw_b, draw_a);
+        GFX_draw_colored_line(
+            0, y, points->x, y,
+            DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A
+        );
     }
 
     // dark segment from right side of screen to last intersection with scanline
     if (last_intersection < SCREEN_WIDTH-1) {
-        GFX_draw_colored_line(last_intersection, y, SCREEN_WIDTH, y, draw_r, draw_g, draw_b, draw_a);
+        GFX_draw_colored_line(
+            last_intersection, y, SCREEN_WIDTH, y,
+            DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A
+        );
     }
 
     // rest of the lines
@@ -186,7 +178,10 @@ void GFX_draw_dark_sectors_in_scanline(
         ptr = points;
 
         while (ptr->next){
-            GFX_draw_colored_line(ptr->x, y, ptr->next->x, y, draw_r, draw_g, draw_b, draw_a);
+            GFX_draw_colored_line(
+                ptr->x, y, ptr->next->x, y,
+                DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A
+            );
             ptr=ptr->next;
         }
     }
@@ -225,7 +220,10 @@ x_intersection_t* GFX_calc_intersections_in_scanline(
 void GFX_draw_scanline(
     obstacle_t    *lines,
     int            y,
-    int            clr
+    int r,
+    int g,
+    int b,
+    int a
 ){
     int n=0;
     x_intersection_t* intersections = NULL;
@@ -233,8 +231,8 @@ void GFX_draw_scanline(
     intersections = GFX_calc_intersections_in_scanline(lines, y, &n);
 
     if (intersections){
-        GFX_draw_dark_sectors_in_scanline(intersections->next, y, n, -1, -1, -1, -1);
-        GFX_draw_light_sectors_in_scanline(intersections, y, n, -1, -1, -1, clr);
+        GFX_draw_dark_sectors_in_scanline(intersections->next, y, n);
+        GFX_draw_light_sectors_in_scanline(intersections, y, n, r, g, b, a);
         INTSC_free(intersections);
     }
 }
@@ -244,9 +242,9 @@ void GFX_draw_scanline(
 // (vertex with lowest y coord value), polygon segments which will be drawn is chosen (and these
 // ones which won`t be needed are discarded), intersection points are calculated and then "dark and
 // "light" sectors are filled.
-void GFX_draw_polygon(
+void GFX_draw_light_polygon(
     vertex_t     *poly,
-    int           clr
+    int r, int g, int b, int a
 ){
     int y                     = VRTX_highest_y(poly);
     obstacle_t* not_drawn_yet = OBS_get_obstacles_from_polygon(poly); 
@@ -255,7 +253,7 @@ void GFX_draw_polygon(
     obstacle_t* candidates    = NULL;
 
     if (y > 0) {
-        GFX_draw_colored_rect(0, 0, SCREEN_WIDTH, y, 20, 20, 20, 100);
+        GFX_draw_colored_rect(0, 0, SCREEN_WIDTH, y, DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A);
     }
 
     while(y<SCREEN_HEIGHT) {
@@ -276,12 +274,11 @@ void GFX_draw_polygon(
         // if there isn`t anything to draw or anything to be drawn in future - stop
         if (!not_drawn_yet && !current_draw){ break; }
 
-        GFX_draw_scanline(current_draw, y, clr);
+        GFX_draw_scanline(current_draw, y, r, g, b, a);
         y++;
     }
 
     // fill the rest with darkness (sounds deep)
-    GFX_draw_colored_rect(0, y, SCREEN_WIDTH, SCREEN_HEIGHT-y, 20, 20, 20, 100);
-
+    GFX_draw_colored_rect(0, y, SCREEN_WIDTH, y, DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A);
 }
 

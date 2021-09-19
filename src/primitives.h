@@ -1,5 +1,5 @@
-#ifndef SEGMENT_H
-#define SEGMENT_H
+#ifndef PRIMITIVES_H
+#define PRIMITIVES_H
 
 // single linked list of obstacle segments
 typedef struct obstacle {

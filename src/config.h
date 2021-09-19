@@ -13,10 +13,11 @@
 #define SCREEN_HEIGHT          200                // screen height in pixels
 #define MAX_KEYS               SDL_NUM_SCANCODES  // SDL max keys supported
 
-#define DEFAULT_DARK_R         20
-#define DEFAULT_DARK_G         20
-#define DEFAULT_DARK_B         20
+#define DEFAULT_DARK_R         0
+#define DEFAULT_DARK_G         0
+#define DEFAULT_DARK_B         0
 #define DEFAULT_DARK_A         100
+
 #define DEFAULT_LIGHT_R        169
 #define DEFAULT_LIGHT_G        169
 #define DEFAULT_LIGHT_B        169

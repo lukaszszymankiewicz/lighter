@@ -1,18 +1,13 @@
+#include "config.h"
 #include "geometry.h"
 #include "gfx.h"
 #include "light.h"
-#include "intersection.h"
 #include "vertex.h"
 #include "sprites.h"
 #include "primitives.h"
 
-// light calculation and rendering implementation. Basically each lightsource creates some light
-// rays which is used to calculate polygon where light can reach. Such polygon is drawn with higher
-// alpha value which creates realisitc effect
-
 #define R 1200
 #define smol_angle 0.01
-#define empty_hit 69
 
 static int wobble_dir = 1;
 static float wobble = 0;
@@ -32,30 +27,30 @@ lightsource_t lantern =
     .wobble_corr = 0.0,
     .wobble_change_dir_coef = 1,
     .polys = {
-        {-10,     -10,       10    },
-        { 10,     -10,       10    },
-        {-10,     -10,       10    },
-        {-10,      10,       10    },
-        {-5,       -5,       30    },
-        { 5,       -5,       30    },
-        {-5,       -5,       30    },
-        {-5,        5,       30    },
-        { 0,        0,       50    },
+        {-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
+        { 10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
+        {-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
+        {-10,  10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
+        {-5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
+        { 5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
+        {-5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
+        {-5 ,   5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
+        { 0 ,   0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50 }
     }
 };
 
 lightsource_t lighter = 
 {
     .width = PI / 7,
-    .n_poly = 2,
+    .n_poly = 5,
     .wobble_corr = 0.001,
     .wobble_change_dir_coef = 30,
     .polys = {
-        {  0,       0,       50    },
-        {  5,       0,       30    },
-        { -5,       0,       30    },
-        {  0,       5,       10    },
-        {  0,      -5,       10    },
+        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50 },
+        {  5,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
+        { -5,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
+        {  0,  5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
+        {  0, -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 }
     }
 };
 
@@ -305,8 +300,8 @@ void LIG_change_source(light_t* lght) {
     lght->src = lightsources[lght->src_num];
 }
 
-int LIG_get_light_polygon_color(light_t* lght, int i){
-    return lght->src->polys[i][COLOR];
+int LIG_get_light_polygon_color(light_t* lght, int i, int color){
+    return lght->src->polys[i][color];
 }
 
 int LIG_get_light_polygon_corr(light_t* lght, int i, int axis){
@@ -319,13 +314,20 @@ int LIG_get_light_polygon_corr(light_t* lght, int i, int axis){
 // looking like "gradient". Number of the polygons and shift coords are defined by its lightsource.
 void LIG_draw_light_effect(int x, int y, light_t* lght, obstacle_t* obstacles) {
     int i=0;            // index of current light polygon drawn
-    int color;          // color of current light polygon drawn
+    int red;            // color of current light polygon drawn
+    int green;          // color of current light polygon drawn
+    int blue;           // color of current light polygon drawn
+    int alpha;          // color of current light polygon drawn
     int x_corr, y_corr; // x and y correction values (light polygon can be shifted from its starting point)
 
     vertex_t* light_polygon = NULL;
 
     for (; i < lght->src->n_poly; i++) {
-        color = LIG_get_light_polygon_color(lght, i);
+        red    = LIG_get_light_polygon_color(lght, i, RED);
+        green  = LIG_get_light_polygon_color(lght, i, GREEN);
+        blue   = LIG_get_light_polygon_color(lght, i, BLUE);
+        alpha  = LIG_get_light_polygon_color(lght, i, ALPHA);
+
         x_corr = LIG_get_light_polygon_corr(lght, i, X);
         y_corr = LIG_get_light_polygon_corr(lght, i, Y);
 
@@ -333,7 +335,7 @@ void LIG_draw_light_effect(int x, int y, light_t* lght, obstacle_t* obstacles) {
         light_polygon = LIG_calc_light_polygon(x+x_corr, y+y_corr, lght->angle, lght->src->width, obstacles);
 
         // drawing the light
-        GFX_draw_polygon(light_polygon, color);
+        GFX_draw_light_polygon(light_polygon, red, green, blue, alpha);
     }
     OBS_free(obstacles);
 };
