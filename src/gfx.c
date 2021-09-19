@@ -231,8 +231,8 @@ void GFX_draw_scanline(
     intersections = GFX_calc_intersections_in_scanline(lines, y, &n);
 
     if (intersections){
-        GFX_draw_dark_sectors_in_scanline(intersections->next, y, n);
         GFX_draw_light_sectors_in_scanline(intersections, y, n, r, g, b, a);
+        GFX_draw_dark_sectors_in_scanline(intersections->next, y, n);
         INTSC_free(intersections);
     }
 }

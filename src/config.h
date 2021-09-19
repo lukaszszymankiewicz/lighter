@@ -16,11 +16,11 @@
 #define DEFAULT_DARK_R         0
 #define DEFAULT_DARK_G         0
 #define DEFAULT_DARK_B         0
-#define DEFAULT_DARK_A         100
+#define DEFAULT_DARK_A         42
 
-#define DEFAULT_LIGHT_R        169
-#define DEFAULT_LIGHT_G        169
-#define DEFAULT_LIGHT_B        169
+#define DEFAULT_LIGHT_R        255
+#define DEFAULT_LIGHT_G        255
+#define DEFAULT_LIGHT_B        255
 #define DEFAULT_LIGHT_A        20
 
 #define GAME_NAME              "Lighter"
