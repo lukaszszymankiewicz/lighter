@@ -23,11 +23,4 @@ typedef struct vertex {
     struct vertex* prev;  // prev vertex
 } vertex_t;
 
-typedef struct light_obstacle {
-    int x1; int y1;
-    int x2; int y2;
-    float slope;
-    struct light_obstacle* next;
-} light_obstacle_t;
-
 #endif

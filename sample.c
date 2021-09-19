@@ -11,6 +11,16 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
 
+#define DEFAULT_DARK_R 20
+#define DEFAULT_DARK_G 20
+#define DEFAULT_DARK_B 20
+#define DEFAULT_DARK_A 100
+
+#define DEFAULT_LIGHT_R 169
+#define DEFAULT_LIGHT_G 169
+#define DEFAULT_LIGHT_B 169
+#define DEFAULT_LIGHT_A 20
+
 typedef struct x_intersection {
     int x;
     struct x_intersection* next;
@@ -126,6 +136,22 @@ void OBS_merge(obstacle_t** head, obstacle_t* candidates){
     }
 }
 
+int VRTX_highest_y(vertex_t* poly){
+    int highest_y = SCREEN_HEIGHT;
+    vertex_t* ptr  = NULL;
+
+    ptr = poly;
+
+    while(ptr){
+        if (ptr->y < highest_y){
+            highest_y = ptr->y;
+        }
+        ptr = ptr->next;
+    }
+
+    return highest_y;
+}
+
 void OBS_delete(obstacle_t** head, int y){
     obstacle_t* ptr  = NULL;
     obstacle_t* prev = NULL;
@@ -143,7 +169,6 @@ void OBS_delete(obstacle_t** head, int y){
                 free(ptr);
                 ptr = prev->next;
             }
-
         }
 
         prev = ptr;
@@ -154,7 +179,7 @@ void OBS_delete(obstacle_t** head, int y){
     }
 }
 
-obstacle_t* VRTX_get_obstacles_from_polygon(vertex_t* poly){
+obstacle_t* OBS_get_obstacles_from_polygon(vertex_t* poly){
     // transform vertices into list of obstacles
     vertex_t* ptr=poly;
     obstacle_t* obstacles = NULL;
@@ -279,7 +304,7 @@ vertex_t* VRTX_new(
     vertex_t* new_vertex = (vertex_t*)malloc(sizeof(vertex_t));
     new_vertex->x = x;
     new_vertex->y = y;
-    new_vertex->angle = GEO_calculate_angle(start_x, start_y, x, y);
+    new_vertex->angle = GEO_calculate_angle(x, y, start_x, start_y);
 
     new_vertex->next = NULL;
     new_vertex->prev = NULL;
@@ -360,29 +385,6 @@ float VRTX_calc_slope(vertex_t* first, vertex_t* second){
         return 0.0;
     }
     return (second->y - first->y) / (second->x - first->x);
-}
-
-// calculates slopes between each vertices
-void VRTX_complete_vertex(
-    vertex_t* vertices
-)
-{
-    vertex_t* ptr = NULL;
-    vertex_t* first = NULL;
-    vertex_t* prev = NULL;
-
-    first = vertices;
-    ptr = vertices;
-    while(ptr->next){
-        ptr->slope = VRTX_calc_slope(ptr->next, ptr);
-        ptr->prev = prev;
-        prev=ptr;
-        ptr=ptr->next;
-    }
-
-    // last vertex
-    ptr->slope = VRTX_calc_slope(first, ptr);
-    ptr->prev = prev;
 }
 
 
@@ -514,128 +516,153 @@ void GFX_draw_colored_rect(
     SDL_RenderFillRect(renderer, &rect);
 };
 
-void GFX_draw_scanline(SDL_Renderer *renderer, obstacle_t* lines, int y, int clr){
-    int x;
-    int n=0;
-    int last_intersection;
-    int curr_col = 0;
-    int cur_alpha = 0;
+void GFX_draw_light_sectors_in_scanline(
+    SDL_Renderer      *renderer,
+    x_intersection_t  *points,
+    int                y,
+    int                n,
+    int                r,
+    int                g,
+    int                b,
+    int                a
+){
+    x_intersection_t* ptr = NULL;
 
-    // ograj poziome linie
-    if (lines){
-        obstacle_t* ptr = lines;
-        x_intersection_t* points = NULL;
+    int draw_r = ((r == -1) ? (DEFAULT_LIGHT_R) : (r));
+    int draw_g = ((g == -1) ? (DEFAULT_LIGHT_G) : (g));
+    int draw_b = ((b == -1) ? (DEFAULT_LIGHT_B) : (b));
+    int draw_a = ((a == -1) ? (DEFAULT_LIGHT_A) : (a));
 
-        while(ptr){
-            if (ptr->y1 == ptr->y2){
-                INTSC_insert(&points, ptr->x1);
-                INTSC_insert(&points, ptr->x2);
-                ptr=ptr->next;
-                n=n+2;
-            }
-            else {
-                x = GEO_calc_intersection_with_slope(y, ptr->x1, ptr->y1, ptr->slope);
-                INTSC_insert(&points, x);
-                ptr=ptr->next;
-                n++;
-            }
-        }
-        
-        x_intersection_t* ptr2 = NULL;
-
-        printf("y = %i \n", y);
-        ptr2= points;
-        while(ptr2){
-            printf("%i, ", ptr2->x);
-            ptr2=ptr2->next;
-        }
-        printf("\n\n");
-
-
-        // dark segment from left side of screen to first intersection with scanline
-        if (points->x > 1) {
-            GFX_draw_colored_line(renderer, 0, y, points->x, y, 20, 20, 20, 100);
-        }
-
-        // dark segment from right side of screen to last intersection with scanline
-        last_intersection = INTSC_get_last(points);
-
-        if (last_intersection < SCREEN_WIDTH-1) {
-            GFX_draw_colored_line(renderer, last_intersection, y, SCREEN_WIDTH, y, 20, 20, 20, 100);
-        }
-
-        if (n==2) {
-            GFX_draw_colored_line(renderer, points->x, y, points->next->x, y, 169, 169, 169, clr); 
-            return;
-        }
-
-        // rest of the lines (light and dark sectors)
-        if (n>2) {
-            x_intersection_t* ptr = NULL;
-            ptr = points;
-            curr_col = 169;
-            cur_alpha = clr;
-
-            while (ptr){
-                GFX_draw_colored_line(
-                    renderer, points->x, y, points->next->x, y, curr_col, curr_col, curr_col, cur_alpha
-                ); 
-
-                // swith colors
-                if (curr_col == 169){
-                    curr_col = 20;
-                    cur_alpha = 100;
-                }
-                else {
-                    curr_col = 169;
-                    cur_alpha = clr;
-                }
-
-                if (ptr->next == NULL) {
-                    break;
-                }
-
-                ptr=ptr->next;
-
-            }
-        }
-
-        // last of the dark sector from intesection points
-        // GFX_draw_colored_line(points->x, y, points->next->x, y, 169, 169, 169, clr); 
-        INTSC_free(points);
+    if (n==2) {
+        GFX_draw_colored_line(renderer, points->x, y, points->next->x, y, draw_r, draw_g, draw_b, draw_a);
     }
-    else {
-        GFX_draw_colored_line(renderer, 0, y, SCREEN_WIDTH, y, 20, 20, 20, 100);
-        return;
+
+    else if (n>2) {
+        ptr = points;
+
+        while (ptr->next){
+            GFX_draw_colored_line(renderer, ptr->x, y, ptr->next->x, y, draw_r, draw_g, draw_b, draw_a);
+            ptr=ptr->next;
+            if (ptr->next == NULL){break;}
+            ptr=ptr->next;
+        }
     }
 }
 
-void GFX_draw_polygon(SDL_Renderer* renderer, vertex_t* poly, int clr){
-    int y =0;
+void GFX_draw_dark_sectors_in_scanline(
+    SDL_Renderer      *renderer,
+    x_intersection_t  *points,
+    int                y,
+    int                n,
+    int                r,
+    int                g,
+    int                b,
+    int                a
+){
+    x_intersection_t* ptr = NULL;
 
-    vertex_t* ptr2 = poly;
-    printf("vetices: \n");
-    while(ptr2){
-        printf("(%i, %i) \n\n", ptr2->x, ptr2->y);
-        ptr2=ptr2->next;
+    int last_intersection = INTSC_get_last(points);
+
+    int draw_r = ((r == -1) ? (DEFAULT_DARK_R) : (r));
+    int draw_g = ((g == -1) ? (DEFAULT_DARK_G) : (g));
+    int draw_b = ((b == -1) ? (DEFAULT_DARK_B) : (b));
+    int draw_a = ((a == -1) ? (DEFAULT_DARK_A) : (a));
+
+    // dark segment from left side of screen to first intersection with scanline
+    if (points->x > 1) {
+        GFX_draw_colored_line(renderer, 0, y, points->x, y, draw_r, draw_g, draw_b, draw_a);
     }
 
-    obstacle_t* not_drawn_yet = VRTX_get_obstacles_from_polygon(poly); 
-    obstacle_t* current_draw = NULL;
-    obstacle_t* obstacle_ptr = NULL;
-    obstacle_t* candidates = NULL;
+    // dark segment from right side of screen to last intersection with scanline
+    if (last_intersection < SCREEN_WIDTH-1) {
+        GFX_draw_colored_line(renderer, last_intersection, y, SCREEN_WIDTH, y, draw_r, draw_g, draw_b, draw_a);
+    }
 
-    obstacle_t* ptr = not_drawn_yet;
+    // rest of the lines
+    if (n>2) {
+        ptr = points;
+
+        while (ptr->next){
+            GFX_draw_colored_line(renderer, ptr->x, y, ptr->next->x, y, draw_r, draw_g, draw_b, draw_a);
+            ptr=ptr->next;
+        }
+    }
+}
+
+x_intersection_t* GFX_calc_intersections_in_scanline(
+    obstacle_t *obstacles,
+    int         y,
+    int        *n
+){
+    x_intersection_t *intersections = NULL;
+    obstacle_t       *ptr           = NULL;
+    int               x;
+
+    ptr = obstacles;
+
     while(ptr){
-        printf("(%i, %i), (%i, %i) \n\n", ptr->x1, ptr->y1, ptr->x2, ptr->y2);
-        ptr=ptr->next;
+        // line in perpendicular to y-axis
+        if (ptr->y1 == ptr->y2){
+            INTSC_insert(&intersections, ptr->x1);
+            INTSC_insert(&intersections, ptr->x2);
+            ptr=ptr->next;
+            (*n)=(*n)+2;
+        }
+        else {
+            x = GEO_calc_intersection_with_slope(y, ptr->x1, ptr->y1, ptr->slope);
+            INTSC_insert(&intersections, x);
+            ptr=ptr->next;
+            (*n)++;
+        }
+    }
+
+    return intersections;
+}
+
+void GFX_draw_scanline(
+    SDL_Renderer  *renderer,
+    obstacle_t    *lines,
+    int            y,
+    int            clr
+){
+    int n=0;
+    x_intersection_t* intersections = NULL;
+
+    intersections = GFX_calc_intersections_in_scanline(lines, y, &n);
+
+    if (intersections){
+        GFX_draw_dark_sectors_in_scanline(renderer, intersections->next, y, n, -1, -1, -1, -1);
+        GFX_draw_light_sectors_in_scanline(renderer, intersections, y, n, -1, -1, -1, clr);
+        INTSC_free(intersections);
+    }
+
+}
+
+// function, firstly checks where the polygon "begins" (vertex with highest y coord value) and draw
+// dark rect from y=0 up to y of such vertex. Then iterating by every y up to "end" of polygon
+// (vertex with lowest y coord value), polygon segments which will be drawn is chosen (and these
+// ones which won`t be needed are discarded), intersection points are calculated and then "dark and
+// "light" sectors are filled.
+void GFX_draw_polygon(
+    SDL_Renderer *renderer,
+    vertex_t     *poly,
+    int           clr
+){
+    int y                     = VRTX_highest_y(poly);
+    obstacle_t* not_drawn_yet = OBS_get_obstacles_from_polygon(poly); 
+    obstacle_t* current_draw  = NULL;
+    obstacle_t* obstacle_ptr  = NULL;
+    obstacle_t* candidates    = NULL;
+
+
+    if (y > 0) {
+        GFX_draw_colored_rect(renderer, 0, 0, SCREEN_WIDTH, y, 20, 20, 20, 100);
     }
 
     while(y<SCREEN_HEIGHT) {
-
-        // delete light obstacles current drawn scan_y must be higher than y of any point
         obstacle_ptr = current_draw;
 
+        // delete light obstacles current drawn scan_y must be higher than y of any point
         while(obstacle_ptr){
             OBS_delete(&current_draw, y);
             obstacle_ptr=obstacle_ptr->next;
@@ -647,16 +674,15 @@ void GFX_draw_polygon(SDL_Renderer* renderer, vertex_t* poly, int clr){
         // add candidates to current draw
         OBS_merge(&current_draw, candidates);       
 
-        if (!not_drawn_yet && !current_draw){
-            break;
-        }
+        // if there isn`t anything to draw or anything to be drawn in future - stop
+        if (!not_drawn_yet && !current_draw){ break; }
 
         GFX_draw_scanline(renderer, current_draw, y, clr);
         y++;
     }
 
     // fill the rest with darkness (sounds deep)
-    GFX_draw_colored_rect(renderer, 0, y, SCREEN_WIDTH, SCREEN_HEIGHT - y, 20, 20, 20, 100);
+    GFX_draw_colored_rect(renderer, 0, y, SCREEN_WIDTH, SCREEN_HEIGHT-y, 20, 20, 20, 100);
 
 }
 

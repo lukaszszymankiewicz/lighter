@@ -115,7 +115,7 @@ void OBS_delete(obstacle_t** head, int y){
     }
 }
 
-obstacle_t* VRTX_get_obstacles_from_polygon(vertex_t* poly){
+obstacle_t* OBS_get_obstacles_from_polygon(vertex_t* poly){
     // transform vertices into list of obstacles
     vertex_t* ptr=poly;
     obstacle_t* obstacles = NULL;

@@ -47,15 +47,15 @@ lightsource_t lantern =
 lightsource_t lighter = 
 {
     .width = PI / 7,
-    .n_poly = 1,
+    .n_poly = 2,
     .wobble_corr = 0.001,
     .wobble_change_dir_coef = 30,
     .polys = {
-        {  0,      -5,       10    },
-        {  0,       5,       10    },
-        { -5,       0,       30    },
-        {  5,       0,       30    },
         {  0,       0,       50    },
+        {  5,       0,       30    },
+        { -5,       0,       30    },
+        {  0,       5,       10    },
+        {  0,      -5,       10    },
     }
 };
 
@@ -277,7 +277,7 @@ vertex_t* LIG_calc_light_polygon(int x, int y, float angle, float width, obstacl
 
     else { filtered_obstacles = obstacles; }
 
-    // for each of obstacle corner three rays is casted
+    // for each of vertex n_width_rays rays are casted
     for(obstacle_t* s=filtered_obstacles; s; s=s->next) {
         angle = GEO_calculate_angle(x, y, s->x1, s->y1);
 
@@ -293,10 +293,9 @@ vertex_t* LIG_calc_light_polygon(int x, int y, float angle, float width, obstacl
 
     // polygon point optimization process (deleting redundant points)
     VRTX_optim(light_polygon);
-    VRTX_complete_vertex(light_polygon);
 
     // if (DEBUG){LIG_debug_rays(light_polygon, x, y, 200);}
-    if (DEBUG){LIG_debug_dark_sectors(light_polygon);}
+    // if (DEBUG){LIG_debug_dark_sectors(light_polygon);}
 
     return light_polygon;
 };

@@ -15,7 +15,7 @@ vertex_t* VRTX_new(
     vertex_t* new_vertex = (vertex_t*)malloc(sizeof(vertex_t));
     new_vertex->x = x;
     new_vertex->y = y;
-    new_vertex->angle = GEO_calculate_angle(start_x, start_y, x, y);
+    new_vertex->angle = GEO_calculate_angle(x, y, start_x, start_y);
 
     new_vertex->next = NULL;
     new_vertex->prev = NULL;
@@ -24,8 +24,8 @@ vertex_t* VRTX_new(
 }
 
 void VRTX_push(
-    vertex_t** head,
-    vertex_t* new_vertex
+    vertex_t **head,
+    vertex_t *new_vertex
 ) 
 {
     new_vertex->next = *head;
@@ -98,30 +98,6 @@ float VRTX_calc_slope(vertex_t* first, vertex_t* second){
     return (second->y - first->y) / (second->x - first->x);
 }
 
-// calculates slopes between each vertices
-void VRTX_complete_vertex(
-    vertex_t* vertices
-)
-{
-    vertex_t* ptr = NULL;
-    vertex_t* first = NULL;
-    vertex_t* prev = NULL;
-
-    first = vertices;
-    ptr = vertices;
-    while(ptr->next){
-        ptr->slope = VRTX_calc_slope(ptr->next, ptr);
-        ptr->prev = prev;
-        prev=ptr;
-        ptr=ptr->next;
-    }
-
-    // last vertex
-    ptr->slope = VRTX_calc_slope(first, ptr);
-    ptr->prev = prev;
-}
-
-
 // Some point can be considered redundant. Light polygon is created mostly from lines that already
 // are in the level (walls edges for example). Having three points laying in one segment makes the
 // middle point really just a waste resources, as intersection needs to be calculated two times.
@@ -157,6 +133,24 @@ void VRTX_optim(vertex_t* poly) {
     
     // new poly is set to optimized set of points
     poly = ptr;
+}
+
+int VRTX_highest_y(
+    vertex_t* poly
+){
+    vertex_t *ptr        = NULL;
+    int       highest_y  = SCREEN_HEIGHT;
+
+    ptr = poly;
+
+    while(ptr){
+        if (ptr->y < highest_y){
+            highest_y = ptr->y;
+        }
+        ptr = ptr->next;
+    }
+
+    return highest_y;
 }
 
 void VRTX_free(vertex_t* head) {

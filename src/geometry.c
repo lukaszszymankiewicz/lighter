@@ -51,8 +51,9 @@ float GEO_seg_intersection_with_y
 // begginig - function only return x-coord of such intersection point.
 float GEO_calc_intersection_with_slope
 (
-    int y,                   // y-line coord
-    int x1,      int y1,     // segment begginig
+    int   y,
+    int   x1,      
+    int   y1,
     float slope
 )
 {

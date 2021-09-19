@@ -15,23 +15,19 @@ void INTSC_insert(x_intersection_t** head, int x) {
     x_intersection_t* current;
     x_intersection_t* new_intersection = INTSC_new(x);
 
-    if (*head == NULL)
-    {
+    if (*head == NULL) {
         new_intersection->next = *head;
         *head = new_intersection;
     }
     // place new point at begininng
-    else if ((*head)->x >= new_intersection->x)
-    {
+    else if ((*head)->x >= new_intersection->x) {
         new_intersection->next = *head;
         *head = new_intersection;
     }
-    else 
-    {
+    else {
         current = *head;
 
-        while (current->next != NULL && current->next->x < new_intersection->x) 
-        {
+        while (current->next != NULL && current->next->x < new_intersection->x) {
             current = current->next;
         }
         new_intersection->next = current->next;
