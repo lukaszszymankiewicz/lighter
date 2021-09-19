@@ -15,14 +15,19 @@ TARGET =                \
 	src/geometry.c      \
 	src/intersection.c  \
 	src/light.c         \
-	src/lightpt.c       \
-	src/segment.c       \
+	src/vertex.c        \
+	src/obstacle.c      \
+
+SAMPLETARGET = sample.c
 
 all:
 	$(TARGET)
 
 lighter: 
 	$(CC) $(CFLAGS) $(TARGET) -o $(OBJ) $(LINKS) $(LIBS)
+
+temp: 
+	$(CC) $(CFLAGS) $(SAMPLETARGET) -o temp $(LINKS) $(LIBS)
 
 clean:
 	$(RM) $(OBJ)

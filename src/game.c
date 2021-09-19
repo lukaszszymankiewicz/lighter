@@ -10,8 +10,7 @@
 #include "light.h"
 
 
-void GAME_close(game_t* game) 
-{
+void GAME_close(game_t* game) {
  GFX_free();
  HERO_free(game->hero);
  TILE_free(game->tiles);
@@ -20,8 +19,7 @@ void GAME_close(game_t* game)
  TIMER_free(game->fps_timer);
 };
 
-game_t* GAME_init() 
-{
+game_t* GAME_init() {
     game_t* game = (game_t*)malloc(sizeof(game_t));
 
     game->loop = true;
@@ -63,8 +61,7 @@ int main(int argc, char* args[]) {
     EVNT_init();
     TIMER_start(game->fps_timer);
 
-    while(game->loop) 
-    {
+    while(game->loop) {
         TIMER_start(game->cap_timer);
         EVNT_handle_events(game);
         GFX_clear_screen();
