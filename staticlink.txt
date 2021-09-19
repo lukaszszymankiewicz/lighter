@@ -1,0 +1,7 @@
+For creating staticlly-linked binary please follow this tutorial:
+
+https://blog.wasin.io/2018/10/18/statically-build-sdl2-application.html
+
+on my machine following line works, propably needed to be put into Makefile
+
+gcc -Wall src/game.c src/gfx.c src/sprites.c src/events.c src/hero.c src/timer.c src/tile.c src/level.c src/geometry.c src/intersection.c src/light.c src/vertex.c src/obstacle.c /usr/lib/x86_64-linux-gnu/libSDL2.a /usr/lib/x86_64-linux-gnu/libSDL2_image.so -lm -ldl -lasound -lm -ldl -lpthread -lpulse-simple -lpulse -lX11 -lXext -lXcursor -lXinerama -lXi -lXrandr -lXss -lXxf86vm -ldrm -lgbm -lwayland-egl -lwayland-client -lwayland-cursor -lxkbcommon -lpthread -lrt 
