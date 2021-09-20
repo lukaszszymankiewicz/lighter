@@ -1,5 +1,6 @@
 #include "def.h"
 #include "obstacle.h"
+#include "macros.h"
 
 float OBS_calc_slope(obstacle_t* obstacle){
     if (obstacle->x1 == obstacle->x2) {

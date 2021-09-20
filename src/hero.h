@@ -1,4 +1,6 @@
 #include "sprites.h"
+#include "primitives.h"
+#include "macros.h"
 
 #ifndef HERO_H
 #define HERO_H

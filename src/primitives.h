@@ -1,6 +1,9 @@
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
 
+typedef short int direction_t;
+enum direction { RIGHT, LEFT, UP, DOWN, NONE };
+
 // single linked list of obstacle segments
 typedef struct obstacle {
     int x1; int y1;            // first point
@@ -9,12 +12,13 @@ typedef struct obstacle {
     struct obstacle* next;     // next obstacle
 } obstacle_t;
 
-// ray is represented by segment
+// light ray representation
 typedef struct ray {
-    int x1; int y1;
-    int x2; int y2;
+    int x1; int y1;            // start point coords
+    int x2; int y2;            // end point coords
 } ray_t;
 
+// light vertex representation
 typedef struct vertex {
     int x; int y;         // coords of vertex
     float angle;          // angle it makes with player
@@ -22,5 +26,6 @@ typedef struct vertex {
     struct vertex* next;  // next vertex
     struct vertex* prev;  // prev vertex
 } vertex_t;
+
 
 #endif

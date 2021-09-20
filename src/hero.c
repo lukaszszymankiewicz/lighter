@@ -1,10 +1,10 @@
 #include "def.h"
 #include "hero.h"
+#include "primitives.h"
 
 static int MAX_VEL = 5;
 static int MOVE_POWUH = 2;
 static int X_FRICTION = 1;
-
 
 // do it dynamically!
 int lightpos_x_corr[] = {5, 0};

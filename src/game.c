@@ -11,12 +11,12 @@
 
 
 void GAME_close(game_t* game) {
- GFX_free();
- HERO_free(game->hero);
- TILE_free(game->tiles);
- LIG_free(game->light);
- TIMER_free(game->cap_timer);
- TIMER_free(game->fps_timer);
+   GFX_free();
+   HERO_free(game->hero);
+   TILE_free(game->tiles);
+   LIG_free(game->light);
+   TIMER_free(game->cap_timer);
+   TIMER_free(game->fps_timer);
 };
 
 game_t* GAME_init() {
@@ -41,22 +41,25 @@ game_t* GAME_init() {
 };
 
 
-void GAME_update(game_t* game)
-{
+void GAME_update(
+    game_t* game
+){
     game->frame_ticks = TIMER_get_ticks(game->cap_timer);
 
-    if(game->frame_ticks < SCREEN_TICKS_PER_FRAME)
-    {
+    if(game->frame_ticks < SCREEN_TICKS_PER_FRAME) {
         game->frame = (game->frame + 1);
         SDL_Delay(SCREEN_TICKS_PER_FRAME - game->frame_ticks);
     }
 }
 
 int main(int argc, char* args[]) {
+    game_t* game = NULL;
+    Texture* bg  = NULL;
+
     // TODO: this can be surely in game struct?
     GFX_init_graphics(SCREEN_WIDTH, SCREEN_HEIGHT);
-    game_t* game = GAME_init();
-    Texture* bg = TXTR_init_texture("sprites/wall.png");
+    game = GAME_init();
+    bg = TXTR_init_texture("sprites/wall.png");
 
     EVNT_init();
     TIMER_start(game->fps_timer);
