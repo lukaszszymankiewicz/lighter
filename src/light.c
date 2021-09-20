@@ -307,6 +307,14 @@ int LIG_get_light_polygon_corr(light_t* lght, int i, int axis){
     return lght->src->polys[i][axis];
 }
 
+int LIG_get_light_polygon_x_corr(light_t* lght, int i){
+    return sin(lght->angle) * lght->src->polys[i][X] + cos(lght->angle) * lght->src->polys[i][Y];
+}
+
+int LIG_get_light_polygon_y_corr(light_t* lght, int i){
+    return sin(lght->angle) * lght->src->polys[i][Y] + cos(lght->angle) * lght->src->polys[i][X];
+}
+
 // Calculates and draws light polygons. Every of the light source needs several polygons to be drawn
 // - every one of them is slightly moved to another which makes light looks more "natural".
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
