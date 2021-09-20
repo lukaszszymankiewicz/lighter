@@ -27,30 +27,31 @@ lightsource_t lantern =
     .wobble_corr = 0.0,
     .wobble_change_dir_coef = 1,
     .polys = {
-        {-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
-        { 10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
-        {-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
-        {-10,  10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10 },
-        {-5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
-        { 5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
-        {-5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
-        {-5 ,   5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
-        { 0 ,   0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50 }
+        {-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0 },
+        { 10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0 },
+        {-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0 },
+        {-10,  10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0 },
+        {-5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0 },
+        { 5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0 },
+        {-5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0 },
+        {-5 ,   5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0 },
+        { 0 ,   0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0 }
     }
 };
 
 lightsource_t lighter = 
 {
     .width = PI / 7,
-    .n_poly = 5,
+    .n_poly = 6,
     .wobble_corr = 0.001,
     .wobble_change_dir_coef = 30,
     .polys = {
-        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 90 },
-        {  2,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50 },
-        { -2,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50 },
-        {  0,  2, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 },
-        {  0, -2, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30 }
+        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 90, 0  },
+        {  4,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0  },
+        { -4,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0  },
+        {  0,  4, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0  },
+        {  0, -4, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0  },
+        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 20, 36 },
     }
 };
 
@@ -303,10 +304,6 @@ int LIG_get_light_polygon_color(light_t* lght, int i, int color){
     return lght->src->polys[i][color];
 }
 
-int LIG_get_light_polygon_corr(light_t* lght, int i, int axis){
-    return lght->src->polys[i][axis];
-}
-
 int LIG_get_light_polygon_x_corr(light_t* lght, int i){
     return sin(lght->angle) * lght->src->polys[i][X] + cos(lght->angle) * lght->src->polys[i][Y];
 }
@@ -315,31 +312,46 @@ int LIG_get_light_polygon_y_corr(light_t* lght, int i){
     return sin(lght->angle) * lght->src->polys[i][Y] + cos(lght->angle) * lght->src->polys[i][X];
 }
 
+float LIG_get_light_polygon_width_corr(light_t* lght, int i){
+    int coef = lght->src->polys[i][WIDTH];
+
+    if (coef){
+        return PI / coef;
+    }
+    return 0.0;
+}
+
 // Calculates and draws light polygons. Every of the light source needs several polygons to be drawn
 // - every one of them is slightly moved to another which makes light looks more "natural".
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
 // looking like "gradient".
 void LIG_draw_light_effect(int x, int y, light_t* lght, obstacle_t* obstacles) {
-    int i=0;            // index of current light polygon drawn
-    int red;            // color of current light polygon drawn
-    int green;          // color of current light polygon drawn
-    int blue;           // color of current light polygon drawn
-    int alpha;          // color of current light polygon drawn
-    int x_corr, y_corr; // x and y correction values (light polygon can be shifted from its starting point)
+    int   i;              // index of current light polygon drawn
+    int   red;            // color of current light polygon drawn
+    int   green;          // color of current light polygon drawn
+    int   blue;           // color of current light polygon drawn
+    int   alpha;          // color of current light polygon drawn
+    int   x_corr, y_corr; // x and y correction values (light polygon can be shifted from its starting point)
+    float width_corr;     // light width correction (some light polygons can be wider)
 
     vertex_t* light_polygon = NULL;
 
-    for (; i < lght->src->n_poly; i++) {
-        red    = LIG_get_light_polygon_color(lght, i, RED);
-        green  = LIG_get_light_polygon_color(lght, i, GREEN);
-        blue   = LIG_get_light_polygon_color(lght, i, BLUE);
-        alpha  = LIG_get_light_polygon_color(lght, i, ALPHA);
+    for (i=0; i < lght->src->n_poly; i++) {
+        red        = LIG_get_light_polygon_color(lght, i, RED);
+        green      = LIG_get_light_polygon_color(lght, i, GREEN);
+        blue       = LIG_get_light_polygon_color(lght, i, BLUE);
+        alpha      = LIG_get_light_polygon_color(lght, i, ALPHA);
 
-        x_corr = LIG_get_light_polygon_corr(lght, i, X);
-        y_corr = LIG_get_light_polygon_corr(lght, i, Y);
+        x_corr     = LIG_get_light_polygon_x_corr(lght, i);
+        y_corr     = LIG_get_light_polygon_y_corr(lght, i);
+        width_corr = LIG_get_light_polygon_width_corr(lght, i);
+
+        printf("%f, \n", width_corr);
 
         // calculating the light polygon shape
-        light_polygon = LIG_calc_light_polygon(x+x_corr, y+y_corr, lght->angle, lght->src->width, obstacles);
+        light_polygon = LIG_calc_light_polygon(
+            x+x_corr, y+y_corr, lght->angle, lght->src->width+width_corr, obstacles
+        );
 
         // drawing the light
         GFX_draw_light_polygon(light_polygon, red, green, blue, alpha);

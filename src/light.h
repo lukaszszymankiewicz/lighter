@@ -9,7 +9,7 @@
 // this is used as column numbers in polys matrix (lightsource_t) - first column
 // determines x offset for given poly, second: y-offset and third: color of
 // given lightpoly.
-enum polydata { X, Y, RED, GREEN, BLUE, ALPHA };
+enum polydata { X, Y, RED, GREEN, BLUE, ALPHA, WIDTH };
 enum light_sources { LANTERN, FLASHLIGHT, ALL };
 
 // lightsources is basically thing which makes any of light
@@ -19,7 +19,7 @@ typedef struct lightsource {
   int wobble_change_dir_coef; // how many frames must pass to light start woblling into other direction
   short int n_poly;           // number of light polygon draw
   void (*draw_fun)();         // function to use to draw light polygon
-  int polys[][6];             // 
+  int polys[][7];             // 
 } lightsource_t;
 
 typedef struct light {
