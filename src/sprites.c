@@ -36,8 +36,7 @@ animation_t* TXTR_init_animation
     animation_t* new_animation = malloc(sizeof(animation_t));
     SDL_Rect* frames = malloc(sizeof(SDL_Rect) * len);
 
-    for (int i=0; i<len; i++)
-    {
+    for (int i=0; i<len; i++) {
         frames[i] = (SDL_Rect){xs[i], ys[i], ws[i], hs[i]};
     }
     new_animation->frames = frames;
@@ -64,8 +63,7 @@ void TXTR_push_animation
 }
 
 // initalize texture stuct from given image file
-Texture* TXTR_init_texture(char *filepath) 
-{
+Texture* TXTR_init_texture(char *filepath) {
 	SDL_Texture* new_texture = NULL;
     SDL_Surface* loaded_surface = NULL;
 

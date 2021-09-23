@@ -27,5 +27,7 @@
 #define DEFAULT_LIGHT_A          20                 // default light ALPHA channel
 
 #define GAME_NAME                "Lighter"          // game windom nape
+#define ONE_STEP_BACK            "../"
+#define TILES_FOLDER             "tiles/"
 
 #endif

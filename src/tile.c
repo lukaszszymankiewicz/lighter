@@ -3,8 +3,6 @@
 #include "primitives.h"
 #include "obstacle.h"
 
-//methods for holding and operating with level tiles. Basic implementation by now, will propably be
-//changed in near future
 tile_t* TILE_init(
     short int x1, short int y1,
     short int x2, short int y2,
@@ -64,8 +62,7 @@ obstacle_t* TILE_calculate_ray_obstacles(tiles_list_t* tiles) {
     return obstacles;
 }
 
-void TILE_free(tiles_list_t* list) 
-{
+void TILE_free(tiles_list_t* list) {
     tiles_list_t* currentRef = list;
 
     while (currentRef != NULL) {
