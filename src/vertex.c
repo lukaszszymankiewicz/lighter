@@ -5,10 +5,11 @@
 
 #define EPSILON 0.1
 
-// vertex is created from ray of light, by getting all ends of rays we get polygon which is equal to
-// light sight
+// vertices are hold as single linked-list and it represents points which make light polygon.
+
+// vertex is created from the end of raylight.
 vertex_t* VRTX_new(
-    int start_x, int start_y,    // starting point - for determing angle vertex made
+    int start_x, int start_y,    // ray starting point - for determing angle vertex make
     int x,       int y           // vertex coord
 )
 {
@@ -33,12 +34,12 @@ void VRTX_push(
     (*head)->prev = new_vertex;
 }
 
-// Function to insert a given point at its correct sorted position into a given list sorted in
-// increasing order (angle is used as sorting paramter). This is needed for creating points of
-// simple convex polygon (no segments of such polygon won`t intersects with another).
+// Function to insert a given vertex at its correct position into a vertex list with increasing
+// order (angle is used as sorting paramter). This is needed for creating points of simple convex
+// polygon.
 void VRTX_insert(
-    vertex_t** head,
-    ray_t* ray
+    vertex_t **head,
+    ray_t     *ray
 ) 
 {
     vertex_t* current = NULL;
@@ -68,7 +69,7 @@ void VRTX_insert(
 
 // checks is lightpoint is inside segment
 bool VRTX_pt_in_segment(
-    int pt_x, int pt_y,
+    int pt_x,   int pt_y,
     int seg_x1, int seg_y1,
     int seg_x2, int seg_y2
 )
@@ -91,27 +92,23 @@ bool VRTX_pt_in_segment(
     return true;
 }
 
-float VRTX_calc_slope(vertex_t* first, vertex_t* second){
-    if (first->x == second->x) {
-        return 0.0;
-    }
-    return (second->y - first->y) / (second->x - first->x);
-}
-
 // Some point can be considered redundant. Light polygon is created mostly from lines that already
 // are in the level (walls edges for example). Having three points laying in one segment makes the
 // middle point really just a waste resources, as intersection needs to be calculated two times.
-void VRTX_optim(vertex_t* poly) {
-    vertex_t* ptr = NULL;
-    vertex_t* first = NULL;
-    first = poly;  // yeah, just for the checking of first to last point
-    ptr = poly;
+void VRTX_optim(
+    vertex_t *poly
+) {
+    vertex_t *ptr   = NULL;
+    vertex_t *first = NULL;
+
+    first = poly;  // just for the checking optimimalisation between last and the first vertex
+    ptr   = poly;
 
     // cut all redundant in between
     while (ptr->next != NULL && ptr->next->next != NULL) { 
-        vertex_t* between = ptr->next;
-        vertex_t* prev = ptr;
-        vertex_t* next = ptr->next->next;
+        vertex_t *between = ptr->next;
+        vertex_t *prev    = ptr;
+        vertex_t *next    = ptr->next->next;
 
         if(VRTX_pt_in_segment(between->x, between->y, prev->x, prev->y, next->x, next->y)) {
             ptr->next = between->next;
@@ -123,9 +120,9 @@ void VRTX_optim(vertex_t* poly) {
     }
 
     // last point to first point
-    vertex_t* between = ptr->next;
-    vertex_t* prev = ptr;
-    vertex_t* next = first;
+    vertex_t *between = ptr->next;
+    vertex_t *prev    = ptr;
+    vertex_t *next    = first;
 
     if(VRTX_pt_in_segment(between->x, between->y, prev->x, prev->y, next->x, next->y)) {
         ptr->next = NULL;
@@ -135,6 +132,7 @@ void VRTX_optim(vertex_t* poly) {
     poly = ptr;
 }
 
+// find highest value of y from list of vertices
 int VRTX_highest_y(
     vertex_t* poly
 ){

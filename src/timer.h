@@ -4,10 +4,10 @@
 #define TIMER_H
 
 typedef struct game_timer {
-  int start_ticks;
-  int paused_ticks; // The ticks stored when the timer was paused
-  bool paused;
-  bool started;
+    int start_ticks;
+    int paused_ticks;
+    bool paused;
+    bool started;
 } game_timer_t;
 
 game_timer_t *TIMER_new();

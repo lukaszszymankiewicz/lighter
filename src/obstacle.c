@@ -2,7 +2,9 @@
 #include "obstacle.h"
 #include "macros.h"
 
-float OBS_calc_slope(obstacle_t* obstacle){
+float OBS_calc_slope(
+    obstacle_t *obstacle
+) {
     if (obstacle->x1 == obstacle->x2) {
         return 0.0;
     }
@@ -17,8 +19,7 @@ obstacle_t* OBS_init(
 )
 {
     obstacle_t* new_obstacle = NULL;
-
-    new_obstacle = (obstacle_t *)malloc(sizeof(obstacle_t));
+    new_obstacle             = (obstacle_t *)malloc(sizeof(obstacle_t));
 
     new_obstacle->x1 = x1;
     new_obstacle->y1 = y1;
@@ -26,29 +27,32 @@ obstacle_t* OBS_init(
     new_obstacle->y2 = y2;
 
     new_obstacle->slope = OBS_calc_slope(new_obstacle);
-
-    new_obstacle->next = NULL;
+    new_obstacle->next  = NULL;
 
     return new_obstacle;
 }
 
 // this push new obstacle to begginig of polygon
 void OBS_push(
-    obstacle_t** head,
-    int x1, int y1,
-    int x2, int y2
+    obstacle_t **head,
+    int          x1,
+    int          y1,
+    int          x2,
+    int          y2
 )
 {
-    obstacle_t* new_obstacle = NULL;
-    new_obstacle = OBS_init(x1, y1, x2, y2);
-    
-    new_obstacle->next = *head;
-    *head = new_obstacle;
+    obstacle_t *new_obstacle = NULL;
+    new_obstacle             = OBS_init(x1, y1, x2, y2);
+    new_obstacle->next       = *head;
+    *head                    = new_obstacle;
 }
 
 
-obstacle_t* OBS_find_candidates(obstacle_t** head, int y){
-    // gets all obstacles which y_min is equal to scan_y, deltes it from linked list and return
+obstacle_t* OBS_find_candidates(
+    obstacle_t **head,
+    int          y
+){
+    // gets all obstacles which y_min is equal to scan_y, deletes it from linked list and return
     obstacle_t* ptr        = NULL;
     obstacle_t* prev       = NULL;
     obstacle_t* candidates = NULL;
@@ -78,9 +82,12 @@ obstacle_t* OBS_find_candidates(obstacle_t** head, int y){
     return candidates;
 }
 
-void OBS_merge(obstacle_t** head, obstacle_t* candidates){
-    obstacle_t* ptr = NULL;
-    ptr = candidates;
+void OBS_merge(
+    obstacle_t **head,
+    obstacle_t  *candidates
+){
+    obstacle_t *ptr = NULL;
+    ptr             = candidates;
 
     while(ptr) {
         OBS_push(head, ptr->x1, ptr->y1, ptr->x2, ptr->y2);
@@ -88,11 +95,13 @@ void OBS_merge(obstacle_t** head, obstacle_t* candidates){
     }
 }
 
-void OBS_delete(obstacle_t** head, int y){
-    obstacle_t* ptr  = NULL;
-    obstacle_t* prev = NULL;
-
-    ptr = (*head);
+void OBS_delete(
+    obstacle_t **head,
+    int          y
+){
+    obstacle_t *ptr  = NULL;
+    obstacle_t *prev = NULL;
+    ptr              = (*head);
 
     while(ptr) {
         if (MAX(ptr->y1, ptr->y2) <= y ) {
@@ -116,13 +125,14 @@ void OBS_delete(obstacle_t** head, int y){
     }
 }
 
-obstacle_t* OBS_get_obstacles_from_polygon(vertex_t* poly){
+obstacle_t* OBS_get_obstacles_from_polygon(
+    vertex_t *poly
+){
     // transform vertices into list of obstacles
-    vertex_t* ptr=poly;
+    vertex_t* ptr         = poly;
     obstacle_t* obstacles = NULL;
-
-    int first_x=ptr->x;
-    int first_y=ptr->y;
+    int first_x           = ptr->x;
+    int first_y           = ptr->y;
 
     while(ptr->next){
         OBS_push(&obstacles, ptr->x, ptr->y, ptr->next->x, ptr->next->y);
@@ -134,8 +144,10 @@ obstacle_t* OBS_get_obstacles_from_polygon(vertex_t* poly){
     return obstacles;
 }
 
-void OBS_free(obstacle_t* obstacles) {
-    obstacle_t* head = obstacles;
+void OBS_free(
+    obstacle_t *obstacles
+) {
+    obstacle_t *head = obstacles;
 
     while (head) {
         obstacle_t * temp = NULL;

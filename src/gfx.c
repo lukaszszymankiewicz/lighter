@@ -65,6 +65,11 @@ int GFX_init_graphics(int width, int height) {
     return 1;
 };
 
+void GFX_free_texture(texture_t *texture) {
+    SDL_DestroyTexture(texture->surface);
+    free(texture);
+};
+
 void GFX_free() {
     window = NULL;
     renderer = NULL;
@@ -73,9 +78,9 @@ void GFX_free() {
     SDL_DestroyRenderer(renderer);
 
     IMG_Quit();
-    SDL_Quit();
-
+    //  SDL_Quit();
 };
+
 void GFX_clear_screen() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderClear(renderer);
@@ -89,6 +94,66 @@ void GFX_blender() {
 void GFX_update() {
     SDL_RenderPresent(renderer);
     SDL_UpdateWindowSurface(window);
+};
+
+texture_t* GFX_read_texture(char *filepath) {
+	SDL_Texture* new_texture = NULL;
+    SDL_Surface* loaded_surface = NULL;
+
+    loaded_surface = IMG_Load(filepath);
+    SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
+
+    new_texture = SDL_CreateTextureFromSurface(renderer, loaded_surface);
+
+    texture_t* p = malloc(sizeof(texture_t));
+
+    p->surface = new_texture;
+    p->width = loaded_surface->w;
+    p->height = loaded_surface->h;
+
+    SDL_FreeSurface(loaded_surface);
+
+    return p;
+};
+
+// renders texture to screen
+void GFX_render_tile(
+    texture_t* texture,
+    int render_x,
+    int render_y,
+    int x,
+    int y,
+    int w,        
+    int h
+) 
+{
+    SDL_Rect clip = {x, y, w, h};
+    SDL_Rect render_quad = {render_x, render_y, w, h};
+    SDL_RenderCopy(renderer, texture->surface, &clip, &render_quad);
+};
+
+// renders texture to screen
+void GFX_render_texture(
+    texture_t* texture,   // Texture to be rendered
+    SDL_Rect* clip,       // rect from texture to be rendered
+    int x,                // x coord of screen to have texture rendered
+    int y,                // y coord of screen to have texture rendered
+    bool flip             // indiaction if texture should be flipped horizontally
+) 
+{
+    SDL_Rect render_quad = {x, y, texture->width, texture->height};
+    SDL_RendererFlip flip_tex;
+
+    // if clip is not given render whole texture
+    if(clip != NULL) {
+        render_quad.w = clip->w;
+        render_quad.h = clip->h;
+    }
+    
+    if (flip) { flip_tex = SDL_FLIP_HORIZONTAL; }
+    else { flip_tex = SDL_FLIP_NONE; }
+
+    SDL_RenderCopyEx(renderer, texture->surface, clip, &render_quad, 0, NULL, flip_tex);
 };
 
 void GFX_draw_colored_line(

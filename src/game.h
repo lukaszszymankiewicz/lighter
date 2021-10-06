@@ -1,8 +1,8 @@
 #include "def.h"
 #include "hero.h"
 #include "light.h"
-#include "tile.h"
 #include "timer.h"
+#include "level.h"
 
 #ifndef GAME_H
 #define GAME_H
@@ -13,7 +13,7 @@ typedef struct game {
   int            frame;          // current number of game frame
   int            frame_ticks;    // ticks passed
   hero_t        *hero;           // hero struct
-  tiles_list_t  *tiles;          // level tiles 
+  level_t       *level;          // level tiles 
   light_t       *light;          // current light objects
   game_timer_t  *fps_timer;      // FPS timer
   game_timer_t  *cap_timer;      // capping timer (for equall length in-game frame)

@@ -7,14 +7,14 @@
 
  COOL THINGS:
  - [x] any of the more sofisticated controls and movements of a hero (looking up/down with lighter),
+ - [x] any working level mechanism for placing/drawing tiles,
+ - [x] scrolling (works anyhow by now),
  - [ ] add light on the vertex of the lighted wall,
- - [ ] any working level mechanism for placing/drawing tiles,
  - [ ] implement radius of the light effect,
  - [ ] implement framebuffer for light effect (right now the whole light scene is drawn n times,
    where n is the number of polygon from which light effect is made. For Example lighter is using 5
    polygons),
- - [ ] gravity,
- - [ ] scrolling.
+ - [ ] gravity.
 
  MILESTONES:
  - [ ] GUI level editor,

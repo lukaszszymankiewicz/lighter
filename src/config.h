@@ -1,6 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define TILE_WIDTH 32
+#define TILE_HEIGHT 32
+
 #define DEBUG                    1                  // set to zero to get rid of all DEBUG graphics
 #define SCREEN_FPS               20                 // Frame per second
 #define SCREEN_TICKS_PER_FRAME   1000 / SCREEN_FPS  // ticks per frame in ms
@@ -27,7 +30,18 @@
 #define DEFAULT_LIGHT_A          20                 // default light ALPHA channel
 
 #define GAME_NAME                "Lighter"          // game windom nape
-#define ONE_STEP_BACK            "../"
 #define TILES_FOLDER             "tiles/"
+#define TILESET_FOLDER           "tilesets/"
+#define ONE_STEP_BACK            "../"
+#define CURRENT_FOLDER           "./"
+
+#define MAX_LINE_LENGHT          256
+#define MAX_LEVEL_NAME           32
+#define MAX_PATH_LEN             64
+#define MAX_INT_LEN              5
+#define TILE_HEIGHT              32
+#define TILE_WIDTH               32
+
+#define TILE_DATA_NUM            3
 
 #endif

@@ -1,5 +1,6 @@
 #include "def.h"
 #include "hero.h"
+#include "gfx.h"
 #include "primitives.h"
 
 static int MAX_VEL = 5;
@@ -14,8 +15,8 @@ hero_t* HERO_init(char* animation_sheet)
 {
     hero_t* hero_o = (hero_t*)malloc(sizeof(hero_t));
 
-    hero_o->x = 160;          // yeah
-    hero_o->y = 137;          //yeah
+    hero_o->x = 384;
+    hero_o->y = 384;
 
     hero_o->state = STANDING;
     hero_o->direction = LEFT;
@@ -99,39 +100,33 @@ void HERO_update(hero_t* hero_o)
     hero_o->x_vel = MAX(0, hero_o->x_vel-X_FRICTION);
 }
 
-void HERO_move(hero_t* hero_o, direction_t direction)
-{
+void HERO_move(hero_t* hero_o, direction_t direction) {
     hero_o->state = WALKING;
 
-    if (direction == hero_o->direction)
-    {
+    if (direction == hero_o->direction) {
         hero_o->x_vel = MIN(MAX_VEL, hero_o->x_vel + MOVE_POWUH);
     }
-    else
-    {
+    else {
         hero_o->x_vel = MOVE_POWUH;
     }
     hero_o->direction = direction;
 }
 
 
-SDL_Rect* HERO_current_frame(hero_t* hero_o)
-{
+SDL_Rect* HERO_current_frame(hero_t* hero_o) {
     return &(hero_o->sprites->animations[hero_o->state].frames[hero_o->frame]);
 }
 
-void HERO_draw(hero_t* hero_o)
-{
-    TXTR_render_texture(
+void HERO_draw(hero_t* hero_o) {
+    GFX_render_texture(
         hero_o->sprites->texture,
         HERO_current_frame(hero_o),
-        hero_o->x,
-        hero_o->y,
+        SCREEN_WIDTH / 2,
+        144,
         hero_o->direction
     );
 }
 
-void HERO_free(hero_t * hero_o)
-{
+void HERO_free(hero_t * hero_o) {
     TXTR_free_animation_sheet(hero_o->sprites);
 }
