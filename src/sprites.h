@@ -1,4 +1,5 @@
 #include "def.h"
+#include "texture.h"
 #include "primitives.h"
 
 #ifndef SPRITES_H

@@ -8,7 +8,7 @@ static int legal_keys[N_LEGAL_KEYS] = {
     SDL_SCANCODE_RIGHT,
     SDL_SCANCODE_LEFT,
     SDL_SCANCODE_DOWN,
-    SDL_SCANCODE_UP
+    SDL_SCANCODE_UP,
 };
 
 // values other than zero means that you cannot spam keypresses. Values other than zero means for
@@ -37,13 +37,13 @@ void EVNT_handle_SDL_events(
 void EVTN_clear_keypress(
     game_t *game,
     int     key
-){
+) {
     game->keys_cooldown[key] = 0;
 }
 
 void EVNT_handle_keypress(
     game_t *game
-){
+) {
   // UP && DOWN ARROW
   if KEY_PRESSED(SDL_SCANCODE_UP) {
       LIG_move_lightsource(game->light, UP, game->hero->direction, game->frame);
@@ -74,11 +74,12 @@ void EVNT_handle_keypress(
       HERO_move(game->hero, LEFT);
       EVTN_clear_keypress(game, SDL_SCANCODE_LEFT);
   }
+
 }
 
 void EVNT_handle_events(
     game_t *game
-){
+) {
   // firstly SDL events are handled
   EVNT_handle_SDL_events(game);
 

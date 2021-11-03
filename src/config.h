@@ -11,6 +11,7 @@
 #define LEFT_RAD                 PI/2               // angle on which hero looks left
 #define RIGHT_RAD                (3 * PI) / 2       // angle on which hero looks right
 #define DEG30                    0.523583333        // shortcut
+#define DEG45                    PI/4               // shortcut
 #define DEG15                    PI/12              // shortcut
 #define DEG10                    PI/18              // shortcut
 #define DEG5                     PI/36              // shortcut
@@ -41,7 +42,8 @@
 #define MAX_INT_LEN              5
 #define TILE_HEIGHT              32
 #define TILE_WIDTH               32
-
+#define X_TILE_OBS_DET           10
+#define Y_TILE_OBS_DET           12
 #define TILE_DATA_NUM            3
 
 #endif

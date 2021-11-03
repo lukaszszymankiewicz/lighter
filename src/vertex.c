@@ -1,22 +1,46 @@
-#include "def.h"
+#include <stdbool.h>
+#include <stdlib.h>
+#include <math.h>
+#include "macros.h"
+#include "config.h"
 #include "primitives.h"
 #include "vertex.h"
-#include "geometry.h"
-
-#define EPSILON 0.1
 
 // vertices are hold as single linked-list and it represents points which make light polygon.
+//
+#define EPSILON 0.1
+
+float VRTX_calculate_angle(int ax, int ay, int bx, int by) {
+    return atan2(ax - bx, ay - by);
+}
+
 
 // vertex is created from the end of raylight.
 vertex_t* VRTX_new(
     int start_x, int start_y,    // ray starting point - for determing angle vertex make
     int x,       int y           // vertex coord
-)
-{
+) {
     vertex_t* new_vertex = (vertex_t*)malloc(sizeof(vertex_t));
-    new_vertex->x = x;
-    new_vertex->y = y;
-    new_vertex->angle = GEO_calculate_angle(x, y, start_x, start_y);
+    new_vertex->x        = x;
+    new_vertex->y        = y;
+    new_vertex->angle    = VRTX_calculate_angle(x, y, start_x, start_y);
+
+    new_vertex->next = NULL;
+    new_vertex->prev = NULL;
+
+    return new_vertex;
+}
+
+// vertex is created from the end of raylight.
+vertex_t* VRTX_new2(
+    int x,
+    int y,
+    float angle
+) {
+    vertex_t* new_vertex = (vertex_t*)malloc(sizeof(vertex_t));
+    new_vertex->x        = x;
+    new_vertex->y        = y;
+    new_vertex->angle    = angle;
 
     new_vertex->next = NULL;
     new_vertex->prev = NULL;
@@ -27,8 +51,7 @@ vertex_t* VRTX_new(
 void VRTX_push(
     vertex_t **head,
     vertex_t *new_vertex
-) 
-{
+) {
     new_vertex->next = *head;
     (*head) = new_vertex;
     (*head)->prev = new_vertex;
@@ -37,14 +60,15 @@ void VRTX_push(
 // Function to insert a given vertex at its correct position into a vertex list with increasing
 // order (angle is used as sorting paramter). This is needed for creating points of simple convex
 // polygon.
-void VRTX_insert(
+void VRTX_add_point(
     vertex_t **head,
-    ray_t     *ray
-) 
-{
+    int x,
+    int y,
+    float angle
+) {
     vertex_t* current = NULL;
     vertex_t* new_vertex = NULL;
-    new_vertex = VRTX_new(ray->x1, ray->y1, ray->x2, ray->y2);
+    new_vertex = VRTX_new2(x, y, angle);
 
     if (!(*head)) {
         new_vertex->next = *head;
@@ -67,29 +91,19 @@ void VRTX_insert(
     }
 }
 
-// checks is lightpoint is inside segment
+// checks is lightpoint is inside segment, as segments are only vertical and horizontal, simple
+// tests is made
 bool VRTX_pt_in_segment(
     int pt_x,   int pt_y,
     int seg_x1, int seg_y1,
     int seg_x2, int seg_y2
-)
-{
-    float cross, dot, box;
-
-    cross = (pt_y - seg_y1) * (seg_x2 - seg_x1) - (pt_x - seg_x1) * (seg_y2 - seg_y1);
-
-    // compare versus epsilon for floating point values, or != 0 if using integers
-    if (abs(cross) > EPSILON) {return false;}
-
-    dot = (pt_x - seg_x1) * (seg_x2 - seg_x1) + (pt_y - seg_y1) * (seg_y2 - seg_y1);
-
-    if (dot < 0) {return false;}
-
-    box = (seg_x2 - seg_x1) * (seg_x2 - seg_x1) + (seg_y2 - seg_y1) * (seg_y2 - seg_y1);
-
-    if (dot > box) {return false;}
-
-    return true;
+) {
+    if ((pt_x == seg_x1 && pt_x == seg_x2) || (pt_y == seg_y1 && pt_y == seg_y2)) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 // Some point can be considered redundant. Light polygon is created mostly from lines that already
@@ -135,14 +149,14 @@ void VRTX_optim(
 // find highest value of y from list of vertices
 int VRTX_highest_y(
     vertex_t* poly
-){
+) {
     vertex_t *ptr        = NULL;
     int       highest_y  = SCREEN_HEIGHT;
 
     ptr = poly;
 
-    while(ptr){
-        if (ptr->y < highest_y){
+    while(ptr) {
+        if (ptr->y < highest_y) {
             highest_y = ptr->y;
         }
         ptr = ptr->next;
@@ -151,7 +165,61 @@ int VRTX_highest_y(
     return highest_y;
 }
 
-void VRTX_free(vertex_t* head) {
+int VRTX_max_y(vertex_t* vertex) {
+    if (vertex->next==NULL) {
+        return vertex->y;
+    }
+    else {
+        return MAX(vertex->y, vertex->next->y);
+    }
+}
+
+void VRTX_delete(
+    vertex_t **head,
+    int          y
+) {
+    vertex_t *ptr  = NULL;
+    vertex_t *prev = NULL;
+    ptr            = (*head);
+
+    while(ptr) {
+        if (VRTX_max_y(ptr) <= y) {
+            if (prev == NULL) {
+                ptr=ptr->next;
+                (*head) = ptr;
+            }
+            else {
+                prev->next = ptr->next;
+                free(ptr);
+                ptr = prev->next;
+            }
+        }
+        prev = ptr;
+        if (ptr==NULL) {
+            return;
+        }
+        ptr = ptr->next;
+    }
+}
+
+int VRTX_len(
+    vertex_t *head
+) {
+    int len        = 0;
+    vertex_t *ptr  = NULL;
+
+    ptr = head;
+
+    while(ptr) {
+        len++;
+        ptr=ptr->next;
+    }
+    return len;
+}
+
+void VRTX_free(
+    vertex_t* head
+) {
     vertex_t* currentRef = head;
 
     while (currentRef != NULL) {

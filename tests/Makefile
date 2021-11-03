@@ -1,27 +1,41 @@
 CC = gcc
 CsegmentFLAGS := -Wall -g
-TARGET =                   \
-	check_events.c         \
-	check_intersection.c   \
-	check_gfx.c            \
-	check_hero.c 		   \
-	check_geometry.c       \
-	check_lightpt.c        \
-	check_segment.c        \
-	check_sprites.c        \
-	check_tests.c          \
-	check_tile.c           \
-	../src/events.c        \
-	../src/intersection.c  \
-	../src/hero.c          \
-	../src/gfx.c           \
-	../src/geometry.c      \
-	../src/level.c         \
-	../src/light.c         \
-	../src/lightpt.c       \
-	../src/segment.c       \
-	../src/sprites.c       \
-	../src/tile.c          \
+TARGET =                     \
+    check_tests.c            \
+	check_vertex.c           \
+	check_light.c            \
+	check_obstacle.c         \
+	check_point.c            \
+	../src/vertex.c          \
+	../src/light.c           \
+	../src/obstacle.c        \
+	../src/gfx.c             \
+	../src/geometry.c        \
+	../src/segment.c         \
+	../src/intersection.c    \
+	../src/point.c           \
+
+	# ../src/geometry.c
+
+	# check_events.c         \
+	# check_intersection.c   \
+	# check_gfx.c            \
+	# check_hero.c 		   \
+	# check_geometry.c       \
+	# check_lightpt.c        \
+	# check_segment.c        \
+	# check_sprites.c        \
+	# check_tests.c          \
+	# check_tile.c           \
+	# ../src/events.c        \
+	# ../src/intersection.c  \
+	# ../src/hero.c          \
+	# ../src/level.c         \
+	# ../src/light.c         \
+	# ../src/lightpt.c       \
+	# ../src/segment.c       \
+	# ../src/sprites.c       \
+	# ../src/tile.c          \
 
 OBJ = check_tests_suite
 LINKS = -lcheck -pthread -lcheck_pic -pthread -lrt -lm -lsubunit `pkg-config --cflags --libs sdl2 SDL2_image` 

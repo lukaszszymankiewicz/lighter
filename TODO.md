@@ -1,9 +1,19 @@
+ SMALL THINGS:
+ - [ ] remove all printf
+ - [ ] add cool background
+ - [x] better detection if vertex is on the same line (VRTX_optim)
+ - [ ] add filtered obstacles
+ - [ ] repair all tests
+ - [ ] check obstacle calculations for horizontal lines (something does not work)
+ - [ ] upgrade layers of graphics (now tiles are above the light)
+
  BORING THINGS:
  - [ ] refactor Makefile
  - [x] refactor ray collision (some of function could easly use integers, rather than float),
  - [ ] scale graphics to full screen - because perfect pixel-for-pixel graphics is important in
    this, project, unfortunatly not all resolutions will looks good. Some function to determine input
    resolution and scale factor is needed.,
+ - [ ] Investigate segfaults
 
  COOL THINGS:
  - [x] any of the more sofisticated controls and movements of a hero (looking up/down with lighter),
