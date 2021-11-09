@@ -48,7 +48,7 @@ START_TEST (EVNT_handle_events_check)
     game->keys_state = new_keys;
     SDL_PushEvent(&(game->event));
     EVNT_handle_events(game);
-    ck_assert_int_eq(light_o->src_num, 1);
+    ck_assert_int_eq(light_o->src_num, 0);
     free(new_keys);
 
     // WHEN (LIGHT CHANGE BACK)
@@ -58,40 +58,16 @@ START_TEST (EVNT_handle_events_check)
     EVNT_handle_events(game);
     ck_assert_int_eq(light_o->src_num, 0);
 
-    // WHEN (MOVING LEFT)
-    game->event.type = SDL_KEYDOWN;
-    game->event.key.keysym.sym = SDL_SCANCODE_LEFT;
-    SDL_PushEvent(&(game->event));
-    EVNT_handle_events(game);
-    ck_assert_int_lt(hero_o->x, 100);
-    ck_assert_int_eq(hero_o->y, 100);
-    ck_assert_int_eq(hero_o->state, 0);
-
-    hero_o->x = 100; // back to starting position
-
-    // WHEN (MOVING RGHT)
-    game->event.type = SDL_KEYDOWN;
-    game->event.key.keysym.sym = SDL_SCANCODE_RIGHT;
-    SDL_PushEvent(&(game->event));
-    EVNT_handle_events(game);
-    ck_assert_int_lt(hero_o->x, 100);
-    ck_assert_int_eq(hero_o->y, 137);
-    ck_assert_int_eq(hero_o->state, 0);
-
     // WHEN (MOVING UP)
     game->event.type = SDL_KEYDOWN;
     game->event.key.keysym.sym = SDL_SCANCODE_UP;
     EVNT_handle_events(game);
-    ck_assert_int_eq(hero_o->x, 160);
-    ck_assert_int_eq(hero_o->y, 137);
     ck_assert_int_eq(hero_o->state, 0);
 
     // WHEN (MOVING DOWN)
     game->event.type = SDL_KEYDOWN;
     game->event.key.keysym.sym = SDL_SCANCODE_DOWN;
     EVNT_handle_events(game);
-    ck_assert_int_eq(hero_o->x, 160);
-    ck_assert_int_eq(hero_o->y, 137);
     ck_assert_int_eq(hero_o->state, 0);
 
     // CLEANING

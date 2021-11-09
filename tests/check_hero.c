@@ -11,8 +11,10 @@ START_TEST (HERO_init_check)
     ck_assert_ptr_nonnull(hero_o);
     ck_assert_ptr_nonnull(hero_o->sprites);
     ck_assert_int_eq(hero_o->state, 0);
-    ck_assert_int_eq(hero_o->x, 160);
-    ck_assert_int_eq(hero_o->y, 137);
+    ck_assert_int_eq(hero_o->x, 384);
+    ck_assert_int_eq(hero_o->y, 384);
+    ck_assert_int_eq(hero_o->view_x, 160);
+    ck_assert_int_eq(hero_o->view_y, 144);
     ck_assert_int_eq(hero_o->direction, 1);
     ck_assert_int_eq(hero_o->frame, 0);
     ck_assert_int_eq(hero_o->frame_t, 0);
@@ -36,14 +38,14 @@ START_TEST (HERO_light_x_and_y_check)
     hero_o->direction = 0;
     x = HERO_light_x(hero_o);
     y = HERO_light_y(hero_o);
-    ck_assert_int_eq(x, 105);
-    ck_assert_int_eq(y, 111);
+    ck_assert_int_eq(x, 165);
+    ck_assert_int_eq(y, 155);
 
     hero_o->direction = 1;
     x = HERO_light_x(hero_o);
     y = HERO_light_y(hero_o);
-    ck_assert_int_eq(x, 100);
-    ck_assert_int_eq(y, 111);
+    ck_assert_int_eq(x, 160);
+    ck_assert_int_eq(y, 155);
 
     // CLEANUP
     HERO_free(hero_o);

@@ -4,8 +4,8 @@
 #define INTERSECTION_H
 
 typedef struct x_intersection {
-    int x;
-    struct x_intersection* next;
+    int                    x;
+    struct x_intersection *next;
 } x_intersection_t;
 
 void INTSC_insert(x_intersection_t** head, int x);
