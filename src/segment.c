@@ -1,6 +1,7 @@
 #include "def.h"
-#include "segment.h"
+#include "config.h"
 #include "macros.h"
+#include "segment.h"
 #include "geometry.h"
 
 segment_t* SEG_init(
@@ -10,10 +11,10 @@ segment_t* SEG_init(
     segment_t* new_segment   = NULL;
     new_segment              = (segment_t *)malloc(sizeof(segment_t));
 
-    new_segment->x1 = x1;
-    new_segment->y1 = y1;
-    new_segment->x2 = x2;
-    new_segment->y2 = y2;
+    new_segment->x1 = TRIM(0, SCREEN_WIDTH,  x1);
+    new_segment->y1 = TRIM(0, SCREEN_HEIGHT, y1);
+    new_segment->x2 = TRIM(0, SCREEN_WIDTH,  x2);
+    new_segment->y2 = TRIM(0, SCREEN_HEIGHT, y2);
 
     new_segment->slope = GEO_calc_slope(x1, y1, x2, y2);
     new_segment->next  = NULL;
@@ -30,11 +31,54 @@ void SEG_push(
     int          y2
 ) {
     segment_t *new_segment = NULL;
-    new_segment            = SEG_init(x1, y1, x2, y2);
-    new_segment->next      = *head;
-    *head                  = new_segment;
+    segment_t *ptr          = NULL;
+
+    new_segment             = SEG_init(x1, y1, x2, y2);
+    ptr                     = (*head);
+
+    if ((*head) == NULL) {
+        (*head) = new_segment;
+    }
+    else if ((*head)->next == NULL) {
+        (*head)->next = new_segment;
+    }
+    else {
+        while(ptr->next) {
+            ptr=ptr->next;
+        }
+        ptr->next = new_segment;
+    }
 }
 
+
+segment_t* SEG_get(
+    segment_t *segments, int index
+) {
+    segment_t *ptr = NULL;
+    ptr             = segments;
+    int         i   = 0;
+
+    while (i < index) {
+        ptr=ptr->next;
+        i++;
+    }
+    return ptr;
+}
+
+int SEG_len(
+    segment_t *segments
+) {
+    segment_t *ptr = NULL;
+    ptr             = segments;
+    int         i   = 0;
+
+    while (ptr) {
+        ptr=ptr->next;
+        i++;
+    }
+
+    return i;
+}
 
 segment_t* SEG_find_candidates(
     segment_t **head,

@@ -1,6 +1,6 @@
 #include "intersection.h"
 
-// intersections are a simple sorted linked list. It is used for poperly drawing light effect (by
+// intersections are a sorted linked list. It is used for poperly drawing light effect (by
 // now). Nothing really special here.
 
 x_intersection_t* INTSC_new(

@@ -4,7 +4,7 @@
 #include "tile.h"
 #include "level.h"
 #include "primitives.h"
-#include "obstacle.h"
+#include "segment.h"
 
 #define ENDLINE ';'
 #define NEWFIELD ','
@@ -14,9 +14,9 @@ enum { W, S, A, D };
 // this stores temporary tile data to determine if tile is an obstacle
 typedef struct cell2 {
     int edge[4];
-} cell_t2;
+} cell_t;
 
-cell_t2 cells[10][12];
+cell_t cells[10][12];
 
 mapfile_t* MAP_new(
     char *filename
@@ -349,42 +349,6 @@ SDL_Rect LVL_get_tile_rect(
     return rect;
 }
 
-void LVL_draw(
-    level_t *level,
-    int      hero_x,
-    int      hero_y
-) {
-
-    int st_x       = hero_x - SCREEN_WIDTH/2;
-    int st_y       = hero_y - SCREEN_HEIGHT/2;
-    int end_x      = hero_x + SCREEN_WIDTH/2;
-    int end_y      = hero_y + SCREEN_HEIGHT/2;
-    
-    int st_tile_pos_x  = st_x / TILE_WIDTH;
-    int st_tile_pos_y  = st_y / TILE_HEIGHT;
-    int end_tile_pos_x = end_x / TILE_WIDTH + 1;
-    int end_tile_pos_y = end_y / TILE_HEIGHT + 1;
-
-    for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
-        for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
-            tile_t* tile = LVL_tile_on_pos(level, x, y);
-
-            texture_t* texture = LVL_get_tile_texture(level, tile->index);
-
-            GFX_render_tile(
-                    texture,
-                    TILE_WIDTH * x - st_x,
-                    TILE_WIDTH * y - st_y,
-                    tile->x,
-                    tile->y,
-                    TILE_WIDTH,
-                    TILE_HEIGHT
-                );
-        }
-    }
-}
-
-// checks curent tile to draw, and calculates obstacles from it
 void LVL_analyze(
     level_t *level,
     int      hero_x,
@@ -392,7 +356,7 @@ void LVL_analyze(
 ) {
 
     level->obstacle_segments = NULL;  // just to be sure
-    obstacle_t *ptr          = NULL;
+    segment_t *ptr          = NULL;
 
     // clearing
     for (int yy = 0; yy < 10; yy++) {
@@ -418,33 +382,19 @@ void LVL_analyze(
     int end_tile_pos_y = end_y / TILE_HEIGHT + 1;
 
     // level border
-    OBS_push(&level->obstacle_segments, 0,            0,             SCREEN_WIDTH, 0             );
-    OBS_push(&level->obstacle_segments, 0,            SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT );
-    OBS_push(&level->obstacle_segments, 0,            0,             0,            SCREEN_HEIGHT );
-    OBS_push(&level->obstacle_segments, SCREEN_WIDTH, 0,             SCREEN_WIDTH, SCREEN_HEIGHT );
+    SEG_push(&level->obstacle_segments, 0,            0,             SCREEN_WIDTH, 0             );
+    SEG_push(&level->obstacle_segments, 0,            SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT );
+    SEG_push(&level->obstacle_segments, 0,            0,             0,            SCREEN_HEIGHT );
+    SEG_push(&level->obstacle_segments, SCREEN_WIDTH, 0,             SCREEN_WIDTH, SCREEN_HEIGHT );
 
-    int obstacle_num = OBS_len(level->obstacle_segments);
+    int obstacle_num = SEG_len(level->obstacle_segments);
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
 
-            // DRAWING
-            tile_t* tile = LVL_tile_on_pos(level, x, y);
-            texture_t* texture = LVL_get_tile_texture(level, tile->index);
-
             // TODO: after implementing framebuffer this wont render tile as fill such buffer.
             int tile_pos_x = TILE_WIDTH  * x-st_x;
             int tile_pos_y = TILE_HEIGHT * y-st_y;
-
-            GFX_render_tile(
-                    texture,
-                    tile_pos_x,
-                    tile_pos_y,
-                    tile->x,
-                    tile->y,
-                    TILE_WIDTH,
-                    TILE_HEIGHT
-                );
 
             // tiles currently on screen has coordinates shifted from absolute tile coords, so shitf
             // is made. This allows to ommit second loop only for collecting obstacles.
@@ -453,10 +403,12 @@ void LVL_analyze(
 
             // ANALYZING OBSTACLES
             if (LVL_obstacle_on_pos(level, x, y)) {
+
+                // check LEFT border
                 if (!LVL_obstacle_on_pos(level, x-1, y)) {
                     // create new
                     if (cells[obs_y-1][obs_x].edge[A] == 0) {
-                        OBS_push(
+                        SEG_push(
                           &level->obstacle_segments,
                           tile_pos_x,
                           tile_pos_y,
@@ -473,15 +425,16 @@ void LVL_analyze(
                     else {
                         index = cells[obs_y-1][obs_x].edge[A];
                         cells[obs_y][obs_x].edge[A] = index;
-                        ptr = OBS_get(level->obstacle_segments, index);
+                        ptr = SEG_get(level->obstacle_segments, index);
                         ptr->y2 += TILE_HEIGHT;
                     }
                 }
 
+                // pass
                 if (!LVL_obstacle_on_pos(level, x+1, y)) {
                     // create new
                     if (cells[obs_y-1][obs_x].edge[D] == 0) {
-                        OBS_push(
+                        SEG_push(
                           &level->obstacle_segments,
                           tile_pos_x + TILE_WIDTH,
                           tile_pos_y,
@@ -497,16 +450,16 @@ void LVL_analyze(
                     else {
                         index = cells[obs_y-1][obs_x].edge[D];
                         cells[obs_y][obs_x].edge[D] = index;
-                        ptr = OBS_get(level->obstacle_segments, index);
+                        ptr = SEG_get(level->obstacle_segments, index);
                         ptr->y2 += TILE_HEIGHT;
                     }
                 }
 
-                // new
+                // check UP line
                 if (!LVL_obstacle_on_pos(level, x, y-1)) {
                     // create new
-                    if (cells[obs_y-1][obs_x].edge[W] == 0) {
-                        OBS_push(
+                    if (cells[obs_y][obs_x-1].edge[W] == 0) {
+                        SEG_push(
                           &level->obstacle_segments,
                           tile_pos_x,
                           tile_pos_y,
@@ -520,18 +473,18 @@ void LVL_analyze(
 
                     // borrow from left
                     else {
-                        index = cells[obs_y-1][obs_x].edge[W];
+                        index = cells[obs_y][obs_x-1].edge[W];
                         cells[obs_y][obs_x].edge[W] = index;
-                        ptr = OBS_get(level->obstacle_segments, index);
+                        ptr = SEG_get(level->obstacle_segments, index);
                         ptr->x2 += TILE_WIDTH;
                     }
                 }
 
-                // new
+                // check BOTTOM line
                 if (!LVL_obstacle_on_pos(level, x, y+1)) {
                     // create new
-                    if (cells[obs_y-1][obs_x].edge[S] == 0) {
-                        OBS_push(
+                    if (cells[obs_y][obs_x-1].edge[S] == 0) {
+                        SEG_push(
                           &level->obstacle_segments,
                           tile_pos_x,
                           tile_pos_y + TILE_HEIGHT,
@@ -545,9 +498,9 @@ void LVL_analyze(
 
                     // borrow from left
                     else {
-                        index = cells[obs_y-1][obs_x].edge[S];
+                        index = cells[obs_y][obs_x-1].edge[S];
                         cells[obs_y][obs_x].edge[S] = index;
-                        ptr = OBS_get(level->obstacle_segments, index);
+                        ptr = SEG_get(level->obstacle_segments, index);
                         ptr->x2 += TILE_WIDTH;
                     }
                 }
@@ -555,14 +508,58 @@ void LVL_analyze(
             }
         }
     }
+}
 
+
+// checks curent tile to draw, and calculates obstacles from it
+void LVL_draw(
+    level_t *level,
+    int      hero_x,
+    int      hero_y
+) {
+
+    level->obstacle_segments = NULL;  // just to be sure
+
+    // viewport coords
+    int st_x       = hero_x - SCREEN_WIDTH/2;
+    int st_y       = hero_y - SCREEN_HEIGHT/2;
+    int end_x      = hero_x + SCREEN_WIDTH/2;
+    int end_y      = hero_y + SCREEN_HEIGHT/2;
+    
+    int st_tile_pos_x  = st_x / TILE_WIDTH;
+    int st_tile_pos_y  = st_y / TILE_HEIGHT;
+
+    int end_tile_pos_x = end_x / TILE_WIDTH + 1;
+    int end_tile_pos_y = end_y / TILE_HEIGHT + 1;
+
+    for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
+        for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
+
+            tile_t* tile = LVL_tile_on_pos(level, x, y);
+            texture_t* texture = LVL_get_tile_texture(level, tile->index);
+
+            // TODO: after implementing framebuffer this wont render tile as fill such buffer.
+            int tile_pos_x = TILE_WIDTH  * x-st_x;
+            int tile_pos_y = TILE_HEIGHT * y-st_y;
+
+            GFX_render_tile(
+                    texture,
+                    tile_pos_x,
+                    tile_pos_y,
+                    tile->x,
+                    tile->y,
+                    TILE_WIDTH,
+                    TILE_HEIGHT
+                );
+        }
+    }
 }
 
 void LVL_free(
     level_t *level
 ) {
     free(level->obstacles);
-    OBS_free(level->obstacle_segments);
+    SEG_free(level->obstacle_segments);
     free(level->tileset_array);
     free(level->tile_array);
     free(level->structure);

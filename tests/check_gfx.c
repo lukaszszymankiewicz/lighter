@@ -2,6 +2,7 @@
 #include <SDL2/SDL_image.h>
 #include <check.h>
 #include "../src/gfx.h"
+#include "../src/segment.h"
 
 
 START_TEST (GFX_init_window_check)
@@ -55,51 +56,45 @@ START_TEST (GFX_init_graphics_check)
     GFX_free();
 }
 END_TEST
+ 
 
-START_TEST (GFX_clear_screen_check)
+START_TEST (GFX_calc_intersections_in_scanline_check)
 {
     // GIVEN
-    int w = 10;
-    int h = 10;
+    int result;
+    int y = 0;
+    int n;
+    int len = 0;
+    int expected_len = 2;
 
-    SDL_Surface *surface;
-    GFX_init_graphics(w, h);
-    SDL_PixelFormat *fmt;
-    SDL_Color *color;
-    Uint8 index;
-    Uint8 r, g, b;
+    segment_t* segments = NULL;
+    x_intersection_t* points = NULL;
+    x_intersection_t* ptr = NULL;
+
+    SEG_push(&segments, 287, 0, 256, 36);
+    SEG_push(&segments, 320, 0, 287, 0);
+    SEG_push(&segments, 320, 145, 320, 0);
 
     // WHEN
-    GFX_clear_screen();
+    result = GFX_init_graphics(100, 100);
+    points = GFX_calc_intersections_in_scanline(segments, y, &n);
+    
+    ptr = points;
+
+    while(ptr) {
+        len++;
+        ptr=ptr->next;
+    }
 
     // THEN
-    SDL_LockSurface(surface);
-    fmt = surface->format;
-    // index = *((Uint8*)surface->pixels);
-
-    SDL_GetRGB(0, fmt, &r, &g, &b);
-    SDL_UnlockSurface(surface);
-    // printf("%d\n", r);
-
-    // for (int i=0; i<w; i++)
-    // {
-    //     for (int j=0; j<h; j++)
-    //     {
-    //         color=&fmt->palette->colors[0];
-    //         ck_assert_int_eq(color->r, 0);
-    //         ck_assert_int_eq(color->g, 0);
-    //         ck_assert_int_eq(color->b, 0);
-    //         printf("Index: %d\n", pixel);
-    //     }
-    // }
+    ck_assert_int_eq(len, expected_len);
     
     // CLEANUP
     GFX_free();
 }
 END_TEST
 
-
-Suite * gfx_suite(void)
+Suite *gfx_suite(void)
 {
     Suite *s;
     TCase *tc_core;
@@ -110,7 +105,7 @@ Suite * gfx_suite(void)
     tcase_add_test(tc_core, GFX_init_window_check);
     tcase_add_test(tc_core, GFX_init_renderer_check);
     tcase_add_test(tc_core, GFX_init_graphics_check);
-    tcase_add_test(tc_core, GFX_clear_screen_check);
+    tcase_add_test(tc_core, GFX_calc_intersections_in_scanline_check);
 
     suite_add_tcase(s, tc_core);
 

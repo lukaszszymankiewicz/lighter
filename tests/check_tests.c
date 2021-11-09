@@ -1,11 +1,25 @@
 #include <check.h>
 #include "check_vertex.h"
 #include "check_light.h"
-#include "check_obstacle.h"
+#include "check_segment.h"
 #include "check_point.h"
+#include "check_gfx.h"
+#include "check_level.h"
+#include "check_events.h"
+#include "check_geometry.h"
+#include "check_hero.h"
+#include "check_intersection.h"
+#include "check_sprites.h"
 #include "../src/vertex.h"
+#include "../src/sprites.h"
+#include "../src/intersection.h"
+#include "../src/geometry.h"
 #include "../src/light.h"
-#include "../src/obstacle.h"
+#include "../src/segment.h"
+#include "../src/gfx.h"
+#include "../src/level.h"
+#include "../src/events.h"
+#include "../src/hero.h"
 
 int main(void) {
     int number_failed = 0;
@@ -30,16 +44,72 @@ int main(void) {
 
     printf("\n");
 
-    // obstacle
-    s = obstacle_suite();
+    // segment
+    s = segment_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
     printf("\n");
 
-    // light
+    // point
     s = point_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
+    printf("\n");
+
+    // GFX
+    // s = gfx_suite();
+    // sr = srunner_create(s);
+    // srunner_run_all(sr, CK_ENV);
+    // number_failed += srunner_ntests_failed(sr);
+
+    // printf("\n");
+
+    // level
+    s = level_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
+    printf("\n");
+
+    // events
+    s = events_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
+    printf("\n");
+
+    // geometry
+    s = geometry_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
+    printf("\n");
+
+    // hero
+    s = hero_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
+    printf("\n");
+
+    // intersection
+    s = intersection_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
+    printf("\n");
+
+    // sprites
+    s = sprites_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);

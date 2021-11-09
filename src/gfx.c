@@ -6,7 +6,7 @@
 #include "geometry.h"
 #include "vertex.h"
 #include "segment.h"
-#include "obstacle.h"
+
 
 SDL_Surface* surface = NULL;
 SDL_Window* window = NULL;
@@ -172,25 +172,26 @@ void GFX_render_texture(
     SDL_RenderCopyEx(renderer, texture->surface, clip, &render_quad, 0, NULL, flip_tex);
 };
 
+
 void GFX_draw_colored_line(
-    float x1,
-    float y1,
-    float x2,
-    float y2,
-    int   r,
-    int   g,
-    int   b,
-    int   a
+    int x1,
+    int y1,
+    int x2,
+    int y2,
+    int r,
+    int g,
+    int b,
+    int a
 ) {
     SDL_SetRenderDrawColor(renderer, r, g, b, a);     
     SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
 };
 
 void GFX_draw_colored_rect(
-    float x1,
-    float y1,
-    float w,
-    float h,
+    int x1,
+    int y1,
+    int w,
+    int h,
     int   r,
     int   g,
     int   b,
@@ -223,7 +224,7 @@ void GFX_draw_light_sectors_in_scanline(
         while (ptr->next) {
             GFX_draw_colored_line(ptr->x, y, ptr->next->x, y, r, g, b, a);
             ptr=ptr->next;
-            if (ptr->next == NULL){
+            if (ptr->next == NULL) {
                 break;
             }
             ptr=ptr->next;
@@ -283,10 +284,15 @@ x_intersection_t* GFX_calc_intersections_in_scanline(
     while(ptr){
         // line in perpendicular to y-axis
         if (ptr->y1 == ptr->y2){
-            INTSC_insert(&intersections, ptr->x1);
-            INTSC_insert(&intersections, ptr->x2);
+            // INTSC_insert(&intersections, ptr->x1);
+            // INTSC_insert(&intersections, ptr->x2);
             ptr=ptr->next;
-            (*n)=(*n)+2;
+            // (*n)=(*n)+2;
+        }
+        else if (ptr->x1 == ptr->x2) {
+            INTSC_insert(&intersections, ptr->x1);
+            ptr=ptr->next;
+            (*n)++;
         }
         else {
             x = GEO_x_intersection_with_slope(y, ptr->x1, ptr->y1, ptr->slope);
@@ -312,7 +318,7 @@ void GFX_draw_scanline(
 
     intersections = GFX_calc_intersections_in_scanline(segments, y, &n);
 
-    if (intersections){
+    if (intersections) {
         GFX_draw_light_sectors_in_scanline(intersections, y, n, r, g, b, a);
         GFX_draw_dark_sectors_in_scanline(intersections->next, y, n);
         INTSC_free(intersections);
@@ -365,19 +371,7 @@ void GFX_draw_light_polygon(
 
     // fill the rest with darkness (sounds deep)
     GFX_draw_colored_rect(0, y, SCREEN_WIDTH, y, DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A);
+
+    // this is temporay (until implementation of light frame buffer)
+    GFX_draw_colored_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, BACKGROUND_DARK_A);
 }
-
-
-// DEBUG function
-void GFX_debug_obs(
-    obstacle_t* obstacles
-) {
-    obstacle_t* ptr = NULL;
-    ptr = obstacles;
-
-    while(ptr) {
-        GFX_draw_colored_line(ptr->x1, ptr->y1, ptr->x2, ptr->y2, 255, 0, 0, 255); 
-        ptr=ptr->next;
-    }
-}
-

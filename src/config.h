@@ -23,12 +23,13 @@
 #define DEFAULT_DARK_R           0                  // default darkness R color
 #define DEFAULT_DARK_G           0                  // default darkness G color
 #define DEFAULT_DARK_B           0                  // default darkness B color
-#define DEFAULT_DARK_A           42                 // default darkness ALPHA channel
+#define DEFAULT_DARK_A           0                 // default darkness ALPHA channel
+#define BACKGROUND_DARK_A        69               // default background darkness ALPHA channel
 
 #define DEFAULT_LIGHT_R          255                // default light R color
-#define DEFAULT_LIGHT_G          255                // default light G color
-#define DEFAULT_LIGHT_B          255                // default light B color
-#define DEFAULT_LIGHT_A          20                 // default light ALPHA channel
+#define DEFAULT_LIGHT_G          252                // default light G color
+#define DEFAULT_LIGHT_B          187                // default light B color
+#define DEFAULT_LIGHT_A          10                 // default light ALPHA channel
 
 #define GAME_NAME                "Lighter"          // game windom nape
 #define TILES_FOLDER             "tiles/"

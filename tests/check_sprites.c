@@ -140,30 +140,6 @@ START_TEST (TXTR_push_animation_check)
 }
 END_TEST
 
-START_TEST (TXTR_init_texture_check)
-{
-    // GIVEN 
-    // TODO: make it automatic to scan all sprites in folder, now it is as lame as it can get
-    int len = 0;
-    char* filepaths[len];
-    
-    filepaths[0] = "../sprites/her2.png";
-
-    // WHEN
-    for (int i=0; i<len; i++)
-    {
-        // THEN
-        Texture * cur_texture = NULL;
-        cur_texture = TXTR_init_texture(filepaths[i]);
-        ck_assert_ptr_nonnull(cur_texture);
-
-        // CLEANUP
-        TXTR_free(cur_texture);
-    }
-
-}
-END_TEST
-
 Suite * sprites_suite(void)
     
 {
@@ -175,11 +151,11 @@ Suite * sprites_suite(void)
     /* Core test case */
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, TXTR_init_texture_check);
     tcase_add_test(tc_core, TXTR_init_animation_sheet_check);
     tcase_add_test(tc_core, TXTR_init_animation_check);
     tcase_add_test(tc_core, TXTR_push_animation_check);
 
     suite_add_tcase(s, tc_core);
+
     return s;
 }

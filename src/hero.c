@@ -30,7 +30,6 @@ hero_t* HERO_init(
     hero_o->frame_t = 0;
     hero_o->x_vel   = 0;
 
-    // TODO: do this in hero.h as some kewl array
     TXTR_push_animation(
         hero_o->sprites,
         STANDING,
@@ -56,18 +55,21 @@ hero_t* HERO_init(
     return hero_o;
 }
 
+// gets x coord of light hero is holding
 int HERO_light_x(
     hero_t *hero_o
 ) {
     return hero_o->view_x + lightpos_x_corr[hero_o->direction];
 }
 
+// gets y coord of light hero is holding
 int HERO_light_y(
     hero_t *hero_o
 ) {
     return hero_o->view_y  + lightpos_y_corr[hero_o->direction];
 }
 
+// updates the animation, positions and the physics of hero
 void HERO_update(
     hero_t *hero_o
 ) {
@@ -125,8 +127,6 @@ SDL_Rect* HERO_current_frame(
 void HERO_draw(
     hero_t *hero_o
 ) {
-    // TODO: position of hero to drawn is fixed! This should be changed and sotred as another
-    // variable!
     GFX_render_texture(
         hero_o->sprites->texture,
         HERO_current_frame(hero_o),

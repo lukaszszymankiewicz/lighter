@@ -17,18 +17,6 @@ TARGET =                \
 	src/light.c         \
 	src/vertex.c        \
 	src/segment.c       \
-	src/obstacle.c      \
-	src/point.c         \
-
-SAMPLETARGET = \
-	src/gfx.c           \
-    src/light.c         \
-    src/obstacle.c      \
-	src/segment.c       \
-	src/geometry.c      \
-	src/intersection.c  \
-    sample2.c           \
-	src/vertex.c        \
 	src/point.c         \
 
 all:
@@ -36,9 +24,6 @@ all:
 
 lighter: 
 	$(CC) $(CFLAGS) $(TARGET) -o $(OBJ) $(LINKS) $(LIBS)
-
-temp: 
-	$(CC) $(CFLAGS) $(SAMPLETARGET) -o temp $(LINKS) $(LIBS)
 
 clean:
 	$(RM) $(OBJ)

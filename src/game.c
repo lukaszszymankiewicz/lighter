@@ -8,7 +8,7 @@
 #include "tile.h"
 #include "level.h"
 #include "light.h"
-#include "obstacle.h"
+#include "segment.h"
 
 void GAME_close(
     game_t *game
@@ -62,12 +62,13 @@ int main(
     EVNT_init();
     TIMER_start(game->fps_timer);
 
+    // main game loop
     while(game->loop) {
         TIMER_start(game->cap_timer);
         EVNT_handle_events(game);
         GFX_clear_screen();
-
         HERO_update(game->hero);
+        LVL_draw(game->level, game->hero->x, game->hero->y);
         LVL_analyze(game->level, game->hero->x, game->hero->y);
         LIG_draw_light_effect(
             HERO_light_x(game->hero),

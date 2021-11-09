@@ -80,67 +80,17 @@ START_TEST (GEO_seg_intersection_with_y_check)
     float x_inter;
     
     // WHEN && THEN
-    x_inter = GEO_seg_intersection_with_y(15, x1, y1, x2, y2);
+    x_inter = GEO_intersection_with_y(15, x1, y1, x2, y2);
     ck_assert_float_eq(x_inter, 5.0);
 
-    x_inter = GEO_seg_intersection_with_y(0, x1, y1, x2, y2);
+    x_inter = GEO_intersection_with_y(0, x1, y1, x2, y2);
     ck_assert_float_eq(x_inter, 20.0);
 
-    x_inter = GEO_seg_intersection_with_y(10, x1, y1, x2, y2);
+    x_inter = GEO_intersection_with_y(10, x1, y1, x2, y2);
     ck_assert_float_eq(x_inter, 10.0);
 
-    x_inter = GEO_seg_intersection_with_y(11, x1, y1, x2, y2);
+    x_inter = GEO_intersection_with_y(11, x1, y1, x2, y2);
     ck_assert_float_eq(x_inter, 9.0);
-}
-END_TEST
-
-START_TEST (GEO_if_seg_intersect_with_y_check_positive)
-{
-    // GIVEN
-    bool result;
-    
-    // WHEN && THEN
-    result = GEO_if_seg_intersect_with_y(1, 0, 10);
-    ck_assert_float_eq(result, 1);
-
-    result = GEO_if_seg_intersect_with_y(1, 10, 0);
-    ck_assert_float_eq(result, 1);
-
-    result = GEO_if_seg_intersect_with_y(0, 0, 10);
-    ck_assert_float_eq(result, 0);
-
-    result = GEO_if_seg_intersect_with_y(0, 10, 0);
-    ck_assert_float_eq(result, 0);
-
-    result = GEO_if_seg_intersect_with_y(10, 0, 10);
-    ck_assert_float_eq(result, 1);
-
-    result = GEO_if_seg_intersect_with_y(10, 10, 0);
-    ck_assert_float_eq(result, 1);
-
-    result = GEO_if_seg_intersect_with_y(11, 0, 10);
-    ck_assert_float_eq(result, 0);
-
-    result = GEO_if_seg_intersect_with_y(11, 10, 0);
-    ck_assert_float_eq(result, 0);
-}
-END_TEST
-
-START_TEST (GEO_distance_check)
-{
-    // GIVEN
-    float dist;
-    
-    // WHEN && THEN
-    dist = GEO_distance(0, 10, 10, 10);
-    ck_assert_float_eq(dist, 10);
-
-    dist = GEO_distance(10, 10, -10, 10);
-    ck_assert_float_eq(dist, 20);
-
-    dist = GEO_distance(10, 10, 20, 20);
-    ck_assert_float_ge(dist, 1.41*10);
-    ck_assert_float_ge(dist, 1.41*10+0.01);
 }
 END_TEST
 
@@ -156,8 +106,6 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_pt_in_triangle_check_edge);
     tcase_add_test(tc_core, GEO_pt_in_triangle_check_negative);
     tcase_add_test(tc_core, GEO_seg_intersection_with_y_check);
-    tcase_add_test(tc_core, GEO_if_seg_intersect_with_y_check_positive);
-    tcase_add_test(tc_core, GEO_distance_check);
 
     suite_add_tcase(s, tc_core);
 

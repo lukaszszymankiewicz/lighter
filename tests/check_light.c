@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "../src/light.h"
-#include "../src/obstacle.h"
+#include "../src/segment.h"
 #include "../src/vertex.h"
 #include "../src/point.h"
 #include "../src/macros.h"
@@ -11,8 +11,8 @@
 START_TEST (LIG_get_visible_obstacles_check) 
 {
     // GIVEN
-    obstacle_t* obstacles = NULL;
-    obstacle_t* visible_obstacles = NULL;
+    segment_t* obstacles = NULL;
+    segment_t* visible_obstacles = NULL;
     int expected_len = 5;
 
     int x = 80; 
@@ -21,20 +21,20 @@ START_TEST (LIG_get_visible_obstacles_check)
     float angle = LEFT_RAD;
 
     // border
-    OBS_push(&obstacles, 0,   0,   100, 0  );   // upper 
-    OBS_push(&obstacles, 0,   100, 100, 100);   // donwer
-    OBS_push(&obstacles, 0,   0,   0,   100);   // left
-    OBS_push(&obstacles, 100, 0,   100, 100);   // right
+    SEG_push(&obstacles, 0,   0,   100, 0  );   // upper 
+    SEG_push(&obstacles, 0,   100, 100, 100);   // donwer
+    SEG_push(&obstacles, 0,   0,   0,   100);   // left
+    SEG_push(&obstacles, 100, 0,   100, 100);   // right
     
     // obstacles
-    OBS_push(&obstacles, 10, 10, 20, 10);
-    OBS_push(&obstacles, 20, 10, 20, 50);
-    OBS_push(&obstacles, 20, 50, 10, 50);
-    OBS_push(&obstacles, 10, 50, 10, 10);
+    SEG_push(&obstacles, 10, 10, 20, 10);
+    SEG_push(&obstacles, 20, 10, 20, 50);
+    SEG_push(&obstacles, 20, 50, 10, 50);
+    SEG_push(&obstacles, 10, 50, 10, 10);
 
     // THEN
     visible_obstacles = LIG_get_visible_obstacles(obstacles, y, x, angle, width);
-    int calculated_length = OBS_len(visible_obstacles);
+    int calculated_length = SEG_len(visible_obstacles);
     
     ck_assert_int_eq(calculated_length, expected_len);
 }
@@ -43,7 +43,7 @@ END_TEST
 START_TEST (LIG_calc_hit_points_real_life_example_check) 
 {
     // GIVEN
-    obstacle_t *obstacles = NULL;
+    segment_t *obstacles = NULL;
     point_t    *points    = NULL;
 
     // four vertex of obstacle vertices, two border points on edge of slight plus one vertex of
@@ -55,11 +55,11 @@ START_TEST (LIG_calc_hit_points_real_life_example_check)
     float width = 0.448786;
     float angle = -0.625243;
 
-    OBS_push(&obstacles, 0,   0,  320, 0);
-    OBS_push(&obstacles, 320, 0,  320, 200);
-    OBS_push(&obstacles, 274, 4,  274, 36);
-    OBS_push(&obstacles, 242, 4,  274, 4);
-    OBS_push(&obstacles, 242, 36, 274, 36);
+    SEG_push(&obstacles, 0,   0,  320, 0);
+    SEG_push(&obstacles, 320, 0,  320, 200);
+    SEG_push(&obstacles, 274, 4,  274, 36);
+    SEG_push(&obstacles, 242, 4,  274, 4);
+    SEG_push(&obstacles, 242, 36, 274, 36);
 
     // THEN
     points = LIG_calc_hit_points(x, y, angle,  width, obstacles);
@@ -72,7 +72,7 @@ END_TEST
 START_TEST (LIG_calc_hit_points_check) 
 {
     // GIVEN
-    obstacle_t *obstacles = NULL;
+    segment_t *obstacles = NULL;
     point_t    *points    = NULL;
 
     int expected_len = 5;
@@ -83,16 +83,16 @@ START_TEST (LIG_calc_hit_points_check)
     float angle = LEFT_RAD;
 
     // border
-    OBS_push(&obstacles, 0,   0,   100, 0  );   // upper 
-    OBS_push(&obstacles, 0,   100, 100, 100);   // donwer
-    OBS_push(&obstacles, 0,   0,   0,   100);   // left
-    OBS_push(&obstacles, 100, 0,   100, 100);   // right
+    SEG_push(&obstacles, 0,   0,   100, 0  );   // upper 
+    SEG_push(&obstacles, 0,   100, 100, 100);   // donwer
+    SEG_push(&obstacles, 0,   0,   0,   100);   // left
+    SEG_push(&obstacles, 100, 0,   100, 100);   // right
     
     // obstacles
-    OBS_push(&obstacles, 10, 10, 20, 10);
-    OBS_push(&obstacles, 20, 10, 20, 50);
-    OBS_push(&obstacles, 20, 50, 10, 50);
-    OBS_push(&obstacles, 10, 50, 10, 10);
+    SEG_push(&obstacles, 10, 10, 20, 10);
+    SEG_push(&obstacles, 20, 10, 20, 50);
+    SEG_push(&obstacles, 20, 50, 10, 50);
+    SEG_push(&obstacles, 10, 50, 10, 10);
 
     // THEN
     points = LIG_calc_hit_points(x, y, angle,  width, obstacles);
@@ -106,10 +106,10 @@ END_TEST
 START_TEST (LIG_calc_light_polygon_check) 
 {
     // GIVEN
-    obstacle_t* obstacles = NULL;
+    segment_t* obstacles = NULL;
     vertex_t* light_vertex = NULL;
 
-    int expected_len = (4 + 1)*2 +1;
+    int expected_len = 7;
 
     int x = 80; 
     int y = 90; 
@@ -117,16 +117,16 @@ START_TEST (LIG_calc_light_polygon_check)
     float angle = LEFT_RAD;
 
     // border
-    OBS_push(&obstacles, 0,   0,   100, 0  );   // upper 
-    OBS_push(&obstacles, 0,   100, 100, 100);   // donwer
-    OBS_push(&obstacles, 0,   0,   0,   100);   // left
-    OBS_push(&obstacles, 100, 0,   100, 100);   // right
+    SEG_push(&obstacles, 0,   0,   100, 0  );   // upper 
+    SEG_push(&obstacles, 0,   100, 100, 100);   // donwer
+    SEG_push(&obstacles, 0,   0,   0,   100);   // left
+    SEG_push(&obstacles, 100, 0,   100, 100);   // right
     
     // obstacles
-    OBS_push(&obstacles, 10, 10, 20, 10);
-    OBS_push(&obstacles, 20, 10, 20, 50);
-    OBS_push(&obstacles, 20, 50, 10, 50);
-    OBS_push(&obstacles, 10, 50, 10, 10);
+    SEG_push(&obstacles, 10, 10, 20, 10);
+    SEG_push(&obstacles, 20, 10, 20, 50);
+    SEG_push(&obstacles, 20, 50, 10, 50);
+    SEG_push(&obstacles, 10, 50, 10, 10);
 
     // THEN
     light_vertex = LIG_calc_light_polygon(x, y, angle,  width, obstacles);
@@ -141,7 +141,7 @@ START_TEST (LIG_calc_light_polygon_check)
     // every light point must belong to some obstacle segment (no point inside or outside).
         found = 0;
         
-        obstacle_t* o = NULL; 
+        segment_t* o = NULL; 
         o = obstacles; 
 
         while(o) {
@@ -190,7 +190,7 @@ START_TEST (LIG_ray_hits_obstacle_vertical_pass)
     int x2s[4] = {60,  70, 30,   2};
     int y2s[4] = {70,  50, 40,  40};
     
-    obstacle_t* obstacle = OBS_init(50, 20, 50, 80);
+    segment_t* obstacle = SEG_init(50, 20, 50, 80);
 
     for (int i=0; i<n_tests; i++) {
         x1 = x1s[i];
@@ -222,7 +222,7 @@ START_TEST (LIG_ray_hits_obstacle_vertical_fail)
     int x2s[4] = {60, 60,  20, 20};
     int y2s[4] = {90, 90,  40, 70};
     
-    obstacle_t* obstacle = OBS_init(50, 20, 50, 80);
+    segment_t* obstacle = SEG_init(50, 20, 50, 80);
 
     for (int i=0; i<1; i++) {
         x1 = x1s[i];
@@ -250,7 +250,7 @@ START_TEST (LIG_ray_hits_obstacle_vertical_pass_edge_cases)
     int x2s[4] = {50,  50};
     int y2s[4] = {20,  80};
     
-    obstacle_t* obstacle = OBS_init(50, 20, 50, 80);
+    segment_t* obstacle = SEG_init(50, 20, 50, 80);
 
     for (int i=0; i<n_tests; i++) {
         x1 = x1s[i];
@@ -281,7 +281,7 @@ START_TEST (LIG_ray_hits_obstacle_horizontal_pass)
     int x2s[4] = {60, 30, 30, 70};
     int y2s[4] = {70, 70, 40,  2};
     
-    obstacle_t* obstacle = OBS_init(20, 50, 80, 50);
+    segment_t* obstacle = SEG_init(20, 50, 80, 50);
 
     for (int i=0; i<n_tests; i++) {
         x1 = x1s[i];
@@ -316,7 +316,7 @@ START_TEST (LIG_ray_hits_obstacle_horizontal_fail)
     int x2s[4] = {100, 10, 60,  0};
     int y2s[4] = {60,  70,  0,  0};
     
-    obstacle_t* obstacle = OBS_init(20, 50, 80, 50);
+    segment_t* obstacle = SEG_init(20, 50, 80, 50);
 
     for (int i=0; i<n_tests; i++) {
         x1 = x1s[i];
@@ -346,7 +346,7 @@ START_TEST (LIG_ray_hits_obstacle_horizontal_edge_cases)
     int x2s[4] = {20,  80};
     int y2s[4] = {50,  50};
     
-    obstacle_t* obstacle = OBS_init(20, 50, 80, 50);
+    segment_t* obstacle = SEG_init(20, 50, 80, 50);
 
     for (int i=0; i<n_tests; i++) {
         x1 = x1s[i];
@@ -373,13 +373,13 @@ START_TEST (LIG_closest_intersection_with_obstacle_check)
     
     int expected_hit_x  = 30;
 
-    obstacle_t* obstacles = OBS_init(20, 50, 80, 50);
+    segment_t* obstacles = SEG_init(20, 50, 80, 50);
 
-    OBS_push(&obstacles, expected_hit_x, 30, expected_hit_x, 70);
-    OBS_push(&obstacles, 50, 20, 50, 80);
-    OBS_push(&obstacles, 60, 10, 60, 90);
-    OBS_push(&obstacles, 60, 10, 60, 90);
-    OBS_push(&obstacles, 40, 60, 40, 100);
+    SEG_push(&obstacles, expected_hit_x, 30, expected_hit_x, 70);
+    SEG_push(&obstacles, 50, 20, 50, 80);
+    SEG_push(&obstacles, 60, 10, 60, 90);
+    SEG_push(&obstacles, 60, 10, 60, 90);
+    SEG_push(&obstacles, 40, 60, 40, 100);
 
     result_pt = LIG_closest_intersection_with_obstacle(x1, y1, x2, y2, obstacles);
 
@@ -398,17 +398,17 @@ START_TEST (LIG_any_intersection_with_obstacle_check)
     int x2 = 60;
     int y2 = 100;
     bool result_pt = NULL;
-    obstacle_t* obstacles = NULL;
+    segment_t* obstacles = NULL;
 
-    OBS_push(&obstacles, 60, 0, 60, 100);
+    SEG_push(&obstacles, 60, 0, 60, 100);
     result_pt = LIG_any_intersection_with_obstacle(x1, y1, x2, y2, obstacles);
     ck_assert_int_eq(result_pt, 0);
 
-    OBS_push(&obstacles, 20, 0, 20, 100);
+    SEG_push(&obstacles, 20, 0, 20, 100);
     result_pt = LIG_any_intersection_with_obstacle(x1, y1, x2, y2, obstacles);
     ck_assert_int_eq(result_pt, 1);
 
-    OBS_push(&obstacles, 40, 0, 40, 200);
+    SEG_push(&obstacles, 40, 0, 40, 200);
     result_pt = LIG_any_intersection_with_obstacle(x1, y1, x2, y2, obstacles);
     ck_assert_int_eq(result_pt, 1);
 }
