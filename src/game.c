@@ -73,6 +73,7 @@ int main(
         LIG_draw_light_effect(
             HERO_light_x(game->hero),
             HERO_light_y(game->hero),
+            game->frame,
             game->light,
             game->level->obstacle_segments
         );

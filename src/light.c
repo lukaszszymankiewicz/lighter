@@ -62,19 +62,6 @@ light_t *LIG_init() {
     return light_o;
 }
 
-// calculates small angle correction to make light effect be more realistic. Charachteristic
-// "wobbling" effect is achieved while changing angle in small amount slowly.
-void LIG_wobble_angle(
-    light_t *lght,
-    int      frame
-) {
-    if ((frame % lght->src->wobble_change_dir_coef) == 0) {
-        lght->wobble_dir = (-1) * lght->wobble_dir;
-    }
-
-    lght->wobble += lght->src->wobble_corr * lght->wobble_dir;
-}
-
 // moves light angle due to wobble and/org looking up/down
 void LIG_move_lightsource(
     light_t     *light_o,
@@ -82,8 +69,7 @@ void LIG_move_lightsource(
     direction_t  hero_dir,
     int          frame
 ) {
-    LIG_wobble_angle(light_o, frame);
-    light_o->angle = lightpos_up_down_corr[hero_dir][light_dir] + light_o->wobble;
+    light_o->angle = lightpos_up_down_corr[hero_dir][light_dir];
 }
 
 // draws rays into every vertex of the lightpolygon
@@ -367,6 +353,16 @@ float LIG_get_light_polygon_width_corr(
     return 0.0;
 }
 
+void LIG_get_jiggy_with_it(
+    light_t *lght,
+    int frame
+) {
+    if ((frame % lght->src->wobble_change_dir_coef) == 0) {
+        lght->wobble_dir = (-1) * lght->wobble_dir;
+    }
+    lght->wobble += lght->src->wobble_corr * lght->wobble_dir;
+}
+
 // Calculates and draws light polygons. Every of the light source needs several polygons to be drawn
 // - every one of them is slightly moved to another which makes light looks more "natural".
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
@@ -374,6 +370,7 @@ float LIG_get_light_polygon_width_corr(
 void LIG_draw_light_effect(
     int        x,
     int        y,
+    int        frame,
     light_t    *lght,
     segment_t  *obstacles
 ) {
@@ -384,7 +381,8 @@ void LIG_draw_light_effect(
     int   alpha;            // color of current light polygon drawn
     int   x_corr, y_corr;   // x and y correction values (light polygon can be shifted from its starting point)
     float width_corr;       // light width correction (some light polygons can be wider)
-
+    
+    LIG_get_jiggy_with_it(lght, frame);
     vertex_t* light_polygon = NULL;
 
     for (i=0; i < lght->src->n_poly; i++) {
@@ -399,7 +397,7 @@ void LIG_draw_light_effect(
 
         // calculating the light polygon shape
         light_polygon = LIG_calc_light_polygon(
-            x+x_corr, y+y_corr, lght->angle, lght->src->width+width_corr, obstacles
+            x+x_corr, y+y_corr, lght->angle+lght->wobble, lght->src->width+width_corr, obstacles
         );
 
         // drawing the light
