@@ -39,7 +39,7 @@ float GEO_intersection_with_y
     int x1,      int y1,     // segment begginig
     int x2,      int y2      // segment end
 ) {
-    return x1 + ((float)((x2 - x1) * (y - y1)) / (y2 - y1));
+    return (float)x1 + ((float)((x2 - x1) * (y - y1)) / (y2 - y1));
 }
 
 // Checks where x-line intersect with given segment. As y coord of such point is known from the
@@ -50,7 +50,7 @@ float GEO_intersection_with_x
     int x1,      int y1,     // segment begginig
     int x2,      int y2      // segment end
 ) {
-    return y1 + ((float)(y2 - y1) * (x - x1)) / (x2 - x1);
+    return (float)y1 + ((float)(y2 - y1) * (x - x1)) / (x2 - x1);
 }
 
 // Checks where y-line intersect with given segment. As y coord of such point is known from the

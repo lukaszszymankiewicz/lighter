@@ -198,70 +198,6 @@ bool LIG_any_intersection_with_obstacle(
     return false;
 }
 
-// filters visible light obstacles for optimisation purposes (hits do not need to be check for all
-// obstacles rather tan only those filtered one).
-segment_t* LIG_get_visible_obstacles(
-    segment_t *obstacles,   // obstacles to be filtered
-    int        y,           // x starting point (hero)
-    int        x,           // y starting point (hero)
-    float      angle,       // angle of light
-    float      width        // light width
-) {
-    segment_t* filtered_obstacles = NULL;
-    segment_t* s                  = NULL;
-    s                             = obstacles;
-
-    // only segments within visible range + epsilon is filtered
-    int a_border_x = (int)x - sin(angle - width - eps_angle) * R;
-    int a_border_y = (int)y - cos(angle - width - eps_angle) * R;
-    int b_border_x = (int)x - sin(angle + width + eps_angle) * R;
-    int b_border_y = (int)y - cos(angle + width + eps_angle) * R;
-
-    while(s) { 
-        if (GEO_pt_in_triangle(
-                s->x1,      s->y1,
-                x,          y,
-                a_border_x, a_border_y,
-                b_border_x, b_border_y
-            )
-            ||
-            GEO_pt_in_triangle(
-                s->x2,      s->y2,
-                x,          y,
-                a_border_x, a_border_y,
-                b_border_x, b_border_y
-            )) {
-
-            SEG_push(&filtered_obstacles, s->x1, s->y1, s->x2, s->y2);
-        }
-        s = s->next;
-    }
-
-    return filtered_obstacles;
-}
-
-// filters obstacles by choosing only those which is in sight. Light can sweeps all around so all
-// obstacles can be needed. If so, original obstacles are returned.
-segment_t* LIG_filter_obstacles_by_sight(
-    int        x,           // x starting point (hero)
-    int        y,           // y starting point (hero)
-    float      angle,       // light angle (do not important if light sweeps all around)
-    float      width,       // light cone width (0.0, if light sweeps all around)
-    segment_t *obstacles    // sets of obstacles 
-) {
-    segment_t* filtered_obstacles = NULL;
-
-    if (width != 0.0) {
-        filtered_obstacles = LIG_get_visible_obstacles(obstacles, x, y, angle, width);
-    }
-
-    else {
-        filtered_obstacles = obstacles; 
-    }
-
-    return filtered_obstacles;
-}
-
 // Calculates end of light rays, only those ends of obstacles which is in sight of light cone is
 // filtered. If light sweeps all around all segment ends are taken into account.
 point_t* LIG_calc_hit_points(
@@ -334,14 +270,11 @@ vertex_t* LIG_calc_light_polygon(
     float width,           // light width
     segment_t *obstacles   // sets of obstacles
 ) { 
-    segment_t *filtered_obstacles = NULL;   // not every level obstacle is taken into account
     vertex_t  *light_polygon      = NULL;   // here is points which make light polygon is stored
     point_t   *hit_points         = NULL;   // here is points to check ray hit stored
 
     // calculating ray ends
     hit_points         = LIG_calc_hit_points(x, y, angle, width, obstacles);
-    // obstacles are filtered for optimization
-    filtered_obstacles = LIG_filter_obstacles_by_sight(x, y, angle, width, obstacles);
     
     // for ray is checked for collision and the two rays which shifts from this one (by a little
     // angle).
@@ -352,7 +285,7 @@ vertex_t* LIG_calc_light_polygon(
         angle = VRTX_calculate_angle(x, y, pt->x, pt->y);
 
         // direct ray (if direct ray hits anything, it should not be pushed into light vertex)
-        if (!LIG_any_intersection_with_obstacle(x, y, pt->x, pt->y, filtered_obstacles)) {
+        if (!LIG_any_intersection_with_obstacle(x, y, pt->x, pt->y, obstacles)) {
             VRTX_add_point(&light_polygon, pt->x, pt->y, angle);
         }
 
@@ -362,7 +295,7 @@ vertex_t* LIG_calc_light_polygon(
             y,
             pt->x - sin(angle + smol_angle) * R,
             pt->y - cos(angle + smol_angle) * R,
-            filtered_obstacles
+            obstacles
         );
         VRTX_add_point(&light_polygon, new_point_a->x, new_point_a->y, angle+smol_angle);
 
@@ -372,7 +305,7 @@ vertex_t* LIG_calc_light_polygon(
             y,
             pt->x - sin(angle - smol_angle) * R,
             pt->y - cos(angle - smol_angle) * R,
-            filtered_obstacles
+            obstacles
         );
         VRTX_add_point(&light_polygon, new_point_b->x, new_point_b->y, angle-smol_angle);
     }
@@ -387,8 +320,6 @@ vertex_t* LIG_calc_light_polygon(
     
     // polygon point optimization process (deleting redundant points)
     VRTX_optim(light_polygon);
-    SEG_free(filtered_obstacles);
-
     // OBS_free(obstacles);
 
     return light_polygon;
@@ -441,10 +372,10 @@ float LIG_get_light_polygon_width_corr(
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
 // looking like "gradient".
 void LIG_draw_light_effect(
-    int         x,
-    int         y,
+    int        x,
+    int        y,
     light_t    *lght,
-    segment_t *obstacles
+    segment_t  *obstacles
 ) {
     int   i;                // index of current light polygon drawn
     int   red;              // color of current light polygon drawn
