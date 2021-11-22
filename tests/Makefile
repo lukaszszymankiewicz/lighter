@@ -11,7 +11,7 @@ TARGET =                     \
 	check_level.c       	 \
 	check_geometry.c       	 \
 	check_hero.c       	     \
-	check_intersection.c     \
+	check_sorted_list.c      \
 	check_sprites.c          \
 	../src/gfx.c             \
 	../src/sprites.c         \
@@ -21,7 +21,7 @@ TARGET =                     \
 	../src/tile.c            \
 	../src/level.c           \
 	../src/geometry.c        \
-	../src/intersection.c    \
+	../src/sorted_list.c     \
 	../src/light.c           \
 	../src/vertex.c          \
 	../src/segment.c         \

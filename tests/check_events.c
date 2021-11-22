@@ -62,13 +62,13 @@ START_TEST (EVNT_handle_events_check)
     game->event.type = SDL_KEYDOWN;
     game->event.key.keysym.sym = SDL_SCANCODE_UP;
     EVNT_handle_events(game);
-    ck_assert_int_eq(hero_o->state, 0);
+    ck_assert_int_eq(hero_o->state, 2);
 
     // WHEN (MOVING DOWN)
     game->event.type = SDL_KEYDOWN;
     game->event.key.keysym.sym = SDL_SCANCODE_DOWN;
     EVNT_handle_events(game);
-    ck_assert_int_eq(hero_o->state, 0);
+    ck_assert_int_eq(hero_o->state, 2);
 
     // CLEANING
     free(hero_o);

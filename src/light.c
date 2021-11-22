@@ -1,4 +1,5 @@
 #include "config.h"
+#include "game.h"
 #include "segment.h"
 #include "geometry.h"
 #include "gfx.h"
@@ -9,11 +10,44 @@
 #include "point.h"
 #include "macros.h"
 
+// yeah, this should be in some file
+wobble_t no_wobble = {
+    .len = 1,
+    .coefs = {0.0}
+};
+
+// yeah, this should be in some file
+wobble_t stable_wobble = {
+    .len = 82,
+    .coefs = {
+        0.006, 0.006, 0.009, 0.009, 0.012, 0.012, 0.017, 0.017, 0.022, 0.022,
+        0.027, 0.027, 0.033, 0.033, 0.038, 0.038, 0.042, 0.042, 0.045, 0.045,
+        0.046, 0.046, 0.045, 0.045, 0.042, 0.042, 0.038, 0.038, 0.033, 0.033,
+        0.027, 0.027, 0.022, 0.022, 0.017, 0.017, 0.012, 0.012, 0.009, 0.009,
+        0.0, 0.0,
+        -0.006, -0.006, -0.009, -0.009, -0.012, -0.012, -0.017, -0.017, -0.022, -0.022,
+        -0.027, -0.027, -0.033, -0.033, -0.038, -0.038, -0.042, -0.042, -0.045, -0.045,
+        -0.046, -0.046, -0.045, -0.045, -0.042, -0.042, -0.038, -0.038, -0.033, -0.033,
+        -0.027, -0.027, -0.022, -0.022, -0.017, -0.017, -0.012, -0.012, -0.009, -0.009
+    }
+};
+
+// yeah, this should be in some file
+wobble_t walk_wobble = {
+    .len = 15,
+    .coefs = {
+        0.012, 0.054, 0.082, 0.1, 0.082, 
+        0.054, 0.012,
+        0.0,
+        -0.012, -0.054, -0.082, -0.1, -0.082,
+        -0.054, -0.012, }
+};
+
+// yeah, this should be in some file
 lightsource_t lantern = {
     .width = 0.0,
     .n_poly = 9,
-    .wobble_corr = 0.0,
-    .wobble_change_dir_coef = 1,
+    .wobble = {&no_wobble, &no_wobble},
     .polys = {
         {-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0 },
         { 10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0 },
@@ -27,11 +61,11 @@ lightsource_t lantern = {
     },
 };
 
+// yeah, this should be in some file
 lightsource_t lighter = {
     .width = PI / 7,
     .n_poly = 6,
-    .wobble_corr = 0.001,
-    .wobble_change_dir_coef = 30,
+    .wobble = {&stable_wobble, &walk_wobble},
     .polys = {
         {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 90, 0  },
         {  4,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0  },
@@ -56,8 +90,6 @@ light_t *LIG_init() {
     light_o->src_num    = LIGHTER;
     light_o->src        = lightsources[light_o->src_num];
     light_o->angle      = LEFT_RAD+DEG30;
-    light_o->wobble_dir = WOBBLE_DOWN;
-    light_o->wobble     = 0;
 
     return light_o;
 }
@@ -296,16 +328,16 @@ vertex_t* LIG_calc_light_polygon(
         VRTX_add_point(&light_polygon, new_point_b->x, new_point_b->y, angle-smol_angle);
     }
 
-    VRTX_add_point(&light_polygon, x, y, 0);
+    if (width != 0.0) {
+        VRTX_add_point(&light_polygon, x, y, 0);
+    }
 
-    // if (DEBUG){ LIG_debug_obstacle_ends(x, y, filtered_obstacles);}
-    // if (DEBUG){ LIG_debug_obstacle(filtered_obstacles); }
-    // if (DEBUG){ LIG_debug_points(hit_points); }
-    // if (DEBUG){ LIG_debug_rays(light_polygon, x, y, 200);}
-    // if (DEBUG){ LIG_debug_dark_sectors(light_polygon);}
+    if (debug == DEBUG_OBSTACLE_LINES) { LIG_debug_obstacle(obstacles); }
+    if (debug == DEBUG_LIGHT_RAYS) { LIG_debug_rays(light_polygon, x, y, 200);}
     
     // polygon point optimization process (deleting redundant points)
     VRTX_optim(light_polygon);
+
     // OBS_free(obstacles);
 
     return light_polygon;
@@ -353,14 +385,19 @@ float LIG_get_light_polygon_width_corr(
     return 0.0;
 }
 
-void LIG_get_jiggy_with_it(
+float LIG_get_wobble_angle_coef(
     light_t *lght,
-    int frame
+    int      x_vel,
+    int      frame
 ) {
-    if ((frame % lght->src->wobble_change_dir_coef) == 0) {
-        lght->wobble_dir = (-1) * lght->wobble_dir;
+    int state = 0;
+
+    if (x_vel != 0) {
+        state=1;
     }
-    lght->wobble += lght->src->wobble_corr * lght->wobble_dir;
+
+    wobble_t *current_wobble = lght->src->wobble[state];
+    return current_wobble->coefs[frame%current_wobble->len];
 }
 
 // Calculates and draws light polygons. Every of the light source needs several polygons to be drawn
@@ -368,11 +405,12 @@ void LIG_get_jiggy_with_it(
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
 // looking like "gradient".
 void LIG_draw_light_effect(
-    int        x,
-    int        y,
-    int        frame,
-    light_t    *lght,
-    segment_t  *obstacles
+    int x,
+    int y,
+    int frame,
+    light_t *light,
+    segment_t *obstacles,
+    int x_vel
 ) {
     int   i;                // index of current light polygon drawn
     int   red;              // color of current light polygon drawn
@@ -381,23 +419,28 @@ void LIG_draw_light_effect(
     int   alpha;            // color of current light polygon drawn
     int   x_corr, y_corr;   // x and y correction values (light polygon can be shifted from its starting point)
     float width_corr;       // light width correction (some light polygons can be wider)
-    
-    LIG_get_jiggy_with_it(lght, frame);
+    float wobble_corr; 
+
+    wobble_corr = LIG_get_wobble_angle_coef(light, x_vel, frame);
     vertex_t* light_polygon = NULL;
 
-    for (i=0; i < lght->src->n_poly; i++) {
-        red        = LIG_get_light_polygon_color(lght, i, RED);
-        green      = LIG_get_light_polygon_color(lght, i, GREEN);
-        blue       = LIG_get_light_polygon_color(lght, i, BLUE);
-        alpha      = LIG_get_light_polygon_color(lght, i, ALPHA);
+    for (i=0; i < light->src->n_poly; i++) {
+        red        = LIG_get_light_polygon_color(light, i, RED);
+        green      = LIG_get_light_polygon_color(light, i, GREEN);
+        blue       = LIG_get_light_polygon_color(light, i, BLUE);
+        alpha      = LIG_get_light_polygon_color(light, i, ALPHA);
 
-        x_corr     = LIG_get_light_polygon_x_corr(lght, i);
-        y_corr     = LIG_get_light_polygon_y_corr(lght, i);
-        width_corr = LIG_get_light_polygon_width_corr(lght, i);
+        x_corr     = LIG_get_light_polygon_x_corr(light, i);
+        y_corr     = LIG_get_light_polygon_y_corr(light, i);
+        width_corr = LIG_get_light_polygon_width_corr(light, i);
 
         // calculating the light polygon shape
         light_polygon = LIG_calc_light_polygon(
-            x+x_corr, y+y_corr, lght->angle+lght->wobble, lght->src->width+width_corr, obstacles
+            x+x_corr,
+            y+y_corr,
+            light->angle+wobble_corr,
+            light->src->width+width_corr,
+            obstacles
         );
 
         // drawing the light

@@ -1,4 +1,5 @@
 #include <check.h>
+#include "../src/segment.h"
 #include "../src/hero.h"
 
 
@@ -44,7 +45,7 @@ START_TEST (HERO_light_x_and_y_check)
     hero_o->direction = 1;
     x = HERO_light_x(hero_o);
     y = HERO_light_y(hero_o);
-    ck_assert_int_eq(x, 160);
+    ck_assert_int_eq(x, 161);
     ck_assert_int_eq(y, 155);
 
     // CLEANUP
@@ -64,24 +65,133 @@ START_TEST (HERO_update_check)
     ck_assert_int_eq(hero_o->frame_t, 0);
     ck_assert_int_eq(hero_o->frame, 0);
 
-    HERO_update(hero_o);                  // frame counter up, sprite not changed
+    HERO_update_sprite(hero_o);                  // frame counter up, sprite not changed
     ck_assert_int_eq(hero_o->frame_t, 1);
     ck_assert_int_eq(hero_o->frame, 0);
 
-    HERO_update(hero_o);                 // frame counter up, sprite changed, frame counter zeroed
+    HERO_update_sprite(hero_o);                  // frame counter up, sprite not changed
     ck_assert_int_eq(hero_o->frame_t, 0);
     ck_assert_int_eq(hero_o->frame, 1);
 
-    HERO_update(hero_o);                  // frame counter up, sprite not changed
+    HERO_update_sprite(hero_o);                  // frame counter up, sprite not changed
     ck_assert_int_eq(hero_o->frame_t, 1);
     ck_assert_int_eq(hero_o->frame, 1);
 
-    HERO_update(hero_o);                  // frame counter up, sprite changes, frame counter zeroed
+    HERO_update_sprite(hero_o);                  // frame counter up, sprite changes, frame counter zeroed
     ck_assert_int_eq(hero_o->frame_t, 0);
     ck_assert_int_eq(hero_o->frame, 0);
 
     // CLEANUP
     HERO_free(hero_o);
+}
+END_TEST
+
+START_TEST (HERO_colision_check_positive)
+{
+    // GIVEN
+    // hero as it is have hitbox already in it
+    // hero->x = 100;
+    // hero->y = 100;
+    // hitbox = {0, 0, 9, 20},
+    // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
+
+    // CASE 1
+    hero_t* hero = HERO_init("../sprites/her2.png");
+    segment_t *obstacles = NULL;
+    SEG_push(&obstacles, 105, 80, 105, 130);
+
+    // adding some velocity for collision
+    hero->x = 100;
+    hero->y = 100;
+    hero->view_x = 100;
+    hero->view_y = 100;
+    hero->x_vel = 1;
+
+    // WHEN && THEN
+    HERO_check_collision(hero, obstacles);
+
+    // collision so velocity should be equal to 0
+    ck_assert_int_eq(hero->x_vel, 0);
+
+    // CASE 2 (lower edge)
+    obstacles = NULL;
+    SEG_push(&obstacles, 105, 80, 105, 100);
+
+    // adding some velocity for collision
+    hero->x = 100;
+    hero->y = 100;
+    hero->x_vel = 1;
+
+    // WHEN && THEN
+    HERO_check_collision(hero, obstacles);
+
+    // collision so velocity should be equal to 0
+    ck_assert_int_eq(hero->x_vel, 0);
+
+    // CASE 3 (lower edge)
+    obstacles = NULL;
+    SEG_push(&obstacles, 0, 110, 200, 110);
+
+    // adding some velocity for collision
+    hero->x = 100;
+    hero->y = 100;
+    hero->y_vel = 1.0;
+
+    // WHEN && THEN
+    HERO_check_collision(hero, obstacles);
+
+    // collision so velocity should be equal to 0
+    ck_assert_int_eq(hero->y_vel, 0);
+
+    // CLEANUP
+    HERO_free(hero);
+}
+END_TEST
+
+START_TEST (HERO_colision_check_negatvie)
+{
+    // GIVEN
+    // hero as it is have hitbox already in it
+    // hero->x = 100;
+    // hero->y = 100;
+    // hitbox = {0, 0, 9, 20},
+    // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
+
+    // CASE 1
+    hero_t* hero = HERO_init("../sprites/her2.png");
+    segment_t *obstacles = NULL;
+    SEG_push(&obstacles, 105, 80, 105, 90);
+
+    // adding some velocity for collision
+    hero->x = 100;
+    hero->y = 100;
+    hero->view_x = 100;
+    hero->view_y = 100;
+    hero->x_vel = 1;
+
+    // WHEN && THEN
+    HERO_check_collision(hero, obstacles);
+
+    // no collision so velocity should be not constrained
+    ck_assert_int_eq(hero->x_vel, 1);
+
+    // CASE 2
+    obstacles = NULL;
+    SEG_push(&obstacles, 0, 110, 200, 110);  // hero is standing on plaftorm
+
+    // adding some velocity for collision
+    hero->x = 100;
+    hero->y = 100;
+    hero->view_x = 100;
+    hero->view_y = 100;
+    hero->y_vel = 1;
+
+    // WHEN && THEN
+    HERO_check_collision(hero, obstacles);
+
+    // hero fall of the platform, so he should stop
+    ck_assert_int_eq(hero->y_vel, 0);
+    ck_assert_int_eq(hero->y, 90);
 }
 END_TEST
 
@@ -96,6 +206,8 @@ Suite* hero_suite(void)
     tcase_add_test(tc_core, HERO_init_check);
     tcase_add_test(tc_core, HERO_light_x_and_y_check);
     tcase_add_test(tc_core, HERO_update_check); 
+    tcase_add_test(tc_core, HERO_colision_check_positive);
+    tcase_add_test(tc_core, HERO_colision_check_negatvie); 
 
     suite_add_tcase(s, tc_core);
 

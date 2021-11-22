@@ -2,15 +2,15 @@
 #include "macros.h"
 #include "gfx.h"
 #include "primitives.h"
-#include "intersection.h"
+#include "sorted_list.h"
 #include "geometry.h"
 #include "vertex.h"
 #include "segment.h"
 
 
-SDL_Surface* surface = NULL;
-SDL_Window* window = NULL;
-SDL_Renderer* renderer = NULL;
+SDL_Surface  *surface  = NULL;
+SDL_Window   *window   = NULL;
+SDL_Renderer *renderer = NULL;
 
 
 SDL_Window* GFX_init_window(
@@ -192,19 +192,33 @@ void GFX_draw_colored_rect(
     int y1,
     int w,
     int h,
-    int   r,
-    int   g,
-    int   b,
-    int   a
+    int r,
+    int g,
+    int b,
+    int a
 ){
     SDL_SetRenderDrawColor(renderer, r, g, b, a);     
     SDL_Rect rect = (SDL_Rect){x1, y1, w, h};
     SDL_RenderFillRect(renderer, &rect);
 };
 
+void GFX_draw_rect_border(
+    int x,
+    int y,
+    int w,
+    int h,
+    int r,
+    int g,
+    int b,
+    int a
+){
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);     
+    SDL_Rect rect = (SDL_Rect){x, y, w, h};
+    SDL_RenderDrawRect(renderer, &rect);
+};
 
 void GFX_draw_light_sectors_in_scanline(
-    x_intersection_t  *points,
+    sorted_list_t  *points,
     int                y,
     int                n,
     int                r,
@@ -212,17 +226,17 @@ void GFX_draw_light_sectors_in_scanline(
     int                b,
     int                a
 ) {
-    x_intersection_t* ptr = NULL;
+    sorted_list_t* ptr = NULL;
 
     if (n==2) {
-        GFX_draw_colored_line(points->x, y, points->next->x, y, r, g, b, a);
+        GFX_draw_colored_line(points->value, y, points->next->value, y, r, g, b, a);
     }
 
     else if (n>2) {
         ptr = points;
 
         while (ptr->next) {
-            GFX_draw_colored_line(ptr->x, y, ptr->next->x, y, r, g, b, a);
+            GFX_draw_colored_line(ptr->value, y, ptr->next->value, y, r, g, b, a);
             ptr=ptr->next;
             if (ptr->next == NULL) {
                 break;
@@ -233,17 +247,17 @@ void GFX_draw_light_sectors_in_scanline(
 }
 
 void GFX_draw_dark_sectors_in_scanline(
-    x_intersection_t  *points,
+    sorted_list_t  *points,
     int                y,
     int                n
 ) {
-    x_intersection_t* ptr = NULL;
-    int last_intersection = INTSC_get_last(points);
+    sorted_list_t* ptr = NULL;
+    int last_intersection = SRTLST_get_last(points);
 
     // dark segment from left side of screen to first intersection with scanline
-    if (points->x > 1) {
+    if (points->value > 1) {
         GFX_draw_colored_line(
-            0, y, points->x, y,
+            0, y, points->value, y,
             DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A
         );
     }
@@ -262,7 +276,7 @@ void GFX_draw_dark_sectors_in_scanline(
 
         while (ptr->next){
             GFX_draw_colored_line(
-                ptr->x, y, ptr->next->x, y,
+                ptr->value, y, ptr->next->value, y,
                 DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A
             );
             ptr=ptr->next;
@@ -270,12 +284,12 @@ void GFX_draw_dark_sectors_in_scanline(
     }
 }
 
-x_intersection_t* GFX_calc_intersections_in_scanline(
+sorted_list_t* GFX_calc_intersections_in_scanline(
     segment_t *segments,
     int        y,
     int       *n
 ) {
-    x_intersection_t *intersections = NULL;
+    sorted_list_t *intersections = NULL;
     segment_t        *ptr           = NULL;
     int               x;
 
@@ -284,19 +298,19 @@ x_intersection_t* GFX_calc_intersections_in_scanline(
     while(ptr){
         // line in perpendicular to y-axis
         if (ptr->y1 == ptr->y2){
-            // INTSC_insert(&intersections, ptr->x1);
-            // INTSC_insert(&intersections, ptr->x2);
+            // SRTLST_insert(&intersections, ptr->x1);
+            // SRTLST_insert(&intersections, ptr->x2);
             ptr=ptr->next;
             // (*n)=(*n)+2;
         }
         else if (ptr->x1 == ptr->x2) {
-            INTSC_insert(&intersections, ptr->x1);
+            SRTLST_insert(&intersections, ptr->x1);
             ptr=ptr->next;
             (*n)++;
         }
         else {
             x = GEO_x_intersection_with_slope(y, ptr->x1, ptr->y1, ptr->slope);
-            INTSC_insert(&intersections, x);
+            SRTLST_insert(&intersections, x);
             ptr=ptr->next;
             (*n)++;
         }
@@ -314,14 +328,14 @@ void GFX_draw_scanline(
     int            a
 ) {
     int               n             = 0;
-    x_intersection_t *intersections = NULL;
+    sorted_list_t *intersections = NULL;
 
     intersections = GFX_calc_intersections_in_scanline(segments, y, &n);
 
     if (intersections) {
         GFX_draw_light_sectors_in_scanline(intersections, y, n, r, g, b, a);
         GFX_draw_dark_sectors_in_scanline(intersections->next, y, n);
-        INTSC_free(intersections);
+        SRTLST_free(intersections);
     }
 }
 

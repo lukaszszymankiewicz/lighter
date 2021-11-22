@@ -7,39 +7,6 @@
 #include "../src/point.h"
 #include "../src/macros.h"
 
-
-START_TEST (LIG_get_visible_obstacles_check) 
-{
-    // GIVEN
-    segment_t* obstacles = NULL;
-    segment_t* visible_obstacles = NULL;
-    int expected_len = 5;
-
-    int x = 80; 
-    int y = 90; 
-    float width = PI / 4; // 45%
-    float angle = LEFT_RAD;
-
-    // border
-    SEG_push(&obstacles, 0,   0,   100, 0  );   // upper 
-    SEG_push(&obstacles, 0,   100, 100, 100);   // donwer
-    SEG_push(&obstacles, 0,   0,   0,   100);   // left
-    SEG_push(&obstacles, 100, 0,   100, 100);   // right
-    
-    // obstacles
-    SEG_push(&obstacles, 10, 10, 20, 10);
-    SEG_push(&obstacles, 20, 10, 20, 50);
-    SEG_push(&obstacles, 20, 50, 10, 50);
-    SEG_push(&obstacles, 10, 50, 10, 10);
-
-    // THEN
-    visible_obstacles = LIG_get_visible_obstacles(obstacles, y, x, angle, width);
-    int calculated_length = SEG_len(visible_obstacles);
-    
-    ck_assert_int_eq(calculated_length, expected_len);
-}
-END_TEST
-
 START_TEST (LIG_calc_hit_points_real_life_example_check) 
 {
     // GIVEN
@@ -419,11 +386,9 @@ Suite *light_suite(void) {
     TCase *tc_core;
     s = suite_create("light");
 
-
     /* Core test case */
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, LIG_get_visible_obstacles_check);
     tcase_add_test(tc_core, LIG_calc_light_polygon_check);
     tcase_add_test(tc_core, LIG_calc_hit_points_check);
     tcase_add_test(tc_core, LIG_calc_hit_points_real_life_example_check);

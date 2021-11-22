@@ -68,8 +68,8 @@ START_TEST (GFX_calc_intersections_in_scanline_check)
     int expected_len = 2;
 
     segment_t* segments = NULL;
-    x_intersection_t* points = NULL;
-    x_intersection_t* ptr = NULL;
+    sorted_list_t* points = NULL;
+    sorted_list_t* ptr = NULL;
 
     SEG_push(&segments, 287, 0, 256, 36);
     SEG_push(&segments, 320, 0, 287, 0);

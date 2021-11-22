@@ -94,6 +94,84 @@ START_TEST (GEO_seg_intersection_with_y_check)
 }
 END_TEST
 
+START_TEST (GEO_vertical_segment_intersects_rect_check)
+{
+    // GIVEN
+    int result;
+
+    // SUCCESS
+    result = GEO_vertical_segment_intersects_rect(120, 80, 120, 200, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    // edge case
+    result = GEO_vertical_segment_intersects_rect(120, 80, 120, 130, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    // edge case
+    result = GEO_vertical_segment_intersects_rect(120, 130, 120, 200, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    // edge case
+    result = GEO_vertical_segment_intersects_rect(120, 130, 120, 100, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    result = GEO_vertical_segment_intersects_rect(120, 100, 120, 200, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    // FAIL
+    result = GEO_vertical_segment_intersects_rect(80, 80, 80, 200, 100, 100, 150, 150);
+    ck_assert_int_eq(result, -1);
+
+    result = GEO_vertical_segment_intersects_rect(125, 20, 125, 80, 100, 100, 150, 150);
+    ck_assert_int_eq(result, -1);
+
+    result = GEO_vertical_segment_intersects_rect(125, 200, 125, 280, 100, 100, 150, 150);
+    ck_assert_int_eq(result, -1);
+
+    result = GEO_vertical_segment_intersects_rect(180, 80, 180, 120, 100, 100, 150, 150);
+    ck_assert_int_eq(result, -1);
+}
+END_TEST
+
+START_TEST (GEO_horizontal_segment_intersects_rect_check)
+{
+    // GIVEN
+    int result;
+
+    // SUCCESS
+    result = GEO_horizontal_segment_intersects_rect(80, 120, 200, 120, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    // edge case
+    result = GEO_horizontal_segment_intersects_rect(80, 120, 120, 120, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    // edge case
+    result = GEO_horizontal_segment_intersects_rect(120, 120, 200, 120, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    // edge case
+    result = GEO_horizontal_segment_intersects_rect(80, 120, 100, 120, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    result = GEO_horizontal_segment_intersects_rect(150, 120, 200, 120, 100, 100, 150, 150);
+    ck_assert_int_eq(result, 120);
+
+    // FAIL
+    result = GEO_horizontal_segment_intersects_rect(20, 80, 200, 80, 100, 100, 150, 150);
+    ck_assert_int_eq(result, -1);
+
+    result = GEO_horizontal_segment_intersects_rect(20, 200, 200, 200, 100, 100, 150, 150);
+    ck_assert_int_eq(result, -1);
+
+    result = GEO_horizontal_segment_intersects_rect(20, 125, 80, 125, 100, 100, 150, 150);
+    ck_assert_int_eq(result, -1);
+
+    result = GEO_horizontal_segment_intersects_rect(200, 125, 250, 125, 100, 100, 150, 150);
+    ck_assert_int_eq(result, -1);
+}
+END_TEST
+
 Suite* geometry_suite(void)
 {
     Suite* s;
@@ -106,6 +184,9 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_pt_in_triangle_check_edge);
     tcase_add_test(tc_core, GEO_pt_in_triangle_check_negative);
     tcase_add_test(tc_core, GEO_seg_intersection_with_y_check);
+
+    tcase_add_test(tc_core, GEO_vertical_segment_intersects_rect_check);
+    tcase_add_test(tc_core, GEO_horizontal_segment_intersects_rect_check);
 
     suite_add_tcase(s, tc_core);
 
