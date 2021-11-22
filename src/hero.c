@@ -1,143 +1,361 @@
 #include "config.h"
+#include "geometry.h"
+#include "game.h"
 #include "def.h"
 #include "hero.h"
 #include "gfx.h"
 #include "primitives.h"
+#include "sorted_list.h"
+
 
 // do it dynamically!
-int lightpos_x_corr[] = {5, 0};
+int lightpos_x_corr[] = {5, 1};
 int lightpos_y_corr[] = {11, 11};
+
+int state_collisions[3][3] = {
+    //  STANDING, WALKING, JUMPING
+    {1,            1,         1    },
+    {1,            1,         1    },
+    {0,            0,         0    },
+};
 
 hero_t* HERO_init(
     char* animation_sheet
 ) {
-    hero_t* hero_o    = (hero_t*)malloc(sizeof(hero_t));
-    hero_o->x         = 384;                   // global postion on map
-    hero_o->y         = 384;                   // global postion on map
-    hero_o->view_x    = SCREEN_WIDTH / 2;      // postion on viewport
-    hero_o->view_y    = 144;                   // postion on viewport
-    hero_o->state     = STANDING;
-    hero_o->direction = LEFT;
+    hero_t* hero    = (hero_t*)malloc(sizeof(hero_t));
+    hero->x         = 384;                   // global postion on map
+    hero->y         = 384;                   // global postion on map
+    hero->view_x    = SCREEN_WIDTH / 2;      // postion on viewport
+    hero->view_y    = 144;                   // postion on viewport
+    hero->state     = STANDING;
+    hero->direction = LEFT;
 
     if (animation_sheet == NULL) {
-        hero_o->sprites = TXTR_init_animation_sheet("sprites/her2.png", MAX_STATE);
+        hero->sprites = TXTR_init_animation_sheet("sprites/her2.png", MAX_STATE);
     }
     else {
-        hero_o->sprites = TXTR_init_animation_sheet(animation_sheet, MAX_STATE);
+        hero->sprites = TXTR_init_animation_sheet(animation_sheet, MAX_STATE);
     }
 
-    hero_o->frame   = 0;
-    hero_o->frame_t = 0;
-    hero_o->x_vel   = 0;
+    hero->frame   = 0;
+    hero->frame_t = 0;
+    hero->x_vel   = 0;
+    hero->y_vel   = 0;
 
+    // this should definitly be im some file
+    // STANDING
     TXTR_push_animation(
-        hero_o->sprites,
+        hero->sprites,
         STANDING,
-        (int[]){0, 9},
-        (int[]){0, 0},
-        (int[]){9, 9},
-        (int[]){20, 20},
+        (int[][4])
+        {
+            {0, 0, 9, 20},
+            {9, 0, 9, 20},
+        },
         20,
         2
     );
 
+    TXTR_push_hitbox (
+        hero->sprites,
+        STANDING,
+        0,
+        (int[][4]) {
+            {0, 0, 9, 20},
+        },
+        1
+    );
+
+    TXTR_push_hitbox (
+        hero->sprites,
+        STANDING,
+        1,
+        (int[][4]) {
+            {0, 0, 9, 20},
+        },
+        1
+    );
+
+    // STANDING
     TXTR_push_animation(
-        hero_o->sprites,
+        hero->sprites,
         WALKING,
-        (int[]){0, 9},
-        (int[]){20, 20},
-        (int[]){9, 9},
-        (int[]){20, 20},
+        (int[][4]) {
+            {0, 20, 9, 20},
+            {9, 20, 9, 20},
+        },
         5,
         2
     );
 
-    return hero_o;
+    TXTR_push_hitbox (
+        hero->sprites,
+        WALKING,
+        0,
+        (int[][4]) {
+            {0, 0, 9, 20},
+        },
+        1
+    );
+
+    TXTR_push_hitbox (
+        hero->sprites,
+        WALKING,
+        1,
+        (int[][4]) {
+            {0, 0, 9, 20},
+        },
+        1
+    );
+
+    // JUMPING
+    TXTR_push_animation(
+        hero->sprites,
+        JUMPING,
+        (int[][4]) {
+            {0, 0, 9, 20},
+        },
+        0,
+        1
+    );
+
+    TXTR_push_hitbox (
+        hero->sprites,
+        JUMPING,
+        0,
+        (int[][4]) {
+            {0, 0, 9, 20},
+        },
+        1
+    );
+
+    return hero;
+}
+
+SDL_Rect* HERO_current_frame(
+    hero_t *hero
+) {
+    return &(hero->sprites->animations[hero->state].frames[hero->frame]);
+}
+
+void HERO_debug_hitbox(hero_t *hero) {
+    int n_boxes = hero->sprites->animations[hero->state].hit_boxes->len;
+
+    for (int i=0; i<n_boxes; i++) {
+        SDL_Rect rect = hero->sprites->animations[hero->state].hit_boxes->rects[i];
+        GFX_draw_rect_border(rect.x+hero->view_x, rect.y+hero->view_y, rect.w, rect.h, 255, 0, 0, 255);
+    }
 }
 
 // gets x coord of light hero is holding
 int HERO_light_x(
-    hero_t *hero_o
+    hero_t *hero
 ) {
-    return hero_o->view_x + lightpos_x_corr[hero_o->direction];
+    return hero->view_x + lightpos_x_corr[hero->direction];
 }
 
 // gets y coord of light hero is holding
 int HERO_light_y(
-    hero_t *hero_o
+    hero_t *hero
 ) {
-    return hero_o->view_y  + lightpos_y_corr[hero_o->direction];
+    return hero->view_y  + lightpos_y_corr[hero->direction];
 }
 
-// updates the animation, positions and the physics of hero
-void HERO_update(
-    hero_t *hero_o
+bool HERO_check_state_collision(
+    int current_state,
+    int desired_state
 ) {
-    // ANIMATIONS
-    hero_o->frame_t++;
-    int del = hero_o->sprites->animations[hero_o->state].delay;
-    int len = hero_o->sprites->animations[hero_o->state].len;
+    return state_collisions[current_state][desired_state];
+}
 
-    if (hero_o->frame_t >= del) {
-        hero_o->frame_t=0;
-        hero_o->frame++; 
-
-        if (hero_o->frame >= len) {
-            hero_o->frame=0;
-        }
-    }
-    if (hero_o->x_vel == 0) {
-        hero_o->state=STANDING; 
-    }
-
-    // MOVEMENT
-    if (hero_o->direction == LEFT) {
-        hero_o->x -= hero_o->x_vel;
+void HERO_update_friction(
+    hero_t *hero
+) {
+    if (hero->direction == RIGHT) {
+        hero->x_vel = MAX(0, hero->x_vel - X_FRICTION);
     }
     else {
-        hero_o->x += hero_o->x_vel;
+        hero->x_vel = MIN(0, hero->x_vel + X_FRICTION);
     }
 
-    // PHYSICS
-    hero_o->x_vel = MAX(0, hero_o->x_vel-X_FRICTION);
+    if (hero->state == JUMPING) {
+        hero->y_vel += Y_FRICTION;
+    }
+}
+
+void HERO_update_pos_due_to_velocity(
+    hero_t *hero
+) {
+    hero->x += hero->x_vel;
+    hero->y += hero->y_vel;
+}
+
+void HERO_update_state(
+    hero_t *hero
+) {
+    if (hero->x_vel == 0 && HERO_check_state_collision(hero->state, STANDING)) {
+        hero->state=STANDING; 
+    }
+}
+
+void HERO_update_sprite(
+    hero_t *hero
+) {
+    hero->frame_t++;
+    int del = hero->sprites->animations[hero->state].delay;
+    int len = hero->sprites->animations[hero->state].len;
+
+    if (hero->frame_t >= del) {
+        hero->frame_t=0;
+        hero->frame++; 
+
+        if (hero->frame >= len) {
+            hero->frame=0;
+        }
+    }
+}
+
+void HERO_check_collision(hero_t *hero, segment_t *obstacles) {
+    int  n_boxes     = hero->sprites->animations[hero->state].hit_boxes->len;
+    int  x_coef      = 0;
+    int  y_coef      = 0;
+    int  x_collision = -1;
+    int  y_collision = -1;
+    int new_x;
+    int new_y;
+
+    y_coef = hero->y_vel;
+    x_coef = hero->x_vel;
+
+    sorted_list_t *x_intersections = NULL;
+    sorted_list_t *y_intersections = NULL;
+
+    // for each of the hit box x and y collision is checked, and each calculated collision value is
+    // stored. Then, depending of the direction of a hero lowest or highest value is then used ad
+    // final postion of hero.
+    for (int i=0; i<n_boxes; i++) {
+        SDL_Rect rect = hero->sprites->animations[hero->state].hit_boxes->rects[i];
+
+        for (segment_t* obstacle=obstacles; obstacle; obstacle=obstacle->next) {
+            if (hero->x_vel != 0) {
+                x_collision = GEO_vertical_segment_intersects_rect(
+                   obstacle->x1,
+                   obstacle->y1,
+                   obstacle->x2,
+                   obstacle->y2, 
+                   rect.x + hero->view_x + x_coef,
+                   rect.y + hero->view_y,
+                   rect.x + hero->view_x + rect.w + x_coef,
+                   rect.y + hero->view_y + rect.h
+                );
+            }
+
+            y_collision = GEO_horizontal_segment_intersects_rect(
+               obstacle->x1,
+               obstacle->y1,
+               obstacle->x2,
+               obstacle->y2, 
+               rect.x + hero->view_x,
+               rect.y + hero->view_y + y_coef,
+               rect.x + hero->view_x + rect.w,
+               rect.y + hero->view_y + rect.h + y_coef
+            );
+
+            if (x_collision != -1) { SRTLST_insert(&x_intersections, x_collision); }
+            if (y_collision != -1) {
+                SRTLST_insert(&y_intersections, y_collision); 
+            }
+        }
+    }
+
+    if (x_intersections != NULL) {
+
+        hero->x_vel = 0;  //stop moving!
+
+        if (hero->direction == LEFT) {
+            new_x = SRTLST_get_last(x_intersections);
+            hero->x -= hero->view_x - new_x;
+        }
+        else {
+            SDL_Rect *frame = HERO_current_frame(hero);
+            new_x = x_intersections->value - frame->w;
+            hero->x -= hero->view_x - new_x;
+        }
+    }
+
+    if (y_intersections != NULL) {
+        // moving up
+        if (hero->y_vel < 0) { 
+            new_y = SRTLST_get_last(y_intersections);
+            hero->y += hero->view_y - new_y;
+            hero->y_vel = 0;
+        }
+
+        // falling down
+        else {
+            SDL_Rect *frame = HERO_current_frame(hero);
+            new_y = y_intersections->value - frame->h;
+            hero->y -= hero->view_y - new_y;
+            hero->state = STANDING;
+            hero->y_vel = 0;
+        }
+    }
 }
 
 void HERO_move(
-    hero_t      *hero_o,
+    hero_t      *hero,
     direction_t  direction
 ) {
-    hero_o->state = WALKING;
+    if (hero->state == STANDING || hero->state == WALKING) {
+        hero->state = WALKING;
 
-    if (direction == hero_o->direction) {
-        hero_o->x_vel = MIN(MAX_VEL, hero_o->x_vel + MOVE_POWUH);
+        if (hero->direction == RIGHT) {
+            hero->x_vel = MIN(MAX_VEL, hero->x_vel + MOVE_POWUH);
+        }
+        else {
+            hero->x_vel = MAX(-1*MAX_VEL, (hero->x_vel - MOVE_POWUH));
+        }
+
+        hero->direction = direction;
     }
-    else {
-        hero_o->x_vel = MOVE_POWUH;
+
+    else if (hero->state == JUMPING) {
+        if (hero->direction == RIGHT) {
+            hero->x_vel = MIN(MAX_VEL, hero->x_vel + MOVE_POWUH);
+        }
+        else {
+            hero->x_vel = MAX(-1*MAX_VEL, (hero->x_vel - MOVE_POWUH));
+        }
+
+        hero->direction = direction;
     }
-    hero_o->direction = direction;
 }
 
-
-SDL_Rect* HERO_current_frame(
-    hero_t *hero_o
+void HERO_jump(
+    hero_t      *hero
 ) {
-    return &(hero_o->sprites->animations[hero_o->state].frames[hero_o->frame]);
+    if (HERO_check_state_collision(hero->state, JUMPING)) {
+        hero->state = JUMPING;
+        hero->y_vel -= JUMP_POWUH;
+    }
 }
 
 void HERO_draw(
-    hero_t *hero_o
+    hero_t *hero
 ) {
     GFX_render_texture(
-        hero_o->sprites->texture,
-        HERO_current_frame(hero_o),
-        hero_o->view_x,
-        hero_o->view_y,
-        hero_o->direction
+        hero->sprites->texture,
+        HERO_current_frame(hero),
+        hero->view_x,
+        hero->view_y,
+        hero->direction
     );
+
+    if (debug == DEBUG_OBSTACLE_LINES) { HERO_debug_hitbox(hero); };
 }
 
 void HERO_free(
-    hero_t *hero_o
+    hero_t *hero
 ) {
-    TXTR_free_animation_sheet(hero_o->sprites);
+    TXTR_free_animation_sheet(hero->sprites);
 }

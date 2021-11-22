@@ -86,5 +86,52 @@ bool GEO_value_between_range (
     int first,
     int second
 ) {
-    return ((first-EPS <= value && second >= value+EPS) || (second-EPS <= value && first >= value+EPS));
+    return ((first-EPS <= value && second+EPS >= value) || (second-EPS <= value && first+EPS >= value));
+}
+
+// returns -1 if there is not collision or x-value of the collision 
+int GEO_vertical_segment_intersects_rect (
+    int x1,     // segment
+    int y1,     // segment
+    int x2,     // segment
+    int y2,     // segment
+    int r_x1,   // rect
+    int r_y1,   // rect
+    int r_x2,   // rect
+    int r_y2    // rect
+) {
+    if (
+        GEO_value_between_range(x1, r_x1, r_x2) && 
+        (
+            GEO_value_between_range(r_y1, y1, y2) ||
+            GEO_value_between_range(r_y2, y1, y2))
+        ) {
+        return x1;
+    }
+
+    return -1;
+}
+
+// returns -1 if there is not collision or y-value of the collision 
+int GEO_horizontal_segment_intersects_rect (
+    int x1,     // segment
+    int y1,     // segment
+    int x2,     // segment
+    int y2,     // segment
+    int r_x1,   // rect
+    int r_y1,   // rect
+    int r_x2,   // rect
+    int r_y2    // rect
+) {
+
+    if (
+        GEO_value_between_range(y1, r_y1, r_y2) && 
+        (
+            GEO_value_between_range(r_x1, x1, x2) ||
+            GEO_value_between_range(r_x2, x1, x2))
+        ) {
+        return y1;
+        }
+
+    return -1;
 }

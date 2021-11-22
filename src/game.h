@@ -1,11 +1,13 @@
 #include "def.h"
-#include "hero.h"
-#include "light.h"
 #include "timer.h"
 #include "level.h"
+#include "hero.h"
+#include "light.h"
 
 #ifndef GAME_H
 #define GAME_H
+
+extern int debug;
 
 // main game struct containing most high-level game data
 typedef struct game {

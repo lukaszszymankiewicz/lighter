@@ -9,5 +9,7 @@ float GEO_intersection_with_x(int x, int x1, int y1, int x2, int y2);
 float GEO_x_intersection_with_slope(int y, int x1, int y1, float slope);
 float GEO_calc_slope(int x1, int y1, int x2, int y2);
 bool GEO_value_between_range(int value, int first, int second);
+int GEO_vertical_segment_intersects_rect(int x1, int y1, int x2, int y2, int r_x1, int r_y1, int r_x2, int r_y2);
+int GEO_horizontal_segment_intersects_rect(int x1, int y1, int x2, int y2, int r_x1, int r_y1, int r_x2, int r_y2);
 
 #endif

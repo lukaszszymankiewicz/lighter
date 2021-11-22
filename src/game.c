@@ -1,4 +1,5 @@
 #include "def.h"
+#include "config.h"
 #include "game.h"
 #include "gfx.h"
 #include "sprites.h"
@@ -9,6 +10,8 @@
 #include "level.h"
 #include "light.h"
 #include "segment.h"
+
+int debug = 0;
 
 void GAME_close(
     game_t *game
@@ -67,15 +70,20 @@ int main(
         TIMER_start(game->cap_timer);
         EVNT_handle_events(game);
         GFX_clear_screen();
-        HERO_update(game->hero);
         LVL_draw(game->level, game->hero->x, game->hero->y);
         LVL_analyze(game->level, game->hero->x, game->hero->y);
+        HERO_update_friction(game->hero);
+        HERO_check_collision(game->hero, game->level->obstacle_segments);
+        HERO_update_pos_due_to_velocity(game->hero);
+        HERO_update_state(game->hero);
+        HERO_update_sprite(game->hero);
         LIG_draw_light_effect(
             HERO_light_x(game->hero),
             HERO_light_y(game->hero),
             game->frame,
             game->light,
-            game->level->obstacle_segments
+            game->level->obstacle_segments,
+            game->hero->x_vel
         );
         HERO_draw(game->hero);
         GFX_update();

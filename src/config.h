@@ -1,10 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+enum debug_state { NO_DEBUG, DEBUG_OBSTACLE_LINES, DEBUG_LIGHT_RAYS, MAX_DEBUG };
+
 #define TILE_WIDTH 32
 #define TILE_HEIGHT 32
 
-#define DEBUG                    1                  // set to zero to get rid of all DEBUG graphics
 #define SCREEN_FPS               20                 // Frame per second
 #define SCREEN_TICKS_PER_FRAME   1000 / SCREEN_FPS  // ticks per frame in ms
 #define PI                       3.1415             // best approximation of pi known to mankind

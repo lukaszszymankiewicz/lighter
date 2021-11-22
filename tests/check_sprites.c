@@ -23,16 +23,18 @@ END_TEST
 START_TEST (TXTR_init_animation_check)
 {
     // GIVEN 
-    int xs[] = { 0, 15, 30, 45};
-    int ys[] = { 0,  0,  0,  0};
-    int ws[] = {15, 15, 15, 15};
-    int hs[] = {20, 20, 20, 20};
+    int rects[][4] = {
+        { 0, 0, 15, 20},
+        {15, 0, 15, 20},
+        {30, 0, 15, 20},
+        {45, 0, 15, 20},
+    };
 
     int delay = 20;
     int len = 4;
 
     // WHEN
-    animation_t* animation = TXTR_init_animation(xs, ys, ws, hs, delay, len);
+    animation_t* animation = TXTR_init_animation(rects, delay, len);
 
     // THEN
     ck_assert_ptr_nonnull(animation);
@@ -78,20 +80,22 @@ START_TEST (TXTR_push_animation_check)
     TXTR_push_animation(
         sheet,
         WALKING,
-        (int[]){ 0, 15, 30, 45},
-        (int[]){ 0,  0,  0,  0},
-        (int[]){15, 15, 15, 15},
-        (int[]){20, 20, 20, 20},
+        (int[][4]) {
+            { 0, 0, 15, 20},
+            {15, 0, 15, 20},
+            {30, 0, 15, 20},
+            {45, 0, 15, 20},
+        },
         20,
         4
     );
     TXTR_push_animation(
         sheet,
         STANDING,
-        (int[]){ 0, 15},
-        (int[]){20, 20},
-        (int[]){15, 15},
-        (int[]){20, 20},
+        (int[][4]) {
+            {0, 20, 15, 20},
+            {15, 20, 15, 20},
+        },
         10,
         2
     );
@@ -140,8 +144,106 @@ START_TEST (TXTR_push_animation_check)
 }
 END_TEST
 
-Suite * sprites_suite(void)
-    
+START_TEST (TXTR_init_hitbox_check)
+{
+    // GIVEN 
+    int rects[][4] = {
+        { 0, 15, 30, 45},
+        {10, 10, 10, 10},
+    };
+    int len = 2;
+
+    // WHEN
+    hit_box_t* hit_box = TXTR_init_hitbox(rects, len);
+
+    // THEN
+    ck_assert_ptr_nonnull(hit_box);
+
+    ck_assert_int_eq(hit_box->rects[0].x, 0);
+    ck_assert_int_eq(hit_box->rects[0].y, 15);
+    ck_assert_int_eq(hit_box->rects[0].w, 30);
+    ck_assert_int_eq(hit_box->rects[0].h, 45);
+
+    ck_assert_int_eq(hit_box->len, 2);
+
+    // CLEANUP
+    TXTR_free_hitbox(hit_box);
+}
+END_TEST
+
+START_TEST (TXTR_push_hitbox_check)
+{
+    // GIVEN 
+    char* filepath = "../sprites/her2.png";
+    enum state {WALKING, STANDING, MAX};
+
+    // WHEN
+    animation_sheet_t* sheet = TXTR_init_animation_sheet(filepath, MAX);
+
+    TXTR_push_animation(
+        sheet,
+        WALKING,
+        (int[][4]) {
+            { 0, 0, 15, 20},
+            {15, 0, 15, 20},
+        },
+        20,
+        4
+    );
+    TXTR_push_animation(
+        sheet,
+        STANDING,
+        (int[][4]) {
+            {0, 20, 15, 20},
+        },
+        10,
+        2
+    );
+
+    // THEN
+    TXTR_push_hitbox (
+        sheet,
+        WALKING,
+        0,
+        (int[][4]) {
+            {1, 2, 3, 4},
+            {5, 6, 7, 8},
+        },
+        2
+    );
+
+    TXTR_push_hitbox (
+        sheet,
+        STANDING,
+        0,
+        (int[][4]) {
+            {10, 11, 12, 13},
+        },
+        1
+    );
+
+    // CLEANUP
+    // animation, frame hitbo
+    ck_assert_int_eq(sheet->animations[0].hit_boxes[0].rects[0].x, 1);
+    ck_assert_int_eq(sheet->animations[0].hit_boxes[0].rects[0].y, 2);
+    ck_assert_int_eq(sheet->animations[0].hit_boxes[0].rects[0].w, 3);
+    ck_assert_int_eq(sheet->animations[0].hit_boxes[0].rects[0].h, 4);
+
+    ck_assert_int_eq(sheet->animations[0].hit_boxes[0].rects[1].x, 5);
+    ck_assert_int_eq(sheet->animations[0].hit_boxes[0].rects[1].y, 6);
+    ck_assert_int_eq(sheet->animations[0].hit_boxes[0].rects[1].w, 7);
+    ck_assert_int_eq(sheet->animations[0].hit_boxes[0].rects[1].h, 8);
+
+    ck_assert_int_eq(sheet->animations[1].hit_boxes[0].rects[0].x, 10);
+    ck_assert_int_eq(sheet->animations[1].hit_boxes[0].rects[0].y, 11);
+    ck_assert_int_eq(sheet->animations[1].hit_boxes[0].rects[0].w, 12);
+    ck_assert_int_eq(sheet->animations[1].hit_boxes[0].rects[0].h, 13);
+
+    TXTR_free_animation_sheet(sheet);
+}
+END_TEST
+
+Suite *sprites_suite(void)
 {
     Suite *s;
     TCase *tc_core;
@@ -152,10 +254,13 @@ Suite * sprites_suite(void)
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, TXTR_init_animation_sheet_check);
+    tcase_add_test(tc_core, TXTR_push_hitbox_check);
     tcase_add_test(tc_core, TXTR_init_animation_check);
     tcase_add_test(tc_core, TXTR_push_animation_check);
+    tcase_add_test(tc_core, TXTR_init_hitbox_check);
 
     suite_add_tcase(s, tc_core);
 
     return s;
 }
+

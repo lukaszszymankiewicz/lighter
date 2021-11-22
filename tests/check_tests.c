@@ -8,11 +8,12 @@
 #include "check_events.h"
 #include "check_geometry.h"
 #include "check_hero.h"
-#include "check_intersection.h"
+#include "check_sorted_list.h"
 #include "check_sprites.h"
+#include "check_tests.h"
 #include "../src/vertex.h"
 #include "../src/sprites.h"
-#include "../src/intersection.h"
+#include "../src/sorted_list.h"
 #include "../src/geometry.h"
 #include "../src/light.h"
 #include "../src/segment.h"
@@ -20,6 +21,8 @@
 #include "../src/level.h"
 #include "../src/events.h"
 #include "../src/hero.h"
+
+int debug = 0;
 
 int main(void) {
     int number_failed = 0;
@@ -101,7 +104,7 @@ int main(void) {
     printf("\n");
 
     // intersection
-    s = intersection_suite();
+    s = sorted_list_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
