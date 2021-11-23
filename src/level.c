@@ -177,7 +177,6 @@ void MAP_get_size_section_data(
     MAP_find_section(map, "SIZE");
     size_x = MAP_find_integer_in_line(map);
     size_y = MAP_find_integer_in_line(map);
-
     LVL_set_size(level, size_x, size_y);
 }
 
@@ -329,7 +328,7 @@ int LVL_tile_index_on_pos(
 }
 
 int LVL_obstacle_on_pos(level_t* level, int x, int y) {
-    return level->obstacles[y * level->size_y + x];
+    return level->obstacles[y * level->size_x + x];
 }
 
 texture_t* LVL_get_tile_texture(
@@ -356,7 +355,7 @@ void LVL_analyze(
 ) {
 
     level->obstacle_segments = NULL;  // just to be sure
-    segment_t *ptr          = NULL;
+    segment_t *ptr           = NULL;
 
     // clearing
     for (int yy = 0; yy < 10; yy++) {
