@@ -1,3 +1,5 @@
+#include "global.h"
+
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
 
@@ -38,5 +40,11 @@ typedef struct vertex {
     struct vertex *next;      // next vertex
     struct vertex *prev;      // prev vertex
 } vertex_t;
+
+typedef struct texture {
+    SDL_Texture *surface;
+    int          width;
+    int          height;
+} texture_t;
 
 #endif

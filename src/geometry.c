@@ -1,6 +1,5 @@
-#include "def.h"
+#include "global.h"
 
-# define EPS 0.1
 
 // aux for GEO_pt_in_triangle function.
 float GEO_sign (
@@ -84,9 +83,10 @@ float GEO_calc_slope(
 bool GEO_value_between_range (
     int value,
     int first,
-    int second
+    int second,
+    float acc
 ) {
-    return ((first-EPS <= value && second+EPS >= value) || (second-EPS <= value && first+EPS >= value));
+    return ((first-acc <= value && second+acc >= value) || (second-acc <= value && first+acc >= value));
 }
 
 // returns -1 if there is not collision or x-value of the collision 
@@ -101,10 +101,10 @@ int GEO_vertical_segment_intersects_rect (
     int r_y2    // rect
 ) {
     if (
-        GEO_value_between_range(x1, r_x1, r_x2) && 
+        GEO_value_between_range(x1, r_x1, r_x2, STRICT_ACCURACY) && 
         (
-            GEO_value_between_range(r_y1, y1, y2) ||
-            GEO_value_between_range(r_y2, y1, y2))
+            GEO_value_between_range(r_y1, y1, y2, STRICT_ACCURACY) ||
+            GEO_value_between_range(r_y2, y1, y2, STRICT_ACCURACY))
         ) {
         return x1;
     }
@@ -125,10 +125,10 @@ int GEO_horizontal_segment_intersects_rect (
 ) {
 
     if (
-        GEO_value_between_range(y1, r_y1, r_y2) && 
+        GEO_value_between_range(y1, r_y1, r_y2, STRICT_ACCURACY) && 
         (
-            GEO_value_between_range(r_x1, x1, x2) ||
-            GEO_value_between_range(r_x2, x1, x2))
+            GEO_value_between_range(r_x1, x1, x2, STRICT_ACCURACY) ||
+            GEO_value_between_range(r_x2, x1, x2, STRICT_ACCURACY))
         ) {
         return y1;
         }

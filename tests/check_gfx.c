@@ -5,49 +5,13 @@
 #include "../src/segment.h"
 
 
-START_TEST (GFX_init_window_check)
-{
-    // GIVEN
-    SDL_Window* window = NULL;
-
-    // WHEN
-    window = GFX_init_window(100, 100);
-
-    // THEN
-    ck_assert_ptr_nonnull(window); // window is created sucessfully!
-
-    // CLEANUP
-    SDL_DestroyWindow(window);
-}
-END_TEST
-
-START_TEST (GFX_init_renderer_check)
-{
-    // GIVEN
-    SDL_Window* window = NULL;
-    SDL_Renderer* renderer = NULL;
-
-    // WHEN
-    window = GFX_init_window(100, 100);
-    renderer = GFX_init_renderer(window);
-
-    // THEN
-    ck_assert_ptr_nonnull(renderer); // renderer is created sucessfully!
-
-    // CLEANUP
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-
-}
-END_TEST
-
 START_TEST (GFX_init_graphics_check)
 {
     // GIVEN
     int result;
 
     // WHEN
-    result = GFX_init_graphics(100, 100);
+    result = GFX_init_graphics();
 
     // THEN
     ck_assert_int_eq(result, 1);
@@ -102,8 +66,6 @@ Suite *gfx_suite(void)
     s = suite_create("gfx");
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, GFX_init_window_check);
-    tcase_add_test(tc_core, GFX_init_renderer_check);
     tcase_add_test(tc_core, GFX_init_graphics_check);
     tcase_add_test(tc_core, GFX_calc_intersections_in_scanline_check);
 

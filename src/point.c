@@ -1,14 +1,16 @@
-#include "primitives.h"
+#include "global.h"
 #include "point.h"
-#include "def.h"
+#include "primitives.h"
 
 point_t* PT_new(
     int x, int y
 ) {
-    point_t* new_point = (point_t*)malloc(sizeof(point_t));
-    new_point->x                = x;
-    new_point->y                = y;
-    new_point->next = NULL;
+    point_t *new_point = NULL;
+
+    new_point          = (point_t*)malloc(sizeof(point_t));
+    new_point->x       = x;
+    new_point->y       = y;
+    new_point->next    = NULL;
 
     return new_point;
 }
@@ -78,7 +80,7 @@ void PT_free(
     point_t* currentRef = head;
 
     while (currentRef != NULL) {
-        point_t * temp = currentRef->next;
+        point_t *temp = currentRef->next;
         free(currentRef);
         currentRef = temp;
     }

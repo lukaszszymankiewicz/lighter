@@ -1,7 +1,5 @@
-#include "config.h"
-#include "def.h"
+#include "global.h"
 #include "tile.h"
-
 
 tile_t* TILE_new(
     int tileset_index,

@@ -1,7 +1,6 @@
-#include "config.h"
+#include "global.h"
 #include "geometry.h"
 #include "game.h"
-#include "def.h"
 #include "hero.h"
 #include "gfx.h"
 #include "primitives.h"
@@ -47,36 +46,20 @@ hero_t* HERO_init(
     TXTR_push_animation(
         hero->sprites,
         STANDING,
-        (int[][4])
-        {
+        (int[][4]) {
             {0, 0, 9, 20},
             {9, 0, 9, 20},
         },
+        (int[][4]) {
+            {0, 0, 9, 20},
+            {0, 0, 9, 20},
+        },
         20,
-        2
+        2,
+        (int[]) { 1, 1 }
     );
 
-    TXTR_push_hitbox (
-        hero->sprites,
-        STANDING,
-        0,
-        (int[][4]) {
-            {0, 0, 9, 20},
-        },
-        1
-    );
-
-    TXTR_push_hitbox (
-        hero->sprites,
-        STANDING,
-        1,
-        (int[][4]) {
-            {0, 0, 9, 20},
-        },
-        1
-    );
-
-    // STANDING
+    // WALKING
     TXTR_push_animation(
         hero->sprites,
         WALKING,
@@ -84,28 +67,13 @@ hero_t* HERO_init(
             {0, 20, 9, 20},
             {9, 20, 9, 20},
         },
+        (int[][4]) {
+            {0, 0, 9, 20},
+            {0, 0, 9, 20},
+        },
         5,
-        2
-    );
-
-    TXTR_push_hitbox (
-        hero->sprites,
-        WALKING,
-        0,
-        (int[][4]) {
-            {0, 0, 9, 20},
-        },
-        1
-    );
-
-    TXTR_push_hitbox (
-        hero->sprites,
-        WALKING,
-        1,
-        (int[][4]) {
-            {0, 0, 9, 20},
-        },
-        1
+        2,
+        (int[]) { 1, 1 }
     );
 
     // JUMPING
@@ -113,20 +81,29 @@ hero_t* HERO_init(
         hero->sprites,
         JUMPING,
         (int[][4]) {
-            {0, 0, 9, 20},
+            {18, 0, 9, 20},
         },
-        0,
-        1
-    );
-
-    TXTR_push_hitbox (
-        hero->sprites,
-        JUMPING,
-        0,
         (int[][4]) {
             {0, 0, 9, 20},
         },
-        1
+        0,
+        1,
+        (int[]) { 1 }
+    );
+
+    // FALLING DOWN
+    TXTR_push_animation(
+        hero->sprites,
+        FALLING_DOWN,
+        (int[][4]) {
+            {18, 20, 9, 20},
+        },
+        (int[][4]) {
+            {0, 0, 9, 20},
+        },
+        0,
+        1,
+        (int[]) { 1 }
     );
 
     return hero;
@@ -135,14 +112,14 @@ hero_t* HERO_init(
 SDL_Rect* HERO_current_frame(
     hero_t *hero
 ) {
-    return &(hero->sprites->animations[hero->state].frames[hero->frame]);
+    return &(hero->sprites->animations[hero->state]->frames[hero->frame].rect);
 }
 
 void HERO_debug_hitbox(hero_t *hero) {
-    int n_boxes = hero->sprites->animations[hero->state].hit_boxes->len;
+    int n_boxes = hero->sprites->animations[hero->state]->frames[hero->frame].n_hit_box;
 
     for (int i=0; i<n_boxes; i++) {
-        SDL_Rect rect = hero->sprites->animations[hero->state].hit_boxes->rects[i];
+        SDL_Rect rect = hero->sprites->animations[hero->state]->frames[hero->frame].hit_boxes[i];
         GFX_draw_rect_border(rect.x+hero->view_x, rect.y+hero->view_y, rect.w, rect.h, 255, 0, 0, 255);
     }
 }
@@ -178,7 +155,7 @@ void HERO_update_friction(
         hero->x_vel = MIN(0, hero->x_vel + X_FRICTION);
     }
 
-    if (hero->state == JUMPING) {
+    if (hero->state == JUMPING || hero->state == FALLING_DOWN) {
         hero->y_vel += Y_FRICTION;
     }
 }
@@ -196,14 +173,17 @@ void HERO_update_state(
     if (hero->x_vel == 0 && HERO_check_state_collision(hero->state, STANDING)) {
         hero->state=STANDING; 
     }
+    if (hero->y_vel > 0) {
+        hero->state=FALLING_DOWN; 
+    }
 }
 
 void HERO_update_sprite(
     hero_t *hero
 ) {
     hero->frame_t++;
-    int del = hero->sprites->animations[hero->state].delay;
-    int len = hero->sprites->animations[hero->state].len;
+    int del = hero->sprites->animations[hero->state]->delay;
+    int len = hero->sprites->animations[hero->state]->len;
 
     if (hero->frame_t >= del) {
         hero->frame_t=0;
@@ -216,25 +196,27 @@ void HERO_update_sprite(
 }
 
 void HERO_check_collision(hero_t *hero, segment_t *obstacles) {
-    int  n_boxes     = hero->sprites->animations[hero->state].hit_boxes->len;
+    int  n_boxes     = hero->sprites->animations[hero->state]->frames[hero->frame].n_hit_box;
     int  x_coef      = 0;
     int  y_coef      = 0;
     int  x_collision = -1;
     int  y_collision = -1;
-    int new_x;
-    int new_y;
+    int  y_falling   = -1;
+    int  new_x;
+    int  new_y;
 
     y_coef = hero->y_vel;
     x_coef = hero->x_vel;
 
     sorted_list_t *x_intersections = NULL;
     sorted_list_t *y_intersections = NULL;
+    sorted_list_t *falling         = NULL;
 
-    // for each of the hit box x and y collision is checked, and each calculated collision value is
-    // stored. Then, depending of the direction of a hero lowest or highest value is then used ad
-    // final postion of hero.
+    // for each of the hit box x, y and falling collision is checked, and each calculated collision
+    // value is stored. Then, depending of the direction of a hero lowest or highest value is then
+    // used and final postion of hero.
     for (int i=0; i<n_boxes; i++) {
-        SDL_Rect rect = hero->sprites->animations[hero->state].hit_boxes->rects[i];
+        SDL_Rect rect = hero->sprites->animations[hero->state]->frames[hero->frame].hit_boxes[i];
 
         for (segment_t* obstacle=obstacles; obstacle; obstacle=obstacle->next) {
             if (hero->x_vel != 0) {
@@ -261,15 +243,24 @@ void HERO_check_collision(hero_t *hero, segment_t *obstacles) {
                rect.y + hero->view_y + rect.h + y_coef
             );
 
+            y_falling = GEO_horizontal_segment_intersects_rect(
+               obstacle->x1,
+               obstacle->y1,
+               obstacle->x2,
+               obstacle->y2, 
+               rect.x + hero->view_x,
+               rect.y + hero->view_y + 1,
+               rect.x + hero->view_x + rect.w,
+               rect.y + hero->view_y + rect.h + 1
+            );
+
             if (x_collision != -1) { SRTLST_insert(&x_intersections, x_collision); }
-            if (y_collision != -1) {
-                SRTLST_insert(&y_intersections, y_collision); 
-            }
+            if (y_collision != -1) { SRTLST_insert(&y_intersections, y_collision); }
+            if (y_falling   != -1) { SRTLST_insert(&falling, y_falling  );         }
         }
     }
-
+    
     if (x_intersections != NULL) {
-
         hero->x_vel = 0;  //stop moving!
 
         if (hero->direction == LEFT) {
@@ -300,7 +291,17 @@ void HERO_check_collision(hero_t *hero, segment_t *obstacles) {
             hero->y_vel = 0;
         }
     }
+
+    if (falling == NULL && (hero->state == STANDING || hero->state == WALKING )) {
+        // if no obstacles is below hero`s feet failing down begins
+        hero->state = FALLING_DOWN;
+    }
+
+    free(x_intersections);
+    free(y_intersections);
+    free(falling);
 }
+
 
 void HERO_move(
     hero_t      *hero,
@@ -319,7 +320,7 @@ void HERO_move(
         hero->direction = direction;
     }
 
-    else if (hero->state == JUMPING) {
+    else if (hero->state == JUMPING || hero->state == FALLING_DOWN) {
         if (hero->direction == RIGHT) {
             hero->x_vel = MIN(MAX_VEL, hero->x_vel + MOVE_POWUH);
         }
@@ -334,7 +335,7 @@ void HERO_move(
 void HERO_jump(
     hero_t      *hero
 ) {
-    if (HERO_check_state_collision(hero->state, JUMPING)) {
+    if (hero->state == STANDING || hero->state == WALKING) {
         hero->state = JUMPING;
         hero->y_vel -= JUMP_POWUH;
     }

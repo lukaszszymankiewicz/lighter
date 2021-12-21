@@ -58,8 +58,8 @@ START_TEST (HERO_update_check)
     // GIVEN
     hero_t* hero_o = HERO_init("../sprites/her2.png");
 
-    hero_o->sprites->animations[hero_o->state].delay = 2;
-    hero_o->sprites->animations[hero_o->state].len = 2;
+    hero_o->sprites->animations[hero_o->state]->delay = 2;
+    hero_o->sprites->animations[hero_o->state]->len = 2;
 
     // WHEN && THEN
     ck_assert_int_eq(hero_o->frame_t, 0);
@@ -111,7 +111,7 @@ START_TEST (HERO_colision_check_positive)
     HERO_check_collision(hero, obstacles);
 
     // collision so velocity should be equal to 0
-    ck_assert_int_eq(hero->x_vel, 0);
+    ck_assert_int_eq(hero->x, 105);
 
     // CASE 2 (lower edge)
     obstacles = NULL;
@@ -125,8 +125,8 @@ START_TEST (HERO_colision_check_positive)
     // WHEN && THEN
     HERO_check_collision(hero, obstacles);
 
-    // collision so velocity should be equal to 0
-    ck_assert_int_eq(hero->x_vel, 0);
+    // collision so hero should not move
+    ck_assert_int_eq(hero->x, 100);
 
     // CASE 3 (lower edge)
     obstacles = NULL;
@@ -140,8 +140,8 @@ START_TEST (HERO_colision_check_positive)
     // WHEN && THEN
     HERO_check_collision(hero, obstacles);
 
-    // collision so velocity should be equal to 0
-    ck_assert_int_eq(hero->y_vel, 0);
+    // collision
+    ck_assert_int_eq(hero->y, 90);
 
     // CLEANUP
     HERO_free(hero);

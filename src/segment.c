@@ -1,8 +1,6 @@
-#include "def.h"
-#include "config.h"
-#include "macros.h"
-#include "segment.h"
 #include "geometry.h"
+#include "global.h"
+#include "segment.h"
 
 segment_t* SEG_init(
     int x1, int y1,

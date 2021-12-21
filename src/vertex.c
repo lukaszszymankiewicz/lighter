@@ -1,38 +1,20 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
-#include "macros.h"
-#include "config.h"
+#include "global.h"
 #include "primitives.h"
 #include "vertex.h"
 
-// vertices are hold as single linked-list and it represents points which make light polygon.
-//
+// epsilon value for calculating two segments intersection. The higher the value more edge cases are
+// captured
 #define EPSILON 0.1
 
+// calculates angle between two points
 float VRTX_calculate_angle(int ax, int ay, int bx, int by) {
     return atan2(ax - bx, ay - by);
 }
 
-
-// vertex is created from the end of raylight.
 vertex_t* VRTX_new(
-    int start_x, int start_y,    // ray starting point - for determing angle vertex make
-    int x,       int y           // vertex coord
-) {
-    vertex_t* new_vertex = (vertex_t*)malloc(sizeof(vertex_t));
-    new_vertex->x        = x;
-    new_vertex->y        = y;
-    new_vertex->angle    = VRTX_calculate_angle(x, y, start_x, start_y);
-
-    new_vertex->next = NULL;
-    new_vertex->prev = NULL;
-
-    return new_vertex;
-}
-
-// vertex is created from the end of raylight.
-vertex_t* VRTX_new2(
     int x,
     int y,
     float angle
@@ -68,7 +50,7 @@ void VRTX_add_point(
 ) {
     vertex_t* current = NULL;
     vertex_t* new_vertex = NULL;
-    new_vertex = VRTX_new2(x, y, angle);
+    new_vertex = VRTX_new(x, y, angle);
 
     if (!(*head)) {
         new_vertex->next = *head;
@@ -165,7 +147,9 @@ int VRTX_highest_y(
     return highest_y;
 }
 
-int VRTX_max_y(vertex_t* vertex) {
+int VRTX_max_y(
+    vertex_t* vertex
+) {
     if (vertex->next==NULL) {
         return vertex->y;
     }

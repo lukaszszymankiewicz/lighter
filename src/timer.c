@@ -2,9 +2,10 @@
 
 // Basically the https://lazyfoo.net/tutorials/SDL/25_capping_frame_rate/index.php 
 
-game_timer_t* TIMER_new() {
-    game_timer_t* new_timer = NULL;
-    new_timer = (game_timer_t*)malloc(sizeof(game_timer_t*));
+game_timer_t* TIMER_new(
+) {
+    game_timer_t *new_timer = NULL;
+    new_timer               = (game_timer_t*)malloc(sizeof(game_timer_t));
 
     new_timer->start_ticks  = 0;
     new_timer->paused_ticks = 0;

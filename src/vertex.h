@@ -4,7 +4,6 @@
 #ifndef VERTEX_H
 #define VERTEX_H
 
-vertex_t* VRTX_new(int start_x, int start_y, int x, int y);
 void VRTX_optim(vertex_t* poly);
 void VRTX_free(vertex_t* head);
 void VRTX_push(vertex_t** head, vertex_t* new_vertex);

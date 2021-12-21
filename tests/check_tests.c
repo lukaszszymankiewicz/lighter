@@ -1,4 +1,5 @@
 #include <check.h>
+#include "fake.h"
 #include "check_vertex.h"
 #include "check_light.h"
 #include "check_segment.h"
@@ -21,8 +22,6 @@
 #include "../src/level.h"
 #include "../src/events.h"
 #include "../src/hero.h"
-
-int debug = 0;
 
 int main(void) {
     int number_failed = 0;

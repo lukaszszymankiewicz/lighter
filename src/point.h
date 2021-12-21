@@ -1,5 +1,3 @@
-#include <stdlib.h>
-#include <stdbool.h>
 #include "primitives.h"
 
 #ifndef POINT_H

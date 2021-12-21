@@ -1,5 +1,4 @@
-#include "def.h"
-#include "config.h"
+#include "global.h"
 #include "game.h"
 #include "gfx.h"
 #include "sprites.h"
@@ -17,11 +16,15 @@ void GAME_close(
     game_t *game
 ) {
    GFX_free();
-   HERO_free(game->hero);
-   LVL_free(game->level);
-   LIG_free(game->light);
+   free(game->keys_cooldown);
    TIMER_free(game->cap_timer);
    TIMER_free(game->fps_timer);
+   LIG_free(game->light);
+   LVL_free(game->level);
+   HERO_free(game->hero);
+   free(game);
+   SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
+   SDL_Quit();
 };
 
 game_t* GAME_init() {
@@ -56,6 +59,12 @@ void GAME_update(
     }
 }
 
+void GAME_clean_frame(
+    game_t* game
+) {
+    SEG_free(game->level->obstacle_segments);
+}
+
 int main(
     int argc, char* args[]
 ) {
@@ -70,20 +79,26 @@ int main(
         TIMER_start(game->cap_timer);
         EVNT_handle_events(game);
         GFX_clear_screen();
-        LVL_draw(game->level, game->hero->x, game->hero->y);
         LVL_analyze(game->level, game->hero->x, game->hero->y);
         HERO_update_friction(game->hero);
         HERO_check_collision(game->hero, game->level->obstacle_segments);
         HERO_update_pos_due_to_velocity(game->hero);
         HERO_update_state(game->hero);
         HERO_update_sprite(game->hero);
-        LIG_draw_light_effect(
+        LIG_fill_lightbuffer(
             HERO_light_x(game->hero),
             HERO_light_y(game->hero),
             game->frame,
             game->light,
             game->level->obstacle_segments,
             game->hero->x_vel
+        );
+        LVL_draw(game->level, game->hero->x, game->hero->y);
+        LVL_fill_shadowbuffer_with_tiles(game->level, game->hero->x, game->hero->y, 0);
+        GFX_draw_lightbuffer(
+            game->light->src->gradient_texture,
+            game->hero->view_x,
+            game->hero->view_y
         );
         HERO_draw(game->hero);
         GFX_update();

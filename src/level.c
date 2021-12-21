@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "config.h"
+#include "global.h"
 #include "gfx.h"
 #include "tile.h"
 #include "level.h"
@@ -12,12 +12,16 @@
 enum { W, S, A, D };
 
 // this stores temporary tile data to determine if tile is an obstacle
-typedef struct cell2 {
+typedef struct cell {
     int edge[4];
 } cell_t;
 
+// this matrix store cells - which are struct holding if tile is an obstacle. We limit number of
+// such cells only to a number of those which fits on screen. As tile has 32x32 pixels and game
+// screen is 320X240 matrix of 240/32=7.5 x 320/32=10. Adding some reserve 10x12 cells seems enough.
 cell_t cells[10][12];
 
+// creates new mapfile_t struct, reading its data from file.
 mapfile_t* MAP_new(
     char *filename
 ) {
@@ -37,6 +41,7 @@ mapfile_t* MAP_new(
     return new_mapfile;
 }
 
+// creates new empty level struct
 level_t* LVL_new() {
     level_t *new_level           = NULL;
 
@@ -46,10 +51,12 @@ level_t* LVL_new() {
     new_level->structure         = NULL;
     new_level->obstacles         = NULL;
     new_level->obstacle_segments = NULL;
+    new_level->tiles_used        = 0;
 
     return new_level;
 }
 
+// allocs proper memory to fit all tiles of level
 void LVL_set_size(
     level_t *level,
     int      size_x,
@@ -58,23 +65,26 @@ void LVL_set_size(
     level->size_x    = size_x;
     level->size_y    = size_y;
     level->structure = malloc(sizeof (tile_t*) * level->size_x * level->size_y);
-    level->obstacles = malloc(sizeof (int*)    * level->size_x * level->size_y);
+    level->obstacles = malloc(sizeof (int)    * level->size_x * level->size_y);
 }
 
+// allocs memory for tilesets 
 void LVL_set_tileset_number(
     level_t *level,
     int      tileset_number
 ) {
-    level->tileset_array = malloc(tileset_number * sizeof(texture_t*));
+    level->tileset_array = malloc(tileset_number * sizeof(texture_t));
 }
 
+// allocs memory for tiles 
 void LVL_set_tile_number(
     level_t *level,
     int      tile_number
 ) {
-    level->tile_array = malloc(tile_number * sizeof(tile_t*));
+    level->tile_array = malloc(tile_number * sizeof(tile_t));
 }
 
+// adds tile to tile array of level
 void LVL_add_tile(
     level_t *level,
     int      tile_index,
@@ -85,6 +95,7 @@ void LVL_add_tile(
     level->tile_array[tile_index] = *tile;
 }
 
+// fills level structure with one tile
 void LVL_fill_structure(
     level_t *level,
     int      x,
@@ -94,6 +105,7 @@ void LVL_fill_structure(
     level->structure[y * level->size_x + x] = &(level->tile_array[tile_type]);
 }
 
+// fills level obstacles (1-obstacle, 0-no obstacle) with single value
 void LVL_fill_obstacle(
     level_t *level,
     int      x,
@@ -103,6 +115,7 @@ void LVL_fill_obstacle(
     level->obstacles[y * level->size_x + x] = value;
 }
 
+// reads line of mapfile and puts it into line_buffer
 void MAP_read_next_line(
     mapfile_t* map
 ) {
@@ -110,13 +123,15 @@ void MAP_read_next_line(
     map->line_buffer[strcspn(map->line_buffer, "\n")] = 0;
 }
 
+// finds integer number from line buffer
 int MAP_find_integer_in_line(
     mapfile_t *map
 ) {
     int  k                       = 0;
     char buffer[MAX_INT_LEN];
-    
-    while(map->line_buffer[k] != ENDLINE){
+    memset(buffer, 0, MAX_INT_LEN * (sizeof(char)));
+
+    while(map->line_buffer[k] != ENDLINE) {
         buffer[k] = map->line_buffer[k];
         k++;
     }
@@ -126,6 +141,7 @@ int MAP_find_integer_in_line(
     return strtol(buffer, NULL, 10);
 }
 
+// finds string number from line buffer
 void MAP_find_str_in_line(
     mapfile_t *map,
     char       buffer[]
@@ -144,7 +160,7 @@ void MAP_find_str_in_line(
 int MAP_strings_are_equal(
     char *line_buffer,
     char *label
-){
+) {
     return strcmp(label, line_buffer) == 0;
 }
 
@@ -187,6 +203,7 @@ int MAP_end_of_section(
     return !MAP_strings_are_equal(map->line_buffer, section);
 }
 
+// finds integer array in line buffer
 int* MAP_find_array_in_line(
     mapfile_t *map,
     int        size
@@ -232,10 +249,11 @@ void MAP_get_tileset_section_data(
     MAP_find_section(map, "TILESET");
     LVL_set_tileset_number(level, MAP_find_integer_in_line(map));
 
-    for (int z=0; MAP_end_of_section(map, "ENDTILESET"); z++){
+    for (int z=0; MAP_end_of_section(map, "ENDTILESET"); z++) {
         MAP_find_str_in_line(map, buffer);
         MAP_get_tileset_path(buffer, secondary_buffer);
         level->tileset_array[z] = *(GFX_read_texture(secondary_buffer));
+        level->tiles_used++;
     }
 }
 
@@ -248,7 +266,7 @@ void MAP_get_tile_section_data(
     MAP_find_section(map, "TILE");
     LVL_set_tile_number(level, MAP_find_integer_in_line(map));
 
-    for (int z=0; MAP_end_of_section(map, "ENDTILE"); z++){
+    for (int z=0; MAP_end_of_section(map, "ENDTILE"); z++) {
         tile_data = MAP_find_array_in_line(map, TILE_DATA_NUM);
         LVL_add_tile(level, z, tile_data);
     }
@@ -291,6 +309,7 @@ void MAP_get_obstacle_section_data(
         for (x=0; x<level->size_x; x++){
             LVL_fill_obstacle(level, x, y, row[x]);
         }
+        free(row);
     }
 }
 
@@ -316,7 +335,10 @@ tile_t* LVL_tile_on_pos(
     int      x,
     int      y
 ) {
-    return level->structure[y * level->size_x + x];
+    if (x>0 && x<level->size_x && y>0 && y<level->size_y) {
+        return level->structure[y * level->size_x + x];
+    }
+    return &level->tile_array[EMPTY_TILE];
 }
 
 int LVL_tile_index_on_pos(
@@ -332,20 +354,10 @@ int LVL_obstacle_on_pos(level_t* level, int x, int y) {
 }
 
 texture_t* LVL_get_tile_texture(
-    level_t* level,
-    int      index
-) {
-    return &level->tileset_array[index];
-}
-
-SDL_Rect LVL_get_tile_rect(
     level_t *level,
-    int      x,
-    int      y
+    tile_t  *tile
 ) {
-    tile_t* tile  = LVL_tile_on_pos(level, x, y);
-    SDL_Rect rect = {tile->x, tile->y, tile->width, tile->height};
-    return rect;
+    return &(level->tileset_array[tile->index]);
 }
 
 void LVL_analyze(
@@ -503,7 +515,6 @@ void LVL_analyze(
                         ptr->x2 += TILE_WIDTH;
                     }
                 }
-
             }
         }
     }
@@ -519,25 +530,22 @@ void LVL_draw(
 
     level->obstacle_segments = NULL;  // just to be sure
 
-    // viewport coords
-    int st_x       = hero_x - SCREEN_WIDTH/2;
-    int st_y       = hero_y - SCREEN_HEIGHT/2;
-    int end_x      = hero_x + SCREEN_WIDTH/2;
-    int end_y      = hero_y + SCREEN_HEIGHT/2;
+    int st_x           = hero_x - SCREEN_WIDTH  / 2;
+    int st_y           = hero_y - SCREEN_HEIGHT / 2;
+    int end_x          = hero_x + SCREEN_WIDTH  / 2;
+    int end_y          = hero_y + SCREEN_HEIGHT / 2;
     
     int st_tile_pos_x  = st_x / TILE_WIDTH;
     int st_tile_pos_y  = st_y / TILE_HEIGHT;
-
     int end_tile_pos_x = end_x / TILE_WIDTH + 1;
     int end_tile_pos_y = end_y / TILE_HEIGHT + 1;
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
 
-            tile_t* tile = LVL_tile_on_pos(level, x, y);
-            texture_t* texture = LVL_get_tile_texture(level, tile->index);
-
-            // TODO: after implementing framebuffer this wont render tile as fill such buffer.
+            tile_t    *tile    = LVL_tile_on_pos(level, x, y);
+            texture_t *texture = LVL_get_tile_texture(level, tile);
+            
             int tile_pos_x = TILE_WIDTH  * x-st_x;
             int tile_pos_y = TILE_HEIGHT * y-st_y;
 
@@ -554,12 +562,57 @@ void LVL_draw(
     }
 }
 
+void LVL_fill_shadowbuffer_with_tiles(
+    level_t *level,
+    int      hero_x,
+    int      hero_y,
+    int      obstacle
+) {
+    int is_obstacle;
+
+    int st_x           = hero_x - SCREEN_WIDTH  / 2;
+    int st_y           = hero_y - SCREEN_HEIGHT / 2;
+    int end_x          = hero_x + SCREEN_WIDTH  / 2;
+    int end_y          = hero_y + SCREEN_HEIGHT / 2;
+    
+    int st_tile_pos_x  = st_x / TILE_WIDTH;
+    int st_tile_pos_y  = st_y / TILE_HEIGHT;
+    int end_tile_pos_x = end_x / TILE_WIDTH + 1;
+    int end_tile_pos_y = end_y / TILE_HEIGHT + 1;
+
+    for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
+        for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
+
+            is_obstacle        = LVL_obstacle_on_pos(level, x, y);
+            
+            int tile_pos_x = TILE_WIDTH  * x-st_x;
+            int tile_pos_y = TILE_HEIGHT * y-st_y;
+
+            // this will allow to decide where shadow on walls should be drawn
+            if (is_obstacle == obstacle) {
+                GFX_fill_rect(
+                    GFX_fill_shadowbuffer,
+                    tile_pos_x,
+                    tile_pos_y,
+                    TILE_WIDTH,
+                    TILE_HEIGHT,
+                    255, 255, 255, 0 
+                );
+            }
+        }
+    }
+}
+
 void LVL_free(
     level_t *level
 ) {
     free(level->obstacles);
-    SEG_free(level->obstacle_segments);
-    free(level->tileset_array);
+
+    for (int i=0; i<level->tiles_used; i++) {
+        GFX_free_texture(&level->tileset_array[i]);
+    }
+
     free(level->tile_array);
     free(level->structure);
+    free(level);
 }

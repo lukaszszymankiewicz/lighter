@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "sorted_list.h"
 
 // intersections are a sorted linked list. It is used for poperly drawing light effect (by

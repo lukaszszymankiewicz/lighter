@@ -1,6 +1,6 @@
-#include "sprites.h"
+#include "global.h"
 #include "primitives.h"
-#include "macros.h"
+#include "sprites.h"
 
 #ifndef HERO_H
 #define HERO_H
@@ -11,7 +11,7 @@
 #define Y_FRICTION       1
 #define JUMP_POWUH       10
 
-enum state { STANDING, WALKING, JUMPING, MAX_STATE };
+enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, MAX_STATE };
 
 typedef struct hero {
     int state;

@@ -1,7 +1,6 @@
 #include "events.h"
-#include "config.h"
+#include "global.h"
 #include "light.h"
-#include "def.h"
 
 static int keyboard_delay[MAX_KEYS];
 static int legal_keys[N_LEGAL_KEYS] = {

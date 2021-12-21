@@ -5,7 +5,7 @@
 #include "../src/segment.h"
 #include "../src/vertex.h"
 #include "../src/point.h"
-#include "../src/macros.h"
+#include "../src/global.h"
 
 START_TEST (LIG_calc_hit_points_real_life_example_check) 
 {

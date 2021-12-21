@@ -1,4 +1,4 @@
-#include "config.h"
+#include "global.h"
 #include "game.h"
 #include "segment.h"
 #include "geometry.h"
@@ -8,7 +8,9 @@
 #include "sprites.h"
 #include "primitives.h"
 #include "point.h"
-#include "macros.h"
+
+
+texture_t *circular_gradient = NULL;
 
 // yeah, this should be in some file
 wobble_t no_wobble = {
@@ -48,6 +50,7 @@ lightsource_t lantern = {
     .width = 0.0,
     .n_poly = 9,
     .wobble = {&no_wobble, &no_wobble},
+    .penetrating_power = 7,
     .polys = {
         {-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0 },
         { 10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0 },
@@ -59,21 +62,25 @@ lightsource_t lantern = {
         {-5 ,   5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0 },
         { 0 ,   0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0 }
     },
+    .gradient_texture = NULL
 };
 
 // yeah, this should be in some file
 lightsource_t lighter = {
     .width = PI / 7,
-    .n_poly = 6,
+    .n_poly = 1,
     .wobble = {&stable_wobble, &walk_wobble},
+    .penetrating_power = 7,
     .polys = {
-        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 90, 0  },
-        {  4,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0  },
-        { -4,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0  },
-        {  0,  4, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0  },
-        {  0, -4, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0  },
-        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 20, 36 },
+        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0  },
+        // {  4,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0  },
+        // { -4,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0  },
+        // {  0,  4, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0  },
+        // {  0, -4, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0  },
+        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 36 },
+        {  0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 20, 72 },
     },
+    .gradient_texture = NULL
 };
 
 lightsource_t* lightsources[] = {&lighter, &lantern};
@@ -85,7 +92,19 @@ float lightpos_up_down_corr[2][5] = {
      {0,   0,     LEFT_RAD-DEG30,  LEFT_RAD+DEG30,  LEFT_RAD}       // LEFT 
 };
 
+void LIG_init_gradients(
+) {
+    // circular_gradient = GFX_read_texture("gradients/circular_gradient.png");
+    circular_gradient = GFX_read_texture("gradients/circular.png");
+}
+
 light_t *LIG_init() {
+    // this is very ugly! storing lightsource data should be done in prettier matter!
+    LIG_init_gradients();
+
+    lighter.gradient_texture = circular_gradient;
+    lantern.gradient_texture = circular_gradient;
+
     light_t *light_o    = (light_t*)malloc(sizeof(light_t));
     light_o->src_num    = LIGHTER;
     light_o->src        = lightsources[light_o->src_num];
@@ -145,10 +164,10 @@ point_t* LIG_ray_hits_obstacle (
 
     // obstacle is vertical
     if (obstacle->x1 == obstacle->x2) {
-        if (GEO_value_between_range(obstacle->x1, x1, x2)) {
+        if (GEO_value_between_range(obstacle->x1, x1, x2, SLIGHLY_LOOSEN_ACCURACY)) {
             new_value = GEO_intersection_with_x(obstacle->x1, x1, y1, x2, y2);
 
-            if (GEO_value_between_range(new_value, obstacle->y1, obstacle->y2)) {
+            if (GEO_value_between_range(new_value, obstacle->y1, obstacle->y2, SLIGHLY_LOOSEN_ACCURACY)) {
                 base_point->y = (int) new_value;
                 base_point->x = obstacle->x1;
             }
@@ -157,10 +176,10 @@ point_t* LIG_ray_hits_obstacle (
 
     // obstacle is horizontal
     else {
-        if (GEO_value_between_range(obstacle->y1, y1, y2)) {
+        if (GEO_value_between_range(obstacle->y1, y1, y2, SLIGHLY_LOOSEN_ACCURACY)) {
             new_value = GEO_intersection_with_y(obstacle->y1, x1, y1, x2, y2);
 
-            if (GEO_value_between_range(new_value, obstacle->x1, obstacle->x2)) {
+            if (GEO_value_between_range(new_value, obstacle->x1, obstacle->x2, SLIGHLY_LOOSEN_ACCURACY)) {
                 base_point->x = (int) new_value;
                 base_point->y = obstacle->y1;
             }
@@ -203,16 +222,18 @@ bool LIG_any_intersection_with_obstacle(
 )
 { 
     point_t    *best_point = NULL;
-    segment_t *obstacle   = NULL;
+    segment_t  *obstacle   = NULL;
 
     for(obstacle=obstacles; obstacle; obstacle=obstacle->next) {
         best_point = LIG_ray_hits_obstacle(x1, y1, x2, y2, obstacle);
 
         if (best_point->x != x2 || best_point->y != y2) {
+            PT_free(best_point);
             return true;
         }
     }
 
+    PT_free(best_point);
     return false;
 }
 
@@ -264,8 +285,8 @@ point_t* LIG_calc_hit_points(
             }
             ptr = ptr->next;
         }
-        free(pt_a);
-        free(pt_b);
+        PT_free(pt_a);
+        PT_free(pt_b);
     }
     
     // light sweeps all around - all points of obstacles are taken
@@ -326,6 +347,9 @@ vertex_t* LIG_calc_light_polygon(
             obstacles
         );
         VRTX_add_point(&light_polygon, new_point_b->x, new_point_b->y, angle-smol_angle);
+
+        PT_free(new_point_a);
+        PT_free(new_point_b);
     }
 
     if (width != 0.0) {
@@ -338,9 +362,40 @@ vertex_t* LIG_calc_light_polygon(
     // polygon point optimization process (deleting redundant points)
     VRTX_optim(light_polygon);
 
-    // OBS_free(obstacles);
+    // cleaning
+    PT_free(hit_points);
 
     return light_polygon;
+};
+
+// Calculates polygon of shadow which will be rendered on walls (light penetating walls).
+vertex_t* LIG_calc_light_wall_shadow(
+    vertex_t *light_polygon,      // light polygon shape
+    int       penetrating_power,  // range of light penetating wall (in px)
+    int       x,                  // x starting point (hero)
+    int       y                   // y starting point (hero)
+) { 
+    vertex_t *shadow_polygon = NULL;  
+    vertex_t *ptr            = NULL;
+    ptr                      = light_polygon;
+
+    while(ptr) {
+        if ((ptr->x == x) && (ptr->y == y)) {
+            // starting point (hero position) should not be transfomred. This allows to avoid
+            // checking if light has any width (if so this point will occur, if not won`t).
+            VRTX_add_point(&shadow_polygon, x, y, 0);
+        }
+        else {
+            VRTX_add_point(
+                &shadow_polygon,
+                ptr->x - sin(ptr->angle) * penetrating_power,
+                ptr->y - cos(ptr->angle) * penetrating_power,
+                ptr->angle
+            );
+        }
+        ptr=ptr->next;
+    }
+    return shadow_polygon;
 };
 
 // changes hero lightsource to another one
@@ -351,12 +406,18 @@ void LIG_change_source(
     lght->src = lightsources[lght->src_num];
 }
 
-int LIG_get_light_polygon_color(
+int LIG_get_lightsource_feature(
     light_t *lght,
     int      i,
     int      color
 ) {
     return lght->src->polys[i][color];
+}
+
+int LIG_get_light_penetrating_power(
+    light_t *lght
+) {
+    return lght->src->penetrating_power;
 }
 
 int LIG_get_light_polygon_x_corr(
@@ -404,35 +465,41 @@ float LIG_get_wobble_angle_coef(
 // - every one of them is slightly moved to another which makes light looks more "natural".
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
 // looking like "gradient".
-void LIG_draw_light_effect(
-    int x,
-    int y,
-    int frame,
-    light_t *light,
+void LIG_fill_lightbuffer(
+    int        x,
+    int        y,
+    int        frame,
+    light_t   *light,
     segment_t *obstacles,
-    int x_vel
+    int        x_vel
 ) {
-    int   i;                // index of current light polygon drawn
-    int   red;              // color of current light polygon drawn
-    int   green;            // color of current light polygon drawn
-    int   blue;             // color of current light polygon drawn
-    int   alpha;            // color of current light polygon drawn
-    int   x_corr, y_corr;   // x and y correction values (light polygon can be shifted from its starting point)
-    float width_corr;       // light width correction (some light polygons can be wider)
-    float wobble_corr; 
+    int   i;                 // index of current light polygon drawn
+    int   red;               // color of current light polygon drawn
+    int   green;             // color of current light polygon drawn
+    int   blue;              // color of current light polygon drawn
+    int   light_power;       // power of light (brightness)
+    int   penetrating_power; // ability to penetrate walls by light
+    int   x_corr, y_corr;    // x and y correction values (light polygon can be shifted from its starting point)
+    float width_corr;        // light width correction (some light polygons can be wider)
+    float wobble_corr;       // angle correction due to wobling
 
-    wobble_corr = LIG_get_wobble_angle_coef(light, x_vel, frame);
-    vertex_t* light_polygon = NULL;
+    // before adding any new light to scene cleansing of lighbuffers is needed
+    GFX_clean_buffers();
+
+    vertex_t* light_polygon     = NULL;
+    vertex_t* light_wall_shadow = NULL;
+    wobble_corr                 = LIG_get_wobble_angle_coef(light, x_vel, frame);
 
     for (i=0; i < light->src->n_poly; i++) {
-        red        = LIG_get_light_polygon_color(light, i, RED);
-        green      = LIG_get_light_polygon_color(light, i, GREEN);
-        blue       = LIG_get_light_polygon_color(light, i, BLUE);
-        alpha      = LIG_get_light_polygon_color(light, i, ALPHA);
+        red              = LIG_get_lightsource_feature(light, i, RED);
+        green            = LIG_get_lightsource_feature(light, i, GREEN);
+        blue             = LIG_get_lightsource_feature(light, i, BLUE);
+        light_power      = LIG_get_lightsource_feature(light, i, LIGHT_POWER);
 
-        x_corr     = LIG_get_light_polygon_x_corr(light, i);
-        y_corr     = LIG_get_light_polygon_y_corr(light, i);
-        width_corr = LIG_get_light_polygon_width_corr(light, i);
+        penetrating_power = LIG_get_light_penetrating_power(light);
+        x_corr           = LIG_get_light_polygon_x_corr(light, i);
+        y_corr           = LIG_get_light_polygon_y_corr(light, i);
+        width_corr       = LIG_get_light_polygon_width_corr(light, i);
 
         // calculating the light polygon shape
         light_polygon = LIG_calc_light_polygon(
@@ -443,8 +510,21 @@ void LIG_draw_light_effect(
             obstacles
         );
 
-        // drawing the light
-        GFX_draw_light_polygon(light_polygon, red, green, blue, alpha);
+        light_wall_shadow = LIG_calc_light_wall_shadow(
+            light_polygon,
+            penetrating_power,
+            x,
+            y
+        );
+        
+        // fill lightbuffer with freshly calulcated light polygon
+        GFX_fill_buffer_single_polygon(light_polygon, GFX_fill_lightbuffer, red, green, blue, light_power);
+
+        // fill lightbuffer with freshly calulcated light polygon
+        GFX_fill_buffer_single_polygon(light_wall_shadow, GFX_fill_mesh_shadowbuffer, red, green, blue, 20);
+
+        // cleaning
+        VRTX_free(light_polygon);
     }
 };
 

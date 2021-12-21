@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 #include <check.h>
 #include <stdlib.h>
-#include "../src/config.h"
+#include "../src/global.h"
 #include "../src/events.h"
 #include "../src/hero.h"
 #include "../src/light.h"
@@ -29,7 +29,7 @@ START_TEST (EVNT_handle_events_check)
     game->hero = hero_o;
     game->light = LIG_init();
     game->frame = 0;
-    game->keys_state = (Uint8 *)malloc(sizeof(Uint8) * MAX_KEYS);;
+    game->keys_state = (Uint8 *)malloc(sizeof(Uint8) * MAX_KEYS);
     game->keys_cooldown = NULL;
     game->keys_cooldown = (Uint8 *)malloc(sizeof(Uint8) * MAX_KEYS);
 

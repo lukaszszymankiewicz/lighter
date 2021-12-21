@@ -1,6 +1,7 @@
 CC = gcc
 CsegmentFLAGS := -Wall -g
 TARGET =                     \
+	fake.c   				 \
     check_tests.c            \
     check_events.c           \
 	check_vertex.c           \
@@ -32,6 +33,9 @@ LINKS = -lcheck -pthread -lcheck_pic -pthread -lrt -lm -lsubunit `pkg-config --c
 
 all:
 	$(TARGET)
+
+run: 
+	./$(OBJ)
 
 tests: 
 	$(CC) $(TARGET) $(CFLAGS) -o $(OBJ) $(LINKS)

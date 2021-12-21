@@ -1,5 +1,4 @@
-#include "config.h"
-#include "macros.h"
+#include "global.h"
 #include "gfx.h"
 #include "primitives.h"
 #include "sorted_list.h"
@@ -8,39 +7,67 @@
 #include "segment.h"
 
 
-SDL_Surface  *surface  = NULL;
-SDL_Window   *window   = NULL;
-SDL_Renderer *renderer = NULL;
+SDL_Window   *window         = NULL;
+SDL_Renderer *renderer       = NULL;
+SDL_Texture  *screen_texture = NULL;
 
+uint32_t     *lightbuffer    = NULL;
+uint32_t     *shadowbuffer   = NULL;
 
-SDL_Window* GFX_init_window(
-    int w,
-    int h
+void GFX_fill_shadowbuffer(
+    uint32_t  color,
+    int       x,
+    int       y,
+    int       power
 ) {
+    shadowbuffer[x+y*SCREEN_WIDTH] = color | power;
+}
+
+void GFX_fill_mesh_shadowbuffer(
+    uint32_t  color,
+    int       x,
+    int       y,
+    int       power
+) {
+    static int mesh = 4;
+    shadowbuffer[x+y*SCREEN_WIDTH] = (color | power) * !((x+y) % mesh + (y % 3));
+}
+
+void GFX_fill_lightbuffer(
+    uint32_t  color,
+    int       x,
+    int       y,
+    int       power
+) {
+    lightbuffer[x+y*SCREEN_WIDTH] = color | ((lightbuffer[x+y*SCREEN_WIDTH] & 0xFF) + power);
+}
+
+
+void GFX_init_window() {
     window = SDL_CreateWindow(
         GAME_NAME,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        1366,
-        768,
+        DEFAULT_SCREEN_WIDTH,
+        DEFAULT_SCREEN_HEIGHT,
         SDL_WINDOW_FULLSCREEN
     );
 
     if (window == NULL) {
         printf("window cannot be created");
     }
-    return window;
 };
 
 void GFX_init_video() {
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf("video canno be initialized!");
+    int init_video = SDL_Init(SDL_INIT_VIDEO);
+
+    if(init_video) {
+        printf("video cannot be initialized!");
+        exit(-1);
     };
 };
 
-SDL_Renderer* GFX_init_renderer(
-    SDL_Window* window
-) {
+void GFX_init_renderer() {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
     SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -48,7 +75,7 @@ SDL_Renderer* GFX_init_renderer(
     if (renderer == NULL) {
         printf("renderer cannot be initialized!");
     }
-    return renderer;
+
 };
 
 void GFX_init_png() {
@@ -59,19 +86,35 @@ void GFX_init_png() {
     }
 };
 
-void GFX_enable_alpha_bleeding() {
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-};
+void GFX_dealloc_buffers() {
+    lightbuffer  = NULL;
+    shadowbuffer = NULL;
+}
 
-int GFX_init_graphics(
-    int width,
-    int height
-) {
+void GFX_alloc_buffers() {
+    lightbuffer  = malloc(FULL_SCREEN);
+    shadowbuffer = malloc(FULL_SCREEN);
+}
+
+// every pixel specific graphic will be stored in this texture. Sprites are rendered in normal
+// fashion but pixel-sharp shapes needs to be put in the buffer first.
+void GFX_init_screen_buffer_texture() {
+    screen_texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT
+    );
+}
+
+int GFX_init_graphics() {
     GFX_init_video();
-    window = GFX_init_window(width, height);
-    renderer = GFX_init_renderer(window);
+    GFX_init_window();
+    GFX_init_renderer();
     GFX_init_png();
-    GFX_enable_alpha_bleeding();
+    GFX_alloc_buffers();
+    GFX_init_screen_buffer_texture();
 
     return 1;
 };
@@ -84,23 +127,24 @@ void GFX_free_texture(
 };
 
 void GFX_free() {
-    window = NULL;
-    renderer = NULL;
+    GFX_dealloc_buffers();
+    if (window) {
+        SDL_DestroyWindow(window);
+    }
 
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
+    if (renderer) {
+        // this gives error
+        // SDL_DestroyRenderer(renderer);
+        free(renderer);
+    }
 
+    free(screen_texture);
     IMG_Quit();
-    //  SDL_Quit();
+
 };
 
 void GFX_clear_screen() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
-    SDL_RenderClear(renderer);
-};
-
-void GFX_blender() {
-    SDL_SetRenderDrawColor(renderer, 250, 250, 250, 10);
     SDL_RenderClear(renderer);
 };
 
@@ -172,7 +216,7 @@ void GFX_render_texture(
     SDL_RenderCopyEx(renderer, texture->surface, clip, &render_quad, 0, NULL, flip_tex);
 };
 
-
+// simplest line - only for debugging
 void GFX_draw_colored_line(
     int x1,
     int y1,
@@ -187,21 +231,7 @@ void GFX_draw_colored_line(
     SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
 };
 
-void GFX_draw_colored_rect(
-    int x1,
-    int y1,
-    int w,
-    int h,
-    int r,
-    int g,
-    int b,
-    int a
-){
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);     
-    SDL_Rect rect = (SDL_Rect){x1, y1, w, h};
-    SDL_RenderFillRect(renderer, &rect);
-};
-
+// simplest rect - only for debugging
 void GFX_draw_rect_border(
     int x,
     int y,
@@ -211,78 +241,56 @@ void GFX_draw_rect_border(
     int g,
     int b,
     int a
-){
+) {
     SDL_SetRenderDrawColor(renderer, r, g, b, a);     
     SDL_Rect rect = (SDL_Rect){x, y, w, h};
     SDL_RenderDrawRect(renderer, &rect);
 };
 
-void GFX_draw_light_sectors_in_scanline(
-    sorted_list_t  *points,
-    int                y,
-    int                n,
-    int                r,
-    int                g,
-    int                b,
-    int                a
+// fills rect with pix_fill_fun function
+void GFX_fill_rect(
+    void  (*pix_fill_fun)(uint32_t, int, int, int),
+    int x,
+    int y,
+    int w,
+    int h,
+    int r,
+    int g,
+    int b,
+    int power 
 ) {
-    sorted_list_t* ptr = NULL;
+    uint32_t red_color = r << 24;
+    uint32_t green_color = g << 16;
+    uint32_t blue_color = b << 8;
+    uint32_t light_color = red_color | green_color | blue_color;
 
-    if (n==2) {
-        GFX_draw_colored_line(points->value, y, points->next->value, y, r, g, b, a);
-    }
-
-    else if (n>2) {
-        ptr = points;
-
-        while (ptr->next) {
-            GFX_draw_colored_line(ptr->value, y, ptr->next->value, y, r, g, b, a);
-            ptr=ptr->next;
-            if (ptr->next == NULL) {
-                break;
-            }
-            ptr=ptr->next;
+    for (int xx=x; xx<x+w; xx++) { 
+        for(int yy=y; yy<y+h; yy++) {
+            pix_fill_fun(light_color, xx, yy, power);
         }
     }
-}
+};
 
-void GFX_draw_dark_sectors_in_scanline(
-    sorted_list_t  *points,
-    int                y,
-    int                n
+void GFX_draw_line_to_buffer(
+    int     x1,                                       // starting point
+    int     x2,                                       // end point
+    void  (*pix_fill_fun)(uint32_t, int, int, int),   // pix fill function
+    int     y,                                        // y-axis coef
+    int     r,                                        // red color (from 00 to FF)
+    int     g,                                        // green color (from 00 to FF)
+    int     b,                                        // blue color (from 00 to FF)
+    int     power                                     // power of  color (mostly alpha channel)
 ) {
-    sorted_list_t* ptr = NULL;
-    int last_intersection = SRTLST_get_last(points);
 
-    // dark segment from left side of screen to first intersection with scanline
-    if (points->value > 1) {
-        GFX_draw_colored_line(
-            0, y, points->value, y,
-            DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A
-        );
+    uint32_t red_color = r << 24;
+    uint32_t green_color = g << 16;
+    uint32_t blue_color = b << 8;
+    uint32_t light_color = red_color | green_color | blue_color;
+
+    for (int x=x1; x<x2; x++) {
+        pix_fill_fun(light_color, x, y, power);
     }
-
-    // dark segment from right side of screen to last intersection with scanline
-    if (last_intersection < SCREEN_WIDTH-1) {
-        GFX_draw_colored_line(
-            last_intersection, y, SCREEN_WIDTH, y,
-            DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A
-        );
-    }
-
-    // rest of the lines
-    if (n>2) {
-        ptr = points;
-
-        while (ptr->next){
-            GFX_draw_colored_line(
-                ptr->value, y, ptr->next->value, y,
-                DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A
-            );
-            ptr=ptr->next;
-        }
-    }
-}
+};
 
 sorted_list_t* GFX_calc_intersections_in_scanline(
     segment_t *segments,
@@ -298,11 +306,9 @@ sorted_list_t* GFX_calc_intersections_in_scanline(
     while(ptr){
         // line in perpendicular to y-axis
         if (ptr->y1 == ptr->y2){
-            // SRTLST_insert(&intersections, ptr->x1);
-            // SRTLST_insert(&intersections, ptr->x2);
             ptr=ptr->next;
-            // (*n)=(*n)+2;
         }
+        // line in perpendicular to x-axis
         else if (ptr->x1 == ptr->x2) {
             SRTLST_insert(&intersections, ptr->x1);
             ptr=ptr->next;
@@ -320,36 +326,56 @@ sorted_list_t* GFX_calc_intersections_in_scanline(
 }
 
 void GFX_draw_scanline(
-    segment_t    *segments,
+    segment_t     *segments,
+    void         (*pix_fill_fun)(uint32_t, int, int, int),
     int            y,
     int            r,
     int            g,
     int            b,
-    int            a
+    int            power 
 ) {
-    int               n             = 0;
-    sorted_list_t *intersections = NULL;
+    int            n             = 0;
+    sorted_list_t *intscs = NULL;
+    intscs                = GFX_calc_intersections_in_scanline(segments, y, &n);
 
-    intersections = GFX_calc_intersections_in_scanline(segments, y, &n);
+    if (intscs) {
 
-    if (intersections) {
-        GFX_draw_light_sectors_in_scanline(intersections, y, n, r, g, b, a);
-        GFX_draw_dark_sectors_in_scanline(intersections->next, y, n);
-        SRTLST_free(intersections);
+        sorted_list_t* ptr = NULL;
+
+        if (n==2) {
+            GFX_draw_line_to_buffer(intscs->value, intscs->next->value, pix_fill_fun, y, r, g, b, power);
+        }
+
+        else if (n>2) {
+            ptr = intscs;
+
+            while (ptr->next) {
+                GFX_draw_line_to_buffer(ptr->value, ptr->next->value, pix_fill_fun, y, r, g, b, power);
+
+                ptr=ptr->next;
+                if (ptr->next == NULL) {
+                    break;
+                }
+                ptr=ptr->next;
+            }
+        }
+
+        SRTLST_free(intscs);
     }
 }
 
-// function, firstly checks where the polygon "begins" (vertex with highest y coord value) and draw
+// function firstly checks where the polygon "begins" (vertex with highest y coord value) and draw
 // dark rect from y=0 up to y of such vertex. Then iterating by every y up to "end" of polygon
 // (vertex with lowest y coord value), polygon segments which will be drawn is chosen (and these
 // ones which won`t be needed are discarded), intersection points are calculated and then "dark and
 // "light" sectors are filled.
-void GFX_draw_light_polygon(
+void GFX_fill_buffer_single_polygon(
     vertex_t     *poly,
+    void          (*pix_fill_fun)(uint32_t, int, int, int),
     int           r,
     int           g,
     int           b,
-    int           a
+    int           power
 ) {
     int         y            = VRTX_highest_y(poly);
     segment_t *not_drawn_yet = SEG_get_segments_of_polygon(poly); 
@@ -357,15 +383,11 @@ void GFX_draw_light_polygon(
     segment_t *obstacle_ptr  = NULL;
     segment_t *candidates    = NULL;
 
-    if (y > 0) {
-        GFX_draw_colored_rect(0, 0, SCREEN_WIDTH, y, DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A);
-    }
-
     while(y<SCREEN_HEIGHT) {
         obstacle_ptr = current_draw;
 
         // delete segments from current drawn scan_y must be higher than y of any point
-        while(obstacle_ptr){
+        while(obstacle_ptr) {
             SEG_delete(&current_draw, y);
             obstacle_ptr=obstacle_ptr->next;
         }
@@ -377,15 +399,109 @@ void GFX_draw_light_polygon(
         SEG_merge(&current_draw, candidates);       
 
         // if there isn`t anything to draw or anything to be drawn in future - stop
-        if (!not_drawn_yet && !current_draw){ break; }
+        if (!not_drawn_yet && !current_draw) { break; }
 
-        GFX_draw_scanline(current_draw, y, r, g, b, a);
+        GFX_draw_scanline(current_draw, pix_fill_fun, y, r, g, b, power);
         y++;
     }
 
-    // fill the rest with darkness (sounds deep)
-    GFX_draw_colored_rect(0, y, SCREEN_WIDTH, y, DEFAULT_DARK_R, DEFAULT_DARK_G, DEFAULT_DARK_B, DEFAULT_DARK_A);
+    SEG_free(not_drawn_yet);
+    SEG_free(current_draw);
+    SEG_free(obstacle_ptr);
+    SEG_free(candidates);
+}
 
-    // this is temporay (until implementation of light frame buffer)
-    GFX_draw_colored_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, BACKGROUND_DARK_A);
+void GFX_clean_buffers() {
+    memset(lightbuffer,  BLANK_COLOR, FULL_SCREEN);
+    memset(shadowbuffer, BLANK_COLOR, FULL_SCREEN);
+}
+
+// sometimes gradient gradient texture is small enough to not fill entire screen leaving some "gaps"
+// of unlighted area. This function ensures that these gaps are left in darkness.
+void GFX_fill_gradient_gaps(
+    uint32_t     *light_power_buffer,
+    texture_t    *gradient_texture,
+    int           st_x,
+    int           st_y
+) {
+
+    int top    = st_y - (int) ((gradient_texture->height) / 2);
+    int bottom = top + gradient_texture->height;
+    int left   = st_x - (int) ((gradient_texture->width) / 2);
+    int right  = left + gradient_texture->width;
+    
+    if (top < 0) { top = 0; };
+    if (bottom < SCREEN_HEIGHT) { bottom = SCREEN_HEIGHT; };
+    if (left < 0) { left = 0; };
+    if (right > SCREEN_WIDTH) { right = SCREEN_WIDTH; };
+
+    // UPPER PART
+    for(int y=0; y<top; y++) {
+        for (int x=0; x<SCREEN_WIDTH; x++) {
+            light_power_buffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
+        }
+    }
+
+    // MIDDLE PART
+    for(int y=top; y<bottom; y++) {
+        for (int x=0; x<left; x++) {
+            light_power_buffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
+        }
+
+        for (int x=right; x<SCREEN_WIDTH; x++) {
+            light_power_buffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
+        }
+    }
+
+    // BOTTOM PART
+    for(int y=bottom; y<SCREEN_HEIGHT; y++) {
+        for (int x=0; x<SCREEN_WIDTH; x++) {
+            light_power_buffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
+        }
+    }
+}
+
+// Calculates rectangle shaped as gradient texture (to fill its negation)
+SDL_Rect GFX_calc_gradient_rect(
+    texture_t* gradient,
+    int x,
+    int y
+) {
+    SDL_Rect gradient_quad = {
+        x - (int)((gradient->width)/2),
+        y - (int)((gradient->height)/2),
+        gradient->width,
+        gradient->height
+    };
+
+    return gradient_quad;
+}
+
+// Draws whole light effect by sequientally blitting lightbuffers (in a different manner) to screen
+// surface.
+void GFX_draw_lightbuffer(
+    texture_t* gradient,
+    int x,
+    int y
+) {
+    // LIGHT
+    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
+    SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
+    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+    
+    // LIGHT GRADIENT
+    SDL_SetTextureBlendMode(gradient->surface, SDL_BLENDMODE_MOD);
+    SDL_Rect gradient_quad = GFX_calc_gradient_rect(gradient, x, y);
+    SDL_RenderCopy(renderer, gradient->surface, NULL, &gradient_quad);
+
+    // DARKNESS
+    GFX_fill_gradient_gaps(lightbuffer, gradient, x, y);
+    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
+    SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
+    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+
+    // LIGHT PENETRATING WALLS
+    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
+    SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
+    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
