@@ -91,9 +91,14 @@ void GFX_dealloc_buffers() {
     shadowbuffer = NULL;
 }
 
+void GFX_clean_buffers() {
+    memset(lightbuffer,  BLANK_COLOR, FULL_SCREEN_BYTE_SIZE);
+    memset(shadowbuffer, BLANK_COLOR, FULL_SCREEN_BYTE_SIZE);
+}
+
 void GFX_alloc_buffers() {
-    lightbuffer  = malloc(FULL_SCREEN);
-    shadowbuffer = malloc(FULL_SCREEN);
+    lightbuffer   = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
+    shadowbuffer  = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
 }
 
 // every pixel specific graphic will be stored in this texture. Sprites are rendered in normal
@@ -411,11 +416,6 @@ void GFX_fill_buffer_single_polygon(
     SEG_free(candidates);
 }
 
-void GFX_clean_buffers() {
-    memset(lightbuffer,  BLANK_COLOR, FULL_SCREEN);
-    memset(shadowbuffer, BLANK_COLOR, FULL_SCREEN);
-}
-
 // sometimes gradient gradient texture is small enough to not fill entire screen leaving some "gaps"
 // of unlighted area. This function ensures that these gaps are left in darkness.
 void GFX_fill_gradient_gaps(
@@ -424,7 +424,6 @@ void GFX_fill_gradient_gaps(
     int           st_x,
     int           st_y
 ) {
-
     int top    = st_y - (int) ((gradient_texture->height) / 2);
     int bottom = top + gradient_texture->height;
     int left   = st_x - (int) ((gradient_texture->width) / 2);

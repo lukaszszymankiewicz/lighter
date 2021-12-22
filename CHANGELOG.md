@@ -1,6 +1,11 @@
 # LIGHTER changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 22-10-2021
+### Fixed:
+- LIG-I-2021-001: Light do not work correctly while jumping  
+- LIG-I-2021-002: Not all tiles are covered with darkness
+
 ## [0.1.0] - 21-10-2021
 ### Added:
 - First, working anyhow, engine scratch released. Features working:

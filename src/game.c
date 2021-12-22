@@ -69,7 +69,7 @@ int main(
     int argc, char* args[]
 ) {
     game_t* game = NULL;
-    GFX_init_graphics(SCREEN_WIDTH, SCREEN_HEIGHT);
+    GFX_init_graphics();
     game = GAME_init();
     EVNT_init();
     TIMER_start(game->fps_timer);
