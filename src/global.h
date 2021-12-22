@@ -13,7 +13,7 @@ enum debug_state { NO_DEBUG, DEBUG_OBSTACLE_LINES, DEBUG_LIGHT_RAYS, MAX_DEBUG }
 // version
 #define MAJOR = 0
 #define MINOR = 1
-#define PATCH = 0
+#define PATCH = 1
 
 // macros
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -59,7 +59,11 @@ enum debug_state { NO_DEBUG, DEBUG_OBSTACLE_LINES, DEBUG_LIGHT_RAYS, MAX_DEBUG }
 #define N_COLOR_CHANNELS         4                  // number of color channels for each pixel
 #define EMPTY_TILE               0                  // index of empty tile in default tileset
 #define BLANK_COLOR              0x00000000         // this color is fully transparent
-#define FULL_SCREEN              SCREEN_WIDTH * SCREEN_HEIGHT * N_COLOR_CHANNELS
+
+// yeah... full screen overall pix number is apparnelty higher than it should be from simple
+// multiplication. This is propably due to reshaping resolution size to window size
+#define FULL_SCREEN_PIX_SIZE     SCREEN_WIDTH * (SCREEN_HEIGHT+40)
+#define FULL_SCREEN_BYTE_SIZE    SCREEN_WIDTH * SCREEN_HEIGHT * N_COLOR_CHANNELS
 #define PIX_PER_SCREEN_ROW       SCREEN_WIDTH * N_COLOR_CHANNELS
 
 #endif
