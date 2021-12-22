@@ -68,7 +68,7 @@ lightsource_t lantern = {
 // yeah, this should be in some file
 lightsource_t lighter = {
     .width = PI / 7,
-    .n_poly = 1,
+    .n_poly = 3,
     .wobble = {&stable_wobble, &walk_wobble},
     .penetrating_power = 7,
     .polys = {
