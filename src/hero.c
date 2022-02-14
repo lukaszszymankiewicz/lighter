@@ -29,11 +29,16 @@ hero_t* HERO_init(
     hero->state     = STANDING;
     hero->direction = LEFT;
 
+    // TODO: some more sofisticaed method should be perfomed here
     if (animation_sheet == NULL) {
         hero->sprites = TXTR_init_animation_sheet("sprites/her2.png", MAX_STATE);
     }
     else {
         hero->sprites = TXTR_init_animation_sheet(animation_sheet, MAX_STATE);
+    }
+
+    if (hero->sprites == NULL) {
+        printf("imma  fool");
     }
 
     hero->frame   = 0;

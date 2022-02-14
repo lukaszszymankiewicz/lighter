@@ -11,8 +11,8 @@ SDL_Window   *window         = NULL;
 SDL_Renderer *renderer       = NULL;
 SDL_Texture  *screen_texture = NULL;
 
-uint32_t     *lightbuffer    = NULL;
-uint32_t     *shadowbuffer   = NULL;
+uint32_t     *lightbuffer;
+uint32_t     *shadowbuffer;
 
 void GFX_fill_shadowbuffer(
     uint32_t  color,
@@ -97,8 +97,18 @@ void GFX_clean_buffers() {
 }
 
 void GFX_alloc_buffers() {
+    lightbuffer  = NULL;
+    shadowbuffer = NULL;
+
     lightbuffer   = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
     shadowbuffer  = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
+}
+
+void GFX_free_buffers() {
+    free(lightbuffer);
+    free(shadowbuffer);
+    lightbuffer  = NULL;
+    shadowbuffer = NULL;
 }
 
 // every pixel specific graphic will be stored in this texture. Sprites are rendered in normal
@@ -132,18 +142,17 @@ void GFX_free_texture(
 };
 
 void GFX_free() {
-    GFX_dealloc_buffers();
+    GFX_free_buffers();
+    SDL_DestroyTexture(screen_texture);
+
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+    }
+
     if (window) {
         SDL_DestroyWindow(window);
     }
 
-    if (renderer) {
-        // this gives error
-        // SDL_DestroyRenderer(renderer);
-        free(renderer);
-    }
-
-    free(screen_texture);
     IMG_Quit();
 
 };
@@ -158,6 +167,7 @@ void GFX_update() {
     SDL_UpdateWindowSurface(window);
 };
 
+// reads texture from a file and converts it into SDL_Texture
 texture_t* GFX_read_texture(
     char *filepath
 ) {
@@ -165,18 +175,30 @@ texture_t* GFX_read_texture(
     SDL_Surface *loaded_surface = NULL;
 
     loaded_surface              = IMG_Load(filepath);
-    SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
 
-    new_texture  = SDL_CreateTextureFromSurface(renderer, loaded_surface);
-    texture_t* p = malloc(sizeof(texture_t));
+    if (loaded_surface == NULL) {
+        new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 20, 20);
+        texture_t* p = malloc(sizeof(texture_t));
 
-    p->surface = new_texture;
-    p->width   = loaded_surface->w;
-    p->height  = loaded_surface->h;
+        p->surface = new_texture;
+        p->width   = loaded_surface->w;
+        p->height  = loaded_surface->h;
 
-    SDL_FreeSurface(loaded_surface);
+        return p;
+    }
+    else {
+        SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
+        new_texture  = SDL_CreateTextureFromSurface(renderer, loaded_surface);
+        texture_t* p = malloc(sizeof(texture_t));
 
-    return p;
+        p->surface = new_texture;
+        p->width   = loaded_surface->w;
+        p->height  = loaded_surface->h;
+
+        SDL_FreeSurface(loaded_surface);
+
+        return p;
+    }
 };
 
 // renders texture to screen

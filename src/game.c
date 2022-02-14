@@ -10,19 +10,20 @@
 #include "light.h"
 #include "segment.h"
 
-int debug = 0;
+int debug = 2;
 
 void GAME_close(
     game_t *game
 ) {
-   GFX_free();
    free(game->keys_cooldown);
    TIMER_free(game->cap_timer);
    TIMER_free(game->fps_timer);
    LIG_free(game->light);
    LVL_free(game->level);
    HERO_free(game->hero);
+   LIG_free_all_files();
    free(game);
+   GFX_free();
    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
    SDL_Quit();
 };
@@ -70,6 +71,7 @@ int main(
 ) {
     game_t* game = NULL;
     GFX_init_graphics();
+    LIG_read_all_files();
     game = GAME_init();
     EVNT_init();
     TIMER_start(game->fps_timer);
@@ -103,6 +105,7 @@ int main(
         HERO_draw(game->hero);
         GFX_update();
         GAME_update(game);
+
     }
 
     GAME_close(game);

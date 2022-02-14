@@ -112,9 +112,6 @@ START_TEST (GEO_vertical_segment_intersects_rect_check)
     ck_assert_int_eq(result, 120);
 
     // edge case
-    result = GEO_vertical_segment_intersects_rect(120, 130, 120, 100, 100, 100, 150, 150);
-    ck_assert_int_eq(result, 120);
-
     result = GEO_vertical_segment_intersects_rect(120, 100, 120, 200, 100, 100, 150, 150);
     ck_assert_int_eq(result, 120);
 
@@ -148,13 +145,6 @@ START_TEST (GEO_horizontal_segment_intersects_rect_check)
 
     // edge case
     result = GEO_horizontal_segment_intersects_rect(120, 120, 200, 120, 100, 100, 150, 150);
-    ck_assert_int_eq(result, 120);
-
-    // edge case
-    result = GEO_horizontal_segment_intersects_rect(80, 120, 100, 120, 100, 100, 150, 150);
-    ck_assert_int_eq(result, 120);
-
-    result = GEO_horizontal_segment_intersects_rect(150, 120, 200, 120, 100, 100, 150, 150);
     ck_assert_int_eq(result, 120);
 
     // FAIL

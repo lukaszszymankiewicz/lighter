@@ -12,11 +12,12 @@ START_TEST (EVNT_handle_events_check)
     // GIVEN
     int loop = 1;
 
-    // hero_t* hero_o = HERO_init();
+    hero_t* hero_o = NULL;
     light_t* light_o = LIG_init();
 
-    // sprites are really unused here, so there are not initialized really
-    hero_t* hero_o = (hero_t*)malloc(sizeof(hero_t));
+    // sprites are really unused here, so some way around is used to get proper hero struct without
+    // texture initialised
+    hero_o = (hero_t*)malloc(sizeof(hero_t));
     hero_o->x = 100;
     hero_o->y = 100;
     hero_o->state = STANDING;
@@ -24,6 +25,7 @@ START_TEST (EVNT_handle_events_check)
     hero_o->frame=0;
     hero_o->frame_t=0;
 
+    // only things needed are initialised in game struct
     game_t* game = (game_t*)malloc(sizeof(game_t));
     game->loop = true;
     game->hero = hero_o;
@@ -44,7 +46,7 @@ START_TEST (EVNT_handle_events_check)
 
     // WHEN (LIGHT CHANGE)
     Uint8* new_keys = (Uint8 *)malloc(sizeof(Uint8) * MAX_KEYS);
-    new_keys[SDL_SCANCODE_SPACE] = 2;
+    new_keys[SDL_SCANCODE_SPACE] = 2;  // exit button pressed
     game->keys_state = new_keys;
     SDL_PushEvent(&(game->event));
     EVNT_handle_events(game);

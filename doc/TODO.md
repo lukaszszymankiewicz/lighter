@@ -5,20 +5,9 @@ codename: make light pretty
  - [x] implement framebuffer for light effect,
  - [x] light should penetrate walls, but weaker.
 
-MILESTONE 1.5
- - [ ] refactor drawing light (right now it is 4 different processes, and each pixel can, at wosrt
-   scenario be redraw 4 times. This can be easily refactored).
-
 MILESTONE 2
-codename: make dev easy
-hint: use some other than C language to make it faster
- - [ ] check fo unused code
- - [ ] GUI level editor,
- - [ ] GUI sprite/animation/light/hitbox editor,
- - [ ] filetype which will store Hero/Object/light data,
- - [ ] script for stand-alone distribution of game for linux,
- - [ ] scipt for stand-alone distribution of game for Windows,
- - [ ] Put SDL library directly into game files.
+codename: make dev easy - create tools for level editing
+developing tools will be stored in such [repo](https://github.com/lukaszszymankiewicz/ltools)
 
  MILESTONE 3
  codename: make gameplay cool
@@ -31,3 +20,10 @@ hint: use some other than C language to make it faster
  - [ ] drawing gradient of light blit whole texture on a screen. Only part of it (shaped by light
    polygon) should be blitted. To obtain so, SDL_RenderCopy needs to be replaced by some custom
    function and custom pix_draw_fun.
+ - [ ] other way od drawing light penetrating wall - by now it is drawn pixel by pixel, maybe some
+   simple tile will do the work?
+ - [ ] script for stand-alone distribution of game for linux,
+ - [ ] scipt for stand-alone distribution of game for Windows,
+ - [ ] Put SDL library directly into game files.
+ - [ ] check for unused code
+ - [ ] filetype which will store Hero/Object/light data,

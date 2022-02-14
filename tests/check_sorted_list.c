@@ -5,7 +5,7 @@
 START_TEST (SRTLST_insert_check)
 {
     // GIVEN
-    sorted_list_t* head;
+    sorted_list_t* head = NULL;
     SRTLST_insert(&head, 2);
 
     // WHEN

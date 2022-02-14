@@ -28,10 +28,10 @@ void PT_push(
     int          y
 ) {
     point_t *new_point = NULL;
-    point_t *ptr          = NULL;
+    point_t *ptr       = NULL;
 
-    new_point             = PT_new(x, y);
-    ptr                   = (*head);
+    new_point          = PT_new(x, y);
+    ptr                = (*head);
 
     // head is empty
     if ((*head) == NULL) {

@@ -48,7 +48,7 @@ void VRTX_add_point(
     int y,
     float angle
 ) {
-    vertex_t* current = NULL;
+    vertex_t* current    = NULL;
     vertex_t* new_vertex = NULL;
     new_vertex = VRTX_new(x, y, angle);
 
@@ -204,12 +204,16 @@ int VRTX_len(
 void VRTX_free(
     vertex_t* head
 ) {
-    vertex_t* currentRef = head;
+    vertex_t* currentRef = NULL;
+    currentRef           = head;
+
+    vertex_t* temp = NULL;
 
     while (currentRef != NULL) {
         vertex_t* temp = currentRef->next;
         free(currentRef);
         currentRef = temp;
     }
+    free(temp);
 }
 
