@@ -36,7 +36,7 @@ game_t* GAME_init() {
     game->keys_cooldown = NULL;
 
     game->loop          = true;
-    game->hero          = HERO_init(NULL);
+    game->hero          = HERO_init(NULL, 12 * TILE_HEIGHT, 12 * TILE_WIDTH); // postion is temp
     game->level         = LVL_read_from_file("./levels/level_1.txt");
     game->light         = LIG_init();
     game->frame         = 0;

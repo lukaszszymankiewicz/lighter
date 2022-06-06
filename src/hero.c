@@ -19,13 +19,15 @@ int state_collisions[3][3] = {
 };
 
 hero_t* HERO_init(
-    char* animation_sheet
+    char* animation_sheet,
+    int starting_pos_x,
+    int starting_pos_y
 ) {
     hero_t* hero    = (hero_t*)malloc(sizeof(hero_t));
-    hero->x         = 384;                   // global postion on map
-    hero->y         = 384;                   // global postion on map
-    hero->view_x    = SCREEN_WIDTH / 2;      // postion on viewport
-    hero->view_y    = 144;                   // postion on viewport
+    hero->x         = starting_pos_x;
+    hero->y         = starting_pos_y;
+    hero->view_x    = SCREEN_WIDTH / 2;      // postion on viewport (middle of screen)
+    hero->view_y    = 144;                   // postion on viewport (middle of screen)
     hero->state     = STANDING;
     hero->direction = LEFT;
 
