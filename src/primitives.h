@@ -5,7 +5,6 @@
 
 typedef short int direction_t;
 enum direction { RIGHT, LEFT, UP, DOWN, NONE };
-enum texture_data { TILESET_INDEX, X_OFFSET, Y_OFFSET };
 
 // for calculating hits
 typedef struct obstacle {

@@ -53,6 +53,7 @@ START_TEST (EVNT_handle_events_check)
     ck_assert_int_eq(light_o->src_num, 0);
     free(new_keys);
 
+    // TODO: this integers in ck_assert_int_eq should be enum keys
     // WHEN (LIGHT CHANGE BACK)
     game->event.type = SDL_KEYDOWN;
     game->event.key.keysym.sym = SDL_SCANCODE_SPACE;
@@ -64,13 +65,13 @@ START_TEST (EVNT_handle_events_check)
     game->event.type = SDL_KEYDOWN;
     game->event.key.keysym.sym = SDL_SCANCODE_UP;
     EVNT_handle_events(game);
-    ck_assert_int_eq(hero_o->state, 2);
+    ck_assert_int_eq(hero_o->state, 1);
 
     // WHEN (MOVING DOWN)
     game->event.type = SDL_KEYDOWN;
     game->event.key.keysym.sym = SDL_SCANCODE_DOWN;
     EVNT_handle_events(game);
-    ck_assert_int_eq(hero_o->state, 2);
+    ck_assert_int_eq(hero_o->state, 1);
 
     // CLEANING
     free(hero_o);

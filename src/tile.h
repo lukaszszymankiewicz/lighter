@@ -6,9 +6,8 @@ typedef struct tile {
   int          y;       // y offset on tileset
   int          width;   // tile width (default is 32)
   int          height;  // tile height (default is 32)
-  int          index;   // tileset index
 } tile_t;
 
-tile_t* TILE_new(int tileset_index, int x_offset, int y_offset);
+tile_t* TILE_new(int x_offset, int y_offset);
 
 #endif

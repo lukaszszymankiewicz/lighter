@@ -6,6 +6,7 @@ OBJ = lighter
 TARGET =                \
 	src/game.c          \
 	src/gfx.c           \
+	src/import.c        \
 	src/sprites.c       \
 	src/events.c        \
 	src/hero.c          \

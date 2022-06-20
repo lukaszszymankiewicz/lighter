@@ -6,6 +6,7 @@
 #include "check_point.h"
 #include "check_gfx.h"
 #include "check_level.h"
+#include "check_import.h"
 #include "check_events.h"
 #include "check_geometry.h"
 #include "check_hero.h"
@@ -19,6 +20,7 @@
 #include "../src/light.h"
 #include "../src/segment.h"
 #include "../src/gfx.h"
+#include "../src/import.h"
 #include "../src/level.h"
 #include "../src/events.h"
 #include "../src/hero.h"
@@ -68,7 +70,12 @@ int main(void) {
     // srunner_run_all(sr, CK_ENV);
     // number_failed += srunner_ntests_failed(sr);
 
-    // printf("\n");
+    // GFX
+    s = import_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+    printf("\n");
 
     // level
     s = level_suite();

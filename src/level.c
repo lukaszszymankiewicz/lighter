@@ -6,8 +6,8 @@
 #include "primitives.h"
 #include "segment.h"
 
-#define ENDLINE ';'
-#define NEWFIELD ','
+#define SCREEN_TILE_PER_X 10
+#define SCREEN_TILE_PER_Y 12
 
 enum { W, S, A, D };
 
@@ -19,41 +19,44 @@ typedef struct cell {
 // this matrix store cells - which are struct holding if tile is an obstacle. We limit number of
 // such cells only to a number of those which fits on screen. As tile has 32x32 pixels and game
 // screen is 320X240 matrix of 240/32=7.5 x 320/32=10. Adding some reserve 10x12 cells seems enough.
-cell_t cells[10][12];
-
-// creates new mapfile_t struct, reading its data from file.
-mapfile_t* MAP_new(
-    char *filename
-) {
-    mapfile_t *new_mapfile = NULL;
-    new_mapfile            = (mapfile_t*)malloc(sizeof(mapfile_t));
-
-    memset(new_mapfile->line_buffer, 0, MAX_LINE_LENGHT * (sizeof(char)));
-
-    new_mapfile->file_pointer = NULL;
-    new_mapfile->file_pointer = fopen(filename, "r");
-
-    if (new_mapfile->file_pointer == NULL) {
-        printf("Failed: ");
-        exit(0);
-    }
-
-    return new_mapfile;
-}
+cell_t cells[SCREEN_TILE_PER_X][SCREEN_TILE_PER_Y];
 
 // creates new empty level struct
 level_t* LVL_new() {
     level_t *new_level           = NULL;
-
     new_level                    = (level_t*)malloc(sizeof(level_t));
-    new_level->tileset_array     = NULL;
-    new_level->tile_array        = NULL;
+
+    new_level->tileset           = NULL;
     new_level->structure         = NULL;
     new_level->obstacles         = NULL;
     new_level->obstacle_segments = NULL;
     new_level->tiles_used        = 0;
 
+    new_level->tileset = malloc(sizeof(texture_t));
+
     return new_level;
+}
+
+// initialise level structure
+void LVL_clean_structure(
+    level_t *level
+) {
+    for (int x=0; x<level->size_x; x++) { 
+        for (int y=0; y<level->size_y; y++) { 
+            level->structure[y * level->size_x + x] = NULL;
+        }
+    }
+}
+
+// initialise level structure
+void LVL_clean_obstacles(
+    level_t *level
+) {
+    for (int x=0; x<level->size_x; x++) { 
+        for (int y=0; y<level->size_y; y++) { 
+            level->obstacles[y * level->size_x + x] = 0;
+        }
+    }
 }
 
 // allocs proper memory to fit all tiles of level
@@ -64,19 +67,15 @@ void LVL_set_size(
 ) {
     level->size_x    = size_x;
     level->size_y    = size_y;
+
     level->structure = malloc(sizeof (tile_t*) * level->size_x * level->size_y);
+    LVL_clean_structure(level);
+
     level->obstacles = malloc(sizeof (int)    * level->size_x * level->size_y);
+    LVL_clean_obstacles(level);
 }
 
-// allocs memory for tilesets 
-void LVL_set_tileset_number(
-    level_t *level,
-    int      tileset_number
-) {
-    level->tileset_array = malloc(tileset_number * sizeof(texture_t));
-}
-
-// allocs memory for tiles 
+// allocs memory for tiles
 void LVL_set_tile_number(
     level_t *level,
     int      tile_number
@@ -88,11 +87,16 @@ void LVL_set_tile_number(
 void LVL_add_tile(
     level_t *level,
     int      tile_index,
-    int     *data
+    int      x_offset,
+    int      y_offset
 ) {
     tile_t* tile                  = NULL;
-    tile                          = TILE_new(data[TILESET_INDEX], data[X_OFFSET], data[Y_OFFSET]);
+    tile                          = TILE_new(x_offset, y_offset);
     level->tile_array[tile_index] = *tile;
+}
+
+void LVL_set_tileset(level_t *level, texture_t* texture) {
+    level->tileset = texture;
 }
 
 // fills level structure with one tile
@@ -100,9 +104,9 @@ void LVL_fill_structure(
     level_t *level,
     int      x,
     int      y,
-    int      tile_type
+    int      i
 ) {
-    level->structure[y * level->size_x + x] = &(level->tile_array[tile_type]);
+    level->structure[y * level->size_x + x] = &(level->tile_array[i]);
 }
 
 // fills level obstacles (1-obstacle, 0-no obstacle) with single value
@@ -110,68 +114,25 @@ void LVL_fill_obstacle(
     level_t *level,
     int      x,
     int      y,
-    int      value
+    int      i
 ) {
-    level->obstacles[y * level->size_x + x] = value;
+    level->obstacles[y * level->size_x + x] = i;
 }
 
-// reads line of mapfile and puts it into line_buffer
-void MAP_read_next_line(
-    mapfile_t* map
-) {
-    fgets(map->line_buffer, MAX_LINE_LENGHT - 1, map->file_pointer);
-    map->line_buffer[strcspn(map->line_buffer, "\n")] = 0;
-}
+void LVL_fill_tiles(level_t *level) {
+    // allocating memory for all tiles
+    int tile_number = (int)(level->tileset->width/TILE_WIDTH) * (int)(level->tileset->height/TILE_HEIGHT); 
+    LVL_set_tile_number(level, tile_number);
 
-// finds integer number from line buffer
-int MAP_find_integer_in_line(
-    mapfile_t *map
-) {
-    int  k                       = 0;
-    char buffer[MAX_INT_LEN];
-    memset(buffer, 0, MAX_INT_LEN * (sizeof(char)));
+    // creating actual tiles
+    int i = 0;
 
-    while(map->line_buffer[k] != ENDLINE) {
-        buffer[k] = map->line_buffer[k];
-        k++;
+    for (int y=0; y<level->tileset->height; y+=TILE_WIDTH) {
+        for (int x=0; x<level->tileset->width; x+=TILE_WIDTH) {
+            LVL_add_tile(level, i, x, y);
+            i++;
+        }
     }
-
-    MAP_read_next_line(map);
-
-    return strtol(buffer, NULL, 10);
-}
-
-// finds string number from line buffer
-void MAP_find_str_in_line(
-    mapfile_t *map,
-    char       buffer[]
-) {
-    int k = 0;                      
-
-    while(map->line_buffer[k] != ENDLINE){
-        buffer[k] = map->line_buffer[k];
-        k++;
-    }
-    buffer[k] = '\0';
-
-    MAP_read_next_line(map);
-}
-
-int MAP_strings_are_equal(
-    char *line_buffer,
-    char *label
-) {
-    return strcmp(label, line_buffer) == 0;
-}
-
-void MAP_find_section(
-    mapfile_t *map,
-    char      *label
-) {
-    while(!MAP_strings_are_equal(map->line_buffer, label)) {
-        MAP_read_next_line(map);
-    }
-    MAP_read_next_line(map);
 }
 
 void MAP_get_tileset_path(
@@ -183,152 +144,6 @@ void MAP_get_tileset_path(
     strcat(level_file_path, tileset_filename);
 }
 
-void MAP_get_size_section_data(
-    mapfile_t *map,
-    level_t   *level
-) {
-    int size_x = 0;
-    int size_y = 0;
-
-    MAP_find_section(map, "SIZE");
-    size_x = MAP_find_integer_in_line(map);
-    size_y = MAP_find_integer_in_line(map);
-    LVL_set_size(level, size_x, size_y);
-}
-
-int MAP_end_of_section(
-    mapfile_t *map,
-    char      *section
-) {
-    return !MAP_strings_are_equal(map->line_buffer, section);
-}
-
-// finds integer array in line buffer
-int* MAP_find_array_in_line(
-    mapfile_t *map,
-    int        size
-) {
-    int *arr                     = NULL;
-    int  k                       = 0;
-    int  i                       = 0;
-    int  z                       = 0;
-    int  number;
-    char buffer[MAX_INT_LEN];
-    
-    memset(buffer, 0, MAX_INT_LEN * (sizeof(char)));
-    arr = (int*)malloc(sizeof(int) * size);
-
-    while(map->line_buffer[k] != ENDLINE){
-        if (map->line_buffer[k] == NEWFIELD) {
-            arr[z++] = strtol(buffer, NULL, 10);
-            memset(buffer, 0, MAX_INT_LEN * (sizeof(char)));
-            k++;
-            i=0;
-        }
-        buffer[i++] = map->line_buffer[k++];
-    }
-
-    number = strtol(buffer, NULL, 10);
-    arr[z] = number;
-
-    MAP_read_next_line(map);
-
-    return arr;
-}
-
-void MAP_get_tileset_section_data(
-    mapfile_t *map,
-    level_t   *level
-) {
-    char     buffer[MAX_LINE_LENGHT];
-    char     secondary_buffer[MAX_LINE_LENGHT];
-
-    memset(buffer, 0, MAX_LINE_LENGHT * (sizeof(char)));
-    memset(secondary_buffer, 0, MAX_LINE_LENGHT * (sizeof(char)));
-
-    MAP_find_section(map, "TILESET");
-    LVL_set_tileset_number(level, MAP_find_integer_in_line(map));
-
-    for (int z=0; MAP_end_of_section(map, "ENDTILESET"); z++) {
-        MAP_find_str_in_line(map, buffer);
-        MAP_get_tileset_path(buffer, secondary_buffer);
-        level->tileset_array[z] = *(GFX_read_texture(secondary_buffer));
-        level->tiles_used++;
-    }
-}
-
-void MAP_get_tile_section_data(
-    mapfile_t *map,
-    level_t   *level
-) {
-    int* tile_data = NULL;
-
-    MAP_find_section(map, "TILE");
-    LVL_set_tile_number(level, MAP_find_integer_in_line(map));
-
-    for (int z=0; MAP_end_of_section(map, "ENDTILE"); z++) {
-        tile_data = MAP_find_array_in_line(map, TILE_DATA_NUM);
-        LVL_add_tile(level, z, tile_data);
-    }
-}
-
-void MAP_get_structure_section_data(
-    mapfile_t *map,
-    level_t   *level
-) {
-    int *row = NULL;
-    int  x;
-    int  y;
-
-    MAP_find_section(map, "STRUCTURE");
-
-    for (y=0; MAP_end_of_section(map, "ENDSTRUCTURE"); y++){
-        row = NULL;
-        row = MAP_find_array_in_line(map, level->size_x);
-
-        for (x=0; x<level->size_x; x++){
-            LVL_fill_structure(level, x, y, row[x]);
-        }
-    }
-}
-
-void MAP_get_obstacle_section_data(
-    mapfile_t *map,
-    level_t   *level
-) {
-    int *row = NULL;
-    int  x;
-    int  y;
-
-    MAP_find_section(map, "OBSTACLE");
-
-    for (y=0; MAP_end_of_section(map, "ENDOBSTACLE"); y++) {
-        row = NULL;
-        row = MAP_find_array_in_line(map, level->size_x);
-
-        for (x=0; x<level->size_x; x++){
-            LVL_fill_obstacle(level, x, y, row[x]);
-        }
-        free(row);
-    }
-}
-
-level_t* LVL_read_from_file(
-    char *filename
-) {
-    level_t *level = NULL;
-    level          = LVL_new();
-    mapfile_t* map = NULL;
-    map            = MAP_new("./levels/level_1.txt"); // just for now
-
-    MAP_get_size_section_data(map, level);
-    MAP_get_tileset_section_data(map, level);
-    MAP_get_tile_section_data(map, level);
-    MAP_get_structure_section_data(map, level);
-    MAP_get_obstacle_section_data(map, level);
-
-    return level;
-}
 
 tile_t* LVL_tile_on_pos(
     level_t *level,
@@ -341,23 +156,14 @@ tile_t* LVL_tile_on_pos(
     return &level->tile_array[EMPTY_TILE];
 }
 
-int LVL_tile_index_on_pos(
-    level_t *level,
-    int      x,
-    int      y
-) {
-    return level->structure[y * level->size_x + x]->index;
-}
-
 int LVL_obstacle_on_pos(level_t* level, int x, int y) {
     return level->obstacles[y * level->size_x + x];
 }
 
 texture_t* LVL_get_tile_texture(
-    level_t *level,
-    tile_t  *tile
+    level_t *level
 ) {
-    return &(level->tileset_array[tile->index]);
+    return level->tileset;
 }
 
 void LVL_analyze(
@@ -369,9 +175,9 @@ void LVL_analyze(
     level->obstacle_segments = NULL;  // just to be sure
     segment_t *ptr           = NULL;
 
-    // clearing
-    for (int yy = 0; yy < 10; yy++) {
-        for (int xx = 0; xx < 12; xx++) {
+    // cleaning
+    for (int yy = 0; yy < SCREEN_TILE_PER_X; yy++) {
+        for (int xx = 0; xx < SCREEN_TILE_PER_Y; xx++) {
             cells[yy][xx].edge[W] = 0;
             cells[yy][xx].edge[S] = 0;
             cells[yy][xx].edge[A] = 0;
@@ -543,21 +349,23 @@ void LVL_draw(
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
 
-            tile_t    *tile    = LVL_tile_on_pos(level, x, y);
-            texture_t *texture = LVL_get_tile_texture(level, tile);
+            tile_t    *tile    = NULL;
+            texture_t *texture = NULL;
+
+            tile    = LVL_tile_on_pos(level, x, y);
+            texture = LVL_get_tile_texture(level);
             
             int tile_pos_x = TILE_WIDTH  * x-st_x;
             int tile_pos_y = TILE_HEIGHT * y-st_y;
-
-            GFX_render_tile(
-                    texture,
-                    tile_pos_x,
-                    tile_pos_y,
-                    tile->x,
-                    tile->y,
-                    TILE_WIDTH,
-                    TILE_HEIGHT
-                );
+            
+            if (tile != NULL) {
+                GFX_render_tile(
+                        texture ,
+                        tile_pos_x, tile_pos_y,
+                        tile->x, tile->y,
+                        TILE_WIDTH, TILE_HEIGHT
+                    );
+            }
         }
     }
 }
@@ -603,14 +411,13 @@ void LVL_fill_shadowbuffer_with_tiles(
     }
 }
 
+// TODO: test this one!
 void LVL_free(
     level_t *level
 ) {
     free(level->obstacles);
 
-    for (int i=0; i<level->tiles_used; i++) {
-        GFX_free_texture(&level->tileset_array[i]);
-    }
+    GFX_free_texture(level->tileset);
 
     free(level->tile_array);
     free(level->structure);
