@@ -6,6 +6,7 @@ TARGET =                     \
     check_events.c           \
 	check_geometry.c       	 \
 	check_gfx.c				 \
+	check_import.c   		 \
 	check_hero.c       	     \
 	check_level.c       	 \
 	check_light.c            \
@@ -17,6 +18,7 @@ TARGET =                     \
 	../src/events.c          \
 	../src/geometry.c        \
 	../src/gfx.c             \
+	../src/import.c          \
 	../src/hero.c            \
 	../src/level.c           \
 	../src/light.c           \

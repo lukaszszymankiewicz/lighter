@@ -1,6 +1,7 @@
 #include "global.h"
 #include "game.h"
 #include "gfx.h"
+#include "import.h"
 #include "sprites.h"
 #include "events.h"
 #include "hero.h"
@@ -9,8 +10,9 @@
 #include "level.h"
 #include "light.h"
 #include "segment.h"
+#include "import.h"
 
-int debug = 2;
+int debug = 0;
 
 void GAME_close(
     game_t *game
@@ -26,6 +28,7 @@ void GAME_close(
    GFX_free();
    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
    SDL_Quit();
+
 };
 
 game_t* GAME_init() {
@@ -36,8 +39,8 @@ game_t* GAME_init() {
     game->keys_cooldown = NULL;
 
     game->loop          = true;
-    game->hero          = HERO_init(NULL, 12 * TILE_HEIGHT, 12 * TILE_WIDTH); // postion is temp
-    game->level         = LVL_read_from_file("./levels/level_1.txt");
+    game->level         = IMP_read_from_file("./levels/sample");
+    game->hero          = HERO_init(NULL, game->level->hero_x, game->level->hero_y);
     game->light         = LIG_init();
     game->frame         = 0;
     game->fps_timer     = TIMER_new();
@@ -47,7 +50,6 @@ game_t* GAME_init() {
 
     return game;
 };
-
 
 void GAME_update(
     game_t* game
@@ -105,7 +107,6 @@ int main(
         HERO_draw(game->hero);
         GFX_update();
         GAME_update(game);
-
     }
 
     GAME_close(game);

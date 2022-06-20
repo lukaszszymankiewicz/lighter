@@ -6,14 +6,14 @@
 START_TEST (HERO_init_check)
 {
     // GIVEN
-    hero_t* hero_o = HERO_init("../sprites/her2.png", 100, 100);
+    hero_t* hero_o = HERO_init("../sprites/her2.png", 10, 10);
 
     // WHEN
     ck_assert_ptr_nonnull(hero_o);
     ck_assert_ptr_nonnull(hero_o->sprites);
     ck_assert_int_eq(hero_o->state, 0);
-    ck_assert_int_eq(hero_o->x, 100);
-    ck_assert_int_eq(hero_o->y, 100);
+    ck_assert_int_eq(hero_o->x, 320);
+    ck_assert_int_eq(hero_o->y, 320);
     ck_assert_int_eq(hero_o->view_x, 160);
     ck_assert_int_eq(hero_o->view_y, 144);
     ck_assert_int_eq(hero_o->direction, 1);
@@ -92,7 +92,11 @@ START_TEST (HERO_colision_check_positive)
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
 
     // CASE 1
-    hero_t* hero = HERO_init("../sprites/her2.png", 100, 100);
+    // init hero at (0, 0) as this value will be overwritten belowe
+    hero_t* hero = HERO_init("../sprites/her2.png", 0, 0);
+
+    hero->x = 100;
+    hero->y = 100;
     segment_t *obstacles = NULL;
     SEG_push(&obstacles, 105, 80, 105, 130);
 

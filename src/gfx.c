@@ -1,4 +1,5 @@
 #include "global.h"
+#include <stdio.h>
 #include "gfx.h"
 #include "primitives.h"
 #include "sorted_list.h"
@@ -176,6 +177,7 @@ texture_t* GFX_read_texture(
 
     loaded_surface              = IMG_Load(filepath);
 
+    // dummy texture if reading file failed
     if (loaded_surface == NULL) {
         new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 20, 20);
         texture_t* p = malloc(sizeof(texture_t));
