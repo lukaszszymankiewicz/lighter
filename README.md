@@ -13,6 +13,10 @@ It will contain awsome light effects and post-apocaliptic vibe.
 
 This repo contains only game code, development tools are put here: [repo](https://github.com/lukaszszymankiewicz/ltools)
 
+Current work progress:
+
+![A test image](screenshot.gif)
+
 Controls:
 
 A - move left
@@ -26,11 +30,6 @@ S - swip light downwards
 Space - Jump
 
 Q - cycle DEBUG functions
-
-
-Current work progress:
-
-![A test image](screenshot.gif)
 
 How to contirbute:
 
