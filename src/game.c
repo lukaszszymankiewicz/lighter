@@ -39,9 +39,9 @@ game_t* GAME_init() {
     game->keys_cooldown = NULL;
 
     game->loop          = true;
+    game->light         = LIG_init();
     game->level         = IMP_read_from_file("./levels/sample");
     game->hero          = HERO_init(NULL, game->level->hero_x, game->level->hero_y);
-    game->light         = LIG_init();
     game->frame         = 0;
     game->fps_timer     = TIMER_new();
     game->cap_timer     = TIMER_new();

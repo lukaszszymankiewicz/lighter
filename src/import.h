@@ -21,7 +21,6 @@ typedef struct mapfile {
     FILE             *file;
     char             *filename;
     char             *tileset_filename;
-    unsigned char     buffer[2];
     int               state;
 } mapfile_t;
 
