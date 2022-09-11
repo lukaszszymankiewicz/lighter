@@ -1,6 +1,10 @@
 # LIGHTER changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.3] - 11-09-2022
+### Changed:
+- light polygon calculation made more robust and optimized
+
 ## [0.1.2] - 14-02-2022
 ### Changed:
 - All resources put into read file-alike functions, making space for replacing it with real reading

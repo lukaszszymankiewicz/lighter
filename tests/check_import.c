@@ -19,9 +19,6 @@ START_TEST (IMP_new_mapfile_check)
     ck_assert_pstr_eq(map->filename, "sample_level_name/level.llv");
 
     ck_assert_pstr_eq(map->tileset_filename, "sample_level_name/level.png");
-
-    ck_assert_int_eq(map->buffer[0], 0);
-    ck_assert_int_eq(map->buffer[1], 0);
     ck_assert_int_eq(map->state, IDLE);  // IDLE == 0
 
 }
@@ -37,11 +34,6 @@ START_TEST (IMP_free_mapfile_empty_mapfile_check)
     // WHEN
     map = IMP_new_mapfile(filename);
     IMP_free_mapfile(map);
-
-    // THEN
-    // TODO: I have no idea why this one does not work without forceing pointer to be NULL ;/
-    map = NULL;
-    ck_assert_ptr_null(map);
 }
 END_TEST
 

@@ -1,0 +1,967 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 37.50      0.03     0.03     2232     0.01     0.02  GFX_fill_rect
+ 25.00      0.05     0.02  2285568     0.00     0.00  GFX_fill_shadowbuffer
+ 25.00      0.07     0.02   596707     0.00     0.00  GFX_fill_lightbuffer
+ 12.50      0.08     0.01   678222     0.00     0.00  GFX_fill_mesh_shadowbuffer
+  0.00      0.08     0.00    51403     0.00     0.00  SEG_delete
+  0.00      0.08     0.00    51272     0.00     0.00  SRTLST_insert
+  0.00      0.08     0.00    51272     0.00     0.00  SRTLST_new
+  0.00      0.08     0.00    38682     0.00     0.00  GEO_x_intersection_with_slope
+  0.00      0.08     0.00    26019     0.00     0.00  SEG_find_candidates
+  0.00      0.08     0.00    26019     0.00     0.00  SEG_merge
+  0.00      0.08     0.00    25803     0.00     0.00  GFX_calc_intersections_in_scanline
+  0.00      0.08     0.00    25803     0.00     0.00  GFX_draw_scanline
+  0.00      0.08     0.00    25600     0.00     0.00  GFX_draw_line_to_buffer
+  0.00      0.08     0.00    25600     0.00     0.00  SRTLST_free
+  0.00      0.08     0.00    12112     0.00     0.00  GEO_sign
+  0.00      0.08     0.00    10080     0.00     0.00  LVL_obstacle_on_pos
+  0.00      0.08     0.00     6180     0.00     0.00  GEO_value_between_range
+  0.00      0.08     0.00     5232     0.00     0.00  LIG_ray_intersect
+  0.00      0.08     0.00     4276     0.00     0.00  GEO_calc_slope
+  0.00      0.08     0.00     4276     0.00     0.00  SEG_determine_type
+  0.00      0.08     0.00     4276     0.00     0.00  SEG_init
+  0.00      0.08     0.00     4276     0.00     0.00  SEG_push
+  0.00      0.08     0.00     3204     0.00     0.00  LVL_analyze
+  0.00      0.08     0.00     3168     0.00     0.00  LVL_tile_on_pos
+  0.00      0.08     0.00     2592     0.00     0.00  GEO_pt_in_triangle
+  0.00      0.08     0.00     2168     0.00     0.00  GEO_pt_same_side
+  0.00      0.08     0.00     1770     0.00     0.00  SEG_get
+  0.00      0.08     0.00     1355     0.00     0.00  VRTX_new
+  0.00      0.08     0.00     1116     0.00     0.00  SEG_free
+  0.00      0.08     0.00     1080     0.00     0.00  GFX_render_tile
+  0.00      0.08     0.00      864     0.00     0.00  GEO_horizontal_segment_intersects_rect
+  0.00      0.08     0.00      834     0.00     0.00  VRTX_add_point
+  0.00      0.08     0.00      652     0.00     0.00  PT_new
+  0.00      0.08     0.00      629     0.00     0.00  VRTX_free
+  0.00      0.08     0.00      506     0.00     0.00  GEO_angle_2pt
+  0.00      0.08     0.00      440     0.00     0.00  PT_contains
+  0.00      0.08     0.00      436     0.00     0.00  LIG_ray_intersects_multiple
+  0.00      0.08     0.00      436     0.00     0.00  PT_push
+  0.00      0.08     0.00      432     0.00     0.00  PT_free
+  0.00      0.08     0.00      413     0.00     0.00  GEO_line_segment_len
+  0.00      0.08     0.00      413     0.00     0.00  LIG_calculate_ray_hit_vertex
+  0.00      0.08     0.00      324     0.00     0.00  VRTX_merge
+  0.00      0.08     0.00      309     0.00     0.00  PT_merge
+  0.00      0.08     0.00      239     0.00     0.00  PT_eq
+  0.00      0.08     0.00      220     0.00     0.00  SEG_contains
+  0.00      0.08     0.00      216     0.00     0.00  GEO_intersection_with_x
+  0.00      0.08     0.00      216     0.00     0.14  GFX_fill_buffer_single_polygon
+  0.00      0.08     0.00      216     0.00     0.00  LIG_find_closest_hit
+  0.00      0.08     0.00      216     0.00     0.00  LIG_find_closest_hit_segment_hor
+  0.00      0.08     0.00      216     0.00     0.00  LIG_find_closest_hit_segment_ver
+  0.00      0.08     0.00      216     0.00     0.00  LIG_generate_slipover_hit_point
+  0.00      0.08     0.00      216     0.00     0.00  SEG_get_segments_of_polygon
+  0.00      0.08     0.00      216     0.00     0.00  VRTX_highest_y
+  0.00      0.08     0.00      197     0.00     0.00  GEO_intersection_with_y
+  0.00      0.08     0.00      186     0.00     0.00  LIG_find_type_segment_in_corner
+  0.00      0.08     0.00      125     0.00     0.00  castValToDec
+  0.00      0.08     0.00      108     0.00     0.00  LIG_add_border_light_vertices
+  0.00      0.08     0.00      108     0.00     0.00  LIG_calc_light_wall_shadow
+  0.00      0.08     0.00      108     0.00     0.00  LIG_generate_hit_points
+  0.00      0.08     0.00      108     0.00     0.00  LIG_get_base_light_polygon
+  0.00      0.08     0.00      108     0.00     0.00  LIG_get_light_polygon
+  0.00      0.08     0.00      108     0.00     0.00  LIG_get_light_polygon_width_corr
+  0.00      0.08     0.00      108     0.00     0.00  LIG_get_light_polygon_x_corr
+  0.00      0.08     0.00      108     0.00     0.00  LIG_get_light_polygon_y_corr
+  0.00      0.08     0.00      108     0.00     0.00  LIG_initial_point_of_light
+  0.00      0.08     0.00       93     0.00     0.00  LIG_generate_aux_hit_points
+  0.00      0.08     0.00       93     0.00     0.00  SEG_common_x
+  0.00      0.08     0.00       93     0.00     0.00  SEG_common_y
+  0.00      0.08     0.00       72     0.00     0.00  HERO_current_frame
+  0.00      0.08     0.00       37     0.00     0.00  TIMER_start
+  0.00      0.08     0.00       36     0.00     0.00  EVNT_handle_SDL_events
+  0.00      0.08     0.00       36     0.00     0.00  EVNT_handle_events
+  0.00      0.08     0.00       36     0.00     0.00  EVNT_handle_keypress
+  0.00      0.08     0.00       36     0.00     0.00  GAME_close
+  0.00      0.08     0.00       36     0.00     0.00  GAME_update
+  0.00      0.08     0.00       36     0.00     0.00  GFX_calc_gradient_rect
+  0.00      0.08     0.00       36     0.00     0.00  GFX_clear_screen
+  0.00      0.08     0.00       36     0.00     0.00  GFX_dealloc_buffers
+  0.00      0.08     0.00       36     0.00     0.00  GFX_draw_lightbuffer
+  0.00      0.08     0.00       36     0.00     0.00  GFX_fill_gradient_gaps
+  0.00      0.08     0.00       36     0.00     0.00  GFX_render_texture
+  0.00      0.08     0.00       36     0.00     0.00  GFX_update
+  0.00      0.08     0.00       36     0.00     0.00  HERO_check_collision
+  0.00      0.08     0.00       36     0.00     0.00  HERO_draw
+  0.00      0.08     0.00       36     0.00     0.00  HERO_light_x
+  0.00      0.08     0.00       36     0.00     0.00  HERO_light_y
+  0.00      0.08     0.00       36     0.00     0.00  HERO_update_friction
+  0.00      0.08     0.00       36     0.00     0.00  HERO_update_pos_due_to_velocity
+  0.00      0.08     0.00       36     0.00     0.00  HERO_update_sprite
+  0.00      0.08     0.00       36     0.00     0.00  HERO_update_state
+  0.00      0.08     0.00       36     0.00     0.83  LIG_fill_lightbuffer
+  0.00      0.08     0.00       36     0.00     0.00  LIG_get_wobble_angle_coef
+  0.00      0.08     0.00       36     0.00     0.00  LIG_move_lightsource
+  0.00      0.08     0.00       36     0.00     0.00  LVL_draw
+  0.00      0.08     0.00       36     0.00     1.39  LVL_fill_shadowbuffer_with_tiles
+  0.00      0.08     0.00       36     0.00     0.00  SEG_len
+  0.00      0.08     0.00       36     0.00     0.00  TIMER_get_ticks
+  0.00      0.08     0.00       35     0.00     0.00  HERO_check_state_collision
+  0.00      0.08     0.00       30     0.00     0.00  LVL_fill_structure
+  0.00      0.08     0.00       26     0.00     0.00  LVL_fill_obstacle
+  0.00      0.08     0.00       16     0.00     0.00  LVL_add_tile
+  0.00      0.08     0.00       16     0.00     0.00  TILE_new
+  0.00      0.08     0.00       12     0.00     0.00  GEO_vertical_segment_intersects_rect
+  0.00      0.08     0.00        4     0.00     0.00  TXTR_init_animation
+  0.00      0.08     0.00        4     0.00     0.00  TXTR_push_animation
+  0.00      0.08     0.00        3     0.00     0.00  GFX_read_texture
+  0.00      0.08     0.00        2     0.00     0.00  GFX_init_video
+  0.00      0.08     0.00        2     0.00     0.00  IMP_concatenate_string
+  0.00      0.08     0.00        2     0.00     0.00  TIMER_new
+  0.00      0.08     0.00        1     0.00     0.00  EVNT_init
+  0.00      0.08     0.00        1     0.00     0.00  EVTN_clear_keypress
+  0.00      0.08     0.00        1     0.00     0.00  GAME_init
+  0.00      0.08     0.00        1     0.00     0.00  GFX_clean_buffers
+  0.00      0.08     0.00        1     0.00     0.00  GFX_free_buffers
+  0.00      0.08     0.00        1     0.00     0.00  GFX_init_png
+  0.00      0.08     0.00        1     0.00     0.00  GFX_init_screen_buffer_texture
+  0.00      0.08     0.00        1     0.00     0.00  HERO_init
+  0.00      0.08     0.00        1     0.00     0.00  HERO_move
+  0.00      0.08     0.00        1     0.00     0.00  IMP_fill_level
+  0.00      0.08     0.00        1     0.00     0.00  IMP_free_mapfile
+  0.00      0.08     0.00        1     0.00     0.00  IMP_new_mapfile
+  0.00      0.08     0.00        1     0.00     0.00  IMP_read_file
+  0.00      0.08     0.00        1     0.00     0.00  IMP_read_from_file
+  0.00      0.08     0.00        1     0.00     0.00  IMP_read_tileset
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_all_gradients
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_all_light_wobbles_patterns
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_all_lightsources
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_circular_gradient
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_lantern
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_lighter
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_no_wobble_pattern
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_stable_wobble_pattern
+  0.00      0.08     0.00        1     0.00     0.00  LIG_init_walk_wobble_pattern
+  0.00      0.08     0.00        1     0.00     0.00  LIG_read_all_files
+  0.00      0.08     0.00        1     0.00     0.00  LVL_clean_obstacles
+  0.00      0.08     0.00        1     0.00     0.00  LVL_clean_structure
+  0.00      0.08     0.00        1     0.00     0.00  LVL_fill_tiles
+  0.00      0.08     0.00        1     0.00     0.00  LVL_new
+  0.00      0.08     0.00        1     0.00     0.00  LVL_set_size
+  0.00      0.08     0.00        1     0.00     0.00  LVL_set_tile_number
+  0.00      0.08     0.00        1     0.00     0.00  LVL_set_tileset
+  0.00      0.08     0.00        1     0.00     0.00  TXTR_init_animation_sheet
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2021 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 12.50% of 0.08 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]    100.0    0.00    0.08                 main [1]
+                0.00    0.05      36/36          LVL_fill_shadowbuffer_with_tiles [3]
+                0.00    0.03      36/36          LIG_fill_lightbuffer [7]
+                0.00    0.00      37/37          TIMER_start [74]
+                0.00    0.00      36/36          EVNT_handle_events [76]
+                0.00    0.00      36/36          GFX_clear_screen [81]
+                0.00    0.00      36/3204        LVL_analyze [28]
+                0.00    0.00      36/36          HERO_update_friction [91]
+                0.00    0.00      36/36          HERO_check_collision [87]
+                0.00    0.00      36/36          HERO_update_pos_due_to_velocity [92]
+                0.00    0.00      36/36          HERO_update_state [94]
+                0.00    0.00      36/36          HERO_update_sprite [93]
+                0.00    0.00      36/36          HERO_light_y [90]
+                0.00    0.00      36/36          HERO_light_x [89]
+                0.00    0.00      36/36          LVL_draw [97]
+                0.00    0.00      36/36          GFX_draw_lightbuffer [83]
+                0.00    0.00      36/36          HERO_draw [88]
+                0.00    0.00      36/36          GFX_update [86]
+                0.00    0.00      36/36          GAME_update [79]
+                0.00    0.00      36/36          GAME_close [78]
+                0.00    0.00       1/1           GFX_init_screen_buffer_texture [118]
+                0.00    0.00       1/1           GAME_init [114]
+                0.00    0.00       1/1           LIG_read_all_files [137]
+                0.00    0.00       1/1           EVNT_init [112]
+-----------------------------------------------
+                0.03    0.02    2232/2232        LVL_fill_shadowbuffer_with_tiles [3]
+[2]     62.5    0.03    0.02    2232         GFX_fill_rect [2]
+                0.02    0.00 2285568/2285568     GFX_fill_shadowbuffer [8]
+-----------------------------------------------
+                0.00    0.05      36/36          main [1]
+[3]     62.5    0.00    0.05      36         LVL_fill_shadowbuffer_with_tiles [3]
+                0.03    0.02    2232/2232        GFX_fill_rect [2]
+                0.00    0.00    3168/10080       LVL_obstacle_on_pos [21]
+-----------------------------------------------
+                0.00    0.03   25803/25803       GFX_fill_buffer_single_polygon [6]
+[4]     37.5    0.00    0.03   25803         GFX_draw_scanline [4]
+                0.00    0.03   25600/25600       GFX_draw_line_to_buffer [5]
+                0.00    0.00   25803/25803       GFX_calc_intersections_in_scanline [18]
+                0.00    0.00   25600/25600       SRTLST_free [19]
+-----------------------------------------------
+                0.00    0.03   25600/25600       GFX_draw_scanline [4]
+[5]     37.5    0.00    0.03   25600         GFX_draw_line_to_buffer [5]
+                0.02    0.00  596706/596707      GFX_fill_lightbuffer [9]
+                0.01    0.00  678222/678222      GFX_fill_mesh_shadowbuffer [10]
+-----------------------------------------------
+                0.00    0.03     216/216         LIG_fill_lightbuffer [7]
+[6]     37.5    0.00    0.03     216         GFX_fill_buffer_single_polygon [6]
+                0.00    0.03   25803/25803       GFX_draw_scanline [4]
+                0.00    0.00   51403/51403       SEG_delete [12]
+                0.00    0.00   26019/26019       SEG_find_candidates [16]
+                0.00    0.00   26019/26019       SEG_merge [17]
+                0.00    0.00     864/1116        SEG_free [34]
+                0.00    0.00     216/216         VRTX_highest_y [57]
+                0.00    0.00     216/216         SEG_get_segments_of_polygon [56]
+-----------------------------------------------
+                0.00    0.03      36/36          main [1]
+[7]     37.5    0.00    0.03      36         LIG_fill_lightbuffer [7]
+                0.00    0.03     216/216         GFX_fill_buffer_single_polygon [6]
+                0.00    0.00     108/108         LIG_get_light_polygon_x_corr [67]
+                0.00    0.00     108/108         LIG_get_light_polygon_y_corr [68]
+                0.00    0.00     108/108         LIG_get_light_polygon_width_corr [66]
+                0.00    0.00     108/108         LIG_get_light_polygon [65]
+                0.00    0.00     108/108         LIG_calc_light_wall_shadow [62]
+                0.00    0.00     108/629         VRTX_free [39]
+                0.00    0.00      36/36          GFX_dealloc_buffers [82]
+                0.00    0.00      36/36          LIG_get_wobble_angle_coef [95]
+-----------------------------------------------
+                0.02    0.00 2285568/2285568     GFX_fill_rect [2]
+[8]     25.0    0.02    0.00 2285568         GFX_fill_shadowbuffer [8]
+-----------------------------------------------
+                0.00    0.00       1/596707      GFX_init_graphics [11]
+                0.02    0.00  596706/596707      GFX_draw_line_to_buffer [5]
+[9]     25.0    0.02    0.00  596707         GFX_fill_lightbuffer [9]
+-----------------------------------------------
+                0.01    0.00  678222/678222      GFX_draw_line_to_buffer [5]
+[10]    12.5    0.01    0.00  678222         GFX_fill_mesh_shadowbuffer [10]
+-----------------------------------------------
+                                                 <spontaneous>
+[11]     0.0    0.00    0.00                 GFX_init_graphics [11]
+                0.00    0.00       1/596707      GFX_fill_lightbuffer [9]
+                0.00    0.00       2/2           GFX_init_video [109]
+                0.00    0.00       1/1           GFX_init_png [117]
+                0.00    0.00       1/1           GFX_free_buffers [116]
+                0.00    0.00       1/1           GFX_clean_buffers [115]
+-----------------------------------------------
+                0.00    0.00   51403/51403       GFX_fill_buffer_single_polygon [6]
+[12]     0.0    0.00    0.00   51403         SEG_delete [12]
+-----------------------------------------------
+                0.00    0.00      72/51272       HERO_check_collision [87]
+                0.00    0.00   51200/51272       GFX_calc_intersections_in_scanline [18]
+[13]     0.0    0.00    0.00   51272         SRTLST_insert [13]
+                0.00    0.00   51272/51272       SRTLST_new [14]
+-----------------------------------------------
+                0.00    0.00   51272/51272       SRTLST_insert [13]
+[14]     0.0    0.00    0.00   51272         SRTLST_new [14]
+-----------------------------------------------
+                0.00    0.00   38682/38682       GFX_calc_intersections_in_scanline [18]
+[15]     0.0    0.00    0.00   38682         GEO_x_intersection_with_slope [15]
+-----------------------------------------------
+                0.00    0.00   26019/26019       GFX_fill_buffer_single_polygon [6]
+[16]     0.0    0.00    0.00   26019         SEG_find_candidates [16]
+                0.00    0.00     834/4276        SEG_push [27]
+-----------------------------------------------
+                0.00    0.00   26019/26019       GFX_fill_buffer_single_polygon [6]
+[17]     0.0    0.00    0.00   26019         SEG_merge [17]
+                0.00    0.00     834/4276        SEG_push [27]
+-----------------------------------------------
+                0.00    0.00   25803/25803       GFX_draw_scanline [4]
+[18]     0.0    0.00    0.00   25803         GFX_calc_intersections_in_scanline [18]
+                0.00    0.00   51200/51272       SRTLST_insert [13]
+                0.00    0.00   38682/38682       GEO_x_intersection_with_slope [15]
+-----------------------------------------------
+                0.00    0.00   25600/25600       GFX_draw_scanline [4]
+[19]     0.0    0.00    0.00   25600         SRTLST_free [19]
+-----------------------------------------------
+                0.00    0.00    4336/12112       GEO_pt_same_side [31]
+                0.00    0.00    7776/12112       GEO_pt_in_triangle [30]
+[20]     0.0    0.00    0.00   12112         GEO_sign [20]
+-----------------------------------------------
+                0.00    0.00    3168/10080       LVL_fill_shadowbuffer_with_tiles [3]
+                0.00    0.00    6912/10080       LVL_analyze [28]
+[21]     0.0    0.00    0.00   10080         LVL_obstacle_on_pos [21]
+-----------------------------------------------
+                0.00    0.00      12/6180        GEO_vertical_segment_intersects_rect [105]
+                0.00    0.00     936/6180        GEO_horizontal_segment_intersects_rect [36]
+                0.00    0.00    5232/6180        LIG_ray_intersect [23]
+[22]     0.0    0.00    0.00    6180         GEO_value_between_range [22]
+-----------------------------------------------
+                0.00    0.00    5232/5232        LIG_ray_intersects_multiple [42]
+[23]     0.0    0.00    0.00    5232         LIG_ray_intersect [23]
+                0.00    0.00    5232/6180        GEO_value_between_range [22]
+                0.00    0.00    2168/2168        GEO_pt_same_side [31]
+-----------------------------------------------
+                0.00    0.00    4276/4276        SEG_init [26]
+[24]     0.0    0.00    0.00    4276         GEO_calc_slope [24]
+-----------------------------------------------
+                0.00    0.00    4276/4276        SEG_init [26]
+[25]     0.0    0.00    0.00    4276         SEG_determine_type [25]
+-----------------------------------------------
+                0.00    0.00    4276/4276        SEG_push [27]
+[26]     0.0    0.00    0.00    4276         SEG_init [26]
+                0.00    0.00    4276/4276        GEO_calc_slope [24]
+                0.00    0.00    4276/4276        SEG_determine_type [25]
+-----------------------------------------------
+                0.00    0.00     432/4276        LVL_analyze [28]
+                0.00    0.00     834/4276        SEG_find_candidates [16]
+                0.00    0.00     834/4276        SEG_merge [17]
+                0.00    0.00     834/4276        SEG_get_segments_of_polygon [56]
+                0.00    0.00    1342/4276        LIG_ray_intersects_multiple [42]
+[27]     0.0    0.00    0.00    4276         SEG_push [27]
+                0.00    0.00    4276/4276        SEG_init [26]
+-----------------------------------------------
+                0.00    0.00      36/3204        main [1]
+                0.00    0.00    3168/3204        LVL_draw [97]
+[28]     0.0    0.00    0.00    3204         LVL_analyze [28]
+                0.00    0.00    6912/10080       LVL_obstacle_on_pos [21]
+                0.00    0.00    1584/1770        SEG_get [32]
+                0.00    0.00     432/4276        SEG_push [27]
+                0.00    0.00      36/36          SEG_len [98]
+-----------------------------------------------
+                0.00    0.00    3168/3168        LVL_draw [97]
+[29]     0.0    0.00    0.00    3168         LVL_tile_on_pos [29]
+-----------------------------------------------
+                0.00    0.00    2592/2592        LIG_generate_hit_points [63]
+[30]     0.0    0.00    0.00    2592         GEO_pt_in_triangle [30]
+                0.00    0.00    7776/12112       GEO_sign [20]
+-----------------------------------------------
+                0.00    0.00    2168/2168        LIG_ray_intersect [23]
+[31]     0.0    0.00    0.00    2168         GEO_pt_same_side [31]
+                0.00    0.00    4336/12112       GEO_sign [20]
+-----------------------------------------------
+                0.00    0.00     186/1770        LIG_generate_aux_hit_points [70]
+                0.00    0.00    1584/1770        LVL_analyze [28]
+[32]     0.0    0.00    0.00    1770         SEG_get [32]
+-----------------------------------------------
+                0.00    0.00     108/1355        LIG_add_border_light_vertices [61]
+                0.00    0.00     413/1355        LIG_calculate_ray_hit_vertex [46]
+                0.00    0.00     834/1355        VRTX_add_point [37]
+[33]     0.0    0.00    0.00    1355         VRTX_new [33]
+-----------------------------------------------
+                0.00    0.00      36/1116        LIG_read_all_files [137]
+                0.00    0.00     108/1116        LIG_get_base_light_polygon [64]
+                0.00    0.00     108/1116        LIG_get_light_polygon [65]
+                0.00    0.00     864/1116        GFX_fill_buffer_single_polygon [6]
+[34]     0.0    0.00    0.00    1116         SEG_free [34]
+-----------------------------------------------
+                0.00    0.00    1080/1080        LVL_draw [97]
+[35]     0.0    0.00    0.00    1080         GFX_render_tile [35]
+-----------------------------------------------
+                0.00    0.00     864/864         HERO_check_collision [87]
+[36]     0.0    0.00    0.00     864         GEO_horizontal_segment_intersects_rect [36]
+                0.00    0.00     936/6180        GEO_value_between_range [22]
+-----------------------------------------------
+                0.00    0.00      93/834         LIG_get_base_light_polygon [64]
+                0.00    0.00     324/834         VRTX_merge [47]
+                0.00    0.00     417/834         LIG_calc_light_wall_shadow [62]
+[37]     0.0    0.00    0.00     834         VRTX_add_point [37]
+                0.00    0.00     834/1355        VRTX_new [33]
+-----------------------------------------------
+                0.00    0.00      19/652         LIG_generate_slipover_hit_point [55]
+                0.00    0.00     197/652         LIG_generate_aux_hit_points [70]
+                0.00    0.00     436/652         PT_push [43]
+[38]     0.0    0.00    0.00     652         PT_new [38]
+-----------------------------------------------
+                0.00    0.00     108/629         LIG_fill_lightbuffer [7]
+                0.00    0.00     197/629         LIG_find_closest_hit [52]
+                0.00    0.00     324/629         VRTX_eq [180]
+[39]     0.0    0.00    0.00     629         VRTX_free [39]
+-----------------------------------------------
+                0.00    0.00      93/506         LIG_get_base_light_polygon [64]
+                0.00    0.00     413/506         LIG_calculate_ray_hit_vertex [46]
+[40]     0.0    0.00    0.00     506         GEO_angle_2pt [40]
+-----------------------------------------------
+                0.00    0.00     440/440         LIG_generate_hit_points [63]
+[41]     0.0    0.00    0.00     440         PT_contains [41]
+-----------------------------------------------
+                0.00    0.00     216/436         LIG_get_light_polygon [65]
+                0.00    0.00     220/436         LIG_get_base_light_polygon [64]
+[42]     0.0    0.00    0.00     436         LIG_ray_intersects_multiple [42]
+                0.00    0.00    5232/5232        LIG_ray_intersect [23]
+                0.00    0.00    1342/4276        SEG_push [27]
+-----------------------------------------------
+                0.00    0.00     216/436         PT_merge [48]
+                0.00    0.00     220/436         LIG_generate_hit_points [63]
+[43]     0.0    0.00    0.00     436         PT_push [43]
+                0.00    0.00     436/652         PT_new [38]
+                0.00    0.00     239/239         PT_eq [49]
+-----------------------------------------------
+                0.00    0.00     216/432         LIG_get_light_polygon [65]
+                0.00    0.00     216/432         PT_merge [48]
+[44]     0.0    0.00    0.00     432         PT_free [44]
+-----------------------------------------------
+                0.00    0.00     413/413         LIG_calculate_ray_hit_vertex [46]
+[45]     0.0    0.00    0.00     413         GEO_line_segment_len [45]
+-----------------------------------------------
+                0.00    0.00     413/413         LIG_find_closest_hit [52]
+[46]     0.0    0.00    0.00     413         LIG_calculate_ray_hit_vertex [46]
+                0.00    0.00     413/413         GEO_line_segment_len [45]
+                0.00    0.00     413/506         GEO_angle_2pt [40]
+                0.00    0.00     413/1355        VRTX_new [33]
+                0.00    0.00     216/216         GEO_intersection_with_x [51]
+                0.00    0.00     197/197         GEO_intersection_with_y [58]
+-----------------------------------------------
+                0.00    0.00     324/324         LIG_get_light_polygon [65]
+[47]     0.0    0.00    0.00     324         VRTX_merge [47]
+                0.00    0.00     324/834         VRTX_add_point [37]
+-----------------------------------------------
+                0.00    0.00      93/309         LIG_get_base_light_polygon [64]
+                0.00    0.00     216/309         LIG_add_border_light_vertices [61]
+[48]     0.0    0.00    0.00     309         PT_merge [48]
+                0.00    0.00     216/436         PT_push [43]
+                0.00    0.00     216/432         PT_free [44]
+-----------------------------------------------
+                0.00    0.00     239/239         PT_push [43]
+[49]     0.0    0.00    0.00     239         PT_eq [49]
+-----------------------------------------------
+                0.00    0.00     220/220         LIG_get_base_light_polygon [64]
+[50]     0.0    0.00    0.00     220         SEG_contains [50]
+-----------------------------------------------
+                0.00    0.00     216/216         LIG_calculate_ray_hit_vertex [46]
+[51]     0.0    0.00    0.00     216         GEO_intersection_with_x [51]
+-----------------------------------------------
+                0.00    0.00     216/216         LIG_get_light_polygon [65]
+[52]     0.0    0.00    0.00     216         LIG_find_closest_hit [52]
+                0.00    0.00     413/413         LIG_calculate_ray_hit_vertex [46]
+                0.00    0.00     216/216         LIG_find_closest_hit_segment_hor [53]
+                0.00    0.00     216/216         LIG_find_closest_hit_segment_ver [54]
+                0.00    0.00     197/629         VRTX_free [39]
+-----------------------------------------------
+                0.00    0.00     216/216         LIG_find_closest_hit [52]
+[53]     0.0    0.00    0.00     216         LIG_find_closest_hit_segment_hor [53]
+-----------------------------------------------
+                0.00    0.00     216/216         LIG_find_closest_hit [52]
+[54]     0.0    0.00    0.00     216         LIG_find_closest_hit_segment_ver [54]
+-----------------------------------------------
+                0.00    0.00     216/216         LIG_add_border_light_vertices [61]
+[55]     0.0    0.00    0.00     216         LIG_generate_slipover_hit_point [55]
+                0.00    0.00      19/652         PT_new [38]
+-----------------------------------------------
+                0.00    0.00     216/216         GFX_fill_buffer_single_polygon [6]
+[56]     0.0    0.00    0.00     216         SEG_get_segments_of_polygon [56]
+                0.00    0.00     834/4276        SEG_push [27]
+-----------------------------------------------
+                0.00    0.00     216/216         GFX_fill_buffer_single_polygon [6]
+[57]     0.0    0.00    0.00     216         VRTX_highest_y [57]
+-----------------------------------------------
+                0.00    0.00     197/197         LIG_calculate_ray_hit_vertex [46]
+[58]     0.0    0.00    0.00     197         GEO_intersection_with_y [58]
+-----------------------------------------------
+                0.00    0.00     186/186         LIG_generate_aux_hit_points [70]
+[59]     0.0    0.00    0.00     186         LIG_find_type_segment_in_corner [59]
+-----------------------------------------------
+                0.00    0.00     125/125         IMP_fill_level [121]
+[60]     0.0    0.00    0.00     125         castValToDec [60]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_get_light_polygon [65]
+[61]     0.0    0.00    0.00     108         LIG_add_border_light_vertices [61]
+                0.00    0.00     216/216         LIG_generate_slipover_hit_point [55]
+                0.00    0.00     216/309         PT_merge [48]
+                0.00    0.00     108/1355        VRTX_new [33]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_fill_lightbuffer [7]
+[62]     0.0    0.00    0.00     108         LIG_calc_light_wall_shadow [62]
+                0.00    0.00     417/834         VRTX_add_point [37]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_get_light_polygon [65]
+[63]     0.0    0.00    0.00     108         LIG_generate_hit_points [63]
+                0.00    0.00    2592/2592        GEO_pt_in_triangle [30]
+                0.00    0.00     440/440         PT_contains [41]
+                0.00    0.00     220/436         PT_push [43]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_get_light_polygon [65]
+[64]     0.0    0.00    0.00     108         LIG_get_base_light_polygon [64]
+                0.00    0.00     220/436         LIG_ray_intersects_multiple [42]
+                0.00    0.00     220/220         SEG_contains [50]
+                0.00    0.00     108/1116        SEG_free [34]
+                0.00    0.00      93/93          LIG_generate_aux_hit_points [70]
+                0.00    0.00      93/309         PT_merge [48]
+                0.00    0.00      93/506         GEO_angle_2pt [40]
+                0.00    0.00      93/834         VRTX_add_point [37]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_fill_lightbuffer [7]
+[65]     0.0    0.00    0.00     108         LIG_get_light_polygon [65]
+                0.00    0.00     324/324         VRTX_merge [47]
+                0.00    0.00     216/436         LIG_ray_intersects_multiple [42]
+                0.00    0.00     216/216         LIG_find_closest_hit [52]
+                0.00    0.00     216/432         PT_free [44]
+                0.00    0.00     108/108         LIG_generate_hit_points [63]
+                0.00    0.00     108/108         LIG_get_base_light_polygon [64]
+                0.00    0.00     108/108         LIG_add_border_light_vertices [61]
+                0.00    0.00     108/108         LIG_initial_point_of_light [69]
+                0.00    0.00     108/1116        SEG_free [34]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_fill_lightbuffer [7]
+[66]     0.0    0.00    0.00     108         LIG_get_light_polygon_width_corr [66]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_fill_lightbuffer [7]
+[67]     0.0    0.00    0.00     108         LIG_get_light_polygon_x_corr [67]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_fill_lightbuffer [7]
+[68]     0.0    0.00    0.00     108         LIG_get_light_polygon_y_corr [68]
+-----------------------------------------------
+                0.00    0.00     108/108         LIG_get_light_polygon [65]
+[69]     0.0    0.00    0.00     108         LIG_initial_point_of_light [69]
+-----------------------------------------------
+                0.00    0.00      93/93          LIG_get_base_light_polygon [64]
+[70]     0.0    0.00    0.00      93         LIG_generate_aux_hit_points [70]
+                0.00    0.00     197/652         PT_new [38]
+                0.00    0.00     186/1770        SEG_get [32]
+                0.00    0.00     186/186         LIG_find_type_segment_in_corner [59]
+                0.00    0.00      93/93          SEG_common_x [71]
+                0.00    0.00      93/93          SEG_common_y [72]
+-----------------------------------------------
+                0.00    0.00      93/93          LIG_generate_aux_hit_points [70]
+[71]     0.0    0.00    0.00      93         SEG_common_x [71]
+-----------------------------------------------
+                0.00    0.00      93/93          LIG_generate_aux_hit_points [70]
+[72]     0.0    0.00    0.00      93         SEG_common_y [72]
+-----------------------------------------------
+                0.00    0.00      36/72          HERO_check_collision [87]
+                0.00    0.00      36/72          HERO_draw [88]
+[73]     0.0    0.00    0.00      72         HERO_current_frame [73]
+-----------------------------------------------
+                0.00    0.00      37/37          main [1]
+[74]     0.0    0.00    0.00      37         TIMER_start [74]
+-----------------------------------------------
+                0.00    0.00      36/36          EVNT_handle_events [76]
+[75]     0.0    0.00    0.00      36         EVNT_handle_SDL_events [75]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[76]     0.0    0.00    0.00      36         EVNT_handle_events [76]
+                0.00    0.00      36/36          EVNT_handle_SDL_events [75]
+                0.00    0.00       1/1           EVTN_clear_keypress [113]
+-----------------------------------------------
+                0.00    0.00      36/36          HERO_init [119]
+[77]     0.0    0.00    0.00      36         EVNT_handle_keypress [77]
+                0.00    0.00      36/36          LIG_move_lightsource [96]
+                0.00    0.00       1/1           HERO_move [120]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[78]     0.0    0.00    0.00      36         GAME_close [78]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[79]     0.0    0.00    0.00      36         GAME_update [79]
+                0.00    0.00      36/36          TIMER_get_ticks [99]
+-----------------------------------------------
+                0.00    0.00      36/36          GFX_draw_lightbuffer [83]
+[80]     0.0    0.00    0.00      36         GFX_calc_gradient_rect [80]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[81]     0.0    0.00    0.00      36         GFX_clear_screen [81]
+-----------------------------------------------
+                0.00    0.00      36/36          LIG_fill_lightbuffer [7]
+[82]     0.0    0.00    0.00      36         GFX_dealloc_buffers [82]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[83]     0.0    0.00    0.00      36         GFX_draw_lightbuffer [83]
+                0.00    0.00      36/36          GFX_calc_gradient_rect [80]
+                0.00    0.00      36/36          GFX_fill_gradient_gaps [84]
+-----------------------------------------------
+                0.00    0.00      36/36          GFX_draw_lightbuffer [83]
+[84]     0.0    0.00    0.00      36         GFX_fill_gradient_gaps [84]
+-----------------------------------------------
+                0.00    0.00      36/36          HERO_draw [88]
+[85]     0.0    0.00    0.00      36         GFX_render_texture [85]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[86]     0.0    0.00    0.00      36         GFX_update [86]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[87]     0.0    0.00    0.00      36         HERO_check_collision [87]
+                0.00    0.00     864/864         GEO_horizontal_segment_intersects_rect [36]
+                0.00    0.00      72/51272       SRTLST_insert [13]
+                0.00    0.00      36/72          HERO_current_frame [73]
+                0.00    0.00      12/12          GEO_vertical_segment_intersects_rect [105]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[88]     0.0    0.00    0.00      36         HERO_draw [88]
+                0.00    0.00      36/72          HERO_current_frame [73]
+                0.00    0.00      36/36          GFX_render_texture [85]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[89]     0.0    0.00    0.00      36         HERO_light_x [89]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[90]     0.0    0.00    0.00      36         HERO_light_y [90]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[91]     0.0    0.00    0.00      36         HERO_update_friction [91]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[92]     0.0    0.00    0.00      36         HERO_update_pos_due_to_velocity [92]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[93]     0.0    0.00    0.00      36         HERO_update_sprite [93]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[94]     0.0    0.00    0.00      36         HERO_update_state [94]
+                0.00    0.00      35/35          HERO_check_state_collision [100]
+-----------------------------------------------
+                0.00    0.00      36/36          LIG_fill_lightbuffer [7]
+[95]     0.0    0.00    0.00      36         LIG_get_wobble_angle_coef [95]
+-----------------------------------------------
+                0.00    0.00      36/36          EVNT_handle_keypress [77]
+[96]     0.0    0.00    0.00      36         LIG_move_lightsource [96]
+-----------------------------------------------
+                0.00    0.00      36/36          main [1]
+[97]     0.0    0.00    0.00      36         LVL_draw [97]
+                0.00    0.00    3168/3168        LVL_tile_on_pos [29]
+                0.00    0.00    3168/3204        LVL_analyze [28]
+                0.00    0.00    1080/1080        GFX_render_tile [35]
+-----------------------------------------------
+                0.00    0.00      36/36          LVL_analyze [28]
+[98]     0.0    0.00    0.00      36         SEG_len [98]
+-----------------------------------------------
+                0.00    0.00      36/36          GAME_update [79]
+[99]     0.0    0.00    0.00      36         TIMER_get_ticks [99]
+-----------------------------------------------
+                0.00    0.00      35/35          HERO_update_state [94]
+[100]    0.0    0.00    0.00      35         HERO_check_state_collision [100]
+-----------------------------------------------
+                0.00    0.00      30/30          IMP_fill_level [121]
+[101]    0.0    0.00    0.00      30         LVL_fill_structure [101]
+-----------------------------------------------
+                0.00    0.00      26/26          IMP_fill_level [121]
+[102]    0.0    0.00    0.00      26         LVL_fill_obstacle [102]
+-----------------------------------------------
+                0.00    0.00      16/16          LVL_fill_tiles [140]
+[103]    0.0    0.00    0.00      16         LVL_add_tile [103]
+                0.00    0.00      16/16          TILE_new [104]
+-----------------------------------------------
+                0.00    0.00      16/16          LVL_add_tile [103]
+[104]    0.0    0.00    0.00      16         TILE_new [104]
+-----------------------------------------------
+                0.00    0.00      12/12          HERO_check_collision [87]
+[105]    0.0    0.00    0.00      12         GEO_vertical_segment_intersects_rect [105]
+                0.00    0.00      12/6180        GEO_value_between_range [22]
+-----------------------------------------------
+                0.00    0.00       4/4           TXTR_push_animation [107]
+[106]    0.0    0.00    0.00       4         TXTR_init_animation [106]
+-----------------------------------------------
+                0.00    0.00       4/4           HERO_init [119]
+[107]    0.0    0.00    0.00       4         TXTR_push_animation [107]
+                0.00    0.00       4/4           TXTR_init_animation [106]
+-----------------------------------------------
+                0.00    0.00       1/3           IMP_read_tileset [126]
+                0.00    0.00       1/3           TXTR_init_animation_sheet [145]
+                0.00    0.00       1/3           LIG_init_circular_gradient [131]
+[108]    0.0    0.00    0.00       3         GFX_read_texture [108]
+-----------------------------------------------
+                0.00    0.00       2/2           GFX_init_graphics [11]
+[109]    0.0    0.00    0.00       2         GFX_init_video [109]
+-----------------------------------------------
+                0.00    0.00       1/2           IMP_new_mapfile [123]
+                0.00    0.00       1/2           IMP_free_mapfile [122]
+[110]    0.0    0.00    0.00       2         IMP_concatenate_string [110]
+-----------------------------------------------
+                0.00    0.00       2/2           GAME_init [114]
+[111]    0.0    0.00    0.00       2         TIMER_new [111]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[112]    0.0    0.00    0.00       1         EVNT_init [112]
+-----------------------------------------------
+                0.00    0.00       1/1           EVNT_handle_events [76]
+[113]    0.0    0.00    0.00       1         EVTN_clear_keypress [113]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[114]    0.0    0.00    0.00       1         GAME_init [114]
+                0.00    0.00       2/2           TIMER_new [111]
+                0.00    0.00       1/1           LIG_init [127]
+                0.00    0.00       1/1           IMP_read_from_file [125]
+                0.00    0.00       1/1           HERO_init [119]
+-----------------------------------------------
+                0.00    0.00       1/1           GFX_init_graphics [11]
+[115]    0.0    0.00    0.00       1         GFX_clean_buffers [115]
+-----------------------------------------------
+                0.00    0.00       1/1           GFX_init_graphics [11]
+[116]    0.0    0.00    0.00       1         GFX_free_buffers [116]
+-----------------------------------------------
+                0.00    0.00       1/1           GFX_init_graphics [11]
+[117]    0.0    0.00    0.00       1         GFX_init_png [117]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[118]    0.0    0.00    0.00       1         GFX_init_screen_buffer_texture [118]
+-----------------------------------------------
+                0.00    0.00       1/1           GAME_init [114]
+[119]    0.0    0.00    0.00       1         HERO_init [119]
+                0.00    0.00      36/36          EVNT_handle_keypress [77]
+                0.00    0.00       4/4           TXTR_push_animation [107]
+                0.00    0.00       1/1           TXTR_init_animation_sheet [145]
+-----------------------------------------------
+                0.00    0.00       1/1           EVNT_handle_keypress [77]
+[120]    0.0    0.00    0.00       1         HERO_move [120]
+-----------------------------------------------
+                0.00    0.00       1/1           IMP_read_from_file [125]
+[121]    0.0    0.00    0.00       1         IMP_fill_level [121]
+                0.00    0.00     125/125         castValToDec [60]
+                0.00    0.00      30/30          LVL_fill_structure [101]
+                0.00    0.00      26/26          LVL_fill_obstacle [102]
+                0.00    0.00       1/1           LVL_set_size [142]
+-----------------------------------------------
+                0.00    0.00       1/1           TXTR_init_animation_sheet [145]
+[122]    0.0    0.00    0.00       1         IMP_free_mapfile [122]
+                0.00    0.00       1/2           IMP_concatenate_string [110]
+-----------------------------------------------
+                0.00    0.00       1/1           IMP_read_from_file [125]
+[123]    0.0    0.00    0.00       1         IMP_new_mapfile [123]
+                0.00    0.00       1/2           IMP_concatenate_string [110]
+-----------------------------------------------
+                0.00    0.00       1/1           IMP_read_from_file [125]
+[124]    0.0    0.00    0.00       1         IMP_read_file [124]
+-----------------------------------------------
+                0.00    0.00       1/1           GAME_init [114]
+[125]    0.0    0.00    0.00       1         IMP_read_from_file [125]
+                0.00    0.00       1/1           LVL_set_tileset [144]
+                0.00    0.00       1/1           LVL_new [141]
+                0.00    0.00       1/1           IMP_new_mapfile [123]
+                0.00    0.00       1/1           IMP_read_file [124]
+                0.00    0.00       1/1           IMP_read_tileset [126]
+                0.00    0.00       1/1           LVL_fill_tiles [140]
+                0.00    0.00       1/1           IMP_fill_level [121]
+-----------------------------------------------
+                0.00    0.00       1/1           IMP_read_from_file [125]
+[126]    0.0    0.00    0.00       1         IMP_read_tileset [126]
+                0.00    0.00       1/3           GFX_read_texture [108]
+-----------------------------------------------
+                0.00    0.00       1/1           GAME_init [114]
+[127]    0.0    0.00    0.00       1         LIG_init [127]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_read_all_files [137]
+[128]    0.0    0.00    0.00       1         LIG_init_all_gradients [128]
+                0.00    0.00       1/1           LIG_init_circular_gradient [131]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_read_all_files [137]
+[129]    0.0    0.00    0.00       1         LIG_init_all_light_wobbles_patterns [129]
+                0.00    0.00       1/1           LIG_init_no_wobble_pattern [134]
+                0.00    0.00       1/1           LIG_init_stable_wobble_pattern [135]
+                0.00    0.00       1/1           LIG_init_walk_wobble_pattern [136]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_free_all_files [163]
+[130]    0.0    0.00    0.00       1         LIG_init_all_lightsources [130]
+                0.00    0.00       1/1           LIG_init_lighter [133]
+                0.00    0.00       1/1           LIG_init_lantern [132]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_init_all_gradients [128]
+[131]    0.0    0.00    0.00       1         LIG_init_circular_gradient [131]
+                0.00    0.00       1/3           GFX_read_texture [108]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_init_all_lightsources [130]
+[132]    0.0    0.00    0.00       1         LIG_init_lantern [132]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_init_all_lightsources [130]
+[133]    0.0    0.00    0.00       1         LIG_init_lighter [133]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_init_all_light_wobbles_patterns [129]
+[134]    0.0    0.00    0.00       1         LIG_init_no_wobble_pattern [134]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_init_all_light_wobbles_patterns [129]
+[135]    0.0    0.00    0.00       1         LIG_init_stable_wobble_pattern [135]
+-----------------------------------------------
+                0.00    0.00       1/1           LIG_init_all_light_wobbles_patterns [129]
+[136]    0.0    0.00    0.00       1         LIG_init_walk_wobble_pattern [136]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[137]    0.0    0.00    0.00       1         LIG_read_all_files [137]
+                0.00    0.00      36/1116        SEG_free [34]
+                0.00    0.00       1/1           LIG_init_all_gradients [128]
+                0.00    0.00       1/1           LIG_init_all_light_wobbles_patterns [129]
+-----------------------------------------------
+                0.00    0.00       1/1           LVL_set_tile_number [143]
+[138]    0.0    0.00    0.00       1         LVL_clean_obstacles [138]
+-----------------------------------------------
+                0.00    0.00       1/1           LVL_set_size [142]
+[139]    0.0    0.00    0.00       1         LVL_clean_structure [139]
+-----------------------------------------------
+                0.00    0.00       1/1           IMP_read_from_file [125]
+[140]    0.0    0.00    0.00       1         LVL_fill_tiles [140]
+                0.00    0.00      16/16          LVL_add_tile [103]
+                0.00    0.00       1/1           LVL_set_tile_number [143]
+-----------------------------------------------
+                0.00    0.00       1/1           IMP_read_from_file [125]
+[141]    0.0    0.00    0.00       1         LVL_new [141]
+-----------------------------------------------
+                0.00    0.00       1/1           IMP_fill_level [121]
+[142]    0.0    0.00    0.00       1         LVL_set_size [142]
+                0.00    0.00       1/1           LVL_clean_structure [139]
+-----------------------------------------------
+                0.00    0.00       1/1           LVL_fill_tiles [140]
+[143]    0.0    0.00    0.00       1         LVL_set_tile_number [143]
+                0.00    0.00       1/1           LVL_clean_obstacles [138]
+-----------------------------------------------
+                0.00    0.00       1/1           IMP_read_from_file [125]
+[144]    0.0    0.00    0.00       1         LVL_set_tileset [144]
+-----------------------------------------------
+                0.00    0.00       1/1           HERO_init [119]
+[145]    0.0    0.00    0.00       1         TXTR_init_animation_sheet [145]
+                0.00    0.00       1/1           IMP_free_mapfile [122]
+                0.00    0.00       1/3           GFX_read_texture [108]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2021 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+  [75] EVNT_handle_SDL_events [90] HERO_light_y          [139] LVL_clean_structure
+  [76] EVNT_handle_events    [120] HERO_move              [97] LVL_draw
+  [77] EVNT_handle_keypress   [91] HERO_update_friction  [102] LVL_fill_obstacle
+ [112] EVNT_init              [92] HERO_update_pos_due_to_velocity [3] LVL_fill_shadowbuffer_with_tiles
+ [113] EVTN_clear_keypress    [93] HERO_update_sprite    [101] LVL_fill_structure
+  [78] GAME_close             [94] HERO_update_state     [140] LVL_fill_tiles
+ [114] GAME_init             [110] IMP_concatenate_string [141] LVL_new
+  [79] GAME_update           [121] IMP_fill_level         [21] LVL_obstacle_on_pos
+  [40] GEO_angle_2pt         [122] IMP_free_mapfile      [142] LVL_set_size
+  [24] GEO_calc_slope        [123] IMP_new_mapfile       [143] LVL_set_tile_number
+  [36] GEO_horizontal_segment_intersects_rect [124] IMP_read_file [144] LVL_set_tileset
+  [51] GEO_intersection_with_x [125] IMP_read_from_file   [29] LVL_tile_on_pos
+  [58] GEO_intersection_with_y [126] IMP_read_tileset     [41] PT_contains
+  [45] GEO_line_segment_len   [61] LIG_add_border_light_vertices [49] PT_eq
+  [30] GEO_pt_in_triangle     [62] LIG_calc_light_wall_shadow [44] PT_free
+  [31] GEO_pt_same_side       [46] LIG_calculate_ray_hit_vertex [48] PT_merge
+  [20] GEO_sign                [7] LIG_fill_lightbuffer   [38] PT_new
+  [22] GEO_value_between_range [52] LIG_find_closest_hit  [43] PT_push
+ [105] GEO_vertical_segment_intersects_rect [53] LIG_find_closest_hit_segment_hor [71] SEG_common_x
+  [15] GEO_x_intersection_with_slope [54] LIG_find_closest_hit_segment_ver [72] SEG_common_y
+  [80] GFX_calc_gradient_rect [59] LIG_find_type_segment_in_corner [50] SEG_contains
+  [18] GFX_calc_intersections_in_scanline [70] LIG_generate_aux_hit_points [12] SEG_delete
+ [115] GFX_clean_buffers      [63] LIG_generate_hit_points [25] SEG_determine_type
+  [81] GFX_clear_screen       [55] LIG_generate_slipover_hit_point [16] SEG_find_candidates
+  [82] GFX_dealloc_buffers    [64] LIG_get_base_light_polygon [34] SEG_free
+  [83] GFX_draw_lightbuffer   [65] LIG_get_light_polygon  [32] SEG_get
+   [5] GFX_draw_line_to_buffer [66] LIG_get_light_polygon_width_corr [56] SEG_get_segments_of_polygon
+   [4] GFX_draw_scanline      [67] LIG_get_light_polygon_x_corr [26] SEG_init
+   [6] GFX_fill_buffer_single_polygon [68] LIG_get_light_polygon_y_corr [98] SEG_len
+  [84] GFX_fill_gradient_gaps [95] LIG_get_wobble_angle_coef [17] SEG_merge
+   [9] GFX_fill_lightbuffer  [127] LIG_init               [27] SEG_push
+  [10] GFX_fill_mesh_shadowbuffer [128] LIG_init_all_gradients [19] SRTLST_free
+   [2] GFX_fill_rect         [129] LIG_init_all_light_wobbles_patterns [13] SRTLST_insert
+   [8] GFX_fill_shadowbuffer [130] LIG_init_all_lightsources [14] SRTLST_new
+ [116] GFX_free_buffers      [131] LIG_init_circular_gradient [104] TILE_new
+ [117] GFX_init_png          [132] LIG_init_lantern       [99] TIMER_get_ticks
+ [118] GFX_init_screen_buffer_texture [133] LIG_init_lighter [111] TIMER_new
+ [109] GFX_init_video        [134] LIG_init_no_wobble_pattern [74] TIMER_start
+ [108] GFX_read_texture      [135] LIG_init_stable_wobble_pattern [106] TXTR_init_animation
+  [85] GFX_render_texture    [136] LIG_init_walk_wobble_pattern [145] TXTR_init_animation_sheet
+  [35] GFX_render_tile        [69] LIG_initial_point_of_light [107] TXTR_push_animation
+  [86] GFX_update             [96] LIG_move_lightsource   [37] VRTX_add_point
+  [87] HERO_check_collision   [23] LIG_ray_intersect      [39] VRTX_free
+ [100] HERO_check_state_collision [42] LIG_ray_intersects_multiple [57] VRTX_highest_y
+  [73] HERO_current_frame    [137] LIG_read_all_files     [47] VRTX_merge
+  [88] HERO_draw             [103] LVL_add_tile           [33] VRTX_new
+ [119] HERO_init              [28] LVL_analyze            [60] castValToDec
+  [89] HERO_light_x          [138] LVL_clean_obstacles

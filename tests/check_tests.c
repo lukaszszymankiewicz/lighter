@@ -45,7 +45,6 @@ int main(void) {
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
-
     printf("\n");
 
     // segment
@@ -53,7 +52,6 @@ int main(void) {
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
-
     printf("\n");
 
     // point
@@ -71,11 +69,11 @@ int main(void) {
     // number_failed += srunner_ntests_failed(sr);
 
     // GFX
-    s = import_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-    printf("\n");
+    // s = import_suite();
+    // sr = srunner_create(s);
+    // srunner_run_all(sr, CK_ENV);
+    // number_failed += srunner_ntests_failed(sr);
+    // printf("\n");
 
     // level
     s = level_suite();
@@ -83,13 +81,13 @@ int main(void) {
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    printf("\n");
-
+    // printf("\n");
+    // TODO: (LG-9)
     // events
-    s = events_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
+    // s = events_suite();
+    // sr = srunner_create(s);
+    // srunner_run_all(sr, CK_ENV);
+    // number_failed += srunner_ntests_failed(sr);
 
     printf("\n");
 

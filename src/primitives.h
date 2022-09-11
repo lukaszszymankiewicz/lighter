@@ -5,6 +5,7 @@
 
 typedef short int direction_t;
 enum direction { RIGHT, LEFT, UP, DOWN, NONE };
+enum segtype { HOR, VER, UNKNOWN};
 
 // for calculating hits
 typedef struct obstacle {
@@ -21,7 +22,8 @@ typedef struct segment {
     int   y1;
     int   x2; 
     int   y2;
-    float slope;
+    float slope; //TODO: is this needed (?)
+    int   type;
     struct segment *next;
 } segment_t;
 
@@ -36,6 +38,7 @@ typedef struct vertex {
     int            x;         // coords of vertex
     int            y;         // coords of vertex
     float          angle;     // angle it makes with player
+    float          dist;      // distance from caster
     struct vertex *next;      // next vertex
     struct vertex *prev;      // prev vertex
 } vertex_t;

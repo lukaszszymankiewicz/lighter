@@ -53,7 +53,7 @@ START_TEST (EVNT_handle_events_check)
     ck_assert_int_eq(light_o->src_num, 0);
     free(new_keys);
 
-    // TODO: this integers in ck_assert_int_eq should be enum keys
+    // TODO: (LG-9) this integers in ck_assert_int_eq should be enum keys
     // WHEN (LIGHT CHANGE BACK)
     game->event.type = SDL_KEYDOWN;
     game->event.key.keysym.sym = SDL_SCANCODE_SPACE;

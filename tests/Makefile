@@ -1,5 +1,6 @@
 CC = gcc
 CsegmentFLAGS := -Wall -g
+
 TARGET =                     \
 	fake.c   				 \
     check_tests.c            \

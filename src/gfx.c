@@ -143,8 +143,8 @@ void GFX_free_texture(
 };
 
 void GFX_free() {
-    GFX_free_buffers();
-    SDL_DestroyTexture(screen_texture);
+    // GFX_free_buffers();
+    // SDL_DestroyTexture(screen_texture);
 
     if (renderer) {
         SDL_DestroyRenderer(renderer);
@@ -154,8 +154,7 @@ void GFX_free() {
         SDL_DestroyWindow(window);
     }
 
-    IMG_Quit();
-
+    // IMG_Quit();
 };
 
 void GFX_clear_screen() {

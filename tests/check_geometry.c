@@ -1,76 +1,6 @@
 #include <check.h>
+#include <stdio.h>
 #include "../src/geometry.h"
-
-
-START_TEST (GEO_pt_in_triangle_check_positive)
-{
-    // GIVEN
-    int t1_x = 0; int t1_y = 0;
-    int t2_x = 0; int t2_y = 20;
-    int t3_x = 20; int t3_y = 0;
-    bool result;
-
-    // WHEN && THEN
-    result = GEO_pt_in_triangle(5, 5, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 1);
-
-    result = GEO_pt_in_triangle(6, 6, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 1);
-
-    result = GEO_pt_in_triangle(1, 16, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 1);
-
-    result = GEO_pt_in_triangle(16, 1, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 1);
-
-    // THEN
-    ck_assert_int_eq(result, 1);
-}
-END_TEST
-
-START_TEST (GEO_pt_in_triangle_check_edge)
-{
-    // GIVEN
-    int t1_x = 0; int t1_y = 0;
-    int t2_x = 0; int t2_y = 20;
-    int t3_x = 20; int t3_y = 0;
-    bool result;    
-
-    // WHEN && THEN
-    result = GEO_pt_in_triangle(0, 0, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 1);
-
-    result = GEO_pt_in_triangle(0, 20, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 1);
-
-    result = GEO_pt_in_triangle(20, 0, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 1);
-
-    result = GEO_pt_in_triangle(10, 10, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 1);
-}
-END_TEST
-
-START_TEST (GEO_pt_in_triangle_check_negative)
-{
-    // GIVEN
-    int t1_x = 0; int t1_y = 0;
-    int t2_x = 0; int t2_y = 20;
-    int t3_x = 20; int t3_y = 0;
-
-    bool result;
-    
-    // WHEN && THEN
-    result = GEO_pt_in_triangle(40, 40, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 0);
-
-    result = GEO_pt_in_triangle(140, -40, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 0);
-
-    result = GEO_pt_in_triangle(-1, -1, t1_x, t1_y, t2_x, t2_y, t3_x, t3_y);
-    ck_assert_int_eq(result, 0);
-}
-END_TEST
 
 START_TEST (GEO_seg_intersection_with_y_check)
 {
@@ -162,6 +92,115 @@ START_TEST (GEO_horizontal_segment_intersects_rect_check)
 }
 END_TEST
 
+
+START_TEST (GEO_pt_same_side_check)
+{
+    typedef struct testcase {
+          int r_x1;       // beg of ray x
+          int r_y1;       // beg of ray y
+          int r_x2;       // end of ray x
+          int r_y2;       // end of ray y
+          int o_x1;       // beg of obstacle x
+          int o_y1;       // beg of obstacle y
+          int o_x2;       // end of obstacle x
+          int o_y2;       // end of obstacle y
+          int exp;
+    } testcase_t;
+    
+    int n_cases = 18;
+
+    testcase_t data[] = {
+        (testcase_t){40, 30, 40, 70, 20, 50, 50, 50, 0},  
+        (testcase_t){30, 10, 50, 10, 20, 50, 50, 50, 1},  
+        (testcase_t){30, 0, 50, 20, 20, 50, 50, 50, 1},  
+        (testcase_t){0, 70, 100, 40, 20, 50, 50, 50, 1},  
+        (testcase_t){100, 40, 0, 70, 20, 50, 50, 50, 1},  
+
+        (testcase_t){30, 0, 100, 0, 20, 50, 50, 50, 1},  
+        (testcase_t){30, 0, 30, 50, 20, 50, 50, 50, 0},  
+        (testcase_t){30, 0, 20, 50, 20, 50, 50, 50, 0},  
+        (testcase_t){20, 50, 30, 0, 20, 50, 50, 50, 0},  
+        (testcase_t){20, 50, 30, 100, 20, 50, 50, 50, 0},  
+
+        // collinear
+        (testcase_t){30, 50, 40, 50, 10, 50, 20, 50, 0},  
+        (testcase_t){30, 50, 40, 50, 10, 50, 35, 50, 0},  
+        (testcase_t){30, 50, 40, 50, 35, 50, 50, 50, 0},  
+        (testcase_t){30, 50, 40, 50, 60, 50, 90, 50, 0},  
+
+        (testcase_t){50, 30, 50, 80, 50, 10, 50, 20, 0},  
+        (testcase_t){50, 30, 50, 80, 50, 10, 50, 40, 0},  
+        (testcase_t){50, 30, 50, 80, 50, 40, 50, 90, 0},  
+        (testcase_t){50, 30, 50, 80, 50, 90, 50, 95, 0},  
+    };
+
+    // WHEN
+    for (int i=0; i<n_cases; i++) {
+        bool res;
+        res = GEO_pt_same_side(
+            data[i].r_x1,
+            data[i].r_y1,
+            data[i].r_x2,
+            data[i].r_y2,
+            data[i].o_x1,
+            data[i].o_y1,
+            data[i].o_x2,
+            data[i].o_y2
+        );
+
+        if ((int)res != (int)data[i].exp) {
+            printf("test no %d went wrong \n", i);
+        }
+        ck_assert_int_eq(res, data[i].exp);
+    }
+}
+END_TEST
+
+
+START_TEST ( GEO_collienar_segs_have_common_pt_check)
+{
+    typedef struct testcase {
+          int a1;
+          int a2;
+          int b1;
+          int b2;
+          int exp;
+    } testcase_t;
+    
+    int n_cases = 12;
+
+    testcase_t data[] = {
+        (testcase_t){10, 20, 30, 40, 0},  
+        (testcase_t){40, 30, 20, 10, 0},  
+        (testcase_t){0, 0, 20, 10, 0},  
+        (testcase_t){10, 30, 20, 40, 1},  
+        (testcase_t){10, 30, 20, 0, 1},  
+
+        (testcase_t){10, 30, 30, 40, 1},  
+        (testcase_t){10, 30, 15, 20, 1},  
+        (testcase_t){5, 20, 10, 40, 1},  
+        (testcase_t){20, 50, 10, 40, 1},  
+        (testcase_t){0, 10, 10, 40, 1},  
+
+        (testcase_t){20, 30, 10, 40, 1},  
+        (testcase_t){20, 50, 80, 90, 0},  
+    };
+
+    // WHEN
+    for (int i=0; i<n_cases; i++) {
+        bool res;
+        res = GEO_collienar_segs_have_common_pt(
+            data[i].a1,
+            data[i].a2,
+            data[i].b1,
+            data[i].b2
+        );
+
+        ck_assert_int_eq(res, data[i].exp);
+    }
+}
+END_TEST
+
 Suite* geometry_suite(void)
 {
     Suite* s;
@@ -170,13 +209,11 @@ Suite* geometry_suite(void)
     s = suite_create("geometry");
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, GEO_pt_in_triangle_check_positive);
-    tcase_add_test(tc_core, GEO_pt_in_triangle_check_edge);
-    tcase_add_test(tc_core, GEO_pt_in_triangle_check_negative);
     tcase_add_test(tc_core, GEO_seg_intersection_with_y_check);
-
     tcase_add_test(tc_core, GEO_vertical_segment_intersects_rect_check);
     tcase_add_test(tc_core, GEO_horizontal_segment_intersects_rect_check);
+    tcase_add_test(tc_core, GEO_pt_same_side_check);
+    tcase_add_test(tc_core, GEO_collienar_segs_have_common_pt_check);
 
     suite_add_tcase(s, tc_core);
 

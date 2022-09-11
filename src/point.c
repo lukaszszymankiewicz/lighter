@@ -22,6 +22,23 @@ bool PT_eq(
     return (first->x == second->x && first->y == second->y);
 }
 
+bool PT_contains(
+    point_t *head,
+    int x,
+    int y
+) {
+    point_t *ptr = NULL;
+    ptr = head;
+
+    while (ptr) {
+        if (ptr->x == x && ptr->y == y) {
+            return true;
+        }
+        ptr=ptr->next;
+    }
+    return false;
+}
+
 void PT_push(
     point_t **head,
     int          x,
@@ -86,4 +103,20 @@ void PT_free(
     }
 }
 
+void PT_merge(
+    point_t **head,
+    point_t  *candidates
+) {
+    point_t *ptr   = NULL;
+    ptr            = candidates;
+
+    while(ptr) {
+        PT_push(head, ptr->x, ptr->y);
+        ptr = ptr->next;
+    }
+
+    if (candidates) {
+        PT_free(candidates);
+    }
+}
 

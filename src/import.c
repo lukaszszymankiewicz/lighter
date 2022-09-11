@@ -18,7 +18,8 @@ char* IMP_concatenate_string(
     const char *a, const char *b, const char *d
 ) {
     size_t len = strlen(a) + strlen(b) + strlen(d);
-    char* str = malloc(len + 1);
+    char* str = NULL;
+    str = (char*)malloc(len + 1);
 
     strcpy(str, a);
     strcat(str, b);
@@ -30,16 +31,16 @@ char* IMP_concatenate_string(
 mapfile_t* IMP_new_mapfile(
     char *filename
 ) {
-    mapfile_t *new_mapfile = NULL;
-    new_mapfile            = (mapfile_t*)malloc(sizeof(mapfile_t));
+    mapfile_t *new_mapfile         = NULL;
+    new_mapfile                    = (mapfile_t*)malloc(sizeof(mapfile_t));
 
-    memset(new_mapfile->buffer, 0, MAX_LINE_LENGHT * (sizeof(char)));
-    new_mapfile->file = NULL;
+    new_mapfile->file              = NULL;
+    new_mapfile->filename          = NULL;
+    new_mapfile->tileset_filename  = NULL;
+    new_mapfile->state             = IDLE;
+
     new_mapfile->filename = IMP_concatenate_string(filename, SEPARATOR, LEVEL_STRUCTURE_PREFIX);
-
     new_mapfile->tileset_filename = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_PREFIX);
-
-    new_mapfile->state = IDLE;
 
     return new_mapfile;
 }
@@ -117,6 +118,7 @@ int IMP_fill_level(mapfile_t *map, level_t *level) {
                 LVL_fill_structure(level, x_tile, y_tile, cur_tile_idx);
             } else if (layer_read == 1) {
                 // TODO: this is temporary - it will be valid only for one type of obstacle
+                // this 1 is means obstacle type
                 LVL_fill_obstacle(level, x_tile, y_tile, 1);
             } else {
                 level->hero_x = x_tile; 
