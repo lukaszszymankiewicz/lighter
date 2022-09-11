@@ -209,7 +209,6 @@ void LVL_analyze(
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
 
-            // TODO: after implementing framebuffer this wont render tile as fill such buffer.
             int tile_pos_x = TILE_WIDTH  * x-st_x;
             int tile_pos_y = TILE_HEIGHT * y-st_y;
 
@@ -411,7 +410,6 @@ void LVL_fill_shadowbuffer_with_tiles(
     }
 }
 
-// TODO: test this one!
 void LVL_free(
     level_t *level
 ) {

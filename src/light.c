@@ -9,17 +9,18 @@
 #include "primitives.h"
 #include "point.h"
 
+#define RAY_THRESHOLD 2
+
 // COLLECTIONS
 lightsource_t* lightsources[ALL_AVAILABLE_LIGHTSOURCES];
 texture_t*     gradient_textures[ALL_AVAILABLE_GRADIENT_TEXTURES];
 wobble_t*      light_wobbles_patterns[ALL_AVAILABLE_WOBBLES_PATTERNS];
 
-
 // this will be handled fully by native file-type. Just by now, all things related to this object is
 // put into single function which it will be easy to put one file.
 lightsource_t* LIG_init_lantern() {
     lightsource_t* lantern = NULL;
-    lantern = (lightsource_t*)malloc(sizeof(lightsource_t));
+    lantern                = (lightsource_t*)malloc(sizeof(lightsource_t));
 
     lantern->width = 0.0;
     lantern->n_poly = 9;
@@ -290,227 +291,446 @@ void LIG_debug_obstacle(
     }
 }
 
-// checks if ray (defined by (x1, y1), (x2, y2) hit obstacle (segment_t). Please not that obstacle
-// can be only horizontal or vertical intersection point is calculated as float to more directly
-// check if it hit obstacle. Rounding is than done simply by casting it to integer.
-// points with intersection is then returned (if nothing is hit the original coords are returned).
-point_t* LIG_ray_hits_obstacle (
-    int x1,
-    int y1,
-    int x2,
-    int y2,
-    segment_t *obstacle
+// checks if ray intersects with obstacle
+bool LIG_ray_intersect(
+    int o_x1,  // obstacle
+    int o_y1,  // obstacle
+    int o_x2,  // obstacle
+    int o_y2,  // obstacle
+    int r_x1,  // ray
+    int r_y1,  // ray
+    int r_x2,  // ray
+    int r_y2   // ray
 ) {
-    point_t *base_point = NULL;
-    base_point          = PT_new(x2, y2);  // hit point is stored here
-
-    float    new_value;
-
-    // obstacle is vertical
-    if (obstacle->x1 == obstacle->x2) {
-        if (GEO_value_between_range(obstacle->x1, x1, x2, SLIGHLY_LOOSEN_ACCURACY)) {
-            new_value = GEO_intersection_with_x(obstacle->x1, x1, y1, x2, y2);
-
-            if (GEO_value_between_range(new_value, obstacle->y1, obstacle->y2, SLIGHLY_LOOSEN_ACCURACY)) {
-                base_point->y = (int) new_value;
-                base_point->x = obstacle->x1;
-            }
+    // check for obstacle is collinear with ray - special case here needs to be applied
+    if (o_x1 == o_x2) {
+        // collinear
+        if ((r_x1 == r_x2) && (r_x1 == o_x1)) {
+            return GEO_collienar_segs_have_common_pt(o_y1, o_y2, r_y1, r_y2);
         }
-    }
+        // typical case
+        return (GEO_value_between_range(o_x1, r_x1, r_x2)) &&
+            !GEO_pt_same_side(r_x1, r_y1, r_x2, r_y2, o_x1, o_y1, o_x2, o_y2);
 
-    // obstacle is horizontal
-    else {
-        if (GEO_value_between_range(obstacle->y1, y1, y2, SLIGHLY_LOOSEN_ACCURACY)) {
-            new_value = GEO_intersection_with_y(obstacle->y1, x1, y1, x2, y2);
-
-            if (GEO_value_between_range(new_value, obstacle->x1, obstacle->x2, SLIGHLY_LOOSEN_ACCURACY)) {
-                base_point->x = (int) new_value;
-                base_point->y = obstacle->y1;
-            }
+    } else {
+        // collinear
+        if ((r_y1 == r_y2) && (r_y1 == o_y1)) {
+            return GEO_collienar_segs_have_common_pt(o_x1, o_x2, r_x1, r_x2);
         }
+        // typical case
+        return (GEO_value_between_range(o_y1, r_y1, r_y2) && 
+         !GEO_pt_same_side(r_x1, r_y1, r_x2, r_y2, o_x1, o_y1, o_x2, o_y2));
     }
-
-    return base_point;
-
 }
 
-// Function checks for any of the possible interseciton between single ray (defined by (x1, y1),
-// (x2, y2) and set of obstacles. Best (closest) intersection point is then returned.
-point_t* LIG_closest_intersection_with_obstacle(
-    int x1,
-    int y1,
-    int x2,
-    int y2,
-    segment_t *obstacles
-)
-{ 
-    point_t   *best_point = NULL;
-    segment_t *obstacle   = NULL;
-    
-    best_point = PT_new(x2, y2);    
-
-    for(obstacle=obstacles; obstacle; obstacle=obstacle->next) {
-        best_point = LIG_ray_hits_obstacle(x1, y1, best_point->x, best_point->y, obstacle);
-    }
-
-    return best_point;
-}
-
-// checks if segment hits any of the obstacle, as above function but returns only bool if so.
-bool LIG_any_intersection_with_obstacle(
-    int x1,
-    int y1,
-    int x2,
-    int y2,
-    segment_t *obstacles
-)
-{ 
-    point_t    *best_point = NULL;
-    segment_t  *obstacle   = NULL;
-
-    for(obstacle=obstacles; obstacle; obstacle=obstacle->next) {
-        best_point = LIG_ray_hits_obstacle(x1, y1, x2, y2, obstacle);
-
-        if (best_point->x != x2 || best_point->y != y2) {
-            PT_free(best_point);
-            return true;
-        }
-    }
-
-    PT_free(best_point);
-    return false;
-}
-
-// Calculates end of light rays, only those ends of obstacles which is in sight of light cone is
-// filtered. If light sweeps all around all segment ends are taken into account.
-point_t* LIG_calc_hit_points(
-    int        x,
-    int        y,
-    float      angle,
-    float      width,
+// calculates all segments which ray hits
+segment_t* LIG_ray_intersects_multiple(
+    int r_x1,
+    int r_y1,
+    int r_x2,
+    int r_y2,
     segment_t *obstacles
 ) { 
-    point_t    *hit_points = NULL;
-    point_t    *pt_a       = NULL;
-    point_t    *pt_b       = NULL;
-    segment_t  *ptr        = NULL;
-    ptr                    = obstacles;
+    segment_t  *seg           = NULL;
+    segment_t  *inter         = NULL;
 
-    if (width != 0.0) {
-
-        // light cone
-        int a_border_x = (int)(x - sin(angle - width) * R);
-        int a_border_y = (int)(y - cos(angle - width) * R);
-        int b_border_x = (int)(x - sin(angle + width) * R);
-        int b_border_y = (int)(y - cos(angle + width) * R);
-        
-        // if light cone edges intersectis with some obstacles such points needs to be added
-        pt_a = LIG_closest_intersection_with_obstacle(x, y, a_border_x, a_border_y, obstacles);
-        pt_b = LIG_closest_intersection_with_obstacle(x, y, b_border_x, b_border_y, obstacles);
-        
-        PT_push(
-                &hit_points,
-                pt_a->x,
-                pt_a->y
-            );
-        PT_push(
-                &hit_points,
-                pt_b->x,
-                pt_b->y
-            );
-
-        // filtering obstacle ends which is inside light cone
-        while(ptr) { 
-            if (GEO_pt_in_triangle(ptr->x1, ptr->y1, x, y, a_border_x, a_border_y, b_border_x, b_border_y)) {
-                PT_push(&hit_points, ptr->x1, ptr->y1);
-            }
-            if (GEO_pt_in_triangle(ptr->x2, ptr->y2, x, y, a_border_x, a_border_y, b_border_x, b_border_y)) {
-                PT_push(&hit_points, ptr->x2, ptr->y2);
-            }
-            ptr = ptr->next;
+    for(seg=obstacles; seg; seg=seg->next) {
+        if(LIG_ray_intersect(seg->x1, seg->y1, seg->x2, seg->y2, r_x1, r_y1, r_x2, r_y2)) {
+            SEG_push(&inter, seg->x1, seg->y1, seg->x2, seg->y2);
         }
-        PT_free(pt_a);
-        PT_free(pt_b);
     }
     
-    // light sweeps all around - all points of obstacles are taken
-    else {
-        while(ptr) {
-            PT_push(&hit_points, ptr->x1, ptr->y1);
-            PT_push(&hit_points, ptr->x2, ptr->y2);
-            ptr=ptr->next;
+    return inter;
+}
+
+// find specific segment type (horizontal or vertical) in corner (two segments)
+segment_t* LIG_find_type_segment_in_corner(
+    segment_t* first,
+    segment_t* second,
+    int type
+) {
+    if (first->type == type) {
+        return first;
+    } else if (second->type == type) {
+        return second;
+    } else {
+        return NULL;
+    }
+}
+
+// when casted ray "slips" of the corner of some obstacle new ray, slightly shifted from the main
+// one needs to be casted (to see where and how light slips of such corner).
+point_t* LIG_generate_slipover_hit_point(
+    int x1,  // ray begginig
+    int y1,  // ray begginig
+    int x2,  // ray end 
+    int y2   // ray end 
+) {
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    
+    // rays are perpendicular to screen axes
+    if (dx==0) {
+        return PT_new( x2, SIGN(y2-y1)*SCREEN_HEIGHT+1);
+    } else if (dy==0) {
+        return PT_new(SIGN(x2-x1)*SCREEN_WIDTH+1, y2);
+    }
+
+    // slipped ray, by now, ends only few pixels from slipped corner. Its end is simply transposed
+    // in such a way, that it is always behind the screen border. This makes sure that such ray will
+    // be checked for every obstacle in a way.
+    // To calculate transposition 'nx' and 'ny' is calculated which is just a number of times ray
+    // needs to be repeated to fall behind the level border.
+    int nx = (int)(SCREEN_WIDTH / abs(dx)) + 1;
+    int ny = (int)(SCREEN_HEIGHT / abs(dy)) + 1;
+
+    int bigger = MAX(nx, ny);
+
+    return PT_new(x1+bigger*dx, y1+bigger*dy);
+}
+
+// this function calculate if ray should "slip" if casted into corner.
+point_t* LIG_generate_aux_hit_points(
+    int x1,           // ray begginig 
+    int y1,           // ray begginig
+    int x2,           // ray end
+    int y2,           // ray end
+    segment_t *inter  // corner made from two obstacles (or one or four!)
+) {
+    segment_t* first  = NULL;
+    segment_t* second = NULL;
+    segment_t* ver    = NULL;
+    segment_t* hor    = NULL;
+
+    first = SEG_get(inter, 0);
+    second = SEG_get(inter, 1);
+
+    ver = LIG_find_type_segment_in_corner(first, second, VER);
+    hor = LIG_find_type_segment_in_corner(first, second, HOR);
+
+    // common point of corner to which ray is casted
+    int common_x = SEG_common_x(first, second); 
+    int common_y = SEG_common_y(first, second); 
+
+    // corner range
+    int max_x = (hor->x1 + hor->x2) - common_x;
+    int max_y = (ver->y1 + ver->y2) - common_y;
+
+    // checks in which direction slipopver ray should be casted. If upper is equal to lefter corner
+    // is concave or conver from hero point of view, so no slip rays should be even considered
+    bool upper = SIGN(common_y-max_y) == SIGN(y1-common_y);
+    bool lefter = SIGN(common_x-max_x) == SIGN(x1-common_x);
+    
+    // TODO: in case this slipover rays will look fake, corr coef should be dynamicaly calculated,
+    // not be a constant RAY_THRESHOLD value
+
+    // slip in y axis
+    if (lefter > upper) {
+        int corr_x = SIGN(x1-x2) * RAY_THRESHOLD + x2;
+        return LIG_generate_slipover_hit_point(x1, y1, corr_x, y2);
+    }
+    // slip in x axis
+    else if (upper > lefter) {
+        int corr_y = SIGN(y1-y2) * RAY_THRESHOLD + y2;
+        return LIG_generate_slipover_hit_point(x1, y1, x2, corr_y);
+    }
+
+    // edge cases
+    if (x1 - common_x == 0) {
+        int corr_x = SIGN(common_x - max_x) * RAY_THRESHOLD + common_x;
+        return LIG_generate_slipover_hit_point(x1, y1, corr_x, y2);
+    } else if (y1 - common_y == 0) {
+        int corr_y = SIGN(common_y - max_y) * RAY_THRESHOLD + common_y;
+        return LIG_generate_slipover_hit_point(x1, y1, x2, corr_y);
+    }
+
+    // no aux points are generated
+    return NULL;
+}
+
+segment_t* LIG_find_closest_hit_segment_ver(
+    segment_t* inter,
+    int r_x1,
+    int r_y1,
+    int r_x2,
+    int r_y2
+) {
+    segment_t* ptr      = NULL;
+    segment_t* best_seg = NULL;
+
+    int best_dist = 9999;
+    int dull_ray_end;
+    int dist;
+    
+    for(ptr=inter; ptr; ptr=ptr->next) {
+        if (ptr->type == VER) {
+            dist = abs(r_x1-ptr->x1);
+
+            // if distance between ray and obstacle is 0 it means that ray is either inside obstacle
+            // or collinear with obstacle - some additional attention is needed
+            if (dist == 0) {
+                dull_ray_end = LIG_calculate_dull_ray_end(r_y1, r_y2, ptr->y1, ptr->y2);
+                dist = r_y1 - dull_ray_end;
+            }
+
+            if (dist < best_dist) {
+                best_dist = dist;
+                best_seg = ptr;
+            }
         }
     }
 
-    return hit_points;
+    return best_seg;
+}
+
+// if ray begins inside of obstacle or it is collinear to obstacle special care is taken to proerly
+// calculate distance between such obstacle to such ray
+int LIG_calculate_dull_ray_end(
+    int r_beg,
+    int r_end,
+    int o_beg,
+    int o_end
+) {
+    // ray begins inside of obstacle
+    if (GEO_value_between_range(r_beg, o_beg, o_end)) {
+        return r_beg;
+    }
+    // if distance between ray and obstacle is still zero it means that they are collinear - one of
+    // the end of obstacle is and hit point
+    int dir = SIGN(r_beg - r_end);
+
+    if (dir == -1) {
+        return MIN(o_beg, o_end);
+    } else {
+        return MAX(o_beg, o_end);
+    }
+}
+
+segment_t* LIG_find_closest_hit_segment_hor(
+    segment_t* inter,
+    int r_x1,
+    int r_y1,
+    int r_x2,
+    int r_y2
+) {
+    segment_t* ptr      = NULL;
+    segment_t* best_seg = NULL;
+
+    int best_dist = 9999;
+    int dist;
+    int dull_ray_end;
+
+    for(ptr=inter; ptr; ptr=ptr->next) {
+        if (ptr->type == HOR) {
+            dist = abs(r_y1-ptr->y1);
+            
+            // if distance between ray and obstacle is 0 it means that ray is either inside obstacle
+            // or collinear with obstacle - some additional attention is needed
+            if (dist == 0) {
+                dull_ray_end = LIG_calculate_dull_ray_end(r_x1, r_x2, ptr->x1, ptr->x2);
+                dist = r_x1 - dull_ray_end;
+            }
+
+            if (dist < best_dist) {
+                best_dist = dist;
+                best_seg = ptr;
+            }
+        }
+    }
+
+    return best_seg;
+}
+
+vertex_t* LIG_calculate_ray_hit_vertex (
+    int r_x1, int r_y1,
+    int r_x2, int r_y2,
+    segment_t* obs
+) {
+    int dist;
+    int hit_x;
+    int hit_y;
+    float angle;
+
+    vertex_t* v = NULL;
+
+    if (obs->type == HOR) {
+        dist = abs(r_y1 - obs->y1);
+        hit_y = obs->y1;
+
+        if (dist == 0) {
+            int dull_ray_end = LIG_calculate_dull_ray_end(r_x1, r_x2, obs->x1, obs->x2);
+            dist = abs(r_x1 - dull_ray_end);
+            hit_x = dull_ray_end;
+        } else {
+            // TODO: make round check here!
+            hit_x = GEO_intersection_with_y(obs->y1, r_x1, r_y1, r_x2, r_y2);
+            dist = (int)GEO_line_segment_len(r_x1, r_y1, hit_x, hit_y);
+        }
+    } else {
+        dist = abs(r_x1 - obs->x1);
+        hit_x = obs->x1;
+
+        if (dist == 0) {
+            int dull_ray_end = LIG_calculate_dull_ray_end(r_y1, r_y2, obs->y1, obs->y2);
+            dist = abs(r_y1 - dull_ray_end);
+            hit_y = dull_ray_end;
+        } else {
+
+            // TODO: make round check here!
+            hit_y = GEO_intersection_with_x(obs->x1, r_x1, r_y1, r_x2, r_y2);
+            dist = (int)GEO_line_segment_len(r_x1, r_y1, hit_x, hit_y);
+        }
+    }
+
+    angle = GEO_angle_2pt(r_x1, r_y1, r_x2, r_y2);
+    v = VRTX_new(hit_x, hit_y, angle);
+    v->dist = dist;
+
+    return v;
+}
+
+vertex_t* LIG_find_closest_hit(
+    segment_t* inter,
+    int r_x1, int r_y1,
+    int r_x2, int r_y2
+) {
+    segment_t* best_ver = NULL;
+    segment_t* best_hor = NULL;
+    vertex_t* v_hor     = NULL;
+    vertex_t* v_ver     = NULL;
+
+    // find vertical and horizontal segments which is closest to ray
+    best_hor = LIG_find_closest_hit_segment_hor(inter, r_x1, r_y1, r_x2, r_y2);
+    best_ver = LIG_find_closest_hit_segment_ver(inter, r_x1, r_y1, r_x2, r_y2);
+    
+    // no hit is found, it is unexpected as inter paramter should contain only hitted segments and
+    // should not be NULL, nevertheless better to have such check
+    if (!best_ver && !best_hor) {
+        return NULL;
+    }
+
+    // there is only one hitted segment, it could be either vertical or horizontal one
+    if (!best_ver) {
+        return LIG_calculate_ray_hit_vertex(r_x1, r_y1, r_x2, r_y2, best_hor);
+    }
+    if (!best_hor) {
+        return LIG_calculate_ray_hit_vertex(r_x1, r_y1, r_x2, r_y2, best_ver);
+    }
+
+    // there are both vertical and horizontal segments hitted - best of each of these group is taken
+    // and check id done to determine which is hit closer
+    v_hor = LIG_calculate_ray_hit_vertex(r_x1, r_y1, r_x2, r_y2, best_hor);
+    v_ver = LIG_calculate_ray_hit_vertex(r_x1, r_y1, r_x2, r_y2, best_ver);
+    
+    // return vertical hitted segment
+    if (v_ver->dist > v_hor->dist) {
+        VRTX_free(v_ver);
+        return v_hor;
+    // return horizontal hitted segment
+    } else {
+        VRTX_free(v_hor);
+        return v_ver;
+    }
 }
 
 // Calculates coords of light polygon vertices.
-vertex_t* LIG_calc_light_polygon(
-    int x,                 // x starting point (hero)
-    int y,                 // y starting point (hero)
-    float angle,           // light angle
-    float width,           // light width
-    segment_t *obstacles   // sets of obstacles
+vertex_t* LIG_get_base_light_polygon(
+    int x,                 // x starting point
+    int y,                 // y starting point
+    segment_t *obstacles,  // light obstacles
+    point_t* hit_points    // hit points to be checked
 ) { 
-    vertex_t  *light_polygon      = NULL;   // here is points which make light polygon is stored
-    point_t   *hit_points         = NULL;   // here is points to check ray hit stored
+    vertex_t   *light_polygon     = NULL;
+    vertex_t   *v                 = NULL;
+    segment_t  *inter             = NULL;
+    point_t    *ptr               = NULL;
+    point_t    *aux_pts           = NULL;  
+    point_t    *aux_pt            = NULL;
 
-    // calculating ray ends
-    hit_points         = LIG_calc_hit_points(x, y, angle, width, obstacles);
-    
-    // for ray is checked for collision and the two rays which shifts from this one (by a little
-    // angle).
-    for(point_t* pt=hit_points; pt; pt=pt->next) {
-        point_t    *new_point_a        = NULL;
-        point_t    *new_point_b        = NULL;
+    float       pt_angle;
 
-        angle = VRTX_calculate_angle(x, y, pt->x, pt->y);
+    for(ptr=hit_points; ptr; ptr=ptr->next) {
+        inter = LIG_ray_intersects_multiple(x, y, ptr->x, ptr->y, obstacles);
+        
+        // ray does not hit anything, only check if light can slip through corner which this segment
+        // make
+        if (SEG_contains(inter, ptr->x, ptr->y)) {
+            // slip rays are calculatd
+            aux_pt = LIG_generate_aux_hit_points(x, y, ptr->x, ptr->y, inter);
+            PT_merge(&aux_pts, aux_pt);
 
-        // direct ray (if direct ray hits anything, it should not be pushed into light vertex)
-        if (!LIG_any_intersection_with_obstacle(x, y, pt->x, pt->y, obstacles)) {
-            VRTX_add_point(&light_polygon, pt->x, pt->y, angle);
-        }
+            // ray end if not interrupted should be added to light polygon
+            pt_angle = GEO_angle_2pt(x, y, ptr->x, ptr->y);
+            VRTX_add_point(&light_polygon, ptr->x, ptr->y, pt_angle);
 
-        // first shifted ray
-        new_point_a = LIG_closest_intersection_with_obstacle(
-            x,
-            y,
-            pt->x - sin(angle + smol_angle) * R,
-            pt->y - cos(angle + smol_angle) * R,
-            obstacles
-        );
-        VRTX_add_point(&light_polygon, new_point_a->x, new_point_a->y, angle+smol_angle);
-
-        // second shifted ray
-        new_point_b = LIG_closest_intersection_with_obstacle(
-            x,
-            y,
-            pt->x - sin(angle - smol_angle) * R,
-            pt->y - cos(angle - smol_angle) * R,
-            obstacles
-        );
-        VRTX_add_point(&light_polygon, new_point_b->x, new_point_b->y, angle-smol_angle);
-
-        PT_free(new_point_a);
-        PT_free(new_point_b);
+        // ray hits SOMETHING - nothing happens. Calculating hit point is needed only for slip rays
+        } else { }
     }
 
-    if (width != 0.0) {
-        VRTX_add_point(&light_polygon, x, y, 0);
+    // slip rays MUST hit something, its end is generated to always range outisde level. Because
+    // level is rounded with dummy obstacles lining the border of screen, at list hit of it needs to
+    // be calculated.
+    ptr = NULL;
+    v = NULL;
+
+    for (ptr=aux_pts; ptr; ptr=ptr->next) {
+        inter = NULL;
+        inter = LIG_ray_intersects_multiple(x, y, ptr->x, ptr->y, obstacles);
+
+        v = LIG_find_closest_hit(inter, x, y, ptr->x, ptr->y);
+        VRTX_push(&light_polygon, v);
     }
 
-    if (debug == DEBUG_OBSTACLE_LINES) { LIG_debug_obstacle(obstacles); }
-    if (debug == DEBUG_LIGHT_RAYS) { LIG_debug_rays(light_polygon, x, y, 200);}
-    
-    // polygon point optimization process (deleting redundant points)
-    VRTX_optim(light_polygon);
-
-    // cleaning
-    PT_free(hit_points);
+    SEG_free(inter);
 
     return light_polygon;
 };
+
+// adds initial point of light to light polygon
+vertex_t* LIG_initial_point_of_light(
+    int x,                   // hero position 
+    int y,                   // hero position
+    float width              // width (in radians) of light cone
+) {
+    if (width == 0.0) {
+        return NULL;
+    }
+
+    return VRTX_new(x, y, 0.0);
+}
+
+// adds light border to light cone (if light sweeps all around function is not used)
+point_t* LIG_add_border_light_vertices(
+    int x,                   // hero position 
+    int y,                   // hero position
+    segment_t* obstacles,    // light obstacles
+    float angle,             // angle in which light is pointed
+    float width              // width (in radians) of light cone
+) {
+    if (width == 0.0) {
+        return NULL;
+    }
+
+    int r = 10;
+
+    point_t  *aux_pt_a            = NULL;  
+    point_t  *aux_pt_b            = NULL;  
+    point_t  *hit_points          = NULL;  
+
+    // edges of light light cone needs to checked for collision
+    int x_a = (int)(x - sin(angle - width) * r);
+    int y_a = (int)(y - cos(angle - width) * r);
+    int x_b = (int)(x - sin(angle + width) * r);
+    int y_b = (int)(y - cos(angle + width) * r);
+    
+    aux_pt_a = LIG_generate_slipover_hit_point(x, y, x_a, y_a);
+    aux_pt_b = LIG_generate_slipover_hit_point(x, y, x_b, y_b);
+
+    PT_merge(&hit_points, aux_pt_a);
+    PT_merge(&hit_points, aux_pt_b);
+
+    return hit_points;
+}
 
 // Calculates polygon of shadow which will be rendered on walls (light penetating walls).
 vertex_t* LIG_calc_light_wall_shadow(
@@ -589,13 +809,115 @@ float LIG_get_wobble_angle_coef(
 ) {
     int state = 0;
 
-    // TODO: sate checking should be in separate function
+    // TODO: state checking should be in separate function
     if (x_vel != 0) {
         state=1;
     }
     wobble_t *current_wobble = lght->src->wobble[state];
     return current_wobble->coefs[frame%current_wobble->len];
 }
+
+// generate list of points which needs to be check for ray casting
+point_t* LIG_generate_hit_points(
+    int x,
+    int y,
+    float width,
+    float angle,
+    segment_t* obstacles
+) {
+    segment_t *ptr        = NULL;
+    point_t *hit_points   = NULL;
+    ptr                   = obstacles;
+
+    // if light source has no width, every point from obstacles is taken
+    if (width == 0.0) {
+        while(ptr) {
+            if (!(PT_contains(hit_points, ptr->x1, ptr->y1))) { 
+                    PT_push(&hit_points, ptr->x1, ptr->y1);
+            }
+            if (!(PT_contains(hit_points, ptr->x2, ptr->y2))) { 
+                    PT_push(&hit_points, ptr->x2, ptr->y2);
+            } 
+            ptr = ptr->next;
+        }
+        return hit_points;
+    }
+
+    int r = 2000;
+
+    // edges of light light cone needs to checked for collision
+    int x_a = (int)(x - sin(angle - width) * r);
+    int y_a = (int)(y - cos(angle - width) * r);
+    int x_b = (int)(x - sin(angle + width) * r);
+    int y_b = (int)(y - cos(angle + width) * r);
+    
+    bool res;
+
+    // end each of the obstacle end is checked whether it occurs in light cone.
+    while(ptr) {
+        res = GEO_pt_in_triangle(ptr->x1, ptr->y1, x, y, x_a, y_a, x_b, y_b);
+
+        if (res && !(PT_contains(hit_points, ptr->x1, ptr->y1))) { 
+            PT_push(&hit_points, ptr->x1, ptr->y1);
+        }
+
+        res = GEO_pt_in_triangle(ptr->x2, ptr->y2, x, y, x_a, y_a, x_b, y_b);
+
+        if (res && !(PT_contains(hit_points, ptr->x2, ptr->y2))) { 
+            PT_push(&hit_points, ptr->x2, ptr->y2);
+        }
+
+        ptr = ptr->next;
+    }
+
+    return hit_points;
+}
+
+// calculates shape of light polygon (width of light cone is calculated on a fly)
+vertex_t* LIG_get_light_polygon(
+    int        x,
+    int        y,
+    float      width,
+    float      angle,
+    segment_t* obstacles
+) {
+    vertex_t* light_polygon     = NULL;
+    vertex_t* aux_vertices      = NULL;
+    vertex_t* starting_point    = NULL;
+
+    point_t* hit_points         = NULL;
+    point_t* aux_hit_points     = NULL;
+    point_t* ptr                = NULL;
+
+    segment_t* inter            = NULL;
+
+    // calculating points to which light rays is casted
+    hit_points = LIG_generate_hit_points(x, y, width, angle, obstacles);
+
+    // calculating light polygon shape
+    light_polygon = LIG_get_base_light_polygon(x, y, obstacles, hit_points);
+
+    // calculating aux hitpoints of light polygon
+    aux_hit_points = LIG_add_border_light_vertices(x, y, obstacles, angle, width);
+
+    for (ptr=aux_hit_points; ptr; ptr=ptr->next) {
+        inter = NULL;
+        inter = LIG_ray_intersects_multiple(x, y, ptr->x, ptr->y, obstacles);
+        aux_vertices = LIG_find_closest_hit(inter, x, y, ptr->x, ptr->y);
+        VRTX_merge(&light_polygon, aux_vertices);
+    }
+
+    starting_point = LIG_initial_point_of_light(x, y, width);
+    VRTX_merge(&light_polygon, starting_point);
+
+    PT_free(hit_points);
+    PT_free(aux_hit_points);
+
+    SEG_free(inter);
+
+    return light_polygon;
+}
+
 
 // Calculates and draws light polygons. Every of the light source needs several polygons to be drawn
 // - every one of them is slightly moved to another which makes light looks more "natural".
@@ -615,11 +937,12 @@ void LIG_fill_lightbuffer(
     int   blue;                    // color of current light polygon drawn
     int   light_power;             // power of light (brightness)
     int   penetrating_power;       // ability to penetrate walls by light
-    int   x_corr, y_corr;          // x and y correction values (light polygon can be shifted from its starting point)
+    int   x_corr;                  // x and y correction values 
+    int   y_corr;                  // x and y correction values
     float width_corr;              // light width correction (some light polygons can be wider)
     float wobble_corr = 0.0;       // angle correction due to wobling
 
-    // before adding any new light to scene, cleansing of lighbuffers is needed
+    // before adding any new light to scene, cleaning of lighbuffers is needed
     GFX_clean_buffers();
 
     vertex_t* light_polygon     = NULL;
@@ -638,21 +961,15 @@ void LIG_fill_lightbuffer(
         y_corr            = LIG_get_light_polygon_y_corr(light, i);
         width_corr        = LIG_get_light_polygon_width_corr(light, i);
 
-        // calculating the light polygon shape
-        light_polygon = LIG_calc_light_polygon(
+        light_polygon = LIG_get_light_polygon(
             x+x_corr,
             y+y_corr,
-            light->angle+wobble_corr,
             light->src->width+width_corr,
+            light->angle+wobble_corr,
             obstacles
         );
-
-        light_wall_shadow = LIG_calc_light_wall_shadow(
-            light_polygon,
-            penetrating_power,
-            x,
-            y
-        );
+        
+        light_wall_shadow = LIG_calc_light_wall_shadow(light_polygon, penetrating_power, x, y);
         
         // fill lightbuffer with freshly calulcated light polygon
         GFX_fill_buffer_single_polygon(light_polygon, GFX_fill_lightbuffer, red, green, blue, light_power);
@@ -664,6 +981,8 @@ void LIG_fill_lightbuffer(
         VRTX_free(light_polygon);
     }
 
+    // LIG_debug_obstacle(obstacles);
+    SEG_free(obstacles);
 };
 
 void LIG_read_all_files() {

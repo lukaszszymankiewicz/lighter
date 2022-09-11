@@ -13,24 +13,24 @@ enum debug_state { NO_DEBUG, DEBUG_OBSTACLE_LINES, DEBUG_LIGHT_RAYS, MAX_DEBUG }
 // version
 #define MAJOR = 0
 #define MINOR = 1
-#define PATCH = 1
+#define PATCH = 3
 
 // macros
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
+#define SIGN(a) ((a) > 0 ? (1) : (-1))
 #define TRIM(low, high, number) MIN(high, MAX(low, number))
 
 // constans
-#define SLIGHLY_LOOSEN_ACCURACY   0.1               // epsilon for geometry calculation (not strict)
-#define STRICT_ACCURACY          -0.1               // epsilon for geometry calculation (strict)
 #define DEFAULT_SCREEN_WIDTH     1366               // default screen resolution
 #define DEFAULT_SCREEN_HEIGHT    768                // default screen resolution
 #define SCREEN_FPS               20                 // Frame per second
 #define SCREEN_TICKS_PER_FRAME   1000 / SCREEN_FPS  // ticks per frame in ms
 #define PI                       3.1415             // best approximation of pi known to mankind
-#define LEFT_RAD                 PI/2               // angle on which hero looks left
-#define RIGHT_RAD                (3 * PI) / 2       // angle on which hero looks right
+#define LEFT_RAD                 1.193547           // angle on which hero looks left
+#define RIGHT_RAD                PI/2 *3            // angle on which hero looks right
 #define DEG30                    0.523583333        // shortcut
+#define DEG90                    PI/2               // shortcut
 #define DEG45                    PI/4               // shortcut
 #define DEG15                    PI/12              // shortcut
 #define DEG10                    PI/18              // shortcut

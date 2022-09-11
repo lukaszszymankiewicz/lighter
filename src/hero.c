@@ -198,7 +198,10 @@ void HERO_update_sprite(
     }
 }
 
-void HERO_check_collision(hero_t *hero, segment_t *obstacles) {
+void HERO_check_collision(
+    hero_t *hero,
+    segment_t *obstacles
+) {
     int  n_boxes     = hero->sprites->animations[hero->state]->frames[hero->frame].n_hit_box;
     int  x_coef      = 0;
     int  y_coef      = 0;
@@ -257,7 +260,10 @@ void HERO_check_collision(hero_t *hero, segment_t *obstacles) {
                rect.y + hero->view_y + rect.h + 1
             );
 
-            if (x_collision != -1) { SRTLST_insert(&x_intersections, x_collision); }
+
+            if (x_collision != -1) {
+                SRTLST_insert(&x_intersections, x_collision); 
+            }
             if (y_collision != -1) { SRTLST_insert(&y_intersections, y_collision); }
             if (y_falling   != -1) { SRTLST_insert(&falling, y_falling  );         }
         }
@@ -271,7 +277,8 @@ void HERO_check_collision(hero_t *hero, segment_t *obstacles) {
             hero->x -= hero->view_x - new_x;
         }
         else {
-            SDL_Rect *frame = HERO_current_frame(hero);
+            SDL_Rect *frame = NULL;
+            frame = HERO_current_frame(hero);
             new_x = x_intersections->value - frame->w;
             hero->x -= hero->view_x - new_x;
         }

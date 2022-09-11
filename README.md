@@ -7,7 +7,7 @@
                                         
 
 ```
-Lighter version 0.1.2
+Lighter version 0.1.3
 Game written in C using SDL2 library.
 It will contain awsome light effects and post-apocaliptic vibe.
 
@@ -25,7 +25,7 @@ D - move right
 
 W - swipe light upwards
 
-S - swip light downwards
+S - swipe light downwards
 
 Space - Jump
 
@@ -58,7 +58,3 @@ sudo apt install libc6-dev libasound-dev libpthread-stubs0-dev libpulse-dev xorg
 ```
 make lighter
 ```
-
-Windows: 
-
-WIP

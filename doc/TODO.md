@@ -8,6 +8,8 @@ codename: make light pretty
 MILESTONE 2
 codename: make dev easy - create tools for level editing
 developing tools will be stored in such [repo](https://github.com/lukaszszymankiewicz/ltools)
+ - [x] basic level editor
+ - [x] level format coherent between editor && game
 
  MILESTONE 3
  codename: make gameplay cool

@@ -118,6 +118,7 @@ int IMP_fill_level(mapfile_t *map, level_t *level) {
                 LVL_fill_structure(level, x_tile, y_tile, cur_tile_idx);
             } else if (layer_read == 1) {
                 // TODO: this is temporary - it will be valid only for one type of obstacle
+                // this 1 is means obstacle type
                 LVL_fill_obstacle(level, x_tile, y_tile, 1);
             } else {
                 level->hero_x = x_tile; 

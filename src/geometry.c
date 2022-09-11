@@ -1,8 +1,13 @@
 #include "global.h"
+#include <math.h>
 
 
-// aux for GEO_pt_in_triangle function.
-float GEO_sign (
+// calculates angle between two points
+float GEO_angle_2pt(int ax, int ay, int bx, int by) {
+    return atan2(ax - bx, ay - by);
+}
+
+int GEO_sign (
     int x1, int y1,
     int x2, int y2,
     int x3, int y3
@@ -38,18 +43,33 @@ float GEO_intersection_with_y
     int x1,      int y1,     // segment begginig
     int x2,      int y2      // segment end
 ) {
-    return (float)x1 + ((float)((x2 - x1) * (y - y1)) / (y2 - y1));
+    float meter = (x2 - x1) * (y - y1);
+    float denominator = y2 - y1;
+
+    if (denominator == 0) {
+        return (float)x1;
+    }
+
+    return (float)x1 + (meter / denominator);
 }
 
 // Checks where x-line intersect with given segment. As y coord of such point is known from the
 // begginig - function only return x-coord of such intersection point.
 float GEO_intersection_with_x
 (
-    int x,                   // y-line coord
+    int x,                   // x-line coord
     int x1,      int y1,     // segment begginig
     int x2,      int y2      // segment end
 ) {
-    return (float)y1 + ((float)(y2 - y1) * (x - x1)) / (x2 - x1);
+
+    float meter = (float)((y2 - y1) * (x - x1));
+    float denominator = x2 - x1;
+
+    if (denominator == 0) {
+        return (float)x1;
+    }
+
+    return (float)y1 + (meter / denominator);
 }
 
 // Checks where y-line intersect with given segment. As y coord of such point is known from the
@@ -76,17 +96,12 @@ float GEO_calc_slope(
     return (float)(x2 - x1) / (float)(y2 - y1);
 }
 
-// Checks if y-line intersects with given segment. Please note that to do that only y-coord of
-// segment is needed to be known. Function will work no matter what is the order of the segment
-// points. Note that there is not strict condition from one side of segment end:
-// (y1 < scan_y rather than y1 <= scan_y)
 bool GEO_value_between_range (
     int value,
     int first,
-    int second,
-    float acc
+    int second
 ) {
-    return ((first-acc <= value && second+acc >= value) || (second-acc <= value && first+acc >= value));
+    return ((first <= value && second >= value) || (second <= value && first >= value));
 }
 
 // returns -1 if there is not collision or x-value of the collision 
@@ -101,10 +116,10 @@ int GEO_vertical_segment_intersects_rect (
     int r_y2    // rect
 ) {
     if (
-        GEO_value_between_range(x1, r_x1, r_x2, STRICT_ACCURACY) && 
+        GEO_value_between_range(x1, r_x1, r_x2) && 
         (
-            GEO_value_between_range(r_y1, y1, y2, STRICT_ACCURACY) ||
-            GEO_value_between_range(r_y2, y1, y2, STRICT_ACCURACY))
+            GEO_value_between_range(r_y1, y1, y2) ||
+            GEO_value_between_range(r_y2, y1, y2))
         ) {
         return x1;
     }
@@ -125,13 +140,58 @@ int GEO_horizontal_segment_intersects_rect (
 ) {
 
     if (
-        GEO_value_between_range(y1, r_y1, r_y2, STRICT_ACCURACY) && 
+        GEO_value_between_range(y1, r_y1, r_y2) && 
         (
-            GEO_value_between_range(r_x1, x1, x2, STRICT_ACCURACY) ||
-            GEO_value_between_range(r_x2, x1, x2, STRICT_ACCURACY))
+            GEO_value_between_range(r_x1, x1, x2) ||
+            GEO_value_between_range(r_x2, x1, x2))
         ) {
         return y1;
         }
 
     return -1;
+}
+
+// checks if segment has its end on different side than its begginig (border is defined by segment)
+// if lines are collinear function always returns false (such case should be handled elsewhere)
+bool GEO_pt_same_side (
+    int r_x1, int r_y1,    // beg pt
+    int r_x2, int r_y2,    // end pt
+    int o_x1, int o_y1,    // segment plane
+    int o_x2, int o_y2     // segment plane
+) {
+    int first, second;
+
+    first = GEO_sign(o_x1, o_y1, r_x1, r_y1, r_x2, r_y2);
+    second = GEO_sign(o_x2, o_y2, r_x1, r_y1, r_x2, r_y2);
+
+    // normal case
+    if (first && second) {
+        return (first ^ second) >= 0;
+    }
+
+    // corner case - ray hits end of obstacle and collinear
+    return false;
+}
+
+float GEO_line_segment_len( 
+    int x1, int y1,
+    int x2, int y2
+) {
+    int dx = x2-x1;
+    int dy = y2-y1;
+
+    return sqrt(dy*dy + dx*dx);
+}
+
+// we dont need collinear coord in this function. Client is responsbile for checking and inputting
+// proper coords to this function
+bool GEO_collienar_segs_have_common_pt(
+    int a1, int a2, // first segment value
+    int b1, int b2 // second segment value
+) {
+    
+    bool first = ((GEO_value_between_range(a1, b1, b2)) || (GEO_value_between_range(a2, b1, b2)));
+    bool second = ((GEO_value_between_range(b1, a1, a2)) || (GEO_value_between_range(b1, a1, a2)));
+
+    return first || second;
 }

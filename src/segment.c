@@ -16,8 +16,20 @@ segment_t* SEG_init(
 
     new_segment->slope = GEO_calc_slope(x1, y1, x2, y2);
     new_segment->next  = NULL;
+    new_segment->type = SEG_determine_type(new_segment);
 
     return new_segment;
+}
+
+int SEG_determine_type(segment_t * seg) {
+    if (seg->x1 == seg->x2) {
+        return VER;
+    }
+
+    else if (seg->y1 == seg->y2) {
+        return HOR;
+    }
+    return UNKNOWN;
 }
 
 // this push new obstacle to begginig of polygon
@@ -47,7 +59,6 @@ void SEG_push(
         ptr->next = new_segment;
     }
 }
-
 
 segment_t* SEG_get(
     segment_t *segments, int index
@@ -117,7 +128,7 @@ void SEG_merge(
     segment_t  *candidates
 ) {
     segment_t *ptr = NULL;
-    ptr             = candidates;
+    ptr            = candidates;
 
     while(ptr) {
         SEG_push(head, ptr->x1, ptr->y1, ptr->x2, ptr->y2);
@@ -172,6 +183,108 @@ segment_t* SEG_get_segments_of_polygon(
     SEG_push(&segments, ptr->x, ptr->y, first_x, first_y);
 
     return segments;
+}
+
+int SEG_common_x(
+    segment_t *first,
+    segment_t *second
+) {
+    if (first->x1 == second->x1) {
+        return first->x1;
+    } else if (first->x2 == second->x2) {
+        return first->x2;
+    } else if (first->x1 == second->x2) {
+        return first->x1;
+    } else if (first->x2 == second->x1) {
+        return first->x2;
+    } else {
+        return -1;
+    }
+}
+
+int SEG_common_y(
+    segment_t *first,
+    segment_t *second
+) {
+    if (first->y1 == second->y1) {
+        return first->y1;
+    } else if (first->y2 == second->y2) {
+        return first->y2;
+    } else if (first->y1 == second->y2) {
+        return first->y1;
+    } else if (first->y2 == second->y1) {
+        return first->y2;
+    } else {
+        return -1;
+    }
+}
+
+// checks if all segments in seg contains given point
+bool SEG_contains(
+    segment_t *seg,
+    int x,
+    int y
+) {
+    segment_t* ptr = NULL;
+    ptr = seg;
+
+    if (!ptr) {
+        return false;
+    }
+
+    for(; ptr; ptr=ptr->next) {
+        if ((ptr->x1 != x || ptr->y1 != y) && (ptr->x2 != x || ptr->y2 != y)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+int SEG_dist_to_pt(
+    segment_t* seg,
+    int x,
+    int y
+) {
+    if (seg->type == VER) {
+        return abs(x - seg->x1);
+    } else {
+        return abs(y - seg->y1);
+    }
+}
+
+// gets segment closest to given point
+segment_t* SEG_closest_to_pt(
+    segment_t *seg,
+    int type,
+    int x,
+    int y
+) {
+    int best = 9999;
+    int approx_dist;
+
+    segment_t* best_seg = NULL;
+    segment_t* ptr = NULL;
+
+    ptr = seg;
+
+    if (!ptr) {
+        return NULL;
+    }
+
+    for(; ptr; ptr=ptr->next) {
+        if (ptr->type == type) {
+            approx_dist = SEG_dist_to_pt(ptr, x, y);
+        } 
+
+        if (approx_dist < best) {
+            best = approx_dist;
+            best_seg = ptr;
+        }
+    }
+
+    return best_seg;
 }
 
 void SEG_free(

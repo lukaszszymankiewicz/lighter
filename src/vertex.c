@@ -5,15 +5,6 @@
 #include "primitives.h"
 #include "vertex.h"
 
-// epsilon value for calculating two segments intersection. The higher the value more edge cases are
-// captured
-#define EPSILON 0.1
-
-// calculates angle between two points
-float VRTX_calculate_angle(int ax, int ay, int bx, int by) {
-    return atan2(ax - bx, ay - by);
-}
-
 vertex_t* VRTX_new(
     int x,
     int y,
@@ -86,46 +77,6 @@ bool VRTX_pt_in_segment(
     else {
         return false;
     }
-}
-
-// Some point can be considered redundant. Light polygon is created mostly from lines that already
-// are in the level (walls edges for example). Having three points laying in one segment makes the
-// middle point really just a waste resources, as intersection needs to be calculated two times.
-void VRTX_optim(
-    vertex_t *poly
-) {
-    vertex_t *ptr   = NULL;
-    vertex_t *first = NULL;
-
-    first = poly;  // just for the checking optimimalisation between last and the first vertex
-    ptr   = poly;
-
-    // cut all redundant in between
-    while (ptr->next != NULL && ptr->next->next != NULL) { 
-        vertex_t *between = ptr->next;
-        vertex_t *prev    = ptr;
-        vertex_t *next    = ptr->next->next;
-
-        if(VRTX_pt_in_segment(between->x, between->y, prev->x, prev->y, next->x, next->y)) {
-            ptr->next = between->next;
-            free(between);
-        }
-        else {
-            ptr=ptr->next; 
-        }
-    }
-
-    // last point to first point
-    vertex_t *between = ptr->next;
-    vertex_t *prev    = ptr;
-    vertex_t *next    = first;
-
-    if(VRTX_pt_in_segment(between->x, between->y, prev->x, prev->y, next->x, next->y)) {
-        ptr->next = NULL;
-    }
-    
-    // new poly is set to optimized set of points
-    poly = ptr;
 }
 
 // find highest value of y from list of vertices
@@ -217,3 +168,39 @@ void VRTX_free(
     free(temp);
 }
 
+void VRTX_merge(
+    vertex_t **head,
+    vertex_t  *candidates
+) {
+    vertex_t *ptr  = NULL;
+    ptr            = candidates;
+
+    while(ptr) {
+        VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
+        ptr=ptr->next;
+    }
+
+    if (candidates) {
+        VRTX_free(candidates);
+    }
+}
+
+bool VRTX_eq(
+    vertex_t *first,
+    vertex_t *second
+) {
+    if (VRTX_len(first) != VRTX_len(second)) {
+        return false;
+    }
+    vertex_t *ptr  = NULL;
+    vertex_t *ptr2  = NULL;
+
+    while(ptr) {
+        if ((ptr->y != ptr2->y) && (ptr->y != ptr2->y)) {
+            return false;
+        }
+        ptr = ptr->next;
+        ptr2 = ptr2->next;
+    }
+    return true;
+}

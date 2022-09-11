@@ -25,10 +25,9 @@ void GAME_close(
    HERO_free(game->hero);
    LIG_free_all_files();
    free(game);
-   GFX_free();
    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
+   GFX_free();
    SDL_Quit();
-
 };
 
 game_t* GAME_init() {

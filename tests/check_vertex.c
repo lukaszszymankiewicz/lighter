@@ -2,6 +2,37 @@
 #include <stdbool.h>
 #include "../src/vertex.h"
 
+START_TEST (VRTX_eq_check) {
+    vertex_t* first = NULL;
+    vertex_t* second = NULL;
+    bool res;
+
+    // CASE 1
+    res = VRTX_eq(first, second);
+    ck_assert_int_eq(res, 1);
+
+    // CASE 2
+    VRTX_add_point(&first, 1, 1, 0.0);
+    res = VRTX_eq(first, second);
+    ck_assert_int_eq(res, 0);
+
+    // CASE 3
+    VRTX_add_point(&second, 1, 1, 0.0);
+    res = VRTX_eq(first, second);
+    ck_assert_int_eq(res, 1);
+
+    // CASE 4
+    VRTX_add_point(&first, 2, 2, 0.0);
+    res = VRTX_eq(first, second);
+    ck_assert_int_eq(res, 0);
+
+    // CASE 5
+    VRTX_add_point(&second, 2, 2, 0.0);
+    res = VRTX_eq(first, second);
+    ck_assert_int_eq(res, 1);
+}
+END_TEST
+
 START_TEST (VRTX_add_point_check) {
     // GIVEN
     vertex_t* head = NULL;
@@ -23,8 +54,6 @@ START_TEST (VRTX_add_point_check) {
     ck_assert_int_eq(VRTX_len(head), 1);
 }
 END_TEST
-
-
 
 START_TEST (VRTX_pt_in_segment_check) {
     bool result;
@@ -52,44 +81,6 @@ START_TEST (VRTX_pt_in_segment_check) {
 END_TEST
 
  
-START_TEST (VRTX_optim_check) {
-    vertex_t* head = NULL;
-    int st_x = 15;
-    int st_y = 15;
-    float angle;
-    int len;
-    int expected_len;
-
-    // base points
-    angle = VRTX_calculate_angle(st_x, st_y, 10, 10);
-    VRTX_add_point(&head, 10, 10, angle);
-
-    angle = VRTX_calculate_angle(st_x, st_y, 20, 10);
-    VRTX_add_point(&head, 20, 10, angle);
-
-    angle = VRTX_calculate_angle(st_x, st_y, 20, 20);
-    VRTX_add_point(&head, 20, 20, angle);
-
-    angle = VRTX_calculate_angle(st_x, st_y, 10, 20);
-    VRTX_add_point(&head, 10, 20, angle);
-    expected_len = VRTX_len(head);    
-
-    //redundant points
-    angle = VRTX_calculate_angle(st_x, st_y, 13, 10);
-    VRTX_add_point(&head, 13, 10, angle);
-
-    angle = VRTX_calculate_angle(st_x, st_y, 17, 10);
-    VRTX_add_point(&head, 17, 10, angle);
-
-    angle = VRTX_calculate_angle(st_x, st_y, 10, 15);
-    VRTX_add_point(&head, 10, 15, angle);
-
-    // THEN
-    VRTX_optim(head);
-    len = VRTX_len(head);
-    ck_assert_int_eq(len, expected_len);
-}
-END_TEST
 
 Suite *vertex_suite(void) {
     Suite *s;
@@ -102,7 +93,7 @@ Suite *vertex_suite(void) {
 
     tcase_add_test(tc_core, VRTX_add_point_check);
     tcase_add_test(tc_core, VRTX_pt_in_segment_check);
-    tcase_add_test(tc_core, VRTX_optim_check);
+    tcase_add_test(tc_core, VRTX_eq_check);
 
     suite_add_tcase(s, tc_core);
 
