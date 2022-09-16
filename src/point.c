@@ -94,12 +94,12 @@ int PT_len(
 void PT_free(
     point_t* head
 ) {
-    point_t* currentRef = head;
+    point_t* ptr = head;
 
-    while (currentRef != NULL) {
-        point_t *temp = currentRef->next;
-        free(currentRef);
-        currentRef = temp;
+    while (ptr) {
+        point_t *temp = ptr->next;
+        free(ptr);
+        ptr = temp;
     }
 }
 
