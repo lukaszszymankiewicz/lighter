@@ -5,9 +5,8 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#define R                               1200
-#define smol_angle                      0.01
-#define LIGHTPOLY_DATA                  8 
+#define R                               2000
+#define RAY_THRESHOLD                   2
 #define ALL_AVAILABLE_LIGHTSOURCES      2
 #define ALL_AVAILABLE_GRADIENT_TEXTURES 1
 #define ALL_AVAILABLE_WOBBLES_PATTERNS  3

@@ -9,7 +9,6 @@
 #include "primitives.h"
 #include "point.h"
 
-#define RAY_THRESHOLD 2
 
 // COLLECTIONS
 lightsource_t* lightsources[ALL_AVAILABLE_LIGHTSOURCES];
@@ -711,23 +710,16 @@ point_t* LIG_add_border_light_vertices(
         return NULL;
     }
 
-    int r = 10;
-
-    point_t  *aux_pt_a            = NULL;  
-    point_t  *aux_pt_b            = NULL;  
     point_t  *hit_points          = NULL;  
 
     // edges of light light cone needs to checked for collision
-    int x_a = (int)(x - sin(angle - width) * r);
-    int y_a = (int)(y - cos(angle - width) * r);
-    int x_b = (int)(x - sin(angle + width) * r);
-    int y_b = (int)(y - cos(angle + width) * r);
+    int x_a = (int)(x - sin(angle - width) * R);
+    int y_a = (int)(y - cos(angle - width) * R);
+    int x_b = (int)(x - sin(angle + width) * R);
+    int y_b = (int)(y - cos(angle + width) * R);
     
-    aux_pt_a = LIG_generate_slipover_hit_point(x, y, x_a, y_a);
-    aux_pt_b = LIG_generate_slipover_hit_point(x, y, x_b, y_b);
-
-    PT_merge(&hit_points, aux_pt_a);
-    PT_merge(&hit_points, aux_pt_b);
+    PT_push(&hit_points, x_a, y_a);
+    PT_push(&hit_points, x_b, y_b);
 
     return hit_points;
 }
@@ -843,13 +835,11 @@ point_t* LIG_generate_hit_points(
         return hit_points;
     }
 
-    int r = 2000;
-
     // edges of light light cone needs to checked for collision
-    int x_a = (int)(x - sin(angle - width) * r);
-    int y_a = (int)(y - cos(angle - width) * r);
-    int x_b = (int)(x - sin(angle + width) * r);
-    int y_b = (int)(y - cos(angle + width) * r);
+    int x_a = (int)(x - sin(angle - width) * R);
+    int y_a = (int)(y - cos(angle - width) * R);
+    int x_b = (int)(x - sin(angle + width) * R);
+    int y_b = (int)(y - cos(angle + width) * R);
     
     bool res;
 
