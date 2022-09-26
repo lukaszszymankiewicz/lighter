@@ -1,0 +1,72 @@
+n_animations = 4
+
+anim_length = 2
+
+anim_coords
+hit_box_coords
+
+delay
+n_hitbox_per_frame
+
+TXTR_push_animation(
+    hero->sprites,
+    STANDING,
+    (int[][4]) {
+        {0, 0, 9, 20},
+        {9, 0, 9, 20},
+    },
+    (int[][4]) {
+        {0, 0, 9, 20},
+        {0, 0, 9, 20},
+    },
+    20,
+    2,
+    (int[]) { 1, 1 }
+);
+
+// WALKING
+TXTR_push_animation(
+    hero->sprites,
+    WALKING,
+    (int[][4]) {
+        {0, 20, 9, 20},
+        {9, 20, 9, 20},
+    },
+    (int[][4]) {
+        {0, 0, 9, 20},
+        {0, 0, 9, 20},
+    },
+    5,
+    2,
+    (int[]) { 1, 1 }
+);
+
+// JUMPING
+TXTR_push_animation(
+    hero->sprites,
+    JUMPING,
+    (int[][4]) {
+        {18, 0, 9, 20},
+    },
+    (int[][4]) {
+        {0, 0, 9, 20},
+    },
+    0,
+    1,
+    (int[]) { 1 }
+);
+
+// FALLING DOWN
+TXTR_push_animation(
+    hero->sprites,
+    FALLING_DOWN,
+    (int[][4]) {
+        {18, 20, 9, 20},
+    },
+    (int[][4]) {
+        {0, 0, 9, 20},
+    },
+    0,
+    1,
+    (int[]) { 1 }
+);

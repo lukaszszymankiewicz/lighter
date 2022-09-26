@@ -1,4 +1,5 @@
 #include "global.h"
+#include "files.h"
 #include "game.h"
 #include "segment.h"
 #include "geometry.h"
@@ -225,15 +226,14 @@ void LIG_init_all_light_wobbles_patterns() {
 
 texture_t* LIG_init_circular_gradient() {
     texture_t* circular_gradient = NULL;
-    circular_gradient = GFX_read_texture("gradients/circular.png");
+    circular_gradient            = GFX_read_texture(CIRCULAR_GRADIENT_FILE);
 
     return circular_gradient;
 }
 
 void LIG_init_all_gradients() {
-    texture_t* circular_gradient = NULL;
-    circular_gradient = LIG_init_circular_gradient();
-
+    texture_t* circular_gradient         = NULL;
+    circular_gradient                    = LIG_init_circular_gradient();
     gradient_textures[GRADIENT_CIRCULAR] = circular_gradient;
 }
 

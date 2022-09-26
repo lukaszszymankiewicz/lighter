@@ -1,6 +1,7 @@
 #include "global.h"
 #include "geometry.h"
 #include "game.h"
+#include "files.h"
 #include "hero.h"
 #include "gfx.h"
 #include "primitives.h"
@@ -18,26 +19,19 @@ int state_collisions[3][3] = {
     {0,            0,         0    },
 };
 
+
 hero_t* HERO_init(
-    char* animation_sheet,
-    int starting_pos_x,   // postion on map (tile not pixel)
-    int starting_pos_y    // postion on map (tile not pixel)
+    int x, int y
 ) {
     hero_t* hero    = (hero_t*)malloc(sizeof(hero_t));
-    hero->x         = starting_pos_x * TILE_WIDTH;        
-    hero->y         = starting_pos_y * TILE_HEIGHT;
+    hero->x         = x * TILE_WIDTH;        
+    hero->y         = y * TILE_HEIGHT;
     hero->view_x    = SCREEN_WIDTH / 2;      // postion on viewport (middle of screen)
     hero->view_y    = 144;                   // postion on viewport (middle of screen)
     hero->state     = STANDING;
     hero->direction = LEFT;
 
-    // TODO: some more sofisticaed method should be perfomed here
-    if (animation_sheet == NULL) {
-        hero->sprites = TXTR_init_animation_sheet("sprites/her2.png", MAX_STATE);
-    }
-    else {
-        hero->sprites = TXTR_init_animation_sheet(animation_sheet, MAX_STATE);
-    }
+    hero->sprites = TXTR_init_animation_sheet(HERO_ANIMATION_SHEET_FILE, MAX_STATE);
 
     hero->frame   = 0;
     hero->frame_t = 0;

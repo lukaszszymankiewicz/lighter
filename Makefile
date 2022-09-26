@@ -5,6 +5,7 @@ LIBS = -lm
 OBJ = lighter
 TARGET =                \
 	src/game.c          \
+	src/files.c         \
 	src/gfx.c           \
 	src/import.c        \
 	src/sprites.c       \

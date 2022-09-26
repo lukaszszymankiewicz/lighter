@@ -58,7 +58,7 @@ void IMP_free_mapfile(
     }
 }
 
-int castValToDec(unsigned char vals[VAL_SIZE]) {
+int LIG_cast_val_to_dec(unsigned char vals[VAL_SIZE]) {
     return vals[0]<<8 | vals[1];
 }
 
@@ -77,7 +77,7 @@ int IMP_fill_level(mapfile_t *map, level_t *level) {
     map->state++;
 
     while((fread(bin_val, VAL_SIZE, 1, map->file) == NO_READ_ERROR)) {
-      int decValue = castValToDec(bin_val);
+      int decValue = LIG_cast_val_to_dec(bin_val);
 
       switch (map->state) {
         case X_SIZE_READ:

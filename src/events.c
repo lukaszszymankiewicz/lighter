@@ -29,7 +29,7 @@ void EVNT_init() {
 // handles input from player and manipulating game window (resize, exit etc)
 void EVNT_handle_SDL_events(
     game_t *game
-){
+) {
 
   while (SDL_PollEvent(&(game->event)) != 0) {
     if (game->event.type == SDL_QUIT){ 
