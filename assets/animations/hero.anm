@@ -1,12 +1,12 @@
-n_animations = 4
+n_animations = 4 (one int)
 
-anim_length = 2
-
-anim_coords
-hit_box_coords
+for each:
+    anim_length = 2 (one integer)
+    anim_coords = anim_length*4 integers
+    n_hitbox_per_frame  = anim_length ints
+    hit_box_coords = anim_length*n_hitbox_per_frame*4 integers
 
 delay
-n_hitbox_per_frame
 
 TXTR_push_animation(
     hero->sprites,
