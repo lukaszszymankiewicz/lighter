@@ -1,9 +1,8 @@
 CC = gcc
-CFLAGS := --std=c99 -Wall
-LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
-LIBS = -lm
-OBJ = lighter
-TARGET =                \
+LINKER_FLAGS = `pkg-config --cflags --libs sdl2 SDL2_image` 
+COMPILER_FLAGS = -w -lm
+TARGET = lighter
+SOURCES =               \
 	src/game.c          \
 	src/gfx.c           \
 	src/import.c        \
@@ -20,11 +19,18 @@ TARGET =                \
 	src/segment.c       \
 	src/point.c         \
 
-all:
-	$(TARGET)
+.PHONY: run
+run: 
+	./$(TARGET)
 
-lighter: 
-	$(CC) $(CFLAGS) $(TARGET) -o $(OBJ) $(LINKS) $(LIBS)
+.PHONY: lighter
+$(TARGET) : $(SOURCES)
+	$(CC) $(SOURCES) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(TARGET)
 
+.PHONY: clean
 clean:
-	$(RM) $(OBJ)
+	$(RM) $(TARGET)
+
+.PHONY: all
+all:
+	make clean lighter run

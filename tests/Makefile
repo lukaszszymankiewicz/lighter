@@ -1,7 +1,6 @@
 CC = gcc
-CsegmentFLAGS := -Wall -g
-
-TARGET =                     \
+COMPILER_FLAGS = -Wall -lm -g
+SOURCES =                    \
 	fake.c   				 \
     check_tests.c            \
     check_events.c           \
@@ -31,17 +30,22 @@ TARGET =                     \
 	../src/tile.c            \
 	../src/vertex.c          \
 
-OBJ = check_tests_suite
-LINKS = -lcheck -pthread -lcheck_pic -pthread -lrt -lm -lsubunit `pkg-config --cflags --libs sdl2 SDL2_image` 
+TARGET = check_tests_suite
+LINKER_FLAGS = -lcheck -pthread -lcheck_pic -pthread -lrt -lm -lsubunit `pkg-config --cflags --libs sdl2 SDL2_image` 
 
-all:
-	$(TARGET)
-
+.PHONY: run
 run: 
-	./$(OBJ)
+	./$(TARGET)
 
-tests: 
-	$(CC) $(TARGET) $(CFLAGS) -o $(OBJ) $(LINKS)
 
+.PHONY: tests
+tests: $(SOURCES) 
+	$(CC) $(SOURCES) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(TARGET)
+
+.PHONY: clean
 clean:
-	$(RM) $(OBJ)
+	$(RM) $(TARGET)
+
+.PHONY: all
+all:
+	make clean tests run
