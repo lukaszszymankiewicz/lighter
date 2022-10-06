@@ -23,8 +23,8 @@ START_TEST (LVL_analyze_check)
     level_t* test_level = NULL;
     test_level = LVL_new();
 
-    test_level->size_y = 10;
-    test_level->size_x = 10;
+    test_level->size_y = size_y;
+    test_level->size_x = size_x;
 
     // CASE A (single long platform)
     // 4 screen borders + 4 obstacle border
@@ -118,12 +118,11 @@ START_TEST (LVL_fill_tiles_check)
     // GIVEN
     texture_t* tex = NULL;
     level_t *level = NULL;
-    char *tex_filepath = "./testfiles/testlevel/level.png";
+    char *tex_filepath = "./tests/testfiles/testlevel/level.png";
 
     level = LVL_new();
     tex = GFX_read_texture(tex_filepath);
     int cols = (int)tex->width/TILE_WIDTH;
-    int rows = (int)tex->height/TILE_HEIGHT;
 
     LVL_set_tileset(level, tex);
 
@@ -150,7 +149,7 @@ START_TEST (LVL_fill_structure_check)
     // GIVEN
     texture_t* tex = NULL;
     level_t *level = NULL;
-    char *tex_filepath = "./testfiles/testlevel/level.png";
+    char *tex_filepath = "./tests/testfiles/testlevel/level.png";
 
     level = LVL_new();
     tex = GFX_read_texture(tex_filepath);

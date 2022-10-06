@@ -4,9 +4,9 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
-#define MAX_HITBOXES_PER_FRAME   4
-#define MAX_FRAMES_PER_ANIMATION 4
-#define MAX_ANIMATION            10
+#define MAX_HITBOXES_PER_FRAME     4
+#define MAX_FRAMES_PER_ANIMATION   4
+#define MAX_ANIMATION              10
 
 enum { FRAME_X, FRAME_Y, FRAME_WID, FRAME_HS };
 

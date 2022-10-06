@@ -176,7 +176,7 @@ Suite* hero_suite(void)
     tcase_add_test(tc_core, HERO_light_x_and_y_check);
     tcase_add_test(tc_core, HERO_update_check); 
     tcase_add_test(tc_core, HERO_colision_check_negatvie); 
-    // tcase_add_test(tc_core, HERO_colision_check_positive);
+    tcase_add_test(tc_core, HERO_colision_check_positive);
 
     suite_add_tcase(s, tc_core);
 

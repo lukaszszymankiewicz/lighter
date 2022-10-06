@@ -7,8 +7,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-extern int debug;
-
 // main game struct containing most high-level game data
 typedef struct game {
   bool           loop;                // main game loop

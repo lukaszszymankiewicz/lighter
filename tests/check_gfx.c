@@ -25,7 +25,7 @@ END_TEST
 START_TEST (GFX_calc_intersections_in_scanline_check)
 {
     // GIVEN
-    int result;
+    int result = 0;
     int y = 0;
     int n;
     int len = 0;
@@ -52,6 +52,7 @@ START_TEST (GFX_calc_intersections_in_scanline_check)
 
     // THEN
     ck_assert_int_eq(len, expected_len);
+    ck_assert_int_eq(result, 1);
     
     // CLEANUP
     GFX_free();

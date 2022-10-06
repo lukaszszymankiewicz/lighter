@@ -2,17 +2,20 @@
 #include "gfx.h"
 #include "tile.h"
 #include "level.h"
-#include "import.h"
 #include "primitives.h"
+#include "import.h"
 #include "segment.h"
+#include "sprites.h"
 #include "string.h"
 
-static const int VAL_SIZE = 2;
-static const int NO_READ_ERROR = 1;
-static const char *LEVEL_READ_MODE = "rb";
-static const char *LEVEL_STRUCTURE_PREFIX = "level.llv";
-static const char *LEVEL_TILESET_PREFIX = "level.png";
-static const char *SEPARATOR = "/";
+static const int DOUBLE_BYTE              = 2;
+static const int QUAD_BYTE                = 4;
+static const int NO_READ_ERROR            = 1;
+static const int ANIMATION_PREAMBULE[2]   = { 16718, 18765 };
+static const char *LEVEL_READ_MODE        = "rb";
+static const char *LEVEL_STRUCTURE_SUFFIX = "level.llv";
+static const char *LEVEL_TILESET_SUFFIX   = "level.png";
+static const char *SEPARATOR              = "/";
 
 char* IMP_concatenate_string(
     const char *a, const char *b, const char *d
@@ -28,88 +31,60 @@ char* IMP_concatenate_string(
     return str;
 }
 
-mapfile_t* IMP_new_mapfile(
-    char *filename
-) {
-    mapfile_t *new_mapfile         = NULL;
-    new_mapfile                    = (mapfile_t*)malloc(sizeof(mapfile_t));
-
-    new_mapfile->file              = NULL;
-    new_mapfile->filename          = NULL;
-    new_mapfile->tileset_filename  = NULL;
-    new_mapfile->state             = IDLE;
-
-    new_mapfile->filename = IMP_concatenate_string(filename, SEPARATOR, LEVEL_STRUCTURE_PREFIX);
-    new_mapfile->tileset_filename = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_PREFIX);
-
-    return new_mapfile;
-}
-
-void IMP_free_mapfile(
-    mapfile_t *map
-) {
-    if (map->file != NULL) {
-        fclose(map->file);
-    }
-
-    if (map != NULL) {
-        free(map);
-        map = NULL;
-    }
-}
-
-int LIG_cast_val_to_dec(unsigned char vals[VAL_SIZE]) {
+int LIG_cast_val_to_dec(char vals[DOUBLE_BYTE]) {
     return vals[0]<<8 | vals[1];
 }
 
-int IMP_fill_level(mapfile_t *map, level_t *level) {
-    unsigned char bin_val[2];
+int IMP_fill_level(level_t *level, FILE *file) {
+    const int BUFFER_SIZE = 2;
+    char buffer[BUFFER_SIZE];
 
     int tiles_counter = 0;
     int layer_counter = 0;
-    int layer_read = 0;
-    int cur_tile_idx = 0;
+    int layer_read    = 0;
+    int cur_tile_idx  = 0;
+    int state         = 0;
     int coords_per_single_tile_per_layer;
     int coords_per_single_tile;
     int x_size, y_size;
     int x_tile, y_tile;
 
-    map->state++;
+    state++;
 
-    while((fread(bin_val, VAL_SIZE, 1, map->file) == NO_READ_ERROR)) {
-      int decValue = LIG_cast_val_to_dec(bin_val);
+    while((fread(buffer, DOUBLE_BYTE, 1, file) == NO_READ_ERROR)) {
+      int dec_value = LIG_cast_val_to_dec(buffer);
 
-      switch (map->state) {
+      switch (state) {
         case X_SIZE_READ:
-            x_size = decValue;
-            map->state++;
+            x_size = dec_value;
+            state++;
             break;
 
         case Y_SIZE_READ: // x and y size of level is read - we can assign them to actual level
-            y_size = decValue;
-            map->state++;
+            y_size = dec_value;
+            state++;
             LVL_set_size(level, x_size, y_size);
             break;
 
         case TILES_SUM_READ:
-            coords_per_single_tile_per_layer = decValue;
-            map->state++;
+            coords_per_single_tile_per_layer = dec_value;
+            state++;
             break;
 
         case TILE_SUM_READ:
-            coords_per_single_tile = decValue;
-            map->state++;
+            coords_per_single_tile = dec_value;
+            state++;
             break;
 
         case TILE_X_READ:
-            x_tile = decValue;
+            x_tile = dec_value;
             tiles_counter++;
             layer_counter++;
-            map->state++;
+            state++;
             break;
 
         case TILE_Y_READ:
-            y_tile = decValue;
+            y_tile = dec_value;
             tiles_counter++;
             layer_counter++;
             
@@ -131,80 +106,104 @@ int IMP_fill_level(mapfile_t *map, level_t *level) {
 
                 if (layer_read == 3) {
                     // eveything is read - move on 
-                    map->state=ALL_TILES_READ;
+                    state=ALL_TILES_READ;
                     break;
                 }
 
                 layer_counter = 0;
-                map->state = TILES_SUM_READ;
+                state = TILES_SUM_READ;
                 cur_tile_idx = 0;
                 tiles_counter=0;
                 break;
             } else if (tiles_counter == coords_per_single_tile) {
                 cur_tile_idx++;
-                map->state = TILE_SUM_READ;
+                state = TILE_SUM_READ;
                 tiles_counter = 0;
                 break;
             // current tile is not yet read
             } else {
-                map->state = TILE_X_READ;
+                state = TILE_X_READ;
                 break;
             }
         case ALL_TILES_READ:
             break;
       }
     }
-
     return 1;
 }
 
-int IMP_read_file(mapfile_t *map) {
-    map->file = fopen(map->filename, LEVEL_READ_MODE);
-
-    if (map->file == NULL) {
-        return -1;
-    }
-    return 1;
-}
-
-int IMP_read_tileset(level_t *level, mapfile_t *map) {
-    texture_t *tileset = NULL;
-    tileset = GFX_read_texture(map->tileset_filename);
-
-    if (tileset == NULL) {
-        return -1;
-    } else if ((tileset->width % TILE_WIDTH) || (tileset->height % TILE_HEIGHT)) {
-        return -1;
-    }
-
-    LVL_set_tileset(level, tileset);
-    return 1;
-}
-
-level_t* IMP_read_from_file(
+level_t* IMP_read_level(
     char *filename
 ) {
-    level_t *level;
-    level = NULL;
-    level = LVL_new();
+    level_t *level = NULL;
+    level          = LVL_new();
 
-    mapfile_t* map;
-    map = NULL;
-    map = IMP_new_mapfile(filename);
+    FILE *file         = NULL;
+    char *data_path    = NULL;
+    char *img_path     = NULL;
+    texture_t *tileset = NULL;
 
-    if (IMP_read_file(map) == -1) {
-        return NULL;
-    }
+    data_path = IMP_concatenate_string(filename, SEPARATOR, LEVEL_STRUCTURE_SUFFIX);
+    img_path = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_SUFFIX);
 
-    if (IMP_read_tileset(level, map) == -1) {
-        return NULL;
-    }
+    file = fopen(data_path, LEVEL_READ_MODE);
+    if (file == NULL) { return NULL; }
+
+    tileset = GFX_read_texture(img_path);
+    if (!tileset) { return NULL; }
 
     LVL_fill_tiles(level);
-    IMP_fill_level(map, level);
-
-    IMP_free_mapfile(map);
+    IMP_fill_level(level, file);
 
     return level;
+}
+
+animation_sheet_t* IMP_read_animation(
+    char *img_path,
+    char *data_path
+) {
+    const int BUFFER_SIZE = 2;
+    char buffer[BUFFER_SIZE];
+
+    animation_sheet_t *sheet = NULL;
+    sheet                    = malloc(sizeof(animation_sheet_t));
+    FILE *file               = NULL;
+
+    int state                = READ_PREAMBULE_IDLE;
+    file                     = fopen(data_path, LEVEL_READ_MODE);
+    int val;
+    
+    state++;
+
+    while((fread(buffer, 2, 1, file) == 1)) {
+
+      // printf("%d %d \n", buffer[0], buffer[1]);
+      // val = buffer[0]<<8 | buffer[1];
+      // printf("value = %d \n", val);
+      // printf("%d \n", buffer[0]);
+      // printf("%d %d %d %d \n", buffer[0], buffer[1], buffer[2], buffer[3]);
+
+      switch (state) 
+      {
+         case READ_PREAMBULE_READING_FIRST_HALF:
+             val = LIG_cast_val_to_dec(buffer);
+             if(val != ANIMATION_PREAMBULE[0]) { return NULL; }
+
+             state++;
+             break;
+             
+         case READ_PREAMBULE_READING_SECOND_HALF:
+             val = LIG_cast_val_to_dec(buffer);
+             if(val != ANIMATION_PREAMBULE[1]) { return NULL; }
+
+             state++;
+             break;
+
+         case READ_ANIMATION_READING:
+             break;
+        }
+    }
+
+    return sheet;
 }
 

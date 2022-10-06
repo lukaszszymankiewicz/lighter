@@ -10,8 +10,6 @@
 START_TEST (EVNT_handle_events_check)
 {
     // GIVEN
-    int loop = 1;
-
     hero_t* hero_o = NULL;
     light_t* light_o = LIG_init();
 

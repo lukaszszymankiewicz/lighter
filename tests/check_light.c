@@ -42,8 +42,6 @@ START_TEST (LIG_get_base_light_polygon_check)
     eq = VRTX_eq(light_vertex, full_light_vertex);
     ck_assert_int_eq(eq, 1);
 
-    vertex_t* ptr = NULL;   
-
     light_vertex      = NULL;
     full_light_vertex = NULL;
     obstacles         = NULL;
@@ -203,8 +201,6 @@ START_TEST (LIG_get_light_polygon_check)
     // GIVEN
     segment_t *obstacles         = NULL;
     vertex_t  *light_vertex      = NULL;
-    vertex_t  *full_light_vertex = NULL;
-    point_t   *hit_points        = NULL;
 
     int calculated_length;
     int x1, x2; int y1, y2;
@@ -222,12 +218,11 @@ START_TEST (LIG_get_light_polygon_check)
     SEG_push(&obstacles, 0,   0,   0,   100);   // left
     SEG_push(&obstacles, 100, 0,   100, 100);   // right
     
-    hit_points = LIG_generate_hit_points(x1, y1, width, angle, obstacles);
     light_vertex = LIG_get_light_polygon(x1, y1, width, angle, obstacles);
     calculated_length = VRTX_len(light_vertex);
 
     ck_assert_int_eq(calculated_length, 2+2+1);
-    obstacles = NULL; hit_points = NULL; light_vertex = NULL;
+    obstacles = NULL; light_vertex = NULL;
 
     // CASE 2 (border + one obstacle in sight)
     x1 = 50; y1 = 50; 
@@ -246,12 +241,11 @@ START_TEST (LIG_get_light_polygon_check)
     SEG_push(&obstacles, 20, 20, 10, 20);
     SEG_push(&obstacles, 10, 20, 10, 10);
 
-    hit_points = LIG_generate_hit_points(x1, y1, width, angle, obstacles);
     light_vertex = LIG_get_light_polygon(x1, y1, width, angle, obstacles);
     calculated_length = VRTX_len(light_vertex);
 
     ck_assert_int_eq(calculated_length, 1+2+4+2);
-    obstacles = NULL; hit_points = NULL; light_vertex = NULL;
+    obstacles = NULL; light_vertex = NULL;
 
     // CASE 2 (border + one obstacle in sight + one obstacle not in sight)
     x1 = 50; y1 = 50; 
@@ -275,12 +269,11 @@ START_TEST (LIG_get_light_polygon_check)
     SEG_push(&obstacles, 90, 90, 80, 90);
     SEG_push(&obstacles, 80, 90, 80, 80);
 
-    hit_points = LIG_generate_hit_points(x1, y1, width, angle, obstacles);
     light_vertex = LIG_get_light_polygon(x1, y1, width, angle, obstacles);
     calculated_length = VRTX_len(light_vertex);
     ck_assert_int_eq(calculated_length, 1+2+4+2);
 
-    obstacles = NULL; hit_points = NULL; light_vertex = NULL;
+    obstacles = NULL; light_vertex = NULL;
 
     // CASE 3 (taken from game itself)
     x1 = 165; y1 = 155;
@@ -304,7 +297,7 @@ START_TEST (LIG_get_light_polygon_check)
     calculated_length = VRTX_len(light_vertex);
     ck_assert_int_eq(calculated_length, 4);
 
-    obstacles = NULL; hit_points = NULL; light_vertex = NULL;
+    obstacles = NULL; light_vertex = NULL;
 
 }
 END_TEST
@@ -448,8 +441,6 @@ START_TEST (LIG_generate_slipover_hit_point_check)
     int y1 = 100;
     int r = 50; 
     point_t* pt = NULL;
-
-    float deg = 3.1415 / 180;
 
     for (int ang=0; ang<360; ang++) {
         // point on circle
@@ -1156,7 +1147,6 @@ START_TEST (LIG_generate_hit_points_check)
 
     for (int i=0; i<n_cases; i++) {
         point_t* hits     = NULL;
-        point_t* filtered = NULL;
 
         hits = LIG_generate_hit_points(x, y, data[i].width, angle, obstacles);
         ck_assert_int_eq(PT_len(hits), data[i].expected_n_pts);

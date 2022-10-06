@@ -1,5 +1,4 @@
 #include <check.h>
-#include "fake.h"
 #include "check_vertex.h"
 #include "check_light.h"
 #include "check_segment.h"
@@ -30,29 +29,23 @@ int main(void) {
     Suite *s;
     SRunner *sr;
 
-    printf("\n");
-
     // vertex
     s = vertex_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    printf("\n");
-
     // light
     s = light_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
-    printf("\n");
 
     // segment
     s = segment_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
-    printf("\n");
 
     // point
     s = point_suite();
@@ -60,20 +53,11 @@ int main(void) {
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    printf("\n");
-
     // GFX
     // s = gfx_suite();
     // sr = srunner_create(s);
     // srunner_run_all(sr, CK_ENV);
     // number_failed += srunner_ntests_failed(sr);
-
-    // GFX
-    // s = import_suite();
-    // sr = srunner_create(s);
-    // srunner_run_all(sr, CK_ENV);
-    // number_failed += srunner_ntests_failed(sr);
-    // printf("\n");
 
     // level
     s = level_suite();
@@ -81,7 +65,6 @@ int main(void) {
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    // printf("\n");
     // TODO: (LG-9)
     // events
     // s = events_suite();
@@ -89,15 +72,11 @@ int main(void) {
     // srunner_run_all(sr, CK_ENV);
     // number_failed += srunner_ntests_failed(sr);
 
-    printf("\n");
-
     // geometry
     s = geometry_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
-
-    printf("\n");
 
     // hero
     s = hero_suite();
@@ -105,15 +84,11 @@ int main(void) {
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    printf("\n");
-
     // intersection
     s = sorted_list_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
-
-    printf("\n");
 
     // sprites
     s = sprites_suite();
@@ -121,8 +96,15 @@ int main(void) {
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    srunner_free(sr);
+    // import
+    s = import_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
 
-    return number_failed == 0 ? 0 : 1;
+    srunner_free(sr);
+    printf("/n");
+
+    return 0;
 }
 

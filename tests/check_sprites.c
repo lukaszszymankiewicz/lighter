@@ -1,12 +1,13 @@
 #include <check.h>
 #include <stdlib.h>
+#include "../src/files.h"
 #include "../src/sprites.h"
 
 
 START_TEST (TXTR_init_animation_sheet_check)
 {
     // GIVEN 
-    char* filepath = "../sprites/her2.png";
+    char* filepath = HERO_ANIMATION_SHEET_FILE;
     int n = 2;
 
     // WHEN
@@ -106,11 +107,10 @@ START_TEST (TXTR_init_animation_check)
 }
 END_TEST
 
-
 START_TEST (TXTR_push_animation_check)
 {
     // GIVEN 
-    char* filepath = "../sprites/her2.png";
+    char* filepath = HERO_ANIMATION_SHEET_FILE;
     enum state { WALKING, STANDING, MAX };
 
     // WHEN

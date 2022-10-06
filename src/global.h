@@ -7,9 +7,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-// enums
-enum debug_state { NO_DEBUG, DEBUG_OBSTACLE_LINES, DEBUG_LIGHT_RAYS, MAX_DEBUG };
-
 // version
 #define MAJOR = 0
 #define MINOR = 1

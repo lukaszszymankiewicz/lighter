@@ -355,8 +355,6 @@ void HERO_draw(
         hero->view_y,
         hero->direction
     );
-
-    if (debug == DEBUG_OBSTACLE_LINES) { HERO_debug_hitbox(hero); };
 }
 
 void HERO_free(
