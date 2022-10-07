@@ -31,7 +31,7 @@ hero_t* HERO_init(
     hero->state     = STANDING;
     hero->direction = LEFT;
 
-    hero->sprites = TXTR_init_animation_sheet(HERO_ANIMATION_SHEET_FILE, MAX_STATE);
+    hero->sprites = TXTR_init_animation_sheet(HERO_ANIMATION_SHEET_FILE);
 
     hero->frame   = 0;
     hero->frame_t = 0;
@@ -40,68 +40,68 @@ hero_t* HERO_init(
 
     // this should definitly be im some file
     // STANDING
-    TXTR_push_animation(
-        hero->sprites,
-        STANDING,
-        (int[][4]) {
-            {0, 0, 9, 20},
-            {9, 0, 9, 20},
-        },
-        (int[][4]) {
-            {0, 0, 9, 20},
-            {0, 0, 9, 20},
-        },
-        20,
-        2,
-        (int[]) { 1, 1 }
-    );
+    // TXTR_push_animation(
+    //     hero->sprites,
+    //     STANDING,
+    //     (int[][4]) {
+    //         {0, 0, 9, 20},
+    //         {9, 0, 9, 20},
+    //     },
+    //     (int[][4]) {
+    //         {0, 0, 9, 20},
+    //         {0, 0, 9, 20},
+    //     },
+    //     20,
+    //     2,
+    //     (int[]) { 1, 1 }
+    // );
 
-    // WALKING
-    TXTR_push_animation(
-        hero->sprites,
-        WALKING,
-        (int[][4]) {
-            {0, 20, 9, 20},
-            {9, 20, 9, 20},
-        },
-        (int[][4]) {
-            {0, 0, 9, 20},
-            {0, 0, 9, 20},
-        },
-        5,
-        2,
-        (int[]) { 1, 1 }
-    );
+    // // WALKING
+    // TXTR_push_animation(
+    //     hero->sprites,
+    //     WALKING,
+    //     (int[][4]) {
+    //         {0, 20, 9, 20},
+    //         {9, 20, 9, 20},
+    //     },
+    //     (int[][4]) {
+    //         {0, 0, 9, 20},
+    //         {0, 0, 9, 20},
+    //     },
+    //     5,
+    //     2,
+    //     (int[]) { 1, 1 }
+    // );
 
-    // JUMPING
-    TXTR_push_animation(
-        hero->sprites,
-        JUMPING,
-        (int[][4]) {
-            {18, 0, 9, 20},
-        },
-        (int[][4]) {
-            {0, 0, 9, 20},
-        },
-        0,
-        1,
-        (int[]) { 1 }
-    );
+    // // JUMPING
+    // TXTR_push_animation(
+    //     // hero->sprites,
+    //     JUMPING,
+    //     (int[][4]) {
+    //         {18, 0, 9, 20},
+    //     },
+    //     (int[][4]) {
+    //         {0, 0, 9, 20},
+    //     },
+    //     0,
+    //     1,
+    //     (int[]) { 1 }
+    // );
 
-    // FALLING DOWN
-    TXTR_push_animation(
-        hero->sprites,
-        FALLING_DOWN,
-        (int[][4]) {
-            {18, 20, 9, 20},
-        },
-        (int[][4]) {
-            {0, 0, 9, 20},
-        },
-        0,
-        1,
-        (int[]) { 1 }
-    );
+    // // FALLING DOWN
+    // TXTR_push_animation(
+    //     // hero->sprites,
+    //     FALLING_DOWN,
+    //     (int[][4]) {
+    //         {18, 20, 9, 20},
+    //     },
+    //     (int[][4]) {
+    //         {0, 0, 9, 20},
+    //     },
+    //     0,
+    //     1,
+    //     (int[]) { 1 }
+    // );
 
     return hero;
 }
@@ -109,14 +109,14 @@ hero_t* HERO_init(
 SDL_Rect* HERO_current_frame(
     hero_t *hero
 ) {
-    return &(hero->sprites->animations[hero->state]->frames[hero->frame].rect);
+    return &(hero->sprites->animations[hero->state].frames[hero->frame].rect);
 }
 
 void HERO_debug_hitbox(hero_t *hero) {
-    int n_boxes = hero->sprites->animations[hero->state]->frames[hero->frame].n_hit_box;
+    int n_boxes = hero->sprites->animations[hero->state].frames[hero->frame].n_hit_box;
 
     for (int i=0; i<n_boxes; i++) {
-        SDL_Rect rect = hero->sprites->animations[hero->state]->frames[hero->frame].hit_boxes[i];
+        SDL_Rect rect = hero->sprites->animations[hero->state].frames[hero->frame].hit_boxes[i];
         GFX_draw_rect_border(rect.x+hero->view_x, rect.y+hero->view_y, rect.w, rect.h, 255, 0, 0, 255);
     }
 }
@@ -179,8 +179,8 @@ void HERO_update_sprite(
     hero_t *hero
 ) {
     hero->frame_t++;
-    int del = hero->sprites->animations[hero->state]->delay;
-    int len = hero->sprites->animations[hero->state]->len;
+    int del = hero->sprites->animations[hero->state].frames[hero->frame].delay;
+    int len = hero->sprites->animations[hero->state].len;
 
     if (hero->frame_t >= del) {
         hero->frame_t=0;
@@ -196,7 +196,7 @@ void HERO_check_collision(
     hero_t *hero,
     segment_t *obstacles
 ) {
-    int  n_boxes     = hero->sprites->animations[hero->state]->frames[hero->frame].n_hit_box;
+    int  n_boxes     = hero->sprites->animations[hero->state].frames[hero->frame].n_hit_box;
     int  x_coef      = 0;
     int  y_coef      = 0;
     int  x_collision = -1;
@@ -216,7 +216,7 @@ void HERO_check_collision(
     // value is stored. Then, depending of the direction of a hero lowest or highest value is then
     // used and final postion of hero.
     for (int i=0; i<n_boxes; i++) {
-        SDL_Rect rect = hero->sprites->animations[hero->state]->frames[hero->frame].hit_boxes[i];
+        SDL_Rect rect = hero->sprites->animations[hero->state].frames[hero->frame].hit_boxes[i];
 
         for (segment_t* obstacle=obstacles; obstacle; obstacle=obstacle->next) {
             if (hero->x_vel != 0) {
@@ -360,5 +360,5 @@ void HERO_draw(
 void HERO_free(
     hero_t *hero
 ) {
-    TXTR_free_animation_sheet(hero->sprites);
+    // TXTR_free_animation_sheet(hero->sprites);
 }

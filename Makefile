@@ -67,7 +67,7 @@ lighter:
 
 .PHONY: tests
 tests: 
-	$(CC) $(CFLAGS) $(TESTTARGET) -o $(TESTOBJ) $(TESTLINKS)
+	$(CC) $(CFLAGS) $(TESTTARGET) -o $(TESTOBJ) $(TESTLINKS) $(LIBS)
 
 .PHONY: run_check_tests_suite
 run_check_tests_suite:

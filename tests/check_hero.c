@@ -55,8 +55,9 @@ START_TEST (HERO_update_check)
     // GIVEN
     hero_t* hero_o = HERO_init(100, 100);
 
-    hero_o->sprites->animations[hero_o->state]->delay = 2;
-    hero_o->sprites->animations[hero_o->state]->len = 2;
+    hero_o->sprites->animations[hero_o->state].frames[0].delay = 20;
+    hero_o->sprites->animations[hero_o->state].frames[1].delay = 20;
+    hero_o->sprites->animations[hero_o->state].len = 2;
 
     // WHEN && THEN
     ck_assert_int_eq(hero_o->frame_t, 0);

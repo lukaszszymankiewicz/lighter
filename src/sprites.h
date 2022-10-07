@@ -13,11 +13,11 @@ enum { FRAME_X, FRAME_Y, FRAME_WID, FRAME_HS };
 typedef struct frame {
     SDL_Rect  rect;
     SDL_Rect  hit_boxes[MAX_HITBOXES_PER_FRAME];
-    int n_hit_box;
+    int       n_hit_box;
+    int       delay;
 } frame_t;
 
 typedef struct animation {
-    int        delay;
     int        len;
     frame_t    frames[MAX_FRAMES_PER_ANIMATION];
 } animation_t;
@@ -25,14 +25,12 @@ typedef struct animation {
 typedef struct animation_sheet {
   texture_t   *texture;
   int          n_animations;
-  animation_t *animations[MAX_ANIMATION];
+  animation_t  animations[MAX_ANIMATION];
 
 } animation_sheet_t;
 
-animation_sheet_t *TXTR_init_animation_sheet(char *filepath, int n_animations);
+animation_sheet_t *TXTR_init_animation_sheet(char *filepath);
 animation_t* TXTR_init_animation(int rect[][4], int hit_boxes[][4], int delay, int n_frames, int n_hit_box[]);
-
-void TXTR_push_animation(animation_sheet_t *sheet, int index, int rects[][4], int hit_boxes[][4], int delay, int n_frames, int n_hit_box[]);
-void TXTR_free_animation_sheet(animation_sheet_t *sheet);
+void TXTR_push_animation(int index, int rects[][4], int hit_boxes[][4], int delay, int n_frames, int n_hit_box[]);
 
 #endif
