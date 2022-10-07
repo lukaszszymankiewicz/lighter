@@ -1,12 +1,12 @@
 #include "global.h"
 #include "geometry.h"
 #include "game.h"
+#include "import.h"
 #include "files.h"
 #include "hero.h"
 #include "gfx.h"
 #include "primitives.h"
 #include "sorted_list.h"
-
 
 // do it dynamically!
 int lightpos_x_corr[] = {5, 1};
@@ -31,77 +31,12 @@ hero_t* HERO_init(
     hero->state     = STANDING;
     hero->direction = LEFT;
 
-    hero->sprites = TXTR_init_animation_sheet(HERO_ANIMATION_SHEET_FILE);
+    hero->sprites = IMP_read_animation(HERO_ANIMATION_SHEET_FILE, HERO_ANIMATION_SHEET_DATA);
 
     hero->frame   = 0;
     hero->frame_t = 0;
     hero->x_vel   = 0;
     hero->y_vel   = 0;
-
-    // this should definitly be im some file
-    // STANDING
-    // TXTR_push_animation(
-    //     hero->sprites,
-    //     STANDING,
-    //     (int[][4]) {
-    //         {0, 0, 9, 20},
-    //         {9, 0, 9, 20},
-    //     },
-    //     (int[][4]) {
-    //         {0, 0, 9, 20},
-    //         {0, 0, 9, 20},
-    //     },
-    //     20,
-    //     2,
-    //     (int[]) { 1, 1 }
-    // );
-
-    // // WALKING
-    // TXTR_push_animation(
-    //     hero->sprites,
-    //     WALKING,
-    //     (int[][4]) {
-    //         {0, 20, 9, 20},
-    //         {9, 20, 9, 20},
-    //     },
-    //     (int[][4]) {
-    //         {0, 0, 9, 20},
-    //         {0, 0, 9, 20},
-    //     },
-    //     5,
-    //     2,
-    //     (int[]) { 1, 1 }
-    // );
-
-    // // JUMPING
-    // TXTR_push_animation(
-    //     // hero->sprites,
-    //     JUMPING,
-    //     (int[][4]) {
-    //         {18, 0, 9, 20},
-    //     },
-    //     (int[][4]) {
-    //         {0, 0, 9, 20},
-    //     },
-    //     0,
-    //     1,
-    //     (int[]) { 1 }
-    // );
-
-    // // FALLING DOWN
-    // TXTR_push_animation(
-    //     // hero->sprites,
-    //     FALLING_DOWN,
-    //     (int[][4]) {
-    //         {18, 20, 9, 20},
-    //     },
-    //     (int[][4]) {
-    //         {0, 0, 9, 20},
-    //     },
-    //     0,
-    //     1,
-    //     (int[]) { 1 }
-    // );
 
     return hero;
 }

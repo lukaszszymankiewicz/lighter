@@ -199,24 +199,20 @@ animation_sheet_t* IMP_read_animation(
         
         // single animation
         case READ_ANIMATION_IDX:
-            printf("idx = %d \n", LIG_cast_val_to_dec(buffer));
             idx = LIG_cast_val_to_dec(buffer);
             state++; break;
 
        case READ_ANIMATION_N_FRAMES:
-            printf("len = %d \n", LIG_cast_val_to_dec(buffer));
             sheet->animations[idx].len = LIG_cast_val_to_dec(buffer);
             state++; break;
 
        // single frame
        case READ_ANIMATION_DELAY:
             sheet->animations[idx].frames[frame_idx].delay = LIG_cast_val_to_dec(buffer);
-            printf("delay = %d \n", LIG_cast_val_to_dec(buffer));
             state++; break;
        
        case READ_ANIMATION_RECT:
             coords[rect_coord_idx] = LIG_cast_val_to_dec(buffer);
-            printf("coord = %d \n", LIG_cast_val_to_dec(buffer));
 
             if (++rect_coord_idx == COORDS_PER_RECT) {
 
@@ -230,13 +226,11 @@ animation_sheet_t* IMP_read_animation(
             break;
 
        case READ_ANIMATION_HITBOX_PER_FRAME:
-            printf("hitbox per frame = %d \n", LIG_cast_val_to_dec(buffer));
             sheet->animations[idx].frames[frame_idx].n_hit_box = LIG_cast_val_to_dec(buffer);
             state++; break;
 
        case READ_ANIMATION_HITBOX_RECT:
             coords[rect_coord_idx] = LIG_cast_val_to_dec(buffer);
-            printf("hit box coord = %d \n", LIG_cast_val_to_dec(buffer));
 
             if (rect_coord_idx++ == COORDS_PER_RECT-1) {
                 sheet->animations[idx].frames[frame_idx].hit_boxes[hitbox_idx].x = coords[0];
@@ -259,7 +253,6 @@ animation_sheet_t* IMP_read_animation(
                         state = READ_ANIMATION_IDX;
                     } else {
                         state++;
-                        printf("im done correctly! \n");
                     }
                 }
             }

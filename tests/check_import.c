@@ -57,10 +57,13 @@ START_TEST (IMP_read_animation_check)
     ck_assert_ptr_nonnull(sheet->texture);
 
     // sheet
-    ck_assert_int_eq(sheet->n_animations, 2);
+    ck_assert_int_eq(sheet->n_animations, 4);
 
     // single animation
     ck_assert_int_eq(sheet->animations[0].len, 2);
+    ck_assert_int_eq(sheet->animations[1].len, 2);
+    ck_assert_int_eq(sheet->animations[2].len, 1);
+    ck_assert_int_eq(sheet->animations[3].len, 1);
 
     // single frame
     // first animation 
@@ -116,6 +119,34 @@ START_TEST (IMP_read_animation_check)
     ck_assert_int_eq(sheet->animations[1].frames[1].hit_boxes[0]. y, 0);
     ck_assert_int_eq(sheet->animations[1].frames[1].hit_boxes[0]. w, 9);
     ck_assert_int_eq(sheet->animations[1].frames[1].hit_boxes[0]. h, 20);
+
+    // third animation 
+    // first frame
+    ck_assert_int_eq(sheet->animations[2].frames[0].delay, 0);
+
+    ck_assert_int_eq(sheet->animations[2].frames[0].rect.x, 18);
+    ck_assert_int_eq(sheet->animations[2].frames[0].rect.y, 0);
+    ck_assert_int_eq(sheet->animations[2].frames[0].rect.w, 9);
+    ck_assert_int_eq(sheet->animations[2].frames[0].rect.h, 20);
+
+    ck_assert_int_eq(sheet->animations[2].frames[0].hit_boxes[0]. x, 0);
+    ck_assert_int_eq(sheet->animations[2].frames[0].hit_boxes[0]. y, 0);
+    ck_assert_int_eq(sheet->animations[2].frames[0].hit_boxes[0]. w, 9);
+    ck_assert_int_eq(sheet->animations[2].frames[0].hit_boxes[0]. h, 20);
+
+    // fourth animation 
+    // first frame
+    ck_assert_int_eq(sheet->animations[3].frames[0].delay, 0);
+
+    ck_assert_int_eq(sheet->animations[3].frames[0].rect.x, 18);
+    ck_assert_int_eq(sheet->animations[3].frames[0].rect.y, 20);
+    ck_assert_int_eq(sheet->animations[3].frames[0].rect.w, 9);
+    ck_assert_int_eq(sheet->animations[3].frames[0].rect.h, 20);
+
+    ck_assert_int_eq(sheet->animations[3].frames[0].hit_boxes[0]. x, 0);
+    ck_assert_int_eq(sheet->animations[3].frames[0].hit_boxes[0]. y, 0);
+    ck_assert_int_eq(sheet->animations[3].frames[0].hit_boxes[0]. w, 9);
+    ck_assert_int_eq(sheet->animations[3].frames[0].hit_boxes[0]. h, 20);
 }
 END_TEST
 
