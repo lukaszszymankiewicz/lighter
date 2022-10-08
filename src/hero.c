@@ -131,7 +131,9 @@ void HERO_check_collision(
     hero_t *hero,
     segment_t *obstacles
 ) {
+    // TODO: add method for this calculation
     int  n_boxes     = hero->sprites->animations[hero->state].frames[hero->frame].n_hit_box;
+
     int  x_coef      = 0;
     int  y_coef      = 0;
     int  x_collision = -1;
@@ -295,5 +297,6 @@ void HERO_draw(
 void HERO_free(
     hero_t *hero
 ) {
-    // TXTR_free_animation_sheet(hero->sprites);
+    GFX_free_texture(hero->sprites->texture);
+    free(hero->sprites);
 }
