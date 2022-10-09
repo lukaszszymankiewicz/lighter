@@ -1,11 +1,8 @@
 #include "global.h"
-#include "gfx.h"
-#include "tile.h"
 #include "level.h"
 #include "files.h"
 #include "primitives.h"
 #include "import.h"
-#include "segment.h"
 #include "sprites.h"
 #include "string.h"
 
@@ -199,6 +196,8 @@ level_t* IMP_read_level(
 
     tileset = IMP_read_texture(img_path);
     if (!tileset) { return NULL; }
+    
+    level->tileset = tileset;
 
     LVL_fill_tiles(level);
     IMP_fill_level(level, file);
@@ -367,6 +366,16 @@ wobble_t* IMP_read_wobble(
 }
 
 void IMP_read_all_files() {
+    animations[ASSET_HERO_ANIMATION]   = IMP_read_animation(FILEPATH_HERO_ANIMATION);
+    gradients[ASSET_GRADIENT_CIRCULAR] = IMP_read_texture(FILEPATH_GRADIENT_CIRCULAR);
+    sprites[ASSET_SPRITE_HERO]         = IMP_read_texture(FILEPATH_SPRITE_HERO);
+    wobbles[ASSET_WOBBLE_NO]           = IMP_read_wobble(FILEPATH_WOBBLE_NO);
+    wobbles[ASSET_WOBBLE_STABLE]       = IMP_read_wobble(FILEPATH_WOBBLE_STABLE);
+    wobbles[ASSET_WOBBLE_WALKING]      = IMP_read_wobble(FILEPATH_WOBBLE_WALKING);
+    levels[ASSET_LEVEL_SAMPLE]         = IMP_read_level(FILEPATH_LEVEL_SAMPLE);
+}
+
+void IMP_FREE_all_files() {
     animations[ASSET_HERO_ANIMATION]   = IMP_read_animation(FILEPATH_HERO_ANIMATION);
     gradients[ASSET_GRADIENT_CIRCULAR] = IMP_read_texture(FILEPATH_GRADIENT_CIRCULAR);
     sprites[ASSET_SPRITE_HERO]         = IMP_read_texture(FILEPATH_SPRITE_HERO);

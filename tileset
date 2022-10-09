@@ -1,0 +1,73 @@
+tests/check_import.c:37:    ck_assert_int_eq(level->size_x, expected_x_size);
+tests/check_import.c:38:    ck_assert_int_eq(level->size_y, expected_y_size);
+tests/check_import.c:40:    ck_assert_int_eq(level->hero_x, expected_x_hero);
+tests/check_import.c:41:    ck_assert_int_eq(level->hero_y, expected_y_hero);
+tests/check_level.c:27:    test_level->size_y = size_y;
+tests/check_level.c:28:    test_level->size_x = size_x;
+tests/check_level.c:45:    test_level->obstacles = obstacles_a;
+tests/check_level.c:47:    len = SEG_len(test_level->obstacle_segments);
+tests/check_level.c:66:    test_level->obstacles = obstacles_b;
+tests/check_level.c:68:    len = SEG_len(test_level->obstacle_segments);
+tests/check_level.c:87:    test_level->obstacles = obstacles_c;
+tests/check_level.c:89:    len = SEG_len(test_level->obstacle_segments);
+tests/check_level.c:108:    test_level->obstacles = obstacles_d;
+tests/check_level.c:110:    len = SEG_len(test_level->obstacle_segments);
+tests/check_level.c:137:        ck_assert_ptr_nonnull(&(level->tile_array[i]));
+tests/check_level.c:138:        tile_t *tile = &(level->tile_array[i]);
+tests/check_level.c:174:    tile_t *ex_tile = &level->tile_array[0];
+tests/check_level.c:175:    tile_t *ex_tile_b = &level->tile_array[1];
+tests/check_level.c:176:    tile_t *ex_tile_c = &level->tile_array[1];
+src/import.c:147:                level->hero_x = x_tile; 
+src/import.c:148:                level->hero_y = y_tile-1; 
+src/game.c:43:    game->hero          = HERO_init(game->level->hero_x, game->level->hero_y);
+src/game.c:67:    SEG_free(game->level->obstacle_segments);
+src/game.c:88:        HERO_check_collision(game->hero, game->level->obstacle_segments);
+src/game.c:97:            game->level->obstacle_segments,
+src/level.c:29:    new_level->tileset           = NULL;
+src/level.c:30:    new_level->structure         = NULL;
+src/level.c:31:    new_level->obstacles         = NULL;
+src/level.c:32:    new_level->obstacle_segments = NULL;
+src/level.c:33:    new_level->tiles_used        = 0;
+src/level.c:35:    new_level->tileset           = malloc(sizeof(texture_t));
+src/level.c:44:    for (int x=0; x<level->size_x; x++) { 
+src/level.c:45:        for (int y=0; y<level->size_y; y++) { 
+src/level.c:46:            level->structure[y * level->size_x + x] = NULL;
+src/level.c:55:    for (int x=0; x<level->size_x; x++) { 
+src/level.c:56:        for (int y=0; y<level->size_y; y++) { 
+src/level.c:57:            level->obstacles[y * level->size_x + x] = 0;
+src/level.c:68:    level->size_x    = size_x;
+src/level.c:69:    level->size_y    = size_y;
+src/level.c:71:    level->structure = malloc(sizeof (tile_t*) * level->size_x * level->size_y);
+src/level.c:74:    level->obstacles = malloc(sizeof (int)    * level->size_x * level->size_y);
+src/level.c:83:    level->tile_array = malloc(tile_number * sizeof(tile_t));
+src/level.c:95:    level->tile_array[tile_index] = *tile;
+src/level.c:99:    level->tileset = texture;
+src/level.c:109:    level->structure[y * level->size_x + x] = &(level->tile_array[i]);
+src/level.c:119:    level->obstacles[y * level->size_x + x] = i;
+src/level.c:124:    int tile_number = (int)(level->tileset->width/TILE_WIDTH) * (int)(level->tileset->height/TILE_HEIGHT); 
+src/level.c:130:    for (int y=0; y<level->tileset->height; y+=TILE_WIDTH) {
+src/level.c:131:        for (int x=0; x<level->tileset->width; x+=TILE_WIDTH) {
+src/level.c:143:    if (x>0 && x<level->size_x && y>0 && y<level->size_y) {
+src/level.c:144:        return level->structure[y * level->size_x + x];
+src/level.c:146:    return &level->tile_array[EMPTY_TILE];
+src/level.c:150:    return level->obstacles[y * level->size_x + x];
+src/level.c:156:    return level->tileset;
+src/level.c:165:    level->obstacle_segments = NULL;  // just to be sure
+src/level.c:192:    SEG_push(&level->obstacle_segments, 0,            0,             SCREEN_WIDTH, 0             );
+src/level.c:193:    SEG_push(&level->obstacle_segments, 0,            SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT );
+src/level.c:194:    SEG_push(&level->obstacle_segments, 0,            0,             0,            SCREEN_HEIGHT );
+src/level.c:195:    SEG_push(&level->obstacle_segments, SCREEN_WIDTH, 0,             SCREEN_WIDTH, SCREEN_HEIGHT );
+src/level.c:197:    int obstacle_num = SEG_len(level->obstacle_segments);
+src/level.c:218:                          &level->obstacle_segments,
+src/level.c:234:                        ptr = SEG_get(level->obstacle_segments, index);
+src/level.c:244:                          &level->obstacle_segments,
+src/level.c:259:                        ptr = SEG_get(level->obstacle_segments, index);
+src/level.c:269:                          &level->obstacle_segments,
+src/level.c:284:                        ptr = SEG_get(level->obstacle_segments, index);
+src/level.c:294:                          &level->obstacle_segments,
+src/level.c:309:                        ptr = SEG_get(level->obstacle_segments, index);
+src/level.c:326:    level->obstacle_segments = NULL;  // just to be sure
+src/level.c:406:    free(level->obstacles);
+src/level.c:408:    GFX_free_texture(level->tileset);
+src/level.c:410:    free(level->tile_array);
+src/level.c:411:    free(level->structure);

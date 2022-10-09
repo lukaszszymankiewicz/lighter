@@ -1,7 +1,4 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <check.h>
-#include "../src/level.h"
 #include "../src/import.h"
 #include "../src/files.h"
 
@@ -155,7 +152,7 @@ START_TEST (IMP_read_wobble_check)
 {
     // GIVEN
     wobble_t *wobble = NULL;
-    char *filename   = "./assets/wobbles/stable.wbl";
+    char *filename   = "./assets/wobbles/walking.wbl";
 
     // WHEN
     wobble = IMP_read_wobble(filename);

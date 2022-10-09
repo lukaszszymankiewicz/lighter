@@ -1,5 +1,3 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <check.h>
 #include "../src/gfx.h"
 #include "../src/segment.h"

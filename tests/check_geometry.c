@@ -1,5 +1,4 @@
 #include <check.h>
-#include <stdio.h>
 #include "../src/geometry.h"
 
 START_TEST (GEO_seg_intersection_with_y_check)
@@ -148,9 +147,6 @@ START_TEST (GEO_pt_same_side_check)
             data[i].o_y2
         );
 
-        if ((int)res != (int)data[i].exp) {
-            printf("test no %d went wrong \n", i);
-        }
         ck_assert_int_eq(res, data[i].exp);
     }
 }

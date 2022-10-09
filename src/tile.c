@@ -7,8 +7,7 @@ tile_t* TILE_new(
 ) {
 
     tile_t *new_tile = NULL;
-
-    new_tile = (tile_t*)malloc(sizeof(tile_t));
+    new_tile         = (tile_t*)malloc(sizeof(tile_t));
 
     new_tile->x      = x_offset;
     new_tile->y      = y_offset;

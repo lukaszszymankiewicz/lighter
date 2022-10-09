@@ -1,9 +1,7 @@
 #include <check.h>
-#include <stdlib.h>
 #include "../src/primitives.h"
 #include "../src/import.h"
 #include "../src/level.h"
-#include "../src/gfx.h"
 #include "../src/segment.h"
 
 

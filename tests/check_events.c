@@ -1,16 +1,11 @@
-#include <SDL2/SDL.h>
 #include <check.h>
-#include <stdlib.h>
-#include "../src/global.h"
 #include "../src/events.h"
-#include "../src/hero.h"
 #include "../src/light.h"
-
 
 START_TEST (EVNT_handle_events_check)
 {
     // GIVEN
-    hero_t* hero_o = NULL;
+    hero_t* hero_o   = NULL;
     light_t* light_o = LIG_init();
 
     // sprites are really unused here, so some way around is used to get proper hero struct without
@@ -33,8 +28,8 @@ START_TEST (EVNT_handle_events_check)
     game->keys_cooldown = NULL;
     game->keys_cooldown = (Uint8 *)malloc(sizeof(Uint8) * MAX_KEYS);
 
-    SDL_Event e;
-    game->event = e;
+    SDL_Event *e = NULL;
+    game->event = *e;
  
     // WHEN (QUITING)
     game->event.type = SDL_QUIT;

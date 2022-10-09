@@ -1,12 +1,9 @@
 #include <check.h>
-#include <stdlib.h>
-#include <math.h>
 #include "../src/light.h"
 #include "../src/segment.h"
 #include "../src/vertex.h"
 #include "../src/geometry.h"
 #include "../src/point.h"
-#include "../src/global.h"
 
 // this test check only base_light_polygon, but to be absolutely sure its result is check against
 // full polygon check (for width equal to 0.0).

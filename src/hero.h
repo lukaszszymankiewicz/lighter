@@ -11,8 +11,6 @@
 #define Y_FRICTION       1
 #define JUMP_POWUH       10
 
-enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, MAX_STATE };
-
 typedef struct hero {
     int state;
     int x;

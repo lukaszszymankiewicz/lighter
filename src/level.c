@@ -32,7 +32,7 @@ level_t* LVL_new() {
     new_level->obstacle_segments = NULL;
     new_level->tiles_used        = 0;
 
-    new_level->tileset = malloc(sizeof(texture_t));
+    new_level->tileset           = malloc(sizeof(texture_t));
 
     return new_level;
 }
@@ -349,11 +349,11 @@ void LVL_draw(
             
             if (tile != NULL) {
                 GFX_render_tile(
-                        texture ,
-                        tile_pos_x, tile_pos_y,
-                        tile->x, tile->y,
-                        TILE_WIDTH, TILE_HEIGHT
-                    );
+                    texture ,
+                    tile_pos_x, tile_pos_y,
+                    tile->x, tile->y,
+                    TILE_WIDTH, TILE_HEIGHT
+                );
             }
         }
     }

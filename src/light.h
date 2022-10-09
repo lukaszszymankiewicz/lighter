@@ -8,13 +8,8 @@
 #define R                               2000
 #define RAY_THRESHOLD                   2
 #define ALL_AVAILABLE_LIGHTSOURCES      2
-#define ALL_AVAILABLE_GRADIENT_TEXTURES 1
-#define ALL_AVAILABLE_WOBBLES_PATTERNS  3
 
-enum wobbles            { WOBBLE_DOWN = -1, WOBBLE_UP = 1};
 enum lightsources_names { LIGHTER, LANTERN, ALL };
-enum wobble_patterns    { WOBBLE_NO, WOBBLE_STABLE, WOBBLE_WALK };
-enum gradient_types     { GRADIENT_CIRCULAR };
 enum polydata           { X, Y, RED, GREEN, BLUE, LIGHT_POWER, WIDTH };
 
 typedef struct lightpolygon { 

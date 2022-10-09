@@ -1,5 +1,4 @@
 #include "geometry.h"
-#include "global.h"
 #include "segment.h"
 
 segment_t* SEG_init(

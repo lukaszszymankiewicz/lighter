@@ -1,16 +1,14 @@
 #include "global.h"
+#include "import.h"
 #include "files.h"
 #include "game.h"
 #include "gfx.h"
 #include "import.h"
-#include "sprites.h"
 #include "events.h"
 #include "hero.h"
 #include "timer.h"
-#include "tile.h"
 #include "level.h"
 #include "light.h"
-#include "segment.h"
 #include "import.h"
 
 void GAME_close(
@@ -38,7 +36,7 @@ game_t* GAME_init() {
 
     game->loop          = true;
     game->light         = LIG_init();
-    game->level         = IMP_read_level(SAMPLE_LEVEL);
+    game->level         = IMP_read_level(FILEPATH_LEVEL_SAMPLE);
     game->hero          = HERO_init(game->level->hero_x, game->level->hero_y);
     game->frame         = 0;
     game->fps_timer     = TIMER_new();
@@ -60,17 +58,12 @@ void GAME_update(
     }
 }
 
-void GAME_clean_frame(
-    game_t* game
-) {
-    SEG_free(game->level->obstacle_segments);
-}
-
 int main(
     int argc, char* args[]
 ) {
     game_t* game = NULL;
     GFX_init_graphics();
+    IMP_read_all_files();
     LIG_read_all_files();
     game = GAME_init();
     EVNT_init();
