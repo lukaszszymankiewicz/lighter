@@ -1,12 +1,9 @@
 #include "files.h"
 
-char* GRADIENTS_FOLDER     = "./assets/gradients/";
-char* LEVELS_FOLDER        = "./assets/levels/";
-char* LIGHTSOURCES_FOLDER  = "./assets/lightsources/";
-char* SPRITES_FOLDER       = "./assets/sprites/";
-char* WOBBLE_FOLDER        = "./assets/wobbles/";
-
-char* HERO_ANIMATION_SHEET_FILE  = "./assets/sprites/hero.png";
-char* HERO_ANIMATION_SHEET_DATA  = "./assets/animations/hero.anm";
-char* CIRCULAR_GRADIENT_FILE     = "./assets/gradients/circular.png";
-char* SAMPLE_LEVEL               = "./assets/levels/sample";
+const char *FILEPATH_HERO_ANIMATION    = "./assets/animations/hero.anm";
+const char *FILEPATH_GRADIENT_CIRCULAR = "./assets/gradients/circular.png";
+const char *FILEPATH_SPRITE_HERO       = "./assets/sprites/hero.png";
+const char *FILEPATH_WOBBLE_NO         = "./assets/wobbles/no.wbl";
+const char *FILEPATH_WOBBLE_STABLE     = "./assets/wobbles/stable.wbl";
+const char *FILEPATH_WOBBLE_WALKING    = "./assets/wobbles/walking.wbl";
+const char *FILEPATH_LEVEL_SAMPLE      = "./assets/levels/sample";

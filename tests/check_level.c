@@ -1,6 +1,7 @@
 #include <check.h>
 #include <stdlib.h>
 #include "../src/primitives.h"
+#include "../src/import.h"
 #include "../src/level.h"
 #include "../src/gfx.h"
 #include "../src/segment.h"
@@ -121,7 +122,7 @@ START_TEST (LVL_fill_tiles_check)
     char *tex_filepath = "./tests/testfiles/testlevel/level.png";
 
     level = LVL_new();
-    tex = GFX_read_texture(tex_filepath);
+    tex = IMP_read_texture(tex_filepath);
     int cols = (int)tex->width/TILE_WIDTH;
 
     LVL_set_tileset(level, tex);
@@ -152,7 +153,7 @@ START_TEST (LVL_fill_structure_check)
     char *tex_filepath = "./tests/testfiles/testlevel/level.png";
 
     level = LVL_new();
-    tex = GFX_read_texture(tex_filepath);
+    tex = IMP_read_texture(tex_filepath);
     LVL_set_tileset(level, tex);
     LVL_set_size(level, 10, 10);
     LVL_set_tile_number(level, 2);

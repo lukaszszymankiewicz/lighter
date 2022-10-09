@@ -31,7 +31,8 @@ hero_t* HERO_init(
     hero->state     = STANDING;
     hero->direction = LEFT;
 
-    hero->sprites = IMP_read_animation(HERO_ANIMATION_SHEET_FILE, HERO_ANIMATION_SHEET_DATA);
+    hero->sprites          = IMP_read_animation(FILEPATH_HERO_ANIMATION);
+    hero->sprites->texture = IMP_read_texture(FILEPATH_SPRITE_HERO);
 
     hero->frame   = 0;
     hero->frame_t = 0;

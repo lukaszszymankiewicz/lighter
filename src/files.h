@@ -1,15 +1,12 @@
-#ifndef FILES_H
+#ifndef FILES_H 
 #define FILES_H
 
-extern char* GRADIENTS_FOLDER;
-extern char* LEVELS_FOLDER;
-extern char* LIGHTSOURCES_FOLDER;
-extern char* SPRITES_FOLDER;
-extern char* WOBBLE_FOLDER;
-
-extern char* SAMPLE_LEVEL;
-extern char* HERO_ANIMATION_SHEET_FILE;
-extern char* HERO_ANIMATION_SHEET_DATA;
-extern char* CIRCULAR_GRADIENT_FILE;
+extern const char *FILEPATH_HERO_ANIMATION   ;
+extern const char *FILEPATH_GRADIENT_CIRCULAR;
+extern const char *FILEPATH_SPRITE_HERO      ;
+extern const char *FILEPATH_WOBBLE_NO        ;
+extern const char *FILEPATH_WOBBLE_STABLE    ;
+extern const char *FILEPATH_WOBBLE_WALKING   ;
+extern const char *FILEPATH_LEVEL_SAMPLE     ;
 
 #endif

@@ -2,6 +2,7 @@
 #include "gfx.h"
 #include "tile.h"
 #include "level.h"
+#include "files.h"
 #include "primitives.h"
 #include "import.h"
 #include "segment.h"
@@ -12,14 +13,26 @@
 #define BUFFER_SIZE         2
 #define DOUBLE_BYTE         2
 #define COORDS_PER_RECT     4
+#define PREAMBULE_LEN       2
 
-static const int ANIMATION_PREAMBULE[2]   = { 16718, 18765 };
+#define FIRST_HALF          0
+#define SECOND_HALF         1
+
+static const int ANIMATION_PREAMBULE[PREAMBULE_LEN]   = { 16718, 18765 };
+static const int WOBBLE_PREAMBULE[PREAMBULE_LEN]      = { 22338, 16972 };
+
 static const char *LEVEL_READ_MODE        = "rb";
 static const char *LEVEL_STRUCTURE_SUFFIX = "level.llv";
 static const char *LEVEL_TILESET_SUFFIX   = "level.png";
 static const char *SEPARATOR              = "/";
 
 static char buffer[BUFFER_SIZE];
+
+animation_sheet_t *animations[ASSET_ANIMATION_ALL];
+texture_t         *gradients[ASSET_GRADIENT_ALL];
+texture_t         *sprites[ASSET_SPRITE_ALL];
+wobble_t          *wobbles[ASSET_WOBBLE_ALL];
+level_t           *levels[ASSET_LEVEL_ALL];
 
 char* IMP_concatenate_string(
     const char *a, const char *b, const char *d
@@ -39,6 +52,40 @@ int LIG_cast_val_to_dec(char vals[DOUBLE_BYTE]) {
     return vals[0]<<8 | vals[1];
 }
 
+texture_t* IMP_read_texture(
+    const char *filepath
+) {
+	SDL_Texture *new_texture    = NULL;
+    SDL_Surface *loaded_surface = NULL;
+
+    loaded_surface              = IMG_Load(filepath);
+
+    // dummy texture if reading file failed
+    if (loaded_surface == NULL) {
+        new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 20, 20);
+        texture_t* p = malloc(sizeof(texture_t));
+
+        p->surface = new_texture;
+        p->width   = loaded_surface->w;
+        p->height  = loaded_surface->h;
+
+        return p;
+    }
+    else {
+        SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
+        new_texture  = SDL_CreateTextureFromSurface(renderer, loaded_surface);
+        texture_t* p = malloc(sizeof(texture_t));
+
+        p->surface = new_texture;
+        p->width   = loaded_surface->w;
+        p->height  = loaded_surface->h;
+
+        SDL_FreeSurface(loaded_surface);
+
+        return p;
+    }
+};
+
 int IMP_fill_level(level_t *level, FILE *file) {
     int tiles_counter = 0;
     int layer_counter = 0;
@@ -56,35 +103,35 @@ int IMP_fill_level(level_t *level, FILE *file) {
       int dec_value = LIG_cast_val_to_dec(buffer);
 
       switch (state) {
-        case X_SIZE_READ:
+        case READ_LEVEL_X_SIZE:
             x_size = dec_value;
             state++;
             break;
 
-        case Y_SIZE_READ: // x and y size of level is read - we can assign them to actual level
+        case READ_LEVEL_Y_SIZE:
             y_size = dec_value;
-            state++;
             LVL_set_size(level, x_size, y_size);
+            state++;
             break;
 
-        case TILES_SUM_READ:
+        case READ_LEVEL_TILES_SUM:
             coords_per_single_tile_per_layer = dec_value;
             state++;
             break;
 
-        case TILE_SUM_READ:
+        case READ_LEVEL_TILE_SUM:
             coords_per_single_tile = dec_value;
             state++;
             break;
 
-        case TILE_X_READ:
+        case READ_LEVEL_TILE_X:
             x_tile = dec_value;
             tiles_counter++;
             layer_counter++;
             state++;
             break;
 
-        case TILE_Y_READ:
+        case READ_LEVEL_TILE_Y:
             y_tile = dec_value;
             tiles_counter++;
             layer_counter++;
@@ -107,26 +154,26 @@ int IMP_fill_level(level_t *level, FILE *file) {
 
                 if (layer_read == 3) {
                     // eveything is read - move on 
-                    state=ALL_TILES_READ;
+                    state= READ_LEVEL_ALL_TILES_READ;
                     break;
                 }
 
+                state = READ_LEVEL_TILES_SUM;
                 layer_counter = 0;
-                state = TILES_SUM_READ;
                 cur_tile_idx = 0;
                 tiles_counter=0;
                 break;
             } else if (tiles_counter == coords_per_single_tile) {
                 cur_tile_idx++;
-                state = TILE_SUM_READ;
+                state = READ_LEVEL_TILE_SUM;
                 tiles_counter = 0;
                 break;
             // current tile is not yet read
             } else {
-                state = TILE_X_READ;
+                state = READ_LEVEL_TILE_X;
                 break;
             }
-        case ALL_TILES_READ:
+        case READ_LEVEL_ALL_TILES_READ:
             break;
       }
     }
@@ -134,10 +181,10 @@ int IMP_fill_level(level_t *level, FILE *file) {
 }
 
 level_t* IMP_read_level(
-    char *filename
+    const char *filename
 ) {
-    level_t *level = NULL;
-    level          = LVL_new();
+    level_t *level     = NULL;
+    level              = LVL_new();
 
     FILE *file         = NULL;
     char *data_path    = NULL;
@@ -145,12 +192,12 @@ level_t* IMP_read_level(
     texture_t *tileset = NULL;
 
     data_path = IMP_concatenate_string(filename, SEPARATOR, LEVEL_STRUCTURE_SUFFIX);
-    img_path = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_SUFFIX);
+    img_path  = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_SUFFIX);
 
     file = fopen(data_path, LEVEL_READ_MODE);
     if (file == NULL) { return NULL; }
 
-    tileset = GFX_read_texture(img_path);
+    tileset = IMP_read_texture(img_path);
     if (!tileset) { return NULL; }
 
     LVL_fill_tiles(level);
@@ -160,15 +207,15 @@ level_t* IMP_read_level(
 }
 
 animation_sheet_t* IMP_read_animation(
-    char *img_path,
-    char *data_path
+    const char *filepath
 ) {
     animation_sheet_t *sheet      = NULL;
-    sheet                         = TXTR_init_animation_sheet(img_path);
 
-    int state                     = READ_PREAMBULE_IDLE;
+    sheet                         = malloc(sizeof(animation_sheet_t));
+
+    int state                     = READ_ANIMATION_PREAMBULE_IDLE;
     FILE *file                    = NULL;
-    file                          = fopen(data_path, LEVEL_READ_MODE);
+    file                          = fopen(filepath, LEVEL_READ_MODE);
     
     int coords[COORDS_PER_RECT];
     int idx                       = 0; // temp container
@@ -179,17 +226,19 @@ animation_sheet_t* IMP_read_animation(
 
     state++;
 
+    if (!file) {return NULL;}
+
     while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
 
     switch (state) 
     {
         // preambule
-        case READ_PREAMBULE_READING_FIRST_HALF:
-            if(LIG_cast_val_to_dec(buffer) != ANIMATION_PREAMBULE[0]) { return NULL; }
+        case READ_ANIMATION_PREAMBULE_FIRST_HALF:
+            if(LIG_cast_val_to_dec(buffer) != ANIMATION_PREAMBULE[FIRST_HALF]) { return NULL; }
             state++; break;
              
-        case READ_PREAMBULE_READING_SECOND_HALF:
-            if(LIG_cast_val_to_dec(buffer) != ANIMATION_PREAMBULE[1]) { return NULL; }
+        case READ_ANIMATION_PREAMBULE_SECOND_HALF:
+            if(LIG_cast_val_to_dec(buffer) != ANIMATION_PREAMBULE[SECOND_HALF]) { return NULL; }
             state++; break;
         
         // animation sheet
@@ -261,4 +310,68 @@ animation_sheet_t* IMP_read_animation(
     }
 
     return sheet;
+}
+
+wobble_t* IMP_read_wobble(
+    const char *filepath
+) {
+    wobble_t *wobble = NULL;
+    wobble           = (wobble_t*)malloc(sizeof(wobble_t));
+
+    int state                     = READ_WOBBLE_IDLE;
+    FILE *file                    = NULL;
+    file                          = fopen(filepath, LEVEL_READ_MODE);
+     
+    int coef_n                    = 0;
+    int sign                      = 0;
+    int val                       = 0;
+
+    state++;
+
+    if (!file) {return NULL;}
+
+    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
+        switch (state) 
+        {
+            case READ_WOBBLE_PREAMBULE_FIRST_HALF:
+                if(LIG_cast_val_to_dec(buffer) != WOBBLE_PREAMBULE[FIRST_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_WOBBLE_PREAMBULE_SECOND_HALF:
+                if(LIG_cast_val_to_dec(buffer) != WOBBLE_PREAMBULE[SECOND_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_WOBBLE_NUMBER:
+                wobble->len = LIG_cast_val_to_dec(buffer);
+                wobble->coefs = (float*)malloc(sizeof(float) * wobble->len);
+                state++; break;
+
+            case READ_WOBBLE_SIGN:
+                val = LIG_cast_val_to_dec(buffer);
+                sign = val==1 ? 1 : -1;
+                state++; break;
+
+            case READ_WOBBLE_COEF:
+                val = LIG_cast_val_to_dec(buffer);
+                wobble->coefs[coef_n] = (float)(sign * val) / 1000.0;
+
+                if (++coef_n == wobble->len) {
+                    state++; break;
+                } else {
+                    state = READ_WOBBLE_SIGN; break;
+                }
+        }
+    }
+
+    return wobble;
+}
+
+void IMP_read_all_files() {
+    animations[ASSET_HERO_ANIMATION]   = IMP_read_animation(FILEPATH_HERO_ANIMATION);
+    gradients[ASSET_GRADIENT_CIRCULAR] = IMP_read_texture(FILEPATH_GRADIENT_CIRCULAR);
+    sprites[ASSET_SPRITE_HERO]         = IMP_read_texture(FILEPATH_SPRITE_HERO);
+    wobbles[ASSET_WOBBLE_NO]           = IMP_read_wobble(FILEPATH_WOBBLE_NO);
+    wobbles[ASSET_WOBBLE_STABLE]       = IMP_read_wobble(FILEPATH_WOBBLE_STABLE);
+    wobbles[ASSET_WOBBLE_WALKING]      = IMP_read_wobble(FILEPATH_WOBBLE_WALKING);
+    levels[ASSET_LEVEL_SAMPLE]         = IMP_read_level(FILEPATH_LEVEL_SAMPLE);
 }

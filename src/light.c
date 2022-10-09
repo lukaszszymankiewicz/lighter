@@ -1,4 +1,5 @@
 #include "global.h"
+#include "import.h"
 #include "files.h"
 #include "game.h"
 #include "segment.h"
@@ -99,6 +100,7 @@ wobble_t* LIG_init_stable_wobble_pattern() {
     stable_wobble->len = 82;
     stable_wobble->coefs = (float*)malloc(sizeof(float) * stable_wobble->len);
     // damn!
+
     stable_wobble->coefs[0] = 0.006;
     stable_wobble->coefs[1] = 0.006;
     stable_wobble->coefs[2] = 0.009;
@@ -191,6 +193,7 @@ wobble_t* LIG_init_walk_wobble_pattern() {
 
     walk_wobble->len = 15;
     walk_wobble->coefs = (float*)malloc(sizeof(float) * 15);
+
     walk_wobble->coefs[0] = 0.012;
     walk_wobble->coefs[1] = 0.054;
     walk_wobble->coefs[2] = 0.082;
@@ -226,7 +229,7 @@ void LIG_init_all_light_wobbles_patterns() {
 
 texture_t* LIG_init_circular_gradient() {
     texture_t* circular_gradient = NULL;
-    circular_gradient            = GFX_read_texture(CIRCULAR_GRADIENT_FILE);
+    circular_gradient            = gradients[ASSET_GRADIENT_CIRCULAR];
 
     return circular_gradient;
 }

@@ -10,7 +10,6 @@
 #include "check_geometry.h"
 #include "check_hero.h"
 #include "check_sorted_list.h"
-#include "check_sprites.h"
 #include "check_tests.h"
 #include "../src/vertex.h"
 #include "../src/sprites.h"
@@ -86,12 +85,6 @@ int main(void) {
 
     // intersection
     s = sorted_list_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // sprites
-    s = sprites_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);

@@ -12,14 +12,13 @@ TESTDIR = tests
 
 TARGET =                      \
 	$(SRCDIR)/game.c          \
-	$(SRCDIR)/files.c         \
 	$(SRCDIR)/gfx.c           \
 	$(SRCDIR)/import.c        \
-	$(SRCDIR)/sprites.c       \
 	$(SRCDIR)/events.c        \
 	$(SRCDIR)/hero.c          \
 	$(SRCDIR)/timer.c         \
 	$(SRCDIR)/tile.c          \
+	$(SRCDIR)/files.c         \
 	$(SRCDIR)/level.c         \
 	$(SRCDIR)/geometry.c      \
 	$(SRCDIR)/sorted_list.c   \
@@ -40,20 +39,18 @@ TESTTARGET =                        \
 	$(TESTDIR)/check_point.c        \
 	$(TESTDIR)/check_segment.c      \
 	$(TESTDIR)/check_sorted_list.c  \
-	$(TESTDIR)/check_sprites.c      \
 	$(TESTDIR)/check_vertex.c       \
 	$(SRCDIR)/events.c              \
-	$(SRCDIR)/files.c               \
 	$(SRCDIR)/geometry.c            \
 	$(SRCDIR)/gfx.c                 \
 	$(SRCDIR)/import.c              \
 	$(SRCDIR)/hero.c                \
 	$(SRCDIR)/level.c               \
 	$(SRCDIR)/light.c               \
+	$(SRCDIR)/files.c               \
 	$(SRCDIR)/point.c               \
 	$(SRCDIR)/segment.c             \
 	$(SRCDIR)/sorted_list.c         \
-	$(SRCDIR)/sprites.c             \
 	$(SRCDIR)/timer.c               \
 	$(SRCDIR)/tile.c                \
 	$(SRCDIR)/vertex.c              \

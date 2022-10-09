@@ -135,16 +135,6 @@ void LVL_fill_tiles(level_t *level) {
     }
 }
 
-// void MAP_get_tileset_path(
-//     char *tileset_filename,
-//     char *level_file_path
-// ) {
-//     strcat(level_file_path, CURRENT_FOLDER);
-//     strcat(level_file_path, TILESET_FOLDER);
-//     strcat(level_file_path, tileset_filename);
-// }
-
-
 tile_t* LVL_tile_on_pos(
     level_t *level,
     int      x,

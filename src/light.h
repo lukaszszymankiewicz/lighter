@@ -38,7 +38,7 @@ typedef struct lightsource {
     int               penetrating_power;
     wobble_t         *wobble[2];              // wobble data
     texture_t        *gradient_texture;
-    lightpolygon_t   *light_polygons;       // polys correction and colors
+    lightpolygon_t   *light_polygons;         // polys correction and colors
 } lightsource_t;
 
 typedef struct light {

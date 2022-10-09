@@ -46,11 +46,12 @@ START_TEST (IMP_read_animation_check)
 {
     // GIVEN
     animation_sheet_t *sheet = NULL;
-    char *data               = HERO_ANIMATION_SHEET_DATA;
-    char *img                = HERO_ANIMATION_SHEET_FILE;
+    const char *data               = FILEPATH_HERO_ANIMATION;
+    const char *texture            = FILEPATH_SPRITE_HERO;
 
     // WHEN
-    sheet = IMP_read_animation(img, data);
+    sheet = IMP_read_animation(data);
+    sheet->texture = IMP_read_texture(texture);
 
     // THEN
     ck_assert_ptr_nonnull(sheet);
@@ -150,6 +151,54 @@ START_TEST (IMP_read_animation_check)
 }
 END_TEST
 
+START_TEST (IMP_read_wobble_check)
+{
+    // GIVEN
+    wobble_t *wobble = NULL;
+    char *filename   = "./assets/wobbles/stable.wbl";
+
+    // WHEN
+    wobble = IMP_read_wobble(filename);
+
+    // THEN
+    ck_assert_ptr_nonnull(wobble);
+    ck_assert_int_eq(wobble->len, 15);
+
+    ck_assert_float_eq(wobble->coefs[0], 0.012);
+    ck_assert_float_eq(wobble->coefs[1], 0.054);
+    ck_assert_float_eq(wobble->coefs[2], 0.082);
+    ck_assert_float_eq(wobble->coefs[3], 0.1);
+    ck_assert_float_eq(wobble->coefs[4], 0.082);
+    ck_assert_float_eq(wobble->coefs[5], 0.054);
+    ck_assert_float_eq(wobble->coefs[6], 0.012);
+    ck_assert_float_eq(wobble->coefs[7], 0.0);
+    ck_assert_float_eq(wobble->coefs[8], -0.012);
+    ck_assert_float_eq(wobble->coefs[9], -0.054);
+    ck_assert_float_eq(wobble->coefs[10], -0.082);
+    ck_assert_float_eq(wobble->coefs[11], -0.1);
+    ck_assert_float_eq(wobble->coefs[12], -0.082);
+    ck_assert_float_eq(wobble->coefs[13], -0.054);
+    ck_assert_float_eq(wobble->coefs[14], -0.012);
+}
+END_TEST
+
+
+START_TEST (IMP_read_all_files_check)
+{
+    // THEN
+    IMP_read_all_files();
+
+    // just the sanity checks
+    ck_assert_ptr_nonnull(animations[ASSET_HERO_ANIMATION]);
+    ck_assert_ptr_nonnull(gradients[ASSET_GRADIENT_CIRCULAR]);
+    ck_assert_ptr_nonnull(sprites[ASSET_SPRITE_HERO]);
+    ck_assert_ptr_nonnull(wobbles[ASSET_WOBBLE_NO]);
+    ck_assert_ptr_nonnull(wobbles[ASSET_WOBBLE_STABLE]);
+    ck_assert_ptr_nonnull(wobbles[ASSET_WOBBLE_WALKING]);
+    ck_assert_ptr_nonnull(levels[ASSET_LEVEL_SAMPLE]);
+}
+END_TEST
+
 Suite *import_suite(void)
 {
     Suite *s;
@@ -161,6 +210,8 @@ Suite *import_suite(void)
     tcase_add_test(tc_core, IMP_read_level_check_positive);
     tcase_add_test(tc_core, IMP_read_level_check_negative);
     tcase_add_test(tc_core, IMP_read_animation_check);
+    tcase_add_test(tc_core, IMP_read_wobble_check);
+    tcase_add_test(tc_core, IMP_read_all_files_check);
 
     suite_add_tcase(s, tc_core);
 
