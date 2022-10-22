@@ -192,7 +192,6 @@ void HERO_check_collision(
 
 
             if (x_collision != -1) {
-                printf("collision is properly detected! \n");
                 SRTLST_insert(&x_intersections, x_collision); 
             }
             if (y_collision != -1) { SRTLST_insert(&y_intersections, y_collision); }
@@ -202,7 +201,6 @@ void HERO_check_collision(
     
     if (x_intersections != NULL) {
 
-        printf("collision is properly read! \n");
         hero->x_vel = 0;  //stop moving!
 
         if (hero->direction == LEFT) {
@@ -213,9 +211,6 @@ void HERO_check_collision(
             SDL_Rect *frame = NULL;
             frame = HERO_current_frame(hero);
 
-            printf("xintersections = %d\n", x_intersections->value);
-            printf("frame_w = %d\n", frame->w);
-            printf("view_x = %d\n", hero->view_x);
             new_x = x_intersections->value - frame->w;
             hero->x -= hero->view_x - new_x;
         }

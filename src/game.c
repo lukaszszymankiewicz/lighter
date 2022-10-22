@@ -20,7 +20,7 @@ void GAME_close(
    LIG_free(game->light);
    LVL_free(game->level);
    HERO_free(game->hero);
-   LIG_free_all_files();
+   IMP_free_all_files();
    free(game);
    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
    GFX_free();
@@ -64,7 +64,7 @@ int main(
     game_t* game = NULL;
     GFX_init_graphics();
     IMP_read_all_files();
-    LIG_read_all_files();
+    IMP_update_all_files();
     game = GAME_init();
     EVNT_init();
     TIMER_start(game->fps_timer);
@@ -91,7 +91,7 @@ int main(
         LVL_draw(game->level, game->hero->x, game->hero->y);
         LVL_fill_shadowbuffer_with_tiles(game->level, game->hero->x, game->hero->y, 0);
         GFX_draw_lightbuffer(
-            game->light->src->gradient_texture,
+            game->light->src->gradient,
             game->hero->view_x,
             game->hero->view_y
         );

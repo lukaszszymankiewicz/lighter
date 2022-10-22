@@ -25,6 +25,7 @@ TARGET =                      \
 	$(SRCDIR)/light.c         \
 	$(SRCDIR)/vertex.c        \
 	$(SRCDIR)/segment.c       \
+	$(SRCDIR)/sprites.c       \
 	$(SRCDIR)/point.c         \
 
 TESTTARGET =                        \
@@ -50,6 +51,7 @@ TESTTARGET =                        \
 	$(SRCDIR)/files.c               \
 	$(SRCDIR)/point.c               \
 	$(SRCDIR)/segment.c             \
+	$(SRCDIR)/sprites.c             \
 	$(SRCDIR)/sorted_list.c         \
 	$(SRCDIR)/timer.c               \
 	$(SRCDIR)/tile.c                \

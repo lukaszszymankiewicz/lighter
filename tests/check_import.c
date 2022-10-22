@@ -31,6 +31,8 @@ START_TEST (IMP_read_level_check_positive)
     level = IMP_read_level(filename);
 
     // THEN
+    ck_assert_ptr_nonnull(level);
+
     ck_assert_int_eq(level->size_x, expected_x_size);
     ck_assert_int_eq(level->size_y, expected_y_size);
 
@@ -179,6 +181,110 @@ START_TEST (IMP_read_wobble_check)
 }
 END_TEST
 
+START_TEST (IMP_read_lightsource_lighter_check)
+{
+    // GIVEN
+    lightsource_t *lightsource  = NULL;
+    char *filename         = "./assets/lightsources/lighter.lsrc";
+
+    // WHEN
+    lightsource = IMP_read_lightsource(filename);
+
+    // THEN
+    ck_assert_ptr_nonnull(lightsource);
+
+    ck_assert_float_eq(lightsource->width, PI / 7);
+    ck_assert_int_eq(lightsource->penetrating_power, 7);
+    ck_assert_int_eq(lightsource->n_poly, 3);
+
+    ck_assert_int_eq(lightsource->light_polygons[0].x, 0);
+    ck_assert_int_eq(lightsource->light_polygons[0].y, 0);
+    ck_assert_int_eq(lightsource->light_polygons[0].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[0].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[0].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[0].light_power, 50);
+    ck_assert_int_eq(lightsource->light_polygons[0].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[1].x, 0);
+    ck_assert_int_eq(lightsource->light_polygons[1].y, 0);
+    ck_assert_int_eq(lightsource->light_polygons[1].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[1].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[1].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[1].light_power, 30);
+    ck_assert_int_eq(lightsource->light_polygons[1].width, 36);
+
+    ck_assert_int_eq(lightsource->light_polygons[2].x, 0);
+    ck_assert_int_eq(lightsource->light_polygons[2].y, 0);
+    ck_assert_int_eq(lightsource->light_polygons[2].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[2].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[2].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[2].light_power, 20);
+    ck_assert_int_eq(lightsource->light_polygons[2].width, 72);
+
+    ck_assert_int_eq(lightsource->wobbable, 1);
+
+}
+END_TEST
+
+START_TEST (IMP_read_lightsource_lantern_check)
+{
+    // GIVEN
+    lightsource_t *lightsource  = NULL;
+    char *filename         = "./assets/lightsources/lantern.lsrc";
+
+    // WHEN
+    lightsource = IMP_read_lightsource(filename);
+
+    // THEN
+    ck_assert_ptr_nonnull(lightsource);
+
+    ck_assert_float_eq(lightsource->width, 0.0);
+    ck_assert_int_eq(lightsource->penetrating_power, 7);
+    ck_assert_int_eq(lightsource->n_poly, 5);
+
+    ck_assert_int_eq(lightsource->light_polygons[0].x, -10);
+    ck_assert_int_eq(lightsource->light_polygons[0].y, -10);
+    ck_assert_int_eq(lightsource->light_polygons[0].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[0].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[0].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[0].light_power, 10);
+    ck_assert_int_eq(lightsource->light_polygons[0].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[1].x, 10);
+    ck_assert_int_eq(lightsource->light_polygons[1].y, -10);
+    ck_assert_int_eq(lightsource->light_polygons[1].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[1].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[1].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[1].light_power, 10);
+    ck_assert_int_eq(lightsource->light_polygons[1].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[2].x, 10);
+    ck_assert_int_eq(lightsource->light_polygons[2].y, 10);
+    ck_assert_int_eq(lightsource->light_polygons[2].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[2].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[2].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[2].light_power, 10);
+    ck_assert_int_eq(lightsource->light_polygons[2].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[3].x, -10);
+    ck_assert_int_eq(lightsource->light_polygons[3].y, 10);
+    ck_assert_int_eq(lightsource->light_polygons[3].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[3].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[3].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[3].light_power, 10);
+    ck_assert_int_eq(lightsource->light_polygons[3].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[4].x, 0);
+    ck_assert_int_eq(lightsource->light_polygons[4].y, 0);
+    ck_assert_int_eq(lightsource->light_polygons[4].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[4].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[4].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[4].light_power, 50);
+    ck_assert_int_eq(lightsource->light_polygons[4].width, 0);
+
+    ck_assert_int_eq(lightsource->wobbable, 0);
+}
+END_TEST
 
 START_TEST (IMP_read_all_files_check)
 {
@@ -196,6 +302,7 @@ START_TEST (IMP_read_all_files_check)
 }
 END_TEST
 
+
 Suite *import_suite(void)
 {
     Suite *s;
@@ -204,11 +311,13 @@ Suite *import_suite(void)
     s = suite_create("import");
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, IMP_read_level_check_positive);
     tcase_add_test(tc_core, IMP_read_level_check_negative);
+    tcase_add_test(tc_core, IMP_read_level_check_positive);
     tcase_add_test(tc_core, IMP_read_animation_check);
     tcase_add_test(tc_core, IMP_read_wobble_check);
     tcase_add_test(tc_core, IMP_read_all_files_check);
+    tcase_add_test(tc_core, IMP_read_lightsource_lighter_check);
+    tcase_add_test(tc_core, IMP_read_lightsource_lantern_check);
 
     suite_add_tcase(s, tc_core);
 

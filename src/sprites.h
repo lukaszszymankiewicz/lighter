@@ -26,4 +26,6 @@ typedef struct animation_sheet {
   animation_t  animations[MAX_ANIMATION];
 } animation_sheet_t;
 
+void ANIM_free(animation_sheet_t* animation);
+
 #endif
