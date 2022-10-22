@@ -1,18 +1,38 @@
 #include "global.h"
-#include "gfx.h"
-#include "tile.h"
 #include "level.h"
-#include "import.h"
+#include "files.h"
 #include "primitives.h"
-#include "segment.h"
+#include "import.h"
+#include "sprites.h"
 #include "string.h"
 
-static const int VAL_SIZE = 2;
-static const int NO_READ_ERROR = 1;
-static const char *LEVEL_READ_MODE = "rb";
-static const char *LEVEL_STRUCTURE_PREFIX = "level.llv";
-static const char *LEVEL_TILESET_PREFIX = "level.png";
-static const char *SEPARATOR = "/";
+#define PROPER_PACK_COUNT   1
+#define BUFFER_SIZE         2
+#define DOUBLE_BYTE         2
+#define COORDS_PER_RECT     4
+#define PREAMBULE_LEN       2
+
+#define FIRST_HALF          0
+#define SECOND_HALF         1
+
+static const int ANIMATION_PREAMBULE[PREAMBULE_LEN]   = { 16718, 18765 };
+static const int WOBBLE_PREAMBULE[PREAMBULE_LEN]      = { 22338, 16972 };
+static const int LIGHTSOURCE_PREAMBULE[PREAMBULE_LEN] = { 19539, 21059 };
+static const int LEVEL_PREAMBULE[PREAMBULE_LEN]       = { 19525, 22092 };
+
+static const char *LEVEL_READ_MODE        = "rb";
+static const char *LEVEL_STRUCTURE_SUFFIX = "level.llv";
+static const char *LEVEL_TILESET_SUFFIX   = "level.png";
+static const char *SEPARATOR              = "/";
+
+static char buffer[BUFFER_SIZE];
+
+animation_sheet_t *animations[ASSET_ANIMATION_ALL];
+texture_t         *gradients[ASSET_GRADIENT_ALL];
+texture_t         *sprites[ASSET_SPRITE_ALL];
+wobble_t          *wobbles[ASSET_WOBBLE_ALL];
+level_t           *levels[ASSET_LEVEL_ALL];
+lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL]; 
 
 char* IMP_concatenate_string(
     const char *a, const char *b, const char *d
@@ -28,88 +48,98 @@ char* IMP_concatenate_string(
     return str;
 }
 
-mapfile_t* IMP_new_mapfile(
-    char *filename
+unsigned short int IMP_cast_val_to_dec(char vals[DOUBLE_BYTE]) {
+    return (unsigned short int) ((unsigned short int) vals[0]<<8 | (unsigned char) vals[1]);
+}
+
+texture_t* IMP_read_texture(
+    const char *filepath
 ) {
-    mapfile_t *new_mapfile         = NULL;
-    new_mapfile                    = (mapfile_t*)malloc(sizeof(mapfile_t));
+	SDL_Texture *new_texture    = NULL;
+    SDL_Surface *loaded_surface = NULL;
 
-    new_mapfile->file              = NULL;
-    new_mapfile->filename          = NULL;
-    new_mapfile->tileset_filename  = NULL;
-    new_mapfile->state             = IDLE;
+    loaded_surface              = IMG_Load(filepath);
 
-    new_mapfile->filename = IMP_concatenate_string(filename, SEPARATOR, LEVEL_STRUCTURE_PREFIX);
-    new_mapfile->tileset_filename = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_PREFIX);
+    // dummy texture if reading file failed
+    if (loaded_surface == NULL) {
+        new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 20, 20);
+        texture_t* p = malloc(sizeof(texture_t));
 
-    return new_mapfile;
-}
+        p->surface = new_texture;
+        p->width   = loaded_surface->w;
+        p->height  = loaded_surface->h;
 
-void IMP_free_mapfile(
-    mapfile_t *map
-) {
-    if (map->file != NULL) {
-        fclose(map->file);
+        return p;
     }
+    else {
+        SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
+        new_texture  = SDL_CreateTextureFromSurface(renderer, loaded_surface);
+        texture_t* p = malloc(sizeof(texture_t));
 
-    if (map != NULL) {
-        free(map);
-        map = NULL;
+        p->surface = new_texture;
+        p->width   = loaded_surface->w;
+        p->height  = loaded_surface->h;
+
+        SDL_FreeSurface(loaded_surface);
+
+        return p;
     }
-}
+};
 
-int castValToDec(unsigned char vals[VAL_SIZE]) {
-    return vals[0]<<8 | vals[1];
-}
-
-int IMP_fill_level(mapfile_t *map, level_t *level) {
-    unsigned char bin_val[2];
-
+int IMP_fill_level(level_t *level, FILE *file) {
     int tiles_counter = 0;
     int layer_counter = 0;
-    int layer_read = 0;
-    int cur_tile_idx = 0;
+    int layer_read    = 0;
+    int cur_tile_idx  = 0;
+    int state         = 0;
     int coords_per_single_tile_per_layer;
     int coords_per_single_tile;
     int x_size, y_size;
     int x_tile, y_tile;
 
-    map->state++;
+    state++;
 
-    while((fread(bin_val, VAL_SIZE, 1, map->file) == NO_READ_ERROR)) {
-      int decValue = castValToDec(bin_val);
+    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
+      int dec_value = IMP_cast_val_to_dec(buffer);
 
-      switch (map->state) {
-        case X_SIZE_READ:
-            x_size = decValue;
-            map->state++;
-            break;
+      switch (state) {
 
-        case Y_SIZE_READ: // x and y size of level is read - we can assign them to actual level
-            y_size = decValue;
-            map->state++;
+        case READ_LEVEL_PREAMBULE_FIRST_HALF:
+            if(dec_value != LEVEL_PREAMBULE[FIRST_HALF]) { return 0; }
+            state++; break;
+
+        case READ_LEVEL_PREAMBULE_SECOND_HALF:
+            if(dec_value != LEVEL_PREAMBULE[SECOND_HALF]) { return 0; }
+            state++; break;
+
+        case READ_LEVEL_X_SIZE:
+            x_size = dec_value;
+            state++; break;
+
+        case READ_LEVEL_Y_SIZE:
+            y_size = dec_value;
             LVL_set_size(level, x_size, y_size);
+            state++; break;
+
+        case READ_LEVEL_TILES_SUM:
+            coords_per_single_tile_per_layer = dec_value;
+            state++;
             break;
 
-        case TILES_SUM_READ:
-            coords_per_single_tile_per_layer = decValue;
-            map->state++;
+        case READ_LEVEL_TILE_SUM:
+            coords_per_single_tile = dec_value;
+            state++;
             break;
 
-        case TILE_SUM_READ:
-            coords_per_single_tile = decValue;
-            map->state++;
-            break;
-
-        case TILE_X_READ:
-            x_tile = decValue;
+        case READ_LEVEL_TILE_X:
+            x_tile = dec_value;
             tiles_counter++;
             layer_counter++;
-            map->state++;
+            state++;
             break;
 
-        case TILE_Y_READ:
-            y_tile = decValue;
+        case READ_LEVEL_TILE_Y:
+            y_tile = dec_value;
             tiles_counter++;
             layer_counter++;
             
@@ -131,80 +161,356 @@ int IMP_fill_level(mapfile_t *map, level_t *level) {
 
                 if (layer_read == 3) {
                     // eveything is read - move on 
-                    map->state=ALL_TILES_READ;
+                    state= READ_LEVEL_ALL_TILES_READ;
                     break;
                 }
 
+                state = READ_LEVEL_TILES_SUM;
                 layer_counter = 0;
-                map->state = TILES_SUM_READ;
                 cur_tile_idx = 0;
                 tiles_counter=0;
                 break;
             } else if (tiles_counter == coords_per_single_tile) {
                 cur_tile_idx++;
-                map->state = TILE_SUM_READ;
+                state = READ_LEVEL_TILE_SUM;
                 tiles_counter = 0;
                 break;
             // current tile is not yet read
             } else {
-                map->state = TILE_X_READ;
+                state = READ_LEVEL_TILE_X;
                 break;
             }
-        case ALL_TILES_READ:
+        case READ_LEVEL_ALL_TILES_READ:
             break;
       }
     }
-
     return 1;
 }
 
-int IMP_read_file(mapfile_t *map) {
-    map->file = fopen(map->filename, LEVEL_READ_MODE);
-
-    if (map->file == NULL) {
-        return -1;
-    }
-    return 1;
-}
-
-int IMP_read_tileset(level_t *level, mapfile_t *map) {
-    texture_t *tileset = NULL;
-    tileset = GFX_read_texture(map->tileset_filename);
-
-    if (tileset == NULL) {
-        return -1;
-    } else if ((tileset->width % TILE_WIDTH) || (tileset->height % TILE_HEIGHT)) {
-        return -1;
-    }
-
-    LVL_set_tileset(level, tileset);
-    return 1;
-}
-
-level_t* IMP_read_from_file(
-    char *filename
+level_t* IMP_read_level(
+    const char *filename
 ) {
-    level_t *level;
-    level = NULL;
-    level = LVL_new();
+    level_t *level     = NULL;
+    level              = LVL_new();
 
-    mapfile_t* map;
-    map = NULL;
-    map = IMP_new_mapfile(filename);
+    FILE *file         = NULL;
+    char *data_path    = NULL;
+    char *img_path     = NULL;
+    texture_t *tileset = NULL;
 
-    if (IMP_read_file(map) == -1) {
-        return NULL;
-    }
+    data_path = IMP_concatenate_string(filename, SEPARATOR, LEVEL_STRUCTURE_SUFFIX);
+    img_path  = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_SUFFIX);
 
-    if (IMP_read_tileset(level, map) == -1) {
-        return NULL;
-    }
+    file = fopen(data_path, LEVEL_READ_MODE);
+    if (file == NULL) { return NULL; }
 
+    tileset = IMP_read_texture(img_path);
+    if (!tileset) { return NULL; }
+    
+    level->tileset = tileset;
     LVL_fill_tiles(level);
-    IMP_fill_level(map, level);
 
-    IMP_free_mapfile(map);
+    if (IMP_fill_level(level, file) == 0) { return NULL; }
 
     return level;
 }
 
+animation_sheet_t* IMP_read_animation(
+    const char *filepath
+) {
+    animation_sheet_t *sheet      = NULL;
+
+    sheet                         = malloc(sizeof(animation_sheet_t));
+
+    int state                     = READ_ANIMATION_PREAMBULE_IDLE;
+    FILE *file                    = NULL;
+    file                          = fopen(filepath, LEVEL_READ_MODE);
+    
+    int coords[COORDS_PER_RECT];
+    int idx                       = 0; // temp container
+    int frame_idx                 = 0; // temp container
+    int hitbox_idx                = 0; // temp container
+    int rect_coord_idx            = 0; // temp container
+    int cur_animation             = 0; // temp container
+
+    state++;
+
+    if (!file) {return NULL;}
+
+    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
+
+    switch (state) 
+    {
+        // preambule
+        case READ_ANIMATION_PREAMBULE_FIRST_HALF:
+            if(IMP_cast_val_to_dec(buffer) != ANIMATION_PREAMBULE[FIRST_HALF]) { return NULL; }
+            state++; break;
+             
+        case READ_ANIMATION_PREAMBULE_SECOND_HALF:
+            if(IMP_cast_val_to_dec(buffer) != ANIMATION_PREAMBULE[SECOND_HALF]) { return NULL; }
+            state++; break;
+        
+        // animation sheet
+        case READ_ANIMATIONS_NUMBER:
+            sheet->n_animations = IMP_cast_val_to_dec(buffer);
+            state++; break;
+        
+        // single animation
+        case READ_ANIMATION_IDX:
+            idx = IMP_cast_val_to_dec(buffer);
+            state++; break;
+
+       case READ_ANIMATION_N_FRAMES:
+            sheet->animations[idx].len = IMP_cast_val_to_dec(buffer);
+            state++; break;
+
+       // single frame
+       case READ_ANIMATION_DELAY:
+            sheet->animations[idx].frames[frame_idx].delay = IMP_cast_val_to_dec(buffer);
+            state++; break;
+       
+       case READ_ANIMATION_RECT:
+            coords[rect_coord_idx] = IMP_cast_val_to_dec(buffer);
+
+            if (++rect_coord_idx == COORDS_PER_RECT) {
+
+                sheet->animations[idx].frames[frame_idx].rect.x = coords[0];
+                sheet->animations[idx].frames[frame_idx].rect.y = coords[1];
+                sheet->animations[idx].frames[frame_idx].rect.w = coords[2];
+                sheet->animations[idx].frames[frame_idx].rect.h = coords[3];
+
+                rect_coord_idx = 0; state++; 
+            }
+            break;
+
+       case READ_ANIMATION_HITBOX_PER_FRAME:
+            sheet->animations[idx].frames[frame_idx].n_hit_box = IMP_cast_val_to_dec(buffer);
+            state++; break;
+
+       case READ_ANIMATION_HITBOX_RECT:
+            coords[rect_coord_idx] = IMP_cast_val_to_dec(buffer);
+
+            if (rect_coord_idx++ == COORDS_PER_RECT-1) {
+                sheet->animations[idx].frames[frame_idx].hit_boxes[hitbox_idx].x = coords[0];
+                sheet->animations[idx].frames[frame_idx].hit_boxes[hitbox_idx].y = coords[1];
+                sheet->animations[idx].frames[frame_idx].hit_boxes[hitbox_idx].w = coords[2];
+                sheet->animations[idx].frames[frame_idx].hit_boxes[hitbox_idx].h = coords[3];
+
+                rect_coord_idx = 0;
+
+                if (++hitbox_idx == sheet->animations[idx].frames[frame_idx].n_hit_box) {
+
+                    if (++frame_idx < sheet->animations[idx].len) {
+                        state = READ_ANIMATION_DELAY;
+                        hitbox_idx = 0;
+                        rect_coord_idx = 0;
+                    } else if (++cur_animation < sheet->n_animations) {
+                        hitbox_idx = 0;
+                        rect_coord_idx = 0;
+                        frame_idx = 0;
+                        state = READ_ANIMATION_IDX;
+                    } else {
+                        state++;
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    return sheet;
+}
+
+wobble_t* IMP_read_wobble(
+    const char *filepath
+) {
+    wobble_t *wobble = NULL;
+    wobble           = (wobble_t*)malloc(sizeof(wobble_t));
+
+    int state                     = READ_WOBBLE_IDLE;
+    FILE *file                    = NULL;
+    file                          = fopen(filepath, LEVEL_READ_MODE);
+     
+    int coef_n                    = 0;
+    int sign                      = 0;
+    int val                       = 0;
+
+    state++;
+
+    if (!file) {return NULL;}
+
+    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
+        switch (state) 
+        {
+            case READ_WOBBLE_PREAMBULE_FIRST_HALF:
+                if(IMP_cast_val_to_dec(buffer) != WOBBLE_PREAMBULE[FIRST_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_WOBBLE_PREAMBULE_SECOND_HALF:
+                if(IMP_cast_val_to_dec(buffer) != WOBBLE_PREAMBULE[SECOND_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_WOBBLE_NUMBER:
+                wobble->len = IMP_cast_val_to_dec(buffer);
+                wobble->coefs = (float*)malloc(sizeof(float) * wobble->len);
+                state++; break;
+
+            case READ_WOBBLE_SIGN:
+                val = IMP_cast_val_to_dec(buffer);
+                sign = val==1 ? 1 : -1;
+                state++; break;
+
+            case READ_WOBBLE_COEF:
+                val = IMP_cast_val_to_dec(buffer);
+                wobble->coefs[coef_n] = (float)(sign * val) / 1000.0;
+
+                if (++coef_n == wobble->len) {
+                    state++; break;
+                } else {
+                    state = READ_WOBBLE_SIGN; break;
+                }
+        }
+    }
+
+    return wobble;
+}
+
+lightsource_t* IMP_read_lightsource(
+    const char *filepath
+) {
+    lightsource_t *lightsource = NULL;
+    lightsource                = (lightsource_t*)malloc(sizeof(lightsource_t));
+
+    int state                   = READ_LIGHTSOURCE_IDLE;
+    FILE *file                  = NULL;
+    file                        = fopen(filepath, LEVEL_READ_MODE);
+     
+    int n_polygon               = 0;
+    int width                   = 0;
+    int x                       = 0;
+    int y                       = 0;
+
+    state++;
+
+    if (!file) {return NULL;}
+
+    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
+        switch (state) 
+        {
+            case READ_LIGHTSOURCE_PREAMBULE_FIRST_HALF:
+                if(IMP_cast_val_to_dec(buffer) != LIGHTSOURCE_PREAMBULE[FIRST_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_LIGHTSOURCE_PREAMBULE_SECOND_HALF:
+                if(IMP_cast_val_to_dec(buffer) != LIGHTSOURCE_PREAMBULE[SECOND_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_LIGHSOURCE_WIDTH:
+                width = IMP_cast_val_to_dec(buffer);
+
+                // just to avoid dividing zero
+                if (width != 0) {
+                    lightsource->width = PI / IMP_cast_val_to_dec(buffer);
+                } else {
+                    lightsource->width = 0.0;
+                }
+
+                state++; break;
+
+            case READ_LIGHSOURCE_PENETRATING_POWER:
+                lightsource->penetrating_power = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGONS_NUMBER:
+
+                lightsource->n_poly = IMP_cast_val_to_dec(buffer);
+                lightsource->light_polygons = NULL;
+                lightsource->light_polygons = (lightpolygon_t*)malloc(sizeof(lightpolygon_t) * lightsource->n_poly);
+
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_X:
+                x = IMP_cast_val_to_dec(buffer);
+
+                // invert the sign
+                if (x > 255 * 256) {
+                    x -= 255 * 256;
+                    x *= -1;
+                }
+
+                lightsource->light_polygons[n_polygon].x = x;
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_Y:
+                y = IMP_cast_val_to_dec(buffer);
+
+                // invert the sign
+                if (y > 255 * 256) {
+                    y -= 255 * 256;
+                    y *= -1;
+                }
+                lightsource->light_polygons[n_polygon].y = y;
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_RED:
+                lightsource->light_polygons[n_polygon].red = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_GREEN:
+                lightsource->light_polygons[n_polygon].green = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_BLUE:
+                lightsource->light_polygons[n_polygon].blue = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_POWER:
+                lightsource->light_polygons[n_polygon].light_power = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_WIDTH:
+                lightsource->light_polygons[n_polygon].width = IMP_cast_val_to_dec(buffer);
+
+                if (++n_polygon == lightsource->n_poly) {
+                    state++; break;
+                } {
+                    state = READ_LIGHSOURCE_POLYGON_X; break;
+                }
+
+            case READ_LIGHSOURCE_WOBBABLE:
+                lightsource->wobbable = (bool)IMP_cast_val_to_dec(buffer);
+                state++; break;
+        }
+    }
+
+    return lightsource;
+}
+
+void IMP_read_all_files() {
+    animations[ASSET_HERO_ANIMATION]         = IMP_read_animation(FILEPATH_HERO_ANIMATION);
+    gradients[ASSET_GRADIENT_CIRCULAR]       = IMP_read_texture(FILEPATH_GRADIENT_CIRCULAR);
+    sprites[ASSET_SPRITE_HERO]               = IMP_read_texture(FILEPATH_SPRITE_HERO);
+    wobbles[ASSET_WOBBLE_NO]                 = IMP_read_wobble(FILEPATH_WOBBLE_NO);
+    wobbles[ASSET_WOBBLE_STABLE]             = IMP_read_wobble(FILEPATH_WOBBLE_STABLE);
+    wobbles[ASSET_WOBBLE_WALKING]            = IMP_read_wobble(FILEPATH_WOBBLE_WALKING);
+    levels[ASSET_LEVEL_SAMPLE]               = IMP_read_level(FILEPATH_LEVEL_SAMPLE);
+    lightsources[ASSET_LIGHTER_LIGHTSOURCE]  = IMP_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    lightsources[ASSET_LANTERN_LIGHTSOURCE]  = IMP_read_lightsource(FILEPATH_LANTERN_LIGHTSOURCE);
+}
+
+void IMP_update_all_files() {
+    lightsources[ASSET_LIGHTER_LIGHTSOURCE]->gradient = gradients[ASSET_GRADIENT_CIRCULAR];
+    lightsources[ASSET_LANTERN_LIGHTSOURCE]->gradient = gradients[ASSET_GRADIENT_CIRCULAR];
+}
+
+void IMP_free_all_files() {
+    ANIM_free(animations[ASSET_HERO_ANIMATION]);
+    GFX_free_texture(gradients[ASSET_GRADIENT_CIRCULAR]);
+    GFX_free_texture(sprites[ASSET_SPRITE_HERO]);
+    LIG_free_wobble(wobbles[ASSET_WOBBLE_NO]);
+    LIG_free_wobble(wobbles[ASSET_WOBBLE_STABLE]);
+    LIG_free_wobble(wobbles[ASSET_WOBBLE_WALKING]);
+    LVL_free(levels[ASSET_LEVEL_SAMPLE]);
+    LIG_free_lightsource(lightsources[ASSET_LIGHTER_LIGHTSOURCE]);
+    LIG_free_lightsource(lightsources[ASSET_LANTERN_LIGHTSOURCE]);
+}

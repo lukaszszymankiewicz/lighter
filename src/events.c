@@ -29,7 +29,7 @@ void EVNT_init() {
 // handles input from player and manipulating game window (resize, exit etc)
 void EVNT_handle_SDL_events(
     game_t *game
-){
+) {
 
   while (SDL_PollEvent(&(game->event)) != 0) {
     if (game->event.type == SDL_QUIT){ 
@@ -69,12 +69,6 @@ void EVNT_handle_keypress(
       EVTN_clear_keypress(game, SDL_SCANCODE_SPACE);
   }
 
-  // SPACE
-  if KEY_PRESSED(SDL_SCANCODE_Q) {
-      debug = (debug + 1) % MAX_DEBUG;
-      EVTN_clear_keypress(game, SDL_SCANCODE_Q);
-  }
-
   // RIGHT ARROW
   if KEY_PRESSED(SDL_SCANCODE_D) {
       HERO_move(game->hero, RIGHT);
@@ -86,7 +80,6 @@ void EVNT_handle_keypress(
       HERO_move(game->hero, LEFT);
       EVTN_clear_keypress(game, SDL_SCANCODE_A);
   }
-
 }
 
 void EVNT_handle_events(

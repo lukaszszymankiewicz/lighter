@@ -11,8 +11,6 @@
 #define Y_FRICTION       1
 #define JUMP_POWUH       10
 
-enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, MAX_STATE };
-
 typedef struct hero {
     int state;
     int x;
@@ -27,7 +25,7 @@ typedef struct hero {
     animation_sheet_t* sprites;
 } hero_t;
 
-hero_t* HERO_init(char* animation_sheet, int starting_pos_x, int starting_pos_y);
+hero_t* HERO_init(int starting_pos_x, int starting_pos_y);
 void HERO_draw(hero_t* hero_o);
 void HERO_free(hero_t* hero_o);
 int HERO_light_x(hero_t* hero_o);

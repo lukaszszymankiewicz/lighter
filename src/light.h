@@ -7,14 +7,8 @@
 
 #define R                               2000
 #define RAY_THRESHOLD                   2
-#define ALL_AVAILABLE_LIGHTSOURCES      2
-#define ALL_AVAILABLE_GRADIENT_TEXTURES 1
-#define ALL_AVAILABLE_WOBBLES_PATTERNS  3
 
-enum wobbles            { WOBBLE_DOWN = -1, WOBBLE_UP = 1};
 enum lightsources_names { LIGHTER, LANTERN, ALL };
-enum wobble_patterns    { WOBBLE_NO, WOBBLE_STABLE, WOBBLE_WALK };
-enum gradient_types     { GRADIENT_CIRCULAR };
 enum polydata           { X, Y, RED, GREEN, BLUE, LIGHT_POWER, WIDTH };
 
 typedef struct lightpolygon { 
@@ -36,9 +30,9 @@ typedef struct lightsource {
     float             width;                  // width (in rad) of light cone (0.0 if light takes whole radius)
     int               n_poly;                 // number of light polygon draw
     int               penetrating_power;
-    wobble_t         *wobble[2];              // wobble data
-    texture_t        *gradient_texture;
-    lightpolygon_t   *light_polygons;       // polys correction and colors
+    bool              wobbable;
+    texture_t        *gradient;
+    lightpolygon_t   *light_polygons;         // polys correction and colors
 } lightsource_t;
 
 typedef struct light {
@@ -49,7 +43,6 @@ typedef struct light {
 
 // INITS
 light_t *LIG_init();
-void LIG_read_all_files();
 
 // TESTING
 vertex_t* LIG_get_base_light_polygon(int x, int y, segment_t *obstacles, point_t* hit_points);
@@ -69,8 +62,9 @@ point_t* LIG_generate_slipover_hit_point(int x1, int y1, int x2, int y2);
 point_t* LIG_generate_hit_points(int x, int y, float width, float angle, segment_t* obstacles);
 
 // FREE
-void LIG_free_all_files();
 void LIG_free(light_t *lght);
+void LIG_free_wobble(wobble_t* wobble);
+void LIG_free_lightsource(lightsource_t* lightsource);
 
 void LIG_change_source(light_t *lght);
 void LIG_move_lightsource(light_t* light_o, direction_t light_dir, direction_t hero_dir, int frame);

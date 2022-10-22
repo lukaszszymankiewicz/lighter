@@ -1,36 +1,87 @@
 CC = gcc
-LINKER_FLAGS = `pkg-config --cflags --libs sdl2 SDL2_image` 
-COMPILER_FLAGS = -w -lm
-TARGET = lighter
-SOURCES =               \
-	src/game.c          \
-	src/gfx.c           \
-	src/import.c        \
-	src/sprites.c       \
-	src/events.c        \
-	src/hero.c          \
-	src/timer.c         \
-	src/tile.c          \
-	src/level.c         \
-	src/geometry.c      \
-	src/sorted_list.c   \
-	src/light.c         \
-	src/vertex.c        \
-	src/segment.c       \
-	src/point.c         \
+CFLAGS := --std=c99 -Wall -g
+LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
+LIBS = -lm
+OBJ = lighter
 
-.PHONY: run
-run: 
-	./$(TARGET)
+TESTOBJ = check_tests_suite
+TESTLINKS = `pkg-config --cflags --libs check sdl2 SDL2_image` 
+
+SRCDIR = src
+TESTDIR = tests
+
+TARGET =                      \
+	$(SRCDIR)/game.c          \
+	$(SRCDIR)/gfx.c           \
+	$(SRCDIR)/import.c        \
+	$(SRCDIR)/events.c        \
+	$(SRCDIR)/hero.c          \
+	$(SRCDIR)/timer.c         \
+	$(SRCDIR)/tile.c          \
+	$(SRCDIR)/files.c         \
+	$(SRCDIR)/level.c         \
+	$(SRCDIR)/geometry.c      \
+	$(SRCDIR)/sorted_list.c   \
+	$(SRCDIR)/light.c         \
+	$(SRCDIR)/vertex.c        \
+	$(SRCDIR)/segment.c       \
+	$(SRCDIR)/sprites.c       \
+	$(SRCDIR)/point.c         \
+
+TESTTARGET =                        \
+    $(TESTDIR)/check_tests.c        \
+    $(TESTDIR)/check_events.c       \
+	$(TESTDIR)/check_geometry.c     \
+	$(TESTDIR)/check_gfx.c	        \
+	$(TESTDIR)/check_import.c       \
+	$(TESTDIR)/check_hero.c         \
+	$(TESTDIR)/check_level.c        \
+	$(TESTDIR)/check_light.c        \
+	$(TESTDIR)/check_point.c        \
+	$(TESTDIR)/check_segment.c      \
+	$(TESTDIR)/check_sorted_list.c  \
+	$(TESTDIR)/check_vertex.c       \
+	$(SRCDIR)/events.c              \
+	$(SRCDIR)/geometry.c            \
+	$(SRCDIR)/gfx.c                 \
+	$(SRCDIR)/import.c              \
+	$(SRCDIR)/hero.c                \
+	$(SRCDIR)/level.c               \
+	$(SRCDIR)/light.c               \
+	$(SRCDIR)/files.c               \
+	$(SRCDIR)/point.c               \
+	$(SRCDIR)/segment.c             \
+	$(SRCDIR)/sprites.c             \
+	$(SRCDIR)/sorted_list.c         \
+	$(SRCDIR)/timer.c               \
+	$(SRCDIR)/tile.c                \
+	$(SRCDIR)/vertex.c              \
 
 .PHONY: lighter
-$(TARGET) : $(SOURCES)
-	$(CC) $(SOURCES) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(TARGET)
+lighter: 
+	$(CC) $(CFLAGS) $(TARGET) -o $(OBJ) $(LINKS) $(LIBS)
+
+.PHONY: tests
+tests: 
+	$(CC) $(CFLAGS) $(TESTTARGET) -o $(TESTOBJ) $(TESTLINKS) $(LIBS)
+
+.PHONY: run_check_tests_suite
+run_check_tests_suite:
+	./$(TESTOBJ)
+
+.PHONY: run_lighter
+run_lighter:
+	./$(OBJ)
+
+.PHONY: run
+run:
+	make clean lighter run_lighter
+
+.PHONY: runtests
+runtests:
+	make clean tests run_check_tests_suite
 
 .PHONY: clean
 clean:
-	$(RM) $(TARGET)
+	$(RM) $(OBJ) $(TESTOBJ)
 
-.PHONY: all
-all:
-	make clean lighter run

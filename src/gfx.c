@@ -1,5 +1,4 @@
 #include "global.h"
-#include <stdio.h>
 #include "gfx.h"
 #include "primitives.h"
 #include "sorted_list.h"
@@ -167,40 +166,6 @@ void GFX_update() {
     SDL_UpdateWindowSurface(window);
 };
 
-// reads texture from a file and converts it into SDL_Texture
-texture_t* GFX_read_texture(
-    char *filepath
-) {
-	SDL_Texture *new_texture    = NULL;
-    SDL_Surface *loaded_surface = NULL;
-
-    loaded_surface              = IMG_Load(filepath);
-
-    // dummy texture if reading file failed
-    if (loaded_surface == NULL) {
-        new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 20, 20);
-        texture_t* p = malloc(sizeof(texture_t));
-
-        p->surface = new_texture;
-        p->width   = loaded_surface->w;
-        p->height  = loaded_surface->h;
-
-        return p;
-    }
-    else {
-        SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
-        new_texture  = SDL_CreateTextureFromSurface(renderer, loaded_surface);
-        texture_t* p = malloc(sizeof(texture_t));
-
-        p->surface = new_texture;
-        p->width   = loaded_surface->w;
-        p->height  = loaded_surface->h;
-
-        SDL_FreeSurface(loaded_surface);
-
-        return p;
-    }
-};
 
 // renders texture to screen
 void GFX_render_tile(

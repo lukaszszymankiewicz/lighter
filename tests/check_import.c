@@ -1,111 +1,26 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <check.h>
-#include "../src/level.h"
 #include "../src/import.h"
+#include "../src/files.h"
 
-START_TEST (IMP_new_mapfile_check)
+START_TEST (IMP_read_level_check_negative)
 {
     // GIVEN
-    mapfile_t *map;
-    map = NULL;
-    char *filename = "sample_level_name";
+    level_t *level = NULL;
+    char *filename =    "./nonexisintg";
 
     // WHEN
-    map = IMP_new_mapfile(filename);
+    level = IMP_read_level(filename);
 
     // THEN
-    ck_assert_ptr_null(map->file);
-    ck_assert_pstr_eq(map->filename, "sample_level_name/level.llv");
-
-    ck_assert_pstr_eq(map->tileset_filename, "sample_level_name/level.png");
-    ck_assert_int_eq(map->state, IDLE);  // IDLE == 0
-
+    ck_assert_ptr_null(level);
 }
 END_TEST
-
-START_TEST (IMP_free_mapfile_empty_mapfile_check)
+ 
+START_TEST (IMP_read_level_check_positive)
 {
     // GIVEN
-    mapfile_t *map;
-    map = NULL;
-    char *filename = "sample_level_name";
-
-    // WHEN
-    map = IMP_new_mapfile(filename);
-    IMP_free_mapfile(map);
-}
-END_TEST
-
-START_TEST (IMP_read_file_check)
-{
-    // GIVEN
-    mapfile_t *map;
-    map = NULL;
-    char *exisiting_filename =    "./testfiles/testlevel";
-    char *nonexisiting_filename =    "./testfiles/nonexisiting_filename";
-    int result;
-
-    // WHEN (existing file)
-    map = IMP_new_mapfile(exisiting_filename);
-    result = IMP_read_file(map);
-
-    // THEN
-    ck_assert_int_eq(result, 1);
-
-    // CLEANUP
-    IMP_free_mapfile(map);
-    map = NULL;
-
-    // WHEN (nonexisting file)
-    map = IMP_new_mapfile(nonexisiting_filename);
-    result = IMP_read_file(map);
-
-    // THEN
-    ck_assert_int_eq(result, -1);
-}
-END_TEST
-
-START_TEST (IMP_read_tileset_check)
-{
-    // GIVEN
-    mapfile_t *map;
-    map = NULL;
-    char *exisiting_filename =    "./testfiles/testlevel";
-    char *nonexisiting_filename =    "./testfiles/nonexisiting_filename";
-    int result;
-
-    level_t *level;
-    level = NULL;
-    level = LVL_new();
-
-    // WHEN (existing file)
-    map = IMP_new_mapfile(exisiting_filename);
-    result = IMP_read_tileset(level, map);
-
-    // THEN
-    ck_assert_int_eq(result, 1);
-
-    // CLEANUP
-    IMP_free_mapfile(map);
-    map = NULL;
-
-    // WHEN (nonexisting file)
-    map = IMP_new_mapfile(nonexisiting_filename);
-    result = IMP_read_file(map);
-
-    // THEN
-    ck_assert_int_eq(result, -1);
-}
-END_TEST
-
-START_TEST (IMP_read_from_file_check)
-{
-
-    // GIVEN
-    level_t *level;
-    level = NULL;
-    char *filename =    "./testfiles/testlevel";
+    level_t *level = NULL;
+    char *filename =    "./tests/testfiles/testlevel";
 
     int expected_x_size = 40;
     int expected_y_size = 40;
@@ -113,9 +28,11 @@ START_TEST (IMP_read_from_file_check)
     int expected_y_hero = 3;
 
     // WHEN
-    level = IMP_read_from_file(filename);
+    level = IMP_read_level(filename);
 
     // THEN
+    ck_assert_ptr_nonnull(level);
+
     ck_assert_int_eq(level->size_x, expected_x_size);
     ck_assert_int_eq(level->size_y, expected_y_size);
 
@@ -124,6 +41,267 @@ START_TEST (IMP_read_from_file_check)
 }
 END_TEST
  
+START_TEST (IMP_read_animation_check)
+{
+    // GIVEN
+    animation_sheet_t *sheet = NULL;
+    const char *data               = FILEPATH_HERO_ANIMATION;
+    const char *texture            = FILEPATH_SPRITE_HERO;
+
+    // WHEN
+    sheet = IMP_read_animation(data);
+    sheet->texture = IMP_read_texture(texture);
+
+    // THEN
+    ck_assert_ptr_nonnull(sheet);
+    ck_assert_ptr_nonnull(sheet->texture);
+
+    // sheet
+    ck_assert_int_eq(sheet->n_animations, 4);
+
+    // single animation
+    ck_assert_int_eq(sheet->animations[0].len, 2);
+    ck_assert_int_eq(sheet->animations[1].len, 2);
+    ck_assert_int_eq(sheet->animations[2].len, 1);
+    ck_assert_int_eq(sheet->animations[3].len, 1);
+
+    // single frame
+    // first animation 
+    // first frame
+    ck_assert_int_eq(sheet->animations[0].frames[0].delay, 20);
+
+    ck_assert_int_eq(sheet->animations[0].frames[0].rect.x, 0);
+    ck_assert_int_eq(sheet->animations[0].frames[0].rect.y, 0);
+    ck_assert_int_eq(sheet->animations[0].frames[0].rect.w, 9);
+    ck_assert_int_eq(sheet->animations[0].frames[0].rect.h, 20);
+
+    ck_assert_int_eq(sheet->animations[0].frames[0].hit_boxes[0]. x, 0);
+    ck_assert_int_eq(sheet->animations[0].frames[0].hit_boxes[0]. y, 0);
+    ck_assert_int_eq(sheet->animations[0].frames[0].hit_boxes[0]. w, 9);
+    ck_assert_int_eq(sheet->animations[0].frames[0].hit_boxes[0]. h, 20);
+
+    //second frame
+    ck_assert_int_eq(sheet->animations[0].frames[1].delay, 20);
+
+    ck_assert_int_eq(sheet->animations[0].frames[1].rect.x, 9);
+    ck_assert_int_eq(sheet->animations[0].frames[1].rect.y, 0);
+    ck_assert_int_eq(sheet->animations[0].frames[1].rect.w, 9);
+    ck_assert_int_eq(sheet->animations[0].frames[1].rect.h, 20);
+
+    ck_assert_int_eq(sheet->animations[0].frames[1].hit_boxes[0]. x, 0);
+    ck_assert_int_eq(sheet->animations[0].frames[1].hit_boxes[0]. y, 0);
+    ck_assert_int_eq(sheet->animations[0].frames[1].hit_boxes[0]. w, 9);
+    ck_assert_int_eq(sheet->animations[0].frames[1].hit_boxes[0]. h, 20);
+
+    // second animation 
+    // first frame
+    ck_assert_int_eq(sheet->animations[1].frames[0].delay, 5);
+
+    ck_assert_int_eq(sheet->animations[1].frames[0].rect.x, 0);
+    ck_assert_int_eq(sheet->animations[1].frames[0].rect.y, 20);
+    ck_assert_int_eq(sheet->animations[1].frames[0].rect.w, 9);
+    ck_assert_int_eq(sheet->animations[1].frames[0].rect.h, 20);
+
+    ck_assert_int_eq(sheet->animations[1].frames[0].hit_boxes[0]. x, 0);
+    ck_assert_int_eq(sheet->animations[1].frames[0].hit_boxes[0]. y, 0);
+    ck_assert_int_eq(sheet->animations[1].frames[0].hit_boxes[0]. w, 9);
+    ck_assert_int_eq(sheet->animations[1].frames[0].hit_boxes[0]. h, 20);
+
+    // second frame
+    ck_assert_int_eq(sheet->animations[1].frames[1].delay, 5);
+
+    ck_assert_int_eq(sheet->animations[1].frames[1].rect.x, 9);
+    ck_assert_int_eq(sheet->animations[1].frames[1].rect.y, 20);
+    ck_assert_int_eq(sheet->animations[1].frames[1].rect.w, 9);
+    ck_assert_int_eq(sheet->animations[1].frames[1].rect.h, 20);
+
+    ck_assert_int_eq(sheet->animations[1].frames[1].hit_boxes[0]. x, 0);
+    ck_assert_int_eq(sheet->animations[1].frames[1].hit_boxes[0]. y, 0);
+    ck_assert_int_eq(sheet->animations[1].frames[1].hit_boxes[0]. w, 9);
+    ck_assert_int_eq(sheet->animations[1].frames[1].hit_boxes[0]. h, 20);
+
+    // third animation 
+    // first frame
+    ck_assert_int_eq(sheet->animations[2].frames[0].delay, 0);
+
+    ck_assert_int_eq(sheet->animations[2].frames[0].rect.x, 18);
+    ck_assert_int_eq(sheet->animations[2].frames[0].rect.y, 0);
+    ck_assert_int_eq(sheet->animations[2].frames[0].rect.w, 9);
+    ck_assert_int_eq(sheet->animations[2].frames[0].rect.h, 20);
+
+    ck_assert_int_eq(sheet->animations[2].frames[0].hit_boxes[0]. x, 0);
+    ck_assert_int_eq(sheet->animations[2].frames[0].hit_boxes[0]. y, 0);
+    ck_assert_int_eq(sheet->animations[2].frames[0].hit_boxes[0]. w, 9);
+    ck_assert_int_eq(sheet->animations[2].frames[0].hit_boxes[0]. h, 20);
+
+    // fourth animation 
+    // first frame
+    ck_assert_int_eq(sheet->animations[3].frames[0].delay, 0);
+
+    ck_assert_int_eq(sheet->animations[3].frames[0].rect.x, 18);
+    ck_assert_int_eq(sheet->animations[3].frames[0].rect.y, 20);
+    ck_assert_int_eq(sheet->animations[3].frames[0].rect.w, 9);
+    ck_assert_int_eq(sheet->animations[3].frames[0].rect.h, 20);
+
+    ck_assert_int_eq(sheet->animations[3].frames[0].hit_boxes[0]. x, 0);
+    ck_assert_int_eq(sheet->animations[3].frames[0].hit_boxes[0]. y, 0);
+    ck_assert_int_eq(sheet->animations[3].frames[0].hit_boxes[0]. w, 9);
+    ck_assert_int_eq(sheet->animations[3].frames[0].hit_boxes[0]. h, 20);
+}
+END_TEST
+
+START_TEST (IMP_read_wobble_check)
+{
+    // GIVEN
+    wobble_t *wobble = NULL;
+    char *filename   = "./assets/wobbles/walking.wbl";
+
+    // WHEN
+    wobble = IMP_read_wobble(filename);
+
+    // THEN
+    ck_assert_ptr_nonnull(wobble);
+    ck_assert_int_eq(wobble->len, 15);
+
+    ck_assert_float_eq(wobble->coefs[0], 0.012);
+    ck_assert_float_eq(wobble->coefs[1], 0.054);
+    ck_assert_float_eq(wobble->coefs[2], 0.082);
+    ck_assert_float_eq(wobble->coefs[3], 0.1);
+    ck_assert_float_eq(wobble->coefs[4], 0.082);
+    ck_assert_float_eq(wobble->coefs[5], 0.054);
+    ck_assert_float_eq(wobble->coefs[6], 0.012);
+    ck_assert_float_eq(wobble->coefs[7], 0.0);
+    ck_assert_float_eq(wobble->coefs[8], -0.012);
+    ck_assert_float_eq(wobble->coefs[9], -0.054);
+    ck_assert_float_eq(wobble->coefs[10], -0.082);
+    ck_assert_float_eq(wobble->coefs[11], -0.1);
+    ck_assert_float_eq(wobble->coefs[12], -0.082);
+    ck_assert_float_eq(wobble->coefs[13], -0.054);
+    ck_assert_float_eq(wobble->coefs[14], -0.012);
+}
+END_TEST
+
+START_TEST (IMP_read_lightsource_lighter_check)
+{
+    // GIVEN
+    lightsource_t *lightsource  = NULL;
+    char *filename         = "./assets/lightsources/lighter.lsrc";
+
+    // WHEN
+    lightsource = IMP_read_lightsource(filename);
+
+    // THEN
+    ck_assert_ptr_nonnull(lightsource);
+
+    ck_assert_float_eq(lightsource->width, PI / 7);
+    ck_assert_int_eq(lightsource->penetrating_power, 7);
+    ck_assert_int_eq(lightsource->n_poly, 3);
+
+    ck_assert_int_eq(lightsource->light_polygons[0].x, 0);
+    ck_assert_int_eq(lightsource->light_polygons[0].y, 0);
+    ck_assert_int_eq(lightsource->light_polygons[0].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[0].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[0].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[0].light_power, 50);
+    ck_assert_int_eq(lightsource->light_polygons[0].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[1].x, 0);
+    ck_assert_int_eq(lightsource->light_polygons[1].y, 0);
+    ck_assert_int_eq(lightsource->light_polygons[1].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[1].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[1].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[1].light_power, 30);
+    ck_assert_int_eq(lightsource->light_polygons[1].width, 36);
+
+    ck_assert_int_eq(lightsource->light_polygons[2].x, 0);
+    ck_assert_int_eq(lightsource->light_polygons[2].y, 0);
+    ck_assert_int_eq(lightsource->light_polygons[2].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[2].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[2].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[2].light_power, 20);
+    ck_assert_int_eq(lightsource->light_polygons[2].width, 72);
+
+    ck_assert_int_eq(lightsource->wobbable, 1);
+
+}
+END_TEST
+
+START_TEST (IMP_read_lightsource_lantern_check)
+{
+    // GIVEN
+    lightsource_t *lightsource  = NULL;
+    char *filename         = "./assets/lightsources/lantern.lsrc";
+
+    // WHEN
+    lightsource = IMP_read_lightsource(filename);
+
+    // THEN
+    ck_assert_ptr_nonnull(lightsource);
+
+    ck_assert_float_eq(lightsource->width, 0.0);
+    ck_assert_int_eq(lightsource->penetrating_power, 7);
+    ck_assert_int_eq(lightsource->n_poly, 5);
+
+    ck_assert_int_eq(lightsource->light_polygons[0].x, -10);
+    ck_assert_int_eq(lightsource->light_polygons[0].y, -10);
+    ck_assert_int_eq(lightsource->light_polygons[0].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[0].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[0].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[0].light_power, 10);
+    ck_assert_int_eq(lightsource->light_polygons[0].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[1].x, 10);
+    ck_assert_int_eq(lightsource->light_polygons[1].y, -10);
+    ck_assert_int_eq(lightsource->light_polygons[1].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[1].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[1].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[1].light_power, 10);
+    ck_assert_int_eq(lightsource->light_polygons[1].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[2].x, 10);
+    ck_assert_int_eq(lightsource->light_polygons[2].y, 10);
+    ck_assert_int_eq(lightsource->light_polygons[2].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[2].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[2].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[2].light_power, 10);
+    ck_assert_int_eq(lightsource->light_polygons[2].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[3].x, -10);
+    ck_assert_int_eq(lightsource->light_polygons[3].y, 10);
+    ck_assert_int_eq(lightsource->light_polygons[3].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[3].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[3].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[3].light_power, 10);
+    ck_assert_int_eq(lightsource->light_polygons[3].width, 0);
+
+    ck_assert_int_eq(lightsource->light_polygons[4].x, 0);
+    ck_assert_int_eq(lightsource->light_polygons[4].y, 0);
+    ck_assert_int_eq(lightsource->light_polygons[4].red, 255);
+    ck_assert_int_eq(lightsource->light_polygons[4].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[4].blue, 187);
+    ck_assert_int_eq(lightsource->light_polygons[4].light_power, 50);
+    ck_assert_int_eq(lightsource->light_polygons[4].width, 0);
+
+    ck_assert_int_eq(lightsource->wobbable, 0);
+}
+END_TEST
+
+START_TEST (IMP_read_all_files_check)
+{
+    // THEN
+    IMP_read_all_files();
+
+    // just the sanity checks
+    ck_assert_ptr_nonnull(animations[ASSET_HERO_ANIMATION]);
+    ck_assert_ptr_nonnull(gradients[ASSET_GRADIENT_CIRCULAR]);
+    ck_assert_ptr_nonnull(sprites[ASSET_SPRITE_HERO]);
+    ck_assert_ptr_nonnull(wobbles[ASSET_WOBBLE_NO]);
+    ck_assert_ptr_nonnull(wobbles[ASSET_WOBBLE_STABLE]);
+    ck_assert_ptr_nonnull(wobbles[ASSET_WOBBLE_WALKING]);
+    ck_assert_ptr_nonnull(levels[ASSET_LEVEL_SAMPLE]);
+}
+END_TEST
+
 
 Suite *import_suite(void)
 {
@@ -133,11 +311,13 @@ Suite *import_suite(void)
     s = suite_create("import");
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, IMP_new_mapfile_check);
-    tcase_add_test(tc_core, IMP_free_mapfile_empty_mapfile_check);
-    tcase_add_test(tc_core, IMP_read_file_check);
-    tcase_add_test(tc_core, IMP_read_tileset_check);
-    tcase_add_test(tc_core, IMP_read_from_file_check);
+    tcase_add_test(tc_core, IMP_read_level_check_negative);
+    tcase_add_test(tc_core, IMP_read_level_check_positive);
+    tcase_add_test(tc_core, IMP_read_animation_check);
+    tcase_add_test(tc_core, IMP_read_wobble_check);
+    tcase_add_test(tc_core, IMP_read_all_files_check);
+    tcase_add_test(tc_core, IMP_read_lightsource_lighter_check);
+    tcase_add_test(tc_core, IMP_read_lightsource_lantern_check);
 
     suite_add_tcase(s, tc_core);
 

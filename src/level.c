@@ -32,7 +32,7 @@ level_t* LVL_new() {
     new_level->obstacle_segments = NULL;
     new_level->tiles_used        = 0;
 
-    new_level->tileset = malloc(sizeof(texture_t));
+    new_level->tileset           = malloc(sizeof(texture_t));
 
     return new_level;
 }
@@ -134,16 +134,6 @@ void LVL_fill_tiles(level_t *level) {
         }
     }
 }
-
-void MAP_get_tileset_path(
-    char *tileset_filename,
-    char *level_file_path
-) {
-    strcat(level_file_path, CURRENT_FOLDER);
-    strcat(level_file_path, TILESET_FOLDER);
-    strcat(level_file_path, tileset_filename);
-}
-
 
 tile_t* LVL_tile_on_pos(
     level_t *level,
@@ -359,11 +349,11 @@ void LVL_draw(
             
             if (tile != NULL) {
                 GFX_render_tile(
-                        texture ,
-                        tile_pos_x, tile_pos_y,
-                        tile->x, tile->y,
-                        TILE_WIDTH, TILE_HEIGHT
-                    );
+                    texture ,
+                    tile_pos_x, tile_pos_y,
+                    tile->x, tile->y,
+                    TILE_WIDTH, TILE_HEIGHT
+                );
             }
         }
     }

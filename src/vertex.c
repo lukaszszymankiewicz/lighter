@@ -1,8 +1,4 @@
-#include <stdbool.h>
-#include <stdlib.h>
-#include <math.h>
 #include "global.h"
-#include "primitives.h"
 #include "vertex.h"
 
 vertex_t* VRTX_new(

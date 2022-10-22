@@ -1,5 +1,4 @@
 #include <check.h>
-#include <stdlib.h>
 #include "../src/segment.h"
 
 
@@ -296,7 +295,6 @@ START_TEST (SEG_contains_check)
     segment_t* head = NULL;
     segment_t* new = NULL;
     segment_t* new2 = NULL;
-    segment_t* new3 = NULL;
 
     new = SEG_init(1, 2, 3, 4);
     new2 = SEG_init(5, 6, 1, 2);

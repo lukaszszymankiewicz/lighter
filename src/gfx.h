@@ -18,8 +18,6 @@ void GFX_free();
 void GFX_clear_screen();
 void GFX_update();
 
-texture_t* GFX_read_texture(char *filepath);
-
 void GFX_draw_colored_line(int x1, int y1, int x2, int y2, int r, int g, int b, int a);
 void GFX_fill_shadowbuffer(uint32_t color, int x, int y, int power);
 void GFX_fill_lightbuffer(uint32_t color, int x, int y, int power);

@@ -1,5 +1,5 @@
-#include "global.h"
 #include <math.h>
+#include "global.h"
 
 
 // calculates angle between two points

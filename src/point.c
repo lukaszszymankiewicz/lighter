@@ -1,6 +1,4 @@
-#include "global.h"
 #include "point.h"
-#include "primitives.h"
 
 point_t* PT_new(
     int x, int y

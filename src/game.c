@@ -1,18 +1,15 @@
 #include "global.h"
+#include "import.h"
+#include "files.h"
 #include "game.h"
 #include "gfx.h"
 #include "import.h"
-#include "sprites.h"
 #include "events.h"
 #include "hero.h"
 #include "timer.h"
-#include "tile.h"
 #include "level.h"
 #include "light.h"
-#include "segment.h"
 #include "import.h"
-
-int debug = 0;
 
 void GAME_close(
     game_t *game
@@ -23,7 +20,7 @@ void GAME_close(
    LIG_free(game->light);
    LVL_free(game->level);
    HERO_free(game->hero);
-   LIG_free_all_files();
+   IMP_free_all_files();
    free(game);
    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
    GFX_free();
@@ -39,8 +36,8 @@ game_t* GAME_init() {
 
     game->loop          = true;
     game->light         = LIG_init();
-    game->level         = IMP_read_from_file("./levels/sample");
-    game->hero          = HERO_init(NULL, game->level->hero_x, game->level->hero_y);
+    game->level         = IMP_read_level(FILEPATH_LEVEL_SAMPLE);
+    game->hero          = HERO_init(game->level->hero_x, game->level->hero_y);
     game->frame         = 0;
     game->fps_timer     = TIMER_new();
     game->cap_timer     = TIMER_new();
@@ -61,18 +58,13 @@ void GAME_update(
     }
 }
 
-void GAME_clean_frame(
-    game_t* game
-) {
-    SEG_free(game->level->obstacle_segments);
-}
-
 int main(
     int argc, char* args[]
 ) {
     game_t* game = NULL;
     GFX_init_graphics();
-    LIG_read_all_files();
+    IMP_read_all_files();
+    IMP_update_all_files();
     game = GAME_init();
     EVNT_init();
     TIMER_start(game->fps_timer);
@@ -99,7 +91,7 @@ int main(
         LVL_draw(game->level, game->hero->x, game->hero->y);
         LVL_fill_shadowbuffer_with_tiles(game->level, game->hero->x, game->hero->y, 0);
         GFX_draw_lightbuffer(
-            game->light->src->gradient_texture,
+            game->light->src->gradient,
             game->hero->view_x,
             game->hero->view_y
         );

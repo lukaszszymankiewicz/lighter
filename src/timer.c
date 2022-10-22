@@ -1,7 +1,6 @@
 #include "timer.h"
 
 // Basically the https://lazyfoo.net/tutorials/SDL/25_capping_frame_rate/index.php 
-
 game_timer_t* TIMER_new(
 ) {
     game_timer_t *new_timer = NULL;

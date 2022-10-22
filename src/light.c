@@ -1,242 +1,12 @@
 #include "global.h"
-#include "game.h"
+#include "import.h"
 #include "segment.h"
 #include "geometry.h"
 #include "gfx.h"
 #include "light.h"
 #include "vertex.h"
-#include "sprites.h"
 #include "primitives.h"
 #include "point.h"
-
-
-// COLLECTIONS
-lightsource_t* lightsources[ALL_AVAILABLE_LIGHTSOURCES];
-texture_t*     gradient_textures[ALL_AVAILABLE_GRADIENT_TEXTURES];
-wobble_t*      light_wobbles_patterns[ALL_AVAILABLE_WOBBLES_PATTERNS];
-
-// this will be handled fully by native file-type. Just by now, all things related to this object is
-// put into single function which it will be easy to put one file.
-lightsource_t* LIG_init_lantern() {
-    lightsource_t* lantern = NULL;
-    lantern                = (lightsource_t*)malloc(sizeof(lightsource_t));
-
-    lantern->width = 0.0;
-    lantern->n_poly = 9;
-    lantern->penetrating_power = 7;
-
-    lantern->wobble[STANDING] = light_wobbles_patterns[WOBBLE_NO];
-    lantern->wobble[WALKING] = light_wobbles_patterns[WOBBLE_NO];
-
-    lantern->light_polygons = (lightpolygon_t*)malloc(sizeof(lightpolygon_t) * lantern->n_poly);
-
-    lantern->light_polygons[0] = (lightpolygon_t){-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0};
-    lantern->light_polygons[1] = (lightpolygon_t){ 10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0};
-    lantern->light_polygons[2] = (lightpolygon_t){-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0};
-    lantern->light_polygons[3] = (lightpolygon_t){-10,  10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0};
-    lantern->light_polygons[4] = (lightpolygon_t){-5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0};
-    lantern->light_polygons[5] = (lightpolygon_t){ 5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0};
-    lantern->light_polygons[6] = (lightpolygon_t){-5 ,  -5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0};
-    lantern->light_polygons[7] = (lightpolygon_t){-5 ,   5, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 0};
-    lantern->light_polygons[8] = (lightpolygon_t){ 0 ,   0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0};
-
-    lantern->gradient_texture = gradient_textures[GRADIENT_CIRCULAR];
-
-    return lantern;
-};
-
-// put into single function which it will be easy to put one file.
-lightsource_t* LIG_init_lighter() {
-    lightsource_t* lighter = NULL;
-    lighter = (lightsource_t*)malloc(sizeof(lightsource_t));
-
-    lighter->width = PI / 7;
-    lighter->n_poly = 3;
-
-    lighter->wobble[STANDING] = light_wobbles_patterns[WOBBLE_STABLE];
-    lighter->wobble[WALKING]  = light_wobbles_patterns[WOBBLE_WALK];
-
-    lighter->penetrating_power = 7;
-
-    lighter->light_polygons = (lightpolygon_t*)malloc(sizeof(lightpolygon_t) * lighter->n_poly);
-    lighter->light_polygons[0] = (lightpolygon_t){0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0};
-    lighter->light_polygons[1] = (lightpolygon_t){0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 36};
-    lighter->light_polygons[2] = (lightpolygon_t){0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 20, 72};
-
-    lighter->gradient_texture = gradient_textures[GRADIENT_CIRCULAR];
-
-    return lighter;
-};
-
-// this will be some kind of global file read
-void LIG_init_all_lightsources() {
-    lightsource_t* lighter = NULL;
-    lightsource_t* lantern = NULL;
-
-    lighter = LIG_init_lighter();
-    lantern = LIG_init_lantern();
-
-    lightsources[LIGHTER] = lighter;
-    lightsources[LANTERN] = lantern;
-}
-
-wobble_t* LIG_init_no_wobble_pattern() {
-    wobble_t *no_wobble = NULL;
-    no_wobble = (wobble_t*)malloc(sizeof(wobble_t));
-
-    no_wobble->len = 1;
-    no_wobble->coefs = (float*)malloc(sizeof(float) * no_wobble->len);
-    no_wobble->coefs[0] = 0.0;
-
-    return no_wobble;
-}
-
-wobble_t* LIG_init_stable_wobble_pattern() {
-    wobble_t *stable_wobble = NULL;
-    stable_wobble = (wobble_t*)malloc(sizeof(wobble_t));
-
-    stable_wobble->len = 82;
-    stable_wobble->coefs = (float*)malloc(sizeof(float) * stable_wobble->len);
-    // damn!
-    stable_wobble->coefs[0] = 0.006;
-    stable_wobble->coefs[1] = 0.006;
-    stable_wobble->coefs[2] = 0.009;
-    stable_wobble->coefs[3] = 0.009;
-    stable_wobble->coefs[4] = 0.012;
-    stable_wobble->coefs[5] = 0.012;
-    stable_wobble->coefs[6] = 0.017;
-    stable_wobble->coefs[7] = 0.017;
-    stable_wobble->coefs[8] = 0.022;
-    stable_wobble->coefs[9] = 0.022;
-    stable_wobble->coefs[10] = 0.027;
-    stable_wobble->coefs[11] = 0.027;
-    stable_wobble->coefs[12] = 0.033;
-    stable_wobble->coefs[13] = 0.033;
-    stable_wobble->coefs[14] = 0.038;
-    stable_wobble->coefs[15] = 0.038;
-    stable_wobble->coefs[16] = 0.042;
-    stable_wobble->coefs[17] = 0.042;
-    stable_wobble->coefs[18] = 0.045;
-    stable_wobble->coefs[19] = 0.046;
-    stable_wobble->coefs[20] = 0.046;
-    stable_wobble->coefs[21] = 0.045;
-    stable_wobble->coefs[22] = 0.045;
-    stable_wobble->coefs[23] = 0.042;
-    stable_wobble->coefs[24] = 0.042;
-    stable_wobble->coefs[25] = 0.038;
-    stable_wobble->coefs[26] = 0.038;
-    stable_wobble->coefs[27] = 0.033;
-    stable_wobble->coefs[28] = 0.033;
-    stable_wobble->coefs[29] = 0.027;
-    stable_wobble->coefs[30] = 0.027;
-    stable_wobble->coefs[31] = 0.022;
-    stable_wobble->coefs[32] = 0.022;
-    stable_wobble->coefs[33] = 0.017;
-    stable_wobble->coefs[34] = 0.017;
-    stable_wobble->coefs[35] = 0.012;
-    stable_wobble->coefs[36] = 0.012;
-    stable_wobble->coefs[37] = 0.009;
-    stable_wobble->coefs[38] = 0.009;
-    stable_wobble->coefs[39] = 0.0;
-    stable_wobble->coefs[40] = 0.0;
-    stable_wobble->coefs[41] = -0.006;
-    stable_wobble->coefs[42] = -0.006;
-    stable_wobble->coefs[43] = -0.009;
-    stable_wobble->coefs[44] = -0.009;
-    stable_wobble->coefs[45] = -0.012;
-    stable_wobble->coefs[46] = -0.012;
-    stable_wobble->coefs[47] = -0.017;
-    stable_wobble->coefs[48] = -0.017;
-    stable_wobble->coefs[49] = -0.022;
-    stable_wobble->coefs[50] = -0.022;
-    stable_wobble->coefs[51] = -0.027;
-    stable_wobble->coefs[52] = -0.027;
-    stable_wobble->coefs[53] = -0.033;
-    stable_wobble->coefs[54] = -0.033;
-    stable_wobble->coefs[55] = -0.038;
-    stable_wobble->coefs[56] = -0.038;
-    stable_wobble->coefs[57] = -0.042;
-    stable_wobble->coefs[58] = -0.042;
-    stable_wobble->coefs[59] = -0.045;
-    stable_wobble->coefs[60] = -0.045;
-    stable_wobble->coefs[61] = -0.046;
-    stable_wobble->coefs[62] = -0.046;
-    stable_wobble->coefs[63] = -0.045;
-    stable_wobble->coefs[64] = -0.045;
-    stable_wobble->coefs[65] = -0.042;
-    stable_wobble->coefs[66] = -0.042;
-    stable_wobble->coefs[67] = -0.038;
-    stable_wobble->coefs[68] = -0.038;
-    stable_wobble->coefs[69] = -0.033;
-    stable_wobble->coefs[70] = -0.033;
-    stable_wobble->coefs[71] = -0.027;
-    stable_wobble->coefs[72] = -0.027;
-    stable_wobble->coefs[73] = -0.022;
-    stable_wobble->coefs[74] = -0.022;
-    stable_wobble->coefs[75] = -0.017;
-    stable_wobble->coefs[76] = -0.017;
-    stable_wobble->coefs[77] = -0.012;
-    stable_wobble->coefs[78] = -0.012;
-    stable_wobble->coefs[79] = -0.009;
-    stable_wobble->coefs[80] = -0.009;
-    stable_wobble->coefs[81] = -0.009;
-
-    return stable_wobble;
-}
-
-wobble_t* LIG_init_walk_wobble_pattern() {
-    wobble_t *walk_wobble = NULL;
-    walk_wobble  = (wobble_t*)malloc(sizeof(wobble_t));
-
-    walk_wobble->len = 15;
-    walk_wobble->coefs = (float*)malloc(sizeof(float) * 15);
-    walk_wobble->coefs[0] = 0.012;
-    walk_wobble->coefs[1] = 0.054;
-    walk_wobble->coefs[2] = 0.082;
-    walk_wobble->coefs[3] = 0.1;
-    walk_wobble->coefs[4] = 0.082;
-    walk_wobble->coefs[5] = 0.054;
-    walk_wobble->coefs[6] = 0.012;
-    walk_wobble->coefs[7] = 0.0;
-    walk_wobble->coefs[8] = -0.012;
-    walk_wobble->coefs[9] = -0.054;
-    walk_wobble->coefs[10] = -0.082;
-    walk_wobble->coefs[11] = -0.1;
-    walk_wobble->coefs[12] = -0.082;
-    walk_wobble->coefs[13] = -0.054;
-    walk_wobble->coefs[14] = -0.012;
-
-    return walk_wobble;
-};
-
-void LIG_init_all_light_wobbles_patterns() {
-    wobble_t* no_wobble = NULL;
-    wobble_t* stable_wobble = NULL;
-    wobble_t* walk_wobble = NULL;
-
-    no_wobble     = LIG_init_no_wobble_pattern();
-    stable_wobble = LIG_init_stable_wobble_pattern();
-    walk_wobble   = LIG_init_walk_wobble_pattern();
-
-    light_wobbles_patterns[WOBBLE_NO] = no_wobble;
-    light_wobbles_patterns[WOBBLE_STABLE] = stable_wobble;
-    light_wobbles_patterns[WOBBLE_WALK] = walk_wobble;
-}
-
-texture_t* LIG_init_circular_gradient() {
-    texture_t* circular_gradient = NULL;
-    circular_gradient = GFX_read_texture("gradients/circular.png");
-
-    return circular_gradient;
-}
-
-void LIG_init_all_gradients() {
-    texture_t* circular_gradient = NULL;
-    circular_gradient = LIG_init_circular_gradient();
-
-    gradient_textures[GRADIENT_CIRCULAR] = circular_gradient;
-}
-
 
 // changes done to light angle if looking in different direction
 float lightpos_up_down_corr[2][5] = {
@@ -800,12 +570,25 @@ float LIG_get_wobble_angle_coef(
     int      frame
 ) {
     int state = 0;
+    
+    if (!lght->src->wobbable) {return 0.0;}
 
     // TODO: state checking should be in separate function
+    // TODO: this should be easier when entity concept will be implemented, then an entity can
+    // "hold" a light source, and then basing on this entity behaviour wobblre can change. By now it
+    // is hardcoded as only hero can be a source of light and hero behaviour is very limited.
     if (x_vel != 0) {
-        state=1;
+        state = 1;
     }
-    wobble_t *current_wobble = lght->src->wobble[state];
+    
+    wobble_t *current_wobble = NULL;
+
+    if (state == 0) {
+        current_wobble = wobbles[ASSET_WOBBLE_STABLE];
+    } else {
+        current_wobble = wobbles[ASSET_WOBBLE_WALKING];
+    }
+
     return current_wobble->coefs[frame%current_wobble->len];
 }
 
@@ -930,7 +713,7 @@ void LIG_fill_lightbuffer(
     int   x_corr;                  // x and y correction values 
     int   y_corr;                  // x and y correction values
     float width_corr;              // light width correction (some light polygons can be wider)
-    float wobble_corr = 0.0;       // angle correction due to wobling
+    float wobble_corr;             // angle correction due to wobling
 
     // before adding any new light to scene, cleaning of lighbuffers is needed
     GFX_clean_buffers();
@@ -975,27 +758,22 @@ void LIG_fill_lightbuffer(
     SEG_free(obstacles);
 };
 
-void LIG_read_all_files() {
-    LIG_init_all_light_wobbles_patterns();
-    LIG_init_all_gradients();
-    LIG_init_all_lightsources();
-}
+void LIG_free_wobble(
+    wobble_t* wobble
+) {
+    free(wobble->coefs);
+    free(wobble);
+    wobble = NULL;
+};
 
-void LIG_free_all_files() {
-    for (int i=0; i<ALL_AVAILABLE_LIGHTSOURCES; i++) {
-        free(lightsources[i]->light_polygons);
-        free(lightsources[i]);
-    }
-
-    for (int i=0; i<ALL_AVAILABLE_WOBBLES_PATTERNS; i++) {
-        free(light_wobbles_patterns[i]->coefs);
-        free(light_wobbles_patterns[i]);
-    }
-
-    for (int i=0; i<ALL_AVAILABLE_GRADIENT_TEXTURES; i++) {
-        GFX_free_texture(gradient_textures[GRADIENT_CIRCULAR]);
-    }
-}
+void LIG_free_lightsource(
+    lightsource_t* lightsource
+) {
+    lightsource->gradient = NULL;    
+    free(lightsource->light_polygons);
+    free(lightsource);
+    lightsource = NULL;
+};
 
 void LIG_free(
     light_t* lght

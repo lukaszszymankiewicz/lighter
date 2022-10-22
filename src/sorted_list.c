@@ -1,9 +1,8 @@
-#include <stdlib.h>
+#include "global.h"
 #include "sorted_list.h"
 
 // intersections are a sorted linked list. It is used for poperly drawing light effect (by
 // now). Nothing really special here.
-
 sorted_list_t* SRTLST_new(
     int value
 ) {

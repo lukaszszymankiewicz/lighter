@@ -1,34 +1,116 @@
 #include "global.h"
 #include "tile.h"
+#include "level.h"
 #include "gfx.h"
+#include "sprites.h"
+#include "light.h"
 
 #ifndef IMPORT_H
 #define IMPORT_H
 
-enum readState {
-    IDLE,
-    X_SIZE_READ,
-    Y_SIZE_READ, 
-    TILES_SUM_READ,
-    TILE_SUM_READ,
-    TILE_X_READ,
-    TILE_Y_READ,
-    ALL_TILES_READ,
+enum READ_LEVEL {
+    READ_LEVEL_IDLE,
+    READ_LEVEL_PREAMBULE_FIRST_HALF,
+    READ_LEVEL_PREAMBULE_SECOND_HALF,
+    READ_LEVEL_X_SIZE,
+    READ_LEVEL_Y_SIZE, 
+    READ_LEVEL_TILES_SUM,
+    READ_LEVEL_TILE_SUM,
+    READ_LEVEL_TILE_X,
+    READ_LEVEL_TILE_Y,
+    READ_LEVEL_ALL_TILES_READ,
 };
 
-// struct for holding level data (temporarly)
-typedef struct mapfile {
-    FILE             *file;
-    char             *filename;
-    char             *tileset_filename;
-    int               state;
-} mapfile_t;
+enum READ_ANIMATION {
+    READ_ANIMATION_PREAMBULE_IDLE,
+    READ_ANIMATION_PREAMBULE_FIRST_HALF,
+    READ_ANIMATION_PREAMBULE_SECOND_HALF,
+    READ_ANIMATIONS_NUMBER,
+    READ_ANIMATION_IDX,
+    READ_ANIMATION_N_FRAMES,
+    READ_ANIMATION_DELAY,
+    READ_ANIMATION_RECT,
+    READ_ANIMATION_HITBOX_PER_FRAME,
+    READ_ANIMATION_HITBOX_RECT,
+    READ_ANIMATION_ALL_READ,
+};
 
-mapfile_t* IMP_new_mapfile(char *filename);
+enum READ_WOBBLE {
+    READ_WOBBLE_IDLE,
+    READ_WOBBLE_PREAMBULE_FIRST_HALF,
+    READ_WOBBLE_PREAMBULE_SECOND_HALF,
+    READ_WOBBLE_NUMBER,
+    READ_WOBBLE_SIGN, 
+    READ_WOBBLE_COEF, 
+    READ_WOBBLE_ALL_READ,
+};
 
-level_t* IMP_read_from_file(char* filename);
-int IMP_read_file(mapfile_t *map);
-int IMP_read_tileset(level_t *level, mapfile_t *map);
-void IMP_free_mapfile(mapfile_t *map);
+enum READ_LIGHTSOURCE {
+    READ_LIGHTSOURCE_IDLE,
+    READ_LIGHTSOURCE_PREAMBULE_FIRST_HALF,
+    READ_LIGHTSOURCE_PREAMBULE_SECOND_HALF,
+    READ_LIGHSOURCE_WIDTH,
+    READ_LIGHSOURCE_PENETRATING_POWER,
+    READ_LIGHSOURCE_POLYGONS_NUMBER,
+    READ_LIGHSOURCE_POLYGON_X,
+    READ_LIGHSOURCE_POLYGON_Y,
+    READ_LIGHSOURCE_POLYGON_RED,
+    READ_LIGHSOURCE_POLYGON_GREEN,
+    READ_LIGHSOURCE_POLYGON_BLUE,
+    READ_LIGHSOURCE_POLYGON_POWER,
+    READ_LIGHSOURCE_POLYGON_WIDTH,
+    READ_LIGHSOURCE_WOBBABLE,
+    READ_LIGHSOURCE_ALL_READ,
+};
+
+enum ASSETS_ANIMATION_IDX {
+    ASSET_HERO_ANIMATION,
+    ASSET_ANIMATION_ALL
+};
+
+enum ASSETS_LIGHTSOURCES_IDX {
+    ASSET_LIGHTER_LIGHTSOURCE,
+    ASSET_LANTERN_LIGHTSOURCE,
+    ASSET_LIGHTSOURCE_ALL
+};
+
+enum ASSETS_GRADIENT_IDX {
+    ASSET_GRADIENT_CIRCULAR,
+    ASSET_GRADIENT_ALL
+};
+
+enum ASSETS_SPRITE_IDX {
+    ASSET_SPRITE_HERO,
+    ASSET_SPRITE_ALL
+};
+
+enum ASSETS_WOBBLE_IDX {
+    ASSET_WOBBLE_NO,
+    ASSET_WOBBLE_STABLE,
+    ASSET_WOBBLE_WALKING,
+    ASSET_WOBBLE_ALL
+};
+
+enum ASSETS_LEVEL_IDX {
+    ASSET_LEVEL_SAMPLE,
+    ASSET_LEVEL_ALL
+};
+
+extern animation_sheet_t *animations[ASSET_ANIMATION_ALL];
+extern texture_t         *gradients[ASSET_GRADIENT_ALL];
+extern texture_t         *sprites[ASSET_SPRITE_ALL];
+extern wobble_t          *wobbles[ASSET_WOBBLE_ALL];
+extern level_t           *levels[ASSET_LEVEL_ALL];
+extern lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
+
+level_t*           IMP_read_level(const char* filepath);
+animation_sheet_t* IMP_read_animation(const char* filepath);
+texture_t*         IMP_read_texture(const char* filepath);
+wobble_t*          IMP_read_wobble(const char* filepath);
+lightsource_t*     IMP_read_lightsource(const char *filepath);
+
+void               IMP_read_all_files();
+void               IMP_update_all_files();
+void               IMP_free_all_files();
 
 #endif
