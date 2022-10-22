@@ -1,5 +1,4 @@
 CC = gcc
-<<<<<<< HEAD
 CFLAGS := --std=c99 -Wall -g
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 LIBS = -lm
@@ -57,10 +56,6 @@ TESTTARGET =                        \
 	$(SRCDIR)/timer.c               \
 	$(SRCDIR)/tile.c                \
 	$(SRCDIR)/vertex.c              \
-
-.PHONY: run
-run: 
-	./$(TARGET)
 
 .PHONY: lighter
 lighter: 
