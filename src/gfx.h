@@ -1,3 +1,4 @@
+#include "assets.h"
 #include "global.h"
 #include "primitives.h"
 #include "sorted_list.h"
@@ -8,6 +9,8 @@
 extern SDL_Window *window;
 extern SDL_Surface *surface;
 extern SDL_Renderer *renderer;
+extern texture_t         *gradients[ASSET_GRADIENT_ALL];
+extern texture_t         *sprites[ASSET_SPRITE_ALL];
 
 void GFX_init_window();
 void GFX_init_renderer();
@@ -52,6 +55,7 @@ void GFX_free_texture(texture_t *texture);
 void GFX_debug_obs(obstacle_t* obstacles);
 void GFX_clean_buffers();
 void GFX_draw_lightbuffer(texture_t* gradient, int x, int y);
+texture_t* GFX_read_texture(const char *filepath);
 
 // for tests
 sorted_list_t* GFX_calc_intersections_in_scanline(segment_t *segments, int y, int *n);

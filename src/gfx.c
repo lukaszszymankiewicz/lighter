@@ -1,3 +1,4 @@
+#include "assets.h"
 #include "global.h"
 #include "gfx.h"
 #include "primitives.h"
@@ -10,6 +11,8 @@
 SDL_Window   *window         = NULL;
 SDL_Renderer *renderer       = NULL;
 SDL_Texture  *screen_texture = NULL;
+texture_t    *gradients[ASSET_GRADIENT_ALL];
+texture_t    *sprites[ASSET_SPRITE_ALL];
 
 uint32_t     *lightbuffer;
 uint32_t     *shadowbuffer;
@@ -139,11 +142,12 @@ void GFX_free_texture(
 ) {
     SDL_DestroyTexture(texture->surface);
     free(texture);
+    texture = NULL;
 };
 
 void GFX_free() {
-    // GFX_free_buffers();
-    // SDL_DestroyTexture(screen_texture);
+    GFX_free_buffers();
+    SDL_DestroyTexture(screen_texture);
 
     if (renderer) {
         SDL_DestroyRenderer(renderer);
@@ -153,7 +157,7 @@ void GFX_free() {
         SDL_DestroyWindow(window);
     }
 
-    // IMG_Quit();
+    IMG_Quit();
 };
 
 void GFX_clear_screen() {
@@ -165,7 +169,6 @@ void GFX_update() {
     SDL_RenderPresent(renderer);
     SDL_UpdateWindowSurface(window);
 };
-
 
 // renders texture to screen
 void GFX_render_tile(
@@ -192,13 +195,13 @@ void GFX_render_texture(
 ) {
     SDL_Rect render_quad = {x, y, texture->width, texture->height};
     SDL_RendererFlip flip_tex;
-
+    
     // if clip is not given render whole texture
     if(clip != NULL) {
         render_quad.w = clip->w;
         render_quad.h = clip->h;
     }
-    
+
     if (flip) {
         flip_tex = SDL_FLIP_HORIZONTAL; 
     }
@@ -492,3 +495,37 @@ void GFX_draw_lightbuffer(
     SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
+
+texture_t* GFX_read_texture(
+    const char *filepath
+) {
+	SDL_Texture *new_texture    = NULL;
+    SDL_Surface *loaded_surface = NULL;
+
+    loaded_surface              = IMG_Load(filepath);
+
+    // dummy texture if reading file failed
+    if (loaded_surface == NULL) {
+        new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 20, 20);
+        texture_t* p = malloc(sizeof(texture_t));
+
+        p->surface = new_texture;
+        p->width   = loaded_surface->w;
+        p->height  = loaded_surface->h;
+
+        return p;
+    }
+    else {
+        SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
+        new_texture  = SDL_CreateTextureFromSurface(renderer, loaded_surface);
+        texture_t* p = malloc(sizeof(texture_t));
+
+        p->surface = new_texture;
+        p->width   = loaded_surface->w;
+        p->height  = loaded_surface->h;
+
+        SDL_FreeSurface(loaded_surface);
+
+        return p;
+    }
+};

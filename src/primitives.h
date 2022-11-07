@@ -7,7 +7,7 @@ typedef short int direction_t;
 
 enum direction { RIGHT, LEFT, UP, DOWN, NONE };
 enum segtype { HOR, VER, UNKNOWN};
-enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, MAX_STATE };
+enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };
 
 // for calculating hits
 typedef struct obstacle {

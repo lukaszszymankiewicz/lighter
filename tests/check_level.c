@@ -1,8 +1,11 @@
 #include <check.h>
+#include "../src/files.h"
 #include "../src/primitives.h"
 #include "../src/import.h"
 #include "../src/level.h"
+#include "../src/gfx.h"
 #include "../src/segment.h"
+#include "../src/sprites.h"
 
 
 START_TEST (LVL_analyze_check)
@@ -12,10 +15,6 @@ START_TEST (LVL_analyze_check)
     const int size_x = 10; 
     const int size_y = 10;
 
-    int tile_width = 32;
-    int tile_height = 32;
-    int hero_x = (int)(size_x * tile_width / 2);
-    int hero_y = (int)(size_x * tile_height / 2);
     int len = 0;  
     int expected_obstacles_num;
 
@@ -26,8 +25,8 @@ START_TEST (LVL_analyze_check)
     test_level->size_x = size_x;
 
     // CASE A (single long platform)
-    // 4 screen borders + 4 obstacle border
-    expected_obstacles_num = 4 + 4;
+    // 4 screen borders
+    expected_obstacles_num = 4;
     int obstacles_a[100] =  {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -41,14 +40,14 @@ START_TEST (LVL_analyze_check)
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
     test_level->obstacles = obstacles_a;
-    LVL_analyze(test_level, hero_x, hero_y);
+    LVL_analyze(test_level);
     len = SEG_len(test_level->obstacle_segments);
 
     ck_assert_int_eq(len, expected_obstacles_num);
     
     // CASE B (single tall platform)
-    // 4 screen borders + 4 obstacle border
-    expected_obstacles_num = 4 + 4;
+    // 4 screen borders
+    expected_obstacles_num = 4;
     int obstacles_b[100] =  {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -62,14 +61,14 @@ START_TEST (LVL_analyze_check)
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
     test_level->obstacles = obstacles_b;
-    LVL_analyze(test_level, hero_x, hero_y);
+    LVL_analyze(test_level);
     len = SEG_len(test_level->obstacle_segments);
 
     ck_assert_int_eq(len, expected_obstacles_num);
 
     // CASE C (two separate platforms)
-    // 4 screen borders + 4 first obstacle borders + 4 second obstacle boder
-    expected_obstacles_num = 4 + 4 + 4;
+    // 4 screen borders + 4 second obstacle boder
+    expected_obstacles_num = 4 + 4;
     int obstacles_c[100] =  {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -83,14 +82,14 @@ START_TEST (LVL_analyze_check)
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
     test_level->obstacles = obstacles_c;
-    LVL_analyze(test_level, hero_x, hero_y);
+    LVL_analyze(test_level);
     len = SEG_len(test_level->obstacle_segments);
 
     ck_assert_int_eq(len, expected_obstacles_num);
 
     // CASE D (many platforms with some strange constructions)
-    // 4 level borders + 14 platform borders
-    expected_obstacles_num = 18;
+    // 14 platform borders
+    expected_obstacles_num = 14;
     int obstacles_d[100] =  {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -104,13 +103,12 @@ START_TEST (LVL_analyze_check)
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
     test_level->obstacles = obstacles_d;
-    LVL_analyze(test_level, hero_x, hero_y);
+    LVL_analyze(test_level);
     len = SEG_len(test_level->obstacle_segments);
 
     ck_assert_int_eq(len, expected_obstacles_num);
 }
 END_TEST
-
 
 START_TEST (LVL_fill_tiles_check)
 {
@@ -120,7 +118,7 @@ START_TEST (LVL_fill_tiles_check)
     char *tex_filepath = "./tests/testfiles/testlevel/level.png";
 
     level = LVL_new();
-    tex = IMP_read_texture(tex_filepath);
+    tex = GFX_read_texture(tex_filepath);
     int cols = (int)tex->width/TILE_WIDTH;
 
     LVL_set_tileset(level, tex);
@@ -142,7 +140,6 @@ START_TEST (LVL_fill_tiles_check)
 }
 END_TEST
 
-
 START_TEST (LVL_fill_structure_check)
 {
     // GIVEN
@@ -151,7 +148,7 @@ START_TEST (LVL_fill_structure_check)
     char *tex_filepath = "./tests/testfiles/testlevel/level.png";
 
     level = LVL_new();
-    tex = IMP_read_texture(tex_filepath);
+    tex = GFX_read_texture(tex_filepath);
     LVL_set_tileset(level, tex);
     LVL_set_size(level, 10, 10);
     LVL_set_tile_number(level, 2);
@@ -183,6 +180,75 @@ START_TEST (LVL_fill_structure_check)
 }
 END_TEST
 
+START_TEST (LVL_entity_in_range_check)
+{
+    // GIVEN 
+    int size_x = 10; 
+    int size_y = 10;
+    int hero_x = 5;
+    int hero_y = 5;
+    
+    bool res    = false;
+    entity_t *e = NULL;
+
+    level_t* level = NULL;
+    level          = LVL_new();
+    level->size_y  = size_y;
+    level->size_x  = size_x;
+    
+    animations[ASSET_HERO_ANIMATION]         = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
+    sprites[ASSET_SPRITE_HERO]               = GFX_read_texture(FILEPATH_SPRITE_HERO);
+    animations[ASSET_HERO_TEST]              = NULL;
+    sprites[ASSET_SPRITE_TEST]               = NULL;
+
+    // hero
+    LVL_add_entity(level, ENT_generate(hero_x, hero_y, ENTITY_HERO), 0);
+
+    e = NULL;
+    e = ENT_generate(24, 24, ENTITY_HERO);
+    res = LVL_entity_in_range(level, e, ENTITY_UPDATE_X_RANGE, ENTITY_UPDATE_Y_RANGE);
+    ck_assert_int_eq(res, 0);
+}
+
+START_TEST (LVL_apply_collision_check)
+{
+    // GIVEN 
+    int size_x = 10; 
+    int size_y = 10;
+    int entity_x = 5;
+    int entity_y = 5;
+
+    level_t* level = NULL;
+    level          = LVL_new();
+    level->size_y  = size_y;
+    level->size_x  = size_x;
+    
+    animations[ASSET_HERO_ANIMATION]         = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
+    sprites[ASSET_SPRITE_HERO]               = GFX_read_texture(FILEPATH_SPRITE_HERO);
+
+    // hero
+    entity_t* e  = NULL;
+    e            = ENT_generate(entity_x, entity_y, ENTITY_HERO);
+    e->state     = WALKING;
+
+    // CASE 1
+    segment_t* obstacles = NULL;
+    SEG_push(&obstacles, 0, entity_y * TILE_HEIGHT + 5, 1000, entity_y * TILE_HEIGHT + 5);
+    level->obstacle_segments = obstacles;
+    LVL_apply_collision(level, e);
+    ck_assert_int_ne(e->y, entity_y*TILE_HEIGHT);
+
+    // CASE 2
+    obstacles    = NULL;
+    e            = ENT_generate(entity_x, entity_y, ENTITY_HERO);
+    e->state     = WALKING;
+    e->x_vel     = 2;
+    SEG_push(&obstacles, entity_x * TILE_WIDTH + 2, 0, entity_x * TILE_WIDTH + 2, 1000);
+    level->obstacle_segments = NULL;
+    level->obstacle_segments = obstacles;
+    LVL_apply_collision(level, e);
+    ck_assert_int_ne(e->x, entity_x*TILE_WIDTH);
+}
 
 Suite *level_suite(void)
 {
@@ -197,6 +263,8 @@ Suite *level_suite(void)
     tcase_add_test(tc_core, LVL_analyze_check);
     tcase_add_test(tc_core, LVL_fill_tiles_check);
     tcase_add_test(tc_core, LVL_fill_structure_check);
+    tcase_add_test(tc_core, LVL_entity_in_range_check);
+    tcase_add_test(tc_core, LVL_apply_collision_check);
 
     suite_add_tcase(s, tc_core);
 

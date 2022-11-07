@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef GLOBAL_H
 #define GLOBAL_H
@@ -17,7 +18,6 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) > (b) ? (b) : (a))
 #define SIGN(a) ((a) > 0 ? (1) : (-1))
-#define TRIM(low, high, number) MIN(high, MAX(low, number))
 
 // constans
 #define DEFAULT_SCREEN_WIDTH     1366               // default screen resolution
@@ -61,7 +61,5 @@
 #define FULL_SCREEN_PIX_SIZE     SCREEN_WIDTH * (SCREEN_HEIGHT+40)
 #define FULL_SCREEN_BYTE_SIZE    SCREEN_WIDTH * SCREEN_HEIGHT * N_COLOR_CHANNELS
 #define PIX_PER_SCREEN_ROW       SCREEN_WIDTH * N_COLOR_CHANNELS
-
-
 
 #endif

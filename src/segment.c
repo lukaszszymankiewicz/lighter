@@ -8,14 +8,14 @@ segment_t* SEG_init(
     segment_t* new_segment   = NULL;
     new_segment              = (segment_t *)malloc(sizeof(segment_t));
 
-    new_segment->x1 = TRIM(0, SCREEN_WIDTH,  x1);
-    new_segment->y1 = TRIM(0, SCREEN_HEIGHT, y1);
-    new_segment->x2 = TRIM(0, SCREEN_WIDTH,  x2);
-    new_segment->y2 = TRIM(0, SCREEN_HEIGHT, y2);
+    new_segment->x1 = x1;
+    new_segment->y1 = y1;
+    new_segment->x2 = x2;
+    new_segment->y2 = y2;
 
     new_segment->slope = GEO_calc_slope(x1, y1, x2, y2);
     new_segment->next  = NULL;
-    new_segment->type = SEG_determine_type(new_segment);
+    new_segment->type  = SEG_determine_type(new_segment);
 
     return new_segment;
 }
@@ -40,7 +40,7 @@ void SEG_push(
     int          y2
 ) {
     segment_t *new_segment = NULL;
-    segment_t *ptr          = NULL;
+    segment_t *ptr         = NULL;
 
     new_segment             = SEG_init(x1, y1, x2, y2);
     ptr                     = (*head);
@@ -62,7 +62,7 @@ void SEG_push(
 segment_t* SEG_get(
     segment_t *segments, int index
 ) {
-    segment_t *ptr = NULL;
+    segment_t *ptr  = NULL;
     ptr             = segments;
     int         i   = 0;
 
@@ -299,3 +299,16 @@ void SEG_free(
     }
 }
 
+segment_t* SEG_filter_by_rect(segment_t* seg, int x1, int y1, int x2, int y2) {
+    segment_t* filtered = NULL;
+    segment_t* ptr      = NULL;
+
+    ptr = seg;
+
+    while(ptr) {
+ 
+        ptr=ptr->next;
+    }
+
+    return filtered;
+}

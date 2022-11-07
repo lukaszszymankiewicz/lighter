@@ -6,9 +6,9 @@
 #include "check_gfx.h"
 #include "check_level.h"
 #include "check_import.h"
-#include "check_events.h"
+#include "check_controller.h"
 #include "check_geometry.h"
-#include "check_hero.h"
+#include "check_entity.h"
 #include "check_sorted_list.h"
 #include "check_tests.h"
 #include "../src/vertex.h"
@@ -20,8 +20,8 @@
 #include "../src/gfx.h"
 #include "../src/import.h"
 #include "../src/level.h"
-#include "../src/events.h"
-#include "../src/hero.h"
+#include "../src/controller.h"
+#include "../src/entity.h"
 
 int main(void) {
     int number_failed = 0;
@@ -64,12 +64,11 @@ int main(void) {
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    // TODO: (LG-9)
-    // events
-    // s = events_suite();
-    // sr = srunner_create(s);
-    // srunner_run_all(sr, CK_ENV);
-    // number_failed += srunner_ntests_failed(sr);
+    // controller
+    s = controller_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
 
     // geometry
     s = geometry_suite();
@@ -77,8 +76,8 @@ int main(void) {
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    // hero
-    s = hero_suite();
+    // entity
+    s = entity_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);

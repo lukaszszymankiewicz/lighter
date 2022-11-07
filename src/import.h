@@ -1,12 +1,26 @@
 #include "global.h"
-#include "tile.h"
-#include "level.h"
-#include "gfx.h"
-#include "sprites.h"
-#include "light.h"
 
 #ifndef IMPORT_H
 #define IMPORT_H
+
+#define PROPER_PACK_COUNT   1
+#define BUFFER_SIZE         2
+#define DOUBLE_BYTE         2
+#define COORDS_PER_RECT     4
+#define PREAMBULE_LEN       2
+
+#define FIRST_HALF          0
+#define SECOND_HALF         1
+
+extern const char *LEVEL_READ_MODE        ;
+extern const char *LEVEL_STRUCTURE_SUFFIX ;
+extern const char *LEVEL_TILESET_SUFFIX   ;
+extern const char *SEPARATOR              ;
+
+extern const int ANIMATION_PREAMBULE[PREAMBULE_LEN];
+extern const int WOBBLE_PREAMBULE[PREAMBULE_LEN]  ;
+extern const int LIGHTSOURCE_PREAMBULE[PREAMBULE_LEN];
+extern const int LEVEL_PREAMBULE[PREAMBULE_LEN]    ;
 
 enum READ_LEVEL {
     READ_LEVEL_IDLE,
@@ -29,6 +43,8 @@ enum READ_ANIMATION {
     READ_ANIMATION_IDX,
     READ_ANIMATION_N_FRAMES,
     READ_ANIMATION_DELAY,
+    READ_ANIMATION_HANDLE_X,
+    READ_ANIMATION_HANDLE_Y,
     READ_ANIMATION_RECT,
     READ_ANIMATION_HITBOX_PER_FRAME,
     READ_ANIMATION_HITBOX_RECT,
@@ -63,54 +79,7 @@ enum READ_LIGHTSOURCE {
     READ_LIGHSOURCE_ALL_READ,
 };
 
-enum ASSETS_ANIMATION_IDX {
-    ASSET_HERO_ANIMATION,
-    ASSET_ANIMATION_ALL
-};
-
-enum ASSETS_LIGHTSOURCES_IDX {
-    ASSET_LIGHTER_LIGHTSOURCE,
-    ASSET_LANTERN_LIGHTSOURCE,
-    ASSET_LIGHTSOURCE_ALL
-};
-
-enum ASSETS_GRADIENT_IDX {
-    ASSET_GRADIENT_CIRCULAR,
-    ASSET_GRADIENT_ALL
-};
-
-enum ASSETS_SPRITE_IDX {
-    ASSET_SPRITE_HERO,
-    ASSET_SPRITE_ALL
-};
-
-enum ASSETS_WOBBLE_IDX {
-    ASSET_WOBBLE_NO,
-    ASSET_WOBBLE_STABLE,
-    ASSET_WOBBLE_WALKING,
-    ASSET_WOBBLE_ALL
-};
-
-enum ASSETS_LEVEL_IDX {
-    ASSET_LEVEL_SAMPLE,
-    ASSET_LEVEL_ALL
-};
-
-extern animation_sheet_t *animations[ASSET_ANIMATION_ALL];
-extern texture_t         *gradients[ASSET_GRADIENT_ALL];
-extern texture_t         *sprites[ASSET_SPRITE_ALL];
-extern wobble_t          *wobbles[ASSET_WOBBLE_ALL];
-extern level_t           *levels[ASSET_LEVEL_ALL];
-extern lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
-
-level_t*           IMP_read_level(const char* filepath);
-animation_sheet_t* IMP_read_animation(const char* filepath);
-texture_t*         IMP_read_texture(const char* filepath);
-wobble_t*          IMP_read_wobble(const char* filepath);
-lightsource_t*     IMP_read_lightsource(const char *filepath);
-
-void               IMP_read_all_files();
-void               IMP_update_all_files();
-void               IMP_free_all_files();
+char* IMP_concatenate_string(const char *a, const char *b, const char *d);
+unsigned short int IMP_cast_val_to_dec(char vals[DOUBLE_BYTE]);
 
 #endif

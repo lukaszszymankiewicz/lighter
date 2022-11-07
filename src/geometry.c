@@ -1,6 +1,4 @@
-#include <math.h>
 #include "global.h"
-
 
 // calculates angle between two points
 float GEO_angle_2pt(int ax, int ay, int bx, int by) {
@@ -104,6 +102,22 @@ bool GEO_value_between_range (
     return ((first <= value && second >= value) || (second <= value && first >= value));
 }
 
+bool GEO_pt_in_rect(
+    int x, int y,
+    int x1, int y1,
+    int x2, int y2
+) {
+    if (GEO_value_between_range (x, x1, x2)) {
+        return true;
+    }
+
+    if (GEO_value_between_range (y, y1, y2)) {
+        return true;
+    }
+
+    return false;
+}
+
 // returns -1 if there is not collision or x-value of the collision 
 int GEO_vertical_segment_intersects_rect (
     int x1,     // segment
@@ -194,4 +208,27 @@ bool GEO_collienar_segs_have_common_pt(
     bool second = ((GEO_value_between_range(b1, a1, a2)) || (GEO_value_between_range(b1, a1, a2)));
 
     return first || second;
+}
+
+int GEO_seg_in_rect(
+    int s_x1, int s_y1,
+    int s_x2, int s_y2,
+    int r_x1, int r_y1,
+    int r_x2, int r_y2
+) {
+    if (s_x1 == s_x2) {
+        return GEO_vertical_segment_intersects_rect(
+           s_x1, s_y1,
+           s_x2, s_y2,
+           r_x1, r_y1,
+           r_x2, r_y2
+        );
+    } else {
+        return GEO_horizontal_segment_intersects_rect(
+           s_x1, s_y1,
+           s_x2, s_y2,
+           r_x1, r_y1,
+           r_x2, r_y2
+        );
+    }
 }

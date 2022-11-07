@@ -13,9 +13,9 @@ TESTDIR = tests
 TARGET =                      \
 	$(SRCDIR)/game.c          \
 	$(SRCDIR)/gfx.c           \
-	$(SRCDIR)/import.c        \
-	$(SRCDIR)/events.c        \
-	$(SRCDIR)/hero.c          \
+    $(SRCDIR)/import.c        \
+	$(SRCDIR)/controller.c    \
+	$(SRCDIR)/entity.c        \
 	$(SRCDIR)/timer.c         \
 	$(SRCDIR)/tile.c          \
 	$(SRCDIR)/files.c         \
@@ -30,22 +30,22 @@ TARGET =                      \
 
 TESTTARGET =                        \
     $(TESTDIR)/check_tests.c        \
-    $(TESTDIR)/check_events.c       \
+    $(TESTDIR)/check_controller.c   \
 	$(TESTDIR)/check_geometry.c     \
 	$(TESTDIR)/check_gfx.c	        \
 	$(TESTDIR)/check_import.c       \
-	$(TESTDIR)/check_hero.c         \
+	$(TESTDIR)/check_entity.c       \
 	$(TESTDIR)/check_level.c        \
 	$(TESTDIR)/check_light.c        \
 	$(TESTDIR)/check_point.c        \
 	$(TESTDIR)/check_segment.c      \
 	$(TESTDIR)/check_sorted_list.c  \
 	$(TESTDIR)/check_vertex.c       \
-	$(SRCDIR)/events.c              \
+	$(SRCDIR)/controller.c          \
 	$(SRCDIR)/geometry.c            \
 	$(SRCDIR)/gfx.c                 \
 	$(SRCDIR)/import.c              \
-	$(SRCDIR)/hero.c                \
+	$(SRCDIR)/entity.c              \
 	$(SRCDIR)/level.c               \
 	$(SRCDIR)/light.c               \
 	$(SRCDIR)/files.c               \

@@ -8,6 +8,10 @@
 #include "primitives.h"
 #include "point.h"
 
+static char buffer[BUFFER_SIZE];
+lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
+wobble_t          *wobbles[ASSET_WOBBLE_ALL];
+
 // changes done to light angle if looking in different direction
 float lightpos_up_down_corr[2][5] = {
   // LEFT  RIGHT  UP               DOWN             NONE
@@ -15,24 +19,14 @@ float lightpos_up_down_corr[2][5] = {
      {0,   0,     LEFT_RAD-DEG30,  LEFT_RAD+DEG30,  LEFT_RAD}       // LEFT 
 };
 
-light_t *LIG_init() {
-
-    light_t *light_o    = (light_t*)malloc(sizeof(light_t));
-    light_o->src_num    = LIGHTER;
-    light_o->src        = lightsources[light_o->src_num];
-    light_o->angle      = LEFT_RAD+DEG30;
-
-    return light_o;
-}
-
 // moves light angle due to wobble and/org looking up/down
 void LIG_move_lightsource(
-    light_t     *light_o,
-    direction_t  light_dir,
-    direction_t  hero_dir,
-    int          frame
+    lightsource_t     *light,
+    direction_t        light_dir,
+    direction_t        hero_dir,
+    int                frame
 ) {
-    light_o->angle = lightpos_up_down_corr[hero_dir][light_dir];
+    light->angle = lightpos_up_down_corr[hero_dir][light_dir];
 }
 
 // draws rays into every vertex of the lightpolygon
@@ -525,38 +519,39 @@ vertex_t* LIG_calc_light_wall_shadow(
 };
 
 // changes hero lightsource to another one
-void LIG_change_source(
-    light_t* lght
-) {
-    lght->src_num = ((lght->src_num) + 1) % ALL;
-    lght->src = lightsources[lght->src_num];
-}
+// void LIG_change_source(
+//     light_t* lght
+// ) {
+//     lght->src_num = ((lght->src_num) + 1) % ALL;
+//     lght->src = lightsources[lght->src_num];
+// }
 
 int LIG_get_light_penetrating_power(
-    light_t *lght
+    lightsource_t *lght
 ) {
-    return lght->src->penetrating_power;
+    return lght->penetrating_power;
 }
 
 int LIG_get_light_polygon_x_corr(
-    light_t *lght,
+    lightsource_t *lght,
     int      i
 ) {
-    return sin(lght->angle) * lght->src->light_polygons[i].x + cos(lght->angle) * lght->src->light_polygons[i].y;
+    return sin(lght->angle) * lght->light_polygons[i].x + cos(lght->angle) * lght->light_polygons[i].y;
 }
 
 int LIG_get_light_polygon_y_corr(
-    light_t *lght,
-    int      i 
+    lightsource_t *lght,
+    int            i 
 ) {
-    return sin(lght->angle) * lght->src->light_polygons[i].y + cos(lght->angle) * lght->src->light_polygons[i].x;
+    return sin(lght->angle) * lght->light_polygons[i].y + cos(lght->angle) * lght->light_polygons[i].x;
 }
 
+
 float LIG_get_light_polygon_width_corr(
-    light_t *lght,
-    int      i
+    lightsource_t *lght,
+    int            i
 ) {
-    int coef = lght->src->light_polygons[i].width;
+    int coef = lght->light_polygons[i].width;
 
     if (coef){
         return PI / coef;
@@ -564,32 +559,21 @@ float LIG_get_light_polygon_width_corr(
     return 0.0;
 }
 
+void LIG_change_wobble(
+    lightsource_t *lght,
+    int wobble_index
+) { 
+    lght->curent_wobble = wobble_index;
+}
+
 float LIG_get_wobble_angle_coef(
-    light_t *lght,
-    int      x_vel,
-    int      frame
+    lightsource_t *lght
 ) {
-    int state = 0;
-    
-    if (!lght->src->wobbable) {return 0.0;}
+    if (lght->wobble==NULL) {return 0.0;}
 
-    // TODO: state checking should be in separate function
-    // TODO: this should be easier when entity concept will be implemented, then an entity can
-    // "hold" a light source, and then basing on this entity behaviour wobblre can change. By now it
-    // is hardcoded as only hero can be a source of light and hero behaviour is very limited.
-    if (x_vel != 0) {
-        state = 1;
-    }
-    
-    wobble_t *current_wobble = NULL;
+    int len = lght->wobble[lght->curent_wobble].len;
 
-    if (state == 0) {
-        current_wobble = wobbles[ASSET_WOBBLE_STABLE];
-    } else {
-        current_wobble = wobbles[ASSET_WOBBLE_WALKING];
-    }
-
-    return current_wobble->coefs[frame%current_wobble->len];
+    return lght->wobble[lght->curent_wobble].coefs[lght->frame%len];
 }
 
 // generate list of points which needs to be check for ray casting
@@ -691,45 +675,38 @@ vertex_t* LIG_get_light_polygon(
     return light_polygon;
 }
 
-
 // Calculates and draws light polygons. Every of the light source needs several polygons to be drawn
 // - every one of them is slightly moved to another which makes light looks more "natural".
 // Furthermore, the polygons with bigger shift has more pale color resulting in overall effect
 // looking like "gradient".
 void LIG_fill_lightbuffer(
-    int        x,
-    int        y,
-    int        frame,
-    light_t   *light,
-    segment_t *obstacles,
-    int        x_vel
+    int              x,
+    int              y,
+    lightsource_t   *light,
+    segment_t       *obstacles
 ) {
     int   i;                       // index of current light polygon drawn
     int   red;                     // color of current light polygon drawn
     int   green;                   // color of current light polygon drawn
     int   blue;                    // color of current light polygon drawn
     int   light_power;             // power of light (brightness)
-    int   penetrating_power;       // ability to penetrate walls by light
+    // int   penetrating_power;       // ability to penetrate walls by light
     int   x_corr;                  // x and y correction values 
     int   y_corr;                  // x and y correction values
     float width_corr;              // light width correction (some light polygons can be wider)
     float wobble_corr;             // angle correction due to wobling
 
-    // before adding any new light to scene, cleaning of lighbuffers is needed
-    GFX_clean_buffers();
-
     vertex_t* light_polygon     = NULL;
-    vertex_t* light_wall_shadow = NULL;
+    // vertex_t* light_wall_shadow = NULL;
+    wobble_corr                 = LIG_get_wobble_angle_coef(light);
 
-    wobble_corr                 = LIG_get_wobble_angle_coef(light, x_vel, frame);
+    for (i=0; i < light->n_poly; i++) {
+        red              = light->light_polygons[i].red;
+        green            = light->light_polygons[i].green;
+        blue             = light->light_polygons[i].blue;
+        light_power      = light->light_polygons[i].light_power;
 
-    for (i=0; i < light->src->n_poly; i++) {
-        red              = light->src->light_polygons[i].red;
-        green            = light->src->light_polygons[i].green;
-        blue             = light->src->light_polygons[i].blue;
-        light_power      = light->src->light_polygons[i].light_power;
-
-        penetrating_power = light->src->penetrating_power;
+        // penetrating_power = light->penetrating_power;
         x_corr            = LIG_get_light_polygon_x_corr(light, i);
         y_corr            = LIG_get_light_polygon_y_corr(light, i);
         width_corr        = LIG_get_light_polygon_width_corr(light, i);
@@ -737,18 +714,19 @@ void LIG_fill_lightbuffer(
         light_polygon = LIG_get_light_polygon(
             x+x_corr,
             y+y_corr,
-            light->src->width+width_corr,
+            light->width+width_corr,
             light->angle+wobble_corr,
             obstacles
         );
         
-        light_wall_shadow = LIG_calc_light_wall_shadow(light_polygon, penetrating_power, x, y);
+        // TODO: silently hide this functionality by now
+        // light_wall_shadow = LIG_calc_light_wall_shadow(light_polygon, penetrating_power, x, y);
         
         // fill lightbuffer with freshly calulcated light polygon
         GFX_fill_buffer_single_polygon(light_polygon, GFX_fill_lightbuffer, red, green, blue, light_power);
 
         // fill lightbuffer with freshly calulcated light polygon
-        GFX_fill_buffer_single_polygon(light_wall_shadow, GFX_fill_mesh_shadowbuffer, red, green, blue, 20);
+        // GFX_fill_buffer_single_polygon(light_wall_shadow, GFX_fill_mesh_shadowbuffer, red, green, blue, 20);
 
         // cleaning
         VRTX_free(light_polygon);
@@ -761,7 +739,6 @@ void LIG_fill_lightbuffer(
 void LIG_free_wobble(
     wobble_t* wobble
 ) {
-    free(wobble->coefs);
     free(wobble);
     wobble = NULL;
 };
@@ -769,14 +746,178 @@ void LIG_free_wobble(
 void LIG_free_lightsource(
     lightsource_t* lightsource
 ) {
-    lightsource->gradient = NULL;    
-    free(lightsource->light_polygons);
     free(lightsource);
     lightsource = NULL;
 };
 
-void LIG_free(
-    light_t* lght
+lightsource_t* LIG_read_lightsource(
+    const char *filepath
 ) {
-    free(lght);
-};
+    lightsource_t *lightsource = NULL;
+    lightsource                = (lightsource_t*)malloc(sizeof(lightsource_t));
+
+    lightsource->frame          = 0;
+    lightsource->curent_wobble  = 0;
+    lightsource->n_wobbles      = 2;
+    lightsource->light_polygons = NULL;
+    lightsource->gradient       = NULL;
+    lightsource->wobble         = NULL;
+
+    int state                   = READ_LIGHTSOURCE_IDLE;
+    FILE *file                  = NULL;
+    file                        = fopen(filepath, LEVEL_READ_MODE);
+     
+    int n_polygon               = 0;
+    int width                   = 0;
+    int x                       = 0;
+    int y                       = 0;
+
+    state++;
+
+    if (!file) {return NULL;}
+
+    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
+        switch (state) 
+        {
+            case READ_LIGHTSOURCE_PREAMBULE_FIRST_HALF:
+                if(IMP_cast_val_to_dec(buffer) != LIGHTSOURCE_PREAMBULE[FIRST_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_LIGHTSOURCE_PREAMBULE_SECOND_HALF:
+                if(IMP_cast_val_to_dec(buffer) != LIGHTSOURCE_PREAMBULE[SECOND_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_LIGHSOURCE_WIDTH:
+                width = IMP_cast_val_to_dec(buffer);
+
+                // just to avoid dividing zero
+                if (width != 0) {
+                    lightsource->width = PI / IMP_cast_val_to_dec(buffer);
+                } else {
+                    lightsource->width = 0.0;
+                }
+
+                state++; break;
+
+            case READ_LIGHSOURCE_PENETRATING_POWER:
+                lightsource->penetrating_power = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGONS_NUMBER:
+
+                lightsource->n_poly = IMP_cast_val_to_dec(buffer);
+                lightsource->light_polygons = (lightpolygon_t*)malloc(sizeof(lightpolygon_t) * lightsource->n_poly);
+
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_X:
+                x = IMP_cast_val_to_dec(buffer);
+
+                // invert the sign
+                if (x > 255 * 256) {
+                    x -= 255 * 256;
+                    x *= -1;
+                }
+
+                lightsource->light_polygons[n_polygon].x = x;
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_Y:
+                y = IMP_cast_val_to_dec(buffer);
+
+                // invert the sign
+                if (y > 255 * 256) {
+                    y -= 255 * 256;
+                    y *= -1;
+                }
+                lightsource->light_polygons[n_polygon].y = y;
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_RED:
+                lightsource->light_polygons[n_polygon].red = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_GREEN:
+                lightsource->light_polygons[n_polygon].green = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_BLUE:
+                lightsource->light_polygons[n_polygon].blue = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_POWER:
+                lightsource->light_polygons[n_polygon].light_power = IMP_cast_val_to_dec(buffer);
+                state++; break;
+
+            case READ_LIGHSOURCE_POLYGON_WIDTH:
+                lightsource->light_polygons[n_polygon].width = IMP_cast_val_to_dec(buffer);
+
+                if (++n_polygon == lightsource->n_poly) {
+                    state++; break;
+                } {
+                    state = READ_LIGHSOURCE_POLYGON_X; break;
+                }
+
+            case READ_LIGHSOURCE_WOBBABLE:
+                // UNUSED, sorry :C
+                IMP_cast_val_to_dec(buffer);
+                state++; break;
+        }
+    }
+
+    return lightsource;
+}
+
+wobble_t* LIG_read_wobble(
+    const char *filepath
+) {
+    wobble_t *wobble = NULL;
+    wobble           = (wobble_t*)malloc(sizeof(wobble_t));
+
+    int state                     = READ_WOBBLE_IDLE;
+    FILE *file                    = NULL;
+    file                          = fopen(filepath, LEVEL_READ_MODE);
+     
+    int coef_n                    = 0;
+    int sign                      = 0;
+    int val                       = 0;
+
+    state++;
+
+    if (!file) {return NULL;}
+
+    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
+        switch (state) 
+        {
+            case READ_WOBBLE_PREAMBULE_FIRST_HALF:
+                if(IMP_cast_val_to_dec(buffer) != WOBBLE_PREAMBULE[FIRST_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_WOBBLE_PREAMBULE_SECOND_HALF:
+                if(IMP_cast_val_to_dec(buffer) != WOBBLE_PREAMBULE[SECOND_HALF]) { return NULL; }
+                state++; break;
+
+            case READ_WOBBLE_NUMBER:
+                wobble->len = IMP_cast_val_to_dec(buffer);
+                wobble->coefs = (float*)malloc(sizeof(float) * wobble->len);
+                state++; break;
+
+            case READ_WOBBLE_SIGN:
+                val = IMP_cast_val_to_dec(buffer);
+                sign = val==1 ? 1 : -1;
+                state++; break;
+
+            case READ_WOBBLE_COEF:
+                val = IMP_cast_val_to_dec(buffer);
+                wobble->coefs[coef_n] = (float)(sign * val) / 1000.0;
+
+                if (++coef_n == wobble->len) {
+                    state++; break;
+                } else {
+                    state = READ_WOBBLE_SIGN; break;
+                }
+        }
+    }
+
+    return wobble;
+}

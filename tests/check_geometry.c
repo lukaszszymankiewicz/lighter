@@ -1,6 +1,36 @@
 #include <check.h>
 #include "../src/geometry.h"
 
+START_TEST (GEO_pt_in_rect_check)
+{
+    bool res;
+
+    res = GEO_pt_in_rect(10, 10, 10, 10, 20, 20);
+    ck_assert_int_eq(res, 1);
+
+    res = GEO_pt_in_rect(11, 10, 10, 10, 20, 20);
+    ck_assert_int_eq(res, 1);
+
+    res = GEO_pt_in_rect(10, 11, 10, 10, 20, 20);
+    ck_assert_int_eq(res, 1);
+
+    res = GEO_pt_in_rect(11, 11, 10, 10, 20, 20);
+    ck_assert_int_eq(res, 1);
+
+    res = GEO_pt_in_rect(9, 10, 10, 10, 20, 20);
+    ck_assert_int_eq(res, 1);
+
+    res = GEO_pt_in_rect(10, 9, 10, 10, 20, 20);
+    ck_assert_int_eq(res, 1);
+
+    res = GEO_pt_in_rect(9, 9, 10, 10, 20, 20);
+    ck_assert_int_eq(res, 0);
+
+    res = GEO_pt_in_rect(21, 21, 10, 10, 20, 20);
+    ck_assert_int_eq(res, 0);
+}
+END_TEST
+
 START_TEST (GEO_seg_intersection_with_y_check)
 {
     // GIVEN
@@ -210,6 +240,7 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_horizontal_segment_intersects_rect_check);
     tcase_add_test(tc_core, GEO_pt_same_side_check);
     tcase_add_test(tc_core, GEO_collienar_segs_have_common_pt_check);
+    tcase_add_test(tc_core, GEO_pt_in_rect_check);
 
     suite_add_tcase(s, tc_core);
 

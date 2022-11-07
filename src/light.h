@@ -1,3 +1,4 @@
+#include "assets.h"
 #include "global.h"
 #include "primitives.h"
 #include "tile.h"
@@ -27,22 +28,20 @@ typedef struct wobble {
 } wobble_t;
 
 typedef struct lightsource {
-    float             width;                  // width (in rad) of light cone (0.0 if light takes whole radius)
-    int               n_poly;                 // number of light polygon draw
+    float             width;
+    float             angle;
     int               penetrating_power;
-    bool              wobbable;
+    int               frame;
+    int               n_poly;
+    int               n_wobbles;
+    int               curent_wobble;
     texture_t        *gradient;
-    lightpolygon_t   *light_polygons;         // polys correction and colors
+    lightpolygon_t   *light_polygons;
+    wobble_t         *wobble;
 } lightsource_t;
 
-typedef struct light {
-    lightsource_t *src;           // current light source
-    int            src_num;       // id of light source
-    float          angle;         // current angle in which light is cast
-} light_t;
-
-// INITS
-light_t *LIG_init();
+extern lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
+extern wobble_t          *wobbles[ASSET_WOBBLE_ALL];
 
 // TESTING
 vertex_t* LIG_get_base_light_polygon(int x, int y, segment_t *obstacles, point_t* hit_points);
@@ -62,14 +61,16 @@ point_t* LIG_generate_slipover_hit_point(int x1, int y1, int x2, int y2);
 point_t* LIG_generate_hit_points(int x, int y, float width, float angle, segment_t* obstacles);
 
 // FREE
-void LIG_free(light_t *lght);
 void LIG_free_wobble(wobble_t* wobble);
 void LIG_free_lightsource(lightsource_t* lightsource);
 
-void LIG_change_source(light_t *lght);
-void LIG_move_lightsource(light_t* light_o, direction_t light_dir, direction_t hero_dir, int frame);
-void LIG_fill_lightbuffer(int x, int y, int frame, light_t *light, segment_t *obstacles, int x_vel);
+void LIG_change_source(lightsource_t *lght);
+void LIG_move_lightsource(lightsource_t* light_o, direction_t light_dir, direction_t hero_dir, int frame);
+void LIG_fill_lightbuffer(int x, int y, lightsource_t *light, segment_t *obstacles);
 
 void LIG_debug_obstacle(segment_t *obstacles);
+
+lightsource_t* LIG_read_lightsource(const char *filepath);
+wobble_t* LIG_read_wobble( const char *filepath);
 
 #endif
