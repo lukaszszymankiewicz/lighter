@@ -7,23 +7,13 @@ vertex_t* VRTX_new(
     float angle
 ) {
     vertex_t* new_vertex = (vertex_t*)malloc(sizeof(vertex_t));
+
     new_vertex->x        = x;
     new_vertex->y        = y;
     new_vertex->angle    = angle;
-
-    new_vertex->next = NULL;
-    new_vertex->prev = NULL;
+    new_vertex->next     = NULL;
 
     return new_vertex;
-}
-
-void VRTX_push(
-    vertex_t **head,
-    vertex_t *new_vertex
-) {
-    new_vertex->next = *head;
-    (*head) = new_vertex;
-    (*head)->prev = new_vertex;
 }
 
 // Function to insert a given vertex at its correct position into a vertex list with increasing
@@ -60,21 +50,6 @@ void VRTX_add_point(
     }
 }
 
-// checks is lightpoint is inside segment, as segments are only vertical and horizontal, simple
-// tests is made
-bool VRTX_pt_in_segment(
-    int pt_x,   int pt_y,
-    int seg_x1, int seg_y1,
-    int seg_x2, int seg_y2
-) {
-    if ((pt_x == seg_x1 && pt_x == seg_x2) || (pt_y == seg_y1 && pt_y == seg_y2)) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
 // find highest value of y from list of vertices
 int VRTX_highest_y(
     vertex_t* poly
@@ -92,45 +67,6 @@ int VRTX_highest_y(
     }
 
     return highest_y;
-}
-
-int VRTX_max_y(
-    vertex_t* vertex
-) {
-    if (vertex->next==NULL) {
-        return vertex->y;
-    }
-    else {
-        return MAX(vertex->y, vertex->next->y);
-    }
-}
-
-void VRTX_delete(
-    vertex_t **head,
-    int          y
-) {
-    vertex_t *ptr  = NULL;
-    vertex_t *prev = NULL;
-    ptr            = (*head);
-
-    while(ptr) {
-        if (VRTX_max_y(ptr) <= y) {
-            if (prev == NULL) {
-                ptr=ptr->next;
-                (*head) = ptr;
-            }
-            else {
-                prev->next = ptr->next;
-                free(ptr);
-                ptr = prev->next;
-            }
-        }
-        prev = ptr;
-        if (ptr==NULL) {
-            return;
-        }
-        ptr = ptr->next;
-    }
 }
 
 int VRTX_len(
@@ -199,4 +135,16 @@ bool VRTX_eq(
         ptr2 = ptr2->next;
     }
     return true;
+}
+
+void VRTX_debug(
+    vertex_t *vertex
+) {
+    vertex_t *ptr  = NULL;
+    ptr            = vertex;
+
+    while(ptr) {
+        printf("x=%d, y=%d \n", ptr->x, ptr->y);
+        ptr = ptr->next;
+    }
 }

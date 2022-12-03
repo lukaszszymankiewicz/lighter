@@ -10,17 +10,25 @@
 int entities_library[ENTITY_ALL][ENTITY_PARAM_ALL] = {
     // hero
     {
-        ASSET_SPRITE_HERO,
-        ASSET_HERO_ANIMATION,
         MOVABLE | APPLY_COLLISION | CONTROLABLE | STATEABLE | APPLY_FRICTION | ANIMATIABLE,
-        HANDLE_MIDDLE_MIDDLE,
+        HANDLE_TYPE_NO,
+        HANDLE_TYPE_NO,
+        ASSET_HERO_ANIMATION,
+        ASSET_SPRITE_HERO,
+        ASSET_LIGHTSOURCE_NO,
+        ENTITY_LIGHTER,
+        STANDING
     }, 
     // lighter
     {
-        ASSET_SPRITE_LIGHTER,
-        ASSET_NO_ANIMATION,
         HOLDABLE | EMMIT_LIGHT,
-        HANDLE_MIDDLE_UP
+        HANDLE_MIDDLE_UP,
+        HANDLE_FRONT_MIDDLE,
+        ASSET_NO_ANIMATION,
+        ASSET_SPRITE_LIGHTER,
+        ASSET_LIGHTSOURCE_LIGHTER,
+        ENTITY_NO,
+        NOTHING
     }, 
 };
 
@@ -205,9 +213,9 @@ int ENT_handle_x(
     int x          = 0;
 
     if (
-        entity->handle == HANDLE_LEFT_UP || 
-        entity->handle == HANDLE_LEFT_MIDDLE || 
-        entity->handle == HANDLE_LEFT_DOWN
+        entity->handle == HANDLE_BACK_UP || 
+        entity->handle == HANDLE_BACK_MIDDLE || 
+        entity->handle == HANDLE_BACK_DOWN
     ) {
         x = 0;
     } else if  (
@@ -217,7 +225,7 @@ int ENT_handle_x(
     ) {
         x = (int) rect->w / 2;
     } else {
-        x =  rect->w;
+        x = rect->w;
     }
     free(rect);
 
@@ -232,15 +240,70 @@ int ENT_handle_y(
     int y          = 0;
 
     if (
-        entity->handle == HANDLE_LEFT_UP || 
+        entity->handle == HANDLE_BACK_UP || 
         entity->handle == HANDLE_MIDDLE_UP || 
-        entity->handle == HANDLE_RIGHT_UP 
+        entity->handle == HANDLE_FRONT_UP 
     ) {
         y = 0;
     } else if  (
-        entity->handle == HANDLE_LEFT_MIDDLE || 
+        entity->handle == HANDLE_BACK_MIDDLE || 
         entity->handle == HANDLE_MIDDLE_MIDDLE || 
-        entity->handle == HANDLE_RIGHT_MIDDLE
+        entity->handle == HANDLE_FRONT_MIDDLE
+    ) {
+        y = (int) rect->h / 2;
+    } else {
+        y = rect->h;
+    }
+
+    free(rect);
+
+    return y;
+}
+
+int ENT_light_pt_x(
+    entity_t *entity
+) {
+    SDL_Rect *rect = NULL;
+    rect           = ENT_current_frame_rect(entity);
+    int x          = 0;
+
+    if (
+        entity->light_pt == HANDLE_BACK_UP || 
+        entity->light_pt == HANDLE_BACK_MIDDLE || 
+        entity->light_pt == HANDLE_BACK_DOWN
+    ) {
+        x = 0;
+    } else if  (
+        entity->light_pt == HANDLE_FRONT_UP || 
+        entity->light_pt == HANDLE_FRONT_MIDDLE || 
+        entity->light_pt == HANDLE_FRONT_DOWN
+    ) {
+        x = (int) rect->w / 2;
+    } else {
+        x = rect->w;
+    }
+    free(rect);
+
+    return x;
+}
+
+int ENT_light_pt_y(
+    entity_t *entity
+) {
+    SDL_Rect *rect = NULL;
+    rect           = ENT_current_frame_rect(entity);
+    int y          = 0;
+
+    if (
+        entity->light_pt == HANDLE_BACK_UP || 
+        entity->light_pt == HANDLE_MIDDLE_UP || 
+        entity->light_pt == HANDLE_FRONT_UP 
+    ) {
+        y = 0;
+    } else if  (
+        entity->light_pt == HANDLE_BACK_MIDDLE || 
+        entity->light_pt == HANDLE_MIDDLE_MIDDLE || 
+        entity->light_pt == HANDLE_FRONT_MIDDLE
     ) {
         y = (int) rect->h / 2;
     } else {
@@ -298,24 +361,32 @@ void ENT_update_hold(
 }
 
 entity_t* ENT_init(
-    int x, 
-    int y,
+    int                id,
+    int                x, 
+    int                y,
+    int                flags,
+    int                handle,
+    int                light_pt,
+    int                hold_id,
+    int                state,
     animation_sheet_t* animation,
-    texture_t* texture,
-    int flags,
-    int handle
+    texture_t*         texture,
+    lightsource_t*     light
 ) {
     entity_t* entity  = (entity_t*)malloc(sizeof(entity_t));
-    entity->x         = x;        
-    entity->y         = y;
 
-    entity->state     = NOTHING;
-    entity->direction = LEFT;   
-    entity->light     = NULL;
+    entity->x                = x;        
+    entity->y                = y;
+    entity->flags            = flags;
+    entity->handle           = handle;
+    entity->light_pt         = light_pt;
+    entity->sprites          = NULL;
+    entity->sprites          = ANIM_init(animation, texture);
+    entity->light            = NULL;
+    entity->light            = light;
 
-    entity->sprites = NULL;
-    entity->sprites = ANIM_init(animation, texture);
-
+    entity->state            = state;
+    entity->direction        = LEFT;   
     entity->id               = 0;
     entity->frame            = 0;
     entity->frame_t          = 0;
@@ -323,9 +394,7 @@ entity_t* ENT_init(
     entity->y_vel            = 0;
     entity->update_fun_t     = 0;                
     entity->resolution_fun_t = 0;                
-    entity->flags            = flags;
     entity->hold             = NULL;
-    entity->handle           = handle;
 
     // update
     if (flags & CONTROLABLE) {
@@ -347,6 +416,10 @@ entity_t* ENT_init(
 
     if (flags & ANIMATIABLE) {
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_animation;
+    }
+    
+    if (hold_id != ENTITY_NO) {
+        entity->hold = ENT_generate(entity->x, entity->y, hold_id);
     }
 
     return entity;
@@ -374,7 +447,6 @@ void ENT_resolve(entity_t* entity) {
     }
 }
 
-
 void ENT_draw(
     entity_t *entity,
     int x,
@@ -387,16 +459,6 @@ void ENT_draw(
         y,
         entity->direction
     );
-
-    // if (entity->hold) {
-    //     GFX_render_texture(
-    //         entity->hold->sprites->texture,
-    //         ENT_current_frame_rect(entity->hold),
-    //         ENT_get_hold_x(entity, x),
-    //         ENT_get_hold_y(entity, y),
-    //         entity->direction
-    //     );
-    // }
 }
 
 void ENT_free(
@@ -417,6 +479,12 @@ SDL_Rect ENT_get_hitbox(
     int i
 ) {
     return entity->sprites->animations[entity->state].frames[entity->frame].hit_boxes[i];
+}
+
+lightsource_t* ENT_get_light(
+    entity_t *entity
+) {
+    return entity->light;
 }
 
 void ENT_update_collision(
@@ -531,14 +599,18 @@ void ENT_update_collision(
     }
 }
 
-// generates entity with given id on given tile
 entity_t* ENT_generate(int x, int y, int id) {
     return ENT_init(
+        id,
         x * TILE_WIDTH,
         y * TILE_HEIGHT,
+        entities_library[id][ENTITY_PARAM_FLAGS],
+        entities_library[id][ENTITY_PARAM_HANDLE_TYPE],
+        entities_library[id][ENTITY_PARAM_LIGHT_EMMIT_PT],
+        entities_library[id][ENTITY_PARAM_HOLD_ID],
+        entities_library[id][ENTITY_PARAM_STARTING_STATE],
         animations[entities_library[id][ENTITY_PARAM_ANIMATION]],
         sprites[entities_library[id][ENTITY_PARAM_SPRITE]],
-        entities_library[id][ENTITY_PARAM_FLAGS],
-        entities_library[id][ENTITY_PARAM_HANDLE_TYPE]
+        lightsources[entities_library[id][ENTITY_PARAM_LIGHT_TYPE]]
     );
 }

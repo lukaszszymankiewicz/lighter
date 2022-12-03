@@ -6,19 +6,9 @@
 typedef short int direction_t;
 
 enum direction { RIGHT, LEFT, UP, DOWN, NONE };
-enum segtype { HOR, VER, UNKNOWN};
+enum segtype { HOR, VER, UNKNOWN };
 enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };
 
-// for calculating hits
-typedef struct obstacle {
-    int              x1;
-    int              y1;
-    int              x2;
-    int              y2;
-    struct obstacle *next;
-} obstacle_t;
-
-// for drawing
 typedef struct segment {
     int   x1;
     int   y1;
@@ -35,15 +25,26 @@ typedef struct point {
     struct point *next;
 } point_t;
 
-// light vertex representation
 typedef struct vertex {
-    int            x;         // coords of vertex
-    int            y;         // coords of vertex
-    float          angle;     // angle it makes with player
-    float          dist;      // distance from caster
-    struct vertex *next;      // next vertex
-    struct vertex *prev;      // prev vertex
+    int            x;
+    int            y;
+    float          angle;
+    struct vertex *next;
+    float          dist;
 } vertex_t;
+
+typedef struct lvertex {
+    vertex_t* coords;
+    int       power;
+    int       red;
+    int       green;
+    int       blue;
+} lvertex_t;
+
+typedef struct light_scene {
+    lvertex_t* components[MAX_LIGHT_ON_SCENE];
+    int        n;
+} light_scene_t;
 
 typedef struct texture {
     SDL_Texture *surface;

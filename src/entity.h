@@ -25,57 +25,88 @@ const static int APPLY_FRICTION  = 1 << 6;  // this entity is affected by fricti
 const static int ANIMATIABLE     = 1 << 7;  // this entity has any animation beside one image
 const static int NOT_DRAWABLE    = 1 << 8;  // this entity should not be drawn
 
+const static int ENTITY_NO       = -1;
+
 enum ENITY_IDX {
     ENTITY_HERO,
-    ENTITY_LANTERN,
+    ENTITY_LIGHTER,
     ENTITY_ALL
 };
 
 enum HANDLE_TYPE {
-    HANDLE_LEFT_UP,
-    HANDLE_LEFT_MIDDLE,
-    HANDLE_LEFT_DOWN,
+    HANDLE_BACK_UP,
+    HANDLE_BACK_MIDDLE,
+    HANDLE_BACK_DOWN,
     HANDLE_MIDDLE_UP,
     HANDLE_MIDDLE_MIDDLE,
     HANDLE_MIDDLE_DOWN,
-    HANDLE_RIGHT_UP,
-    HANDLE_RIGHT_MIDDLE,
-    HANDLE_RIGHT_DOWN,
-    HANDLE_TYPE_ALL
+    HANDLE_FRONT_UP,
+    HANDLE_FRONT_MIDDLE,
+    HANDLE_FRONT_DOWN,
+    HANDLE_TYPE_NO
 };
 
 enum ENTITY_PARAM {
-    ENTITY_PARAM_SPRITE,
-    ENTITY_PARAM_ANIMATION,
     ENTITY_PARAM_FLAGS,
     ENTITY_PARAM_HANDLE_TYPE,
+    ENTITY_PARAM_LIGHT_EMMIT_PT,
+    ENTITY_PARAM_ANIMATION,
+    ENTITY_PARAM_SPRITE,
+    ENTITY_PARAM_LIGHT_TYPE,
+    ENTITY_PARAM_HOLD_ID,
+    ENTITY_PARAM_STARTING_STATE,
     ENTITY_PARAM_ALL,
 };
 
 extern int entities_library[ENTITY_ALL][ENTITY_PARAM_ALL];
 
 typedef struct entity {
+    // global
     int id;                                                         // entity global id
-    int state;                                                      // entity state
+
+    // position
     int x;                                                          // position on global map
     int y;                                                          // position on global map
     int direction;                                                  // direction enity is directed
-    int frame;                                                      // current animation frame index
-    int frame_t;                                                    // frame timer, if big enough frame is changed
     int x_vel;                                                      // velocity in x direction
     int y_vel;                                                      // velocity in y direction
+
+    // state
+    int state;                                                      // entity state
+    int frame;                                                      // current animation frame index
+    int frame_t;                                                    // frame timer, if big enough frame is changed
+
+    // interactions
     int handle;                                                     // way of calculating handle pos
+    int light_pt;                                                   // handle where light is emitted
     char flags;                                                     // entity flags (8 bits)
+    struct entity *hold;                                            // entity holded by this entity
+
+    // actions
     int update_fun_t;                                               // number of updating function
     int resolution_fun_t;                                           // number of updating function
     void(*update_fun[MAX_UPDATE_FUN_NUMBER])(struct entity *e);     // update functions
     void(*resolution_fun[MAX_UPDATE_FUN_NUMBER])(struct entity *e); // resolution functions 
-    struct entity *hold;                                            // entity holded by this entity
+
+    // assets
     animation_sheet_t* sprites;                                     // entity sprites
     lightsource_t *light;                                           // entity lightsource type
+
 } entity_t;
 
-entity_t* ENT_init(int x, int y, animation_sheet_t* animation, texture_t* texture, int flags, int handle);
+entity_t* ENT_init(
+    int                id,
+    int                x,
+    int                y,
+    int                flags,
+    int                handle,
+    int                light_pt,
+    int                hold_id,
+    int                state,
+    animation_sheet_t* animation,
+    texture_t*         texture,
+    lightsource_t*     light
+);
 entity_t* ENT_generate(int x, int y, int id);
 
 void ENT_update(entity_t* entity);
@@ -87,5 +118,11 @@ void ENT_free(entity_t *entity);
 
 int ENT_hold_x(entity_t *entity);
 int ENT_hold_y(entity_t *entity);
+int ENT_handle_x(entity_t *entity);
+int ENT_handle_y(entity_t *entity);
+int ENT_light_pt_x(entity_t *entity);
+int ENT_light_pt_y(entity_t *entity);
+
+lightsource_t* ENT_get_light(entity_t *entity);
 
 #endif

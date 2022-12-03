@@ -10,23 +10,25 @@ TESTLINKS = `pkg-config --cflags --libs check sdl2 SDL2_image`
 SRCDIR = src
 TESTDIR = tests
 
-TARGET =                      \
-	$(SRCDIR)/game.c          \
-	$(SRCDIR)/gfx.c           \
-    $(SRCDIR)/import.c        \
-	$(SRCDIR)/controller.c    \
-	$(SRCDIR)/entity.c        \
-	$(SRCDIR)/timer.c         \
-	$(SRCDIR)/tile.c          \
-	$(SRCDIR)/files.c         \
-	$(SRCDIR)/level.c         \
-	$(SRCDIR)/geometry.c      \
-	$(SRCDIR)/sorted_list.c   \
-	$(SRCDIR)/light.c         \
-	$(SRCDIR)/vertex.c        \
-	$(SRCDIR)/segment.c       \
-	$(SRCDIR)/sprites.c       \
-	$(SRCDIR)/point.c         \
+TARGET =                         \
+	$(SRCDIR)/game.c             \
+	$(SRCDIR)/main.c             \
+	$(SRCDIR)/gfx.c              \
+    $(SRCDIR)/import.c           \
+	$(SRCDIR)/controller.c       \
+	$(SRCDIR)/entity.c           \
+	$(SRCDIR)/entity_manager.c   \
+	$(SRCDIR)/timer.c            \
+	$(SRCDIR)/tile.c             \
+	$(SRCDIR)/files.c            \
+	$(SRCDIR)/level.c            \
+	$(SRCDIR)/geometry.c         \
+	$(SRCDIR)/sorted_list.c      \
+	$(SRCDIR)/light.c            \
+	$(SRCDIR)/vertex.c           \
+	$(SRCDIR)/segment.c          \
+	$(SRCDIR)/sprites.c          \
+	$(SRCDIR)/point.c            \
 
 TESTTARGET =                        \
     $(TESTDIR)/check_tests.c        \
@@ -46,6 +48,7 @@ TESTTARGET =                        \
 	$(SRCDIR)/gfx.c                 \
 	$(SRCDIR)/import.c              \
 	$(SRCDIR)/entity.c              \
+	$(SRCDIR)/entity_manager.c      \
 	$(SRCDIR)/level.c               \
 	$(SRCDIR)/light.c               \
 	$(SRCDIR)/files.c               \

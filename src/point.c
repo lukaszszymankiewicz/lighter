@@ -118,3 +118,15 @@ void PT_merge(
     }
 }
 
+void PT_debug(
+    point_t *point
+) {
+    point_t *ptr   = NULL;
+    ptr            = point;
+
+    while(ptr) {
+        printf("x=%d, y=%d \n", ptr->x, ptr->y);
+        ptr = ptr->next;
+    }
+}
+

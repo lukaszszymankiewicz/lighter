@@ -51,10 +51,9 @@ void GFX_draw_rect_border(int x, int y, int w, int h, int r, int g, int b, int a
 void GFX_render_texture(texture_t* texture, SDL_Rect* clip, int x, int y, bool flip);
 void GFX_render_tile(texture_t* texture, int render_x, int render_y, int x, int y, int w, int h);
 void GFX_free_texture(texture_t *texture);
-
-void GFX_debug_obs(obstacle_t* obstacles);
 void GFX_clean_buffers();
 void GFX_draw_lightbuffer(texture_t* gradient, int x, int y);
+
 texture_t* GFX_read_texture(const char *filepath);
 
 // for tests

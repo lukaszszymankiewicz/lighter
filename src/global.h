@@ -11,8 +11,8 @@
 
 // version
 #define MAJOR = 0
-#define MINOR = 1
-#define PATCH = 3
+#define MINOR = 2
+#define PATCH = 0
 
 // macros
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -37,29 +37,21 @@
 #define SCREEN_WIDTH             320                // screen width in pixels
 #define SCREEN_HEIGHT            200                // screen height in pixels
 #define MAX_KEYS                 SDL_NUM_SCANCODES  // SDL max keys supported
-#define DEFAULT_DARK_R           0                  // default darkness R color
-#define DEFAULT_DARK_G           0                  // default darkness G color
-#define DEFAULT_DARK_B           0                  // default darkness B color
-#define DEFAULT_DARK_A           0                  // default darkness ALPHA channel
-#define BACKGROUND_DARK_A        69                 // default background darkness ALPHA channel
-#define DEFAULT_LIGHT_R          255                // default light R color
-#define DEFAULT_LIGHT_G          252                // default light G color
-#define DEFAULT_LIGHT_B          187                // default light B color
-#define DEFAULT_LIGHT_A          10                 // default light ALPHA channel
 #define GAME_NAME                "Lighter"          // game windom nape
-#define MAX_LINE_LENGHT          256                // max line length when reading level data
-#define MAX_INT_LEN              5                  // max int length when reading level data
 #define TILE_HEIGHT              32                 // single tile height (in px)
 #define TILE_WIDTH               32                 // single tile width (in px)
-#define TILE_DATA_NUM            3
 #define N_COLOR_CHANNELS         4                  // number of color channels for each pixel
 #define EMPTY_TILE               0                  // index of empty tile in default tileset
 #define BLANK_COLOR              0x00000000         // this color is fully transparent
+#define MAX_LIGHT_ON_SCENE       20                 // maximum number of rendered polygon
 
 // yeah... full screen overall pix number is apparently higher than it should be from simple
 // multiplication. This is propably due to reshaping resolution size to window size
 #define FULL_SCREEN_PIX_SIZE     SCREEN_WIDTH * (SCREEN_HEIGHT+40)
 #define FULL_SCREEN_BYTE_SIZE    SCREEN_WIDTH * SCREEN_HEIGHT * N_COLOR_CHANNELS
 #define PIX_PER_SCREEN_ROW       SCREEN_WIDTH * N_COLOR_CHANNELS
+
+#define CAMERA_X                 (int)SCREEN_WIDTH / 2
+#define CAMERA_Y                 (int)SCREEN_HEIGHT / 2
 
 #endif

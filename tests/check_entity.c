@@ -12,7 +12,16 @@ START_TEST (ENT_hold_and_handle_check)
 {
     sprites[ASSET_SPRITE_LIGHTER]         = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
     entity_t* entity = NULL;
-    entity           = ENT_init(100, 100, NULL, sprites[ASSET_SPRITE_LIGHTER], NOTHING_FLAG, HANDLE_LEFT_UP);
+    entity           = ENT_init(
+        100,
+        100,
+        NOTHING_FLAG,
+        HANDLE_BACK_UP,
+        HANDLE_BACK_UP,
+        NULL,
+        sprites[ASSET_SPRITE_LIGHTER],
+        NULL
+    );
 
     int w = sprites[ASSET_SPRITE_LIGHTER]->width;
     int h = sprites[ASSET_SPRITE_LIGHTER]->height;
@@ -21,21 +30,21 @@ START_TEST (ENT_hold_and_handle_check)
     entity->direction = RIGHT;
 
     // CASE 1
-    entity->handle    = HANDLE_LEFT_UP;
+    entity->handle    = HANDLE_BACK_UP;
     x = ENT_hold_x(entity);
     y = ENT_hold_y(entity);
     ck_assert_int_eq(x, 0);
     ck_assert_int_eq(y, 0);
 
     // CASE 2
-    entity->handle    = HANDLE_LEFT_MIDDLE;
+    entity->handle    = HANDLE_BACK_MIDDLE;
     x = ENT_hold_x(entity);
     y = ENT_hold_y(entity);
     ck_assert_int_eq(x, 0);
     ck_assert_int_eq(y, (int)h/2);
 
     // CASE 3
-    entity->handle    = HANDLE_LEFT_DOWN;
+    entity->handle    = HANDLE_BACK_DOWN;
     x = ENT_hold_x(entity);
     y = ENT_hold_y(entity);
     ck_assert_int_eq(x, 0);
@@ -63,21 +72,21 @@ START_TEST (ENT_hold_and_handle_check)
     ck_assert_int_eq(y, h);
 
     // CASE 7
-    entity->handle    = HANDLE_RIGHT_UP;
+    entity->handle    = HANDLE_FRONT_UP;
     x = ENT_hold_x(entity);
     y = ENT_hold_y(entity);
     ck_assert_int_eq(x, w);
     ck_assert_int_eq(y, 0);
 
     // CASE 8
-    entity->handle    = HANDLE_RIGHT_MIDDLE;
+    entity->handle    = HANDLE_FRONT_MIDDLE;
     x = ENT_hold_x(entity);
     y = ENT_hold_y(entity);
     ck_assert_int_eq(x, w);
     ck_assert_int_eq(y, (int)h/2);
 
     // CASE 9
-    entity->handle    = HANDLE_RIGHT_DOWN;
+    entity->handle    = HANDLE_FRONT_DOWN;
     x = ENT_hold_x(entity);
     y = ENT_hold_y(entity);
     ck_assert_int_eq(x, w);
@@ -89,7 +98,16 @@ END_TEST
 START_TEST (ENT_resolve_check)
 {
     entity_t* entity         = NULL;
-    entity                   = ENT_init(100, 100, NULL, NULL, ANIMATIABLE, HANDLE_LEFT_UP);
+    entity                   = ENT_init(
+        100,
+        100,
+        ANIMATIABLE,
+        HANDLE_BACK_UP,
+        HANDLE_BACK_UP,
+        NULL,
+        NULL,
+        NULL
+    );
     entity->state            = STANDING;
 
     animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
@@ -133,7 +151,16 @@ START_TEST (ENT_colision_update_check_positive)
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
 
     entity_t* entity = NULL;
-    entity           = ENT_init(100, 100, NULL, NULL, APPLY_COLLISION, HANDLE_LEFT_UP);
+    entity           = ENT_init(
+        100,
+        100,
+        APPLY_COLLISION,
+        HANDLE_BACK_UP,
+        HANDLE_BACK_UP,
+        NULL,
+        NULL,
+        NULL
+    );
 
     animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
     sprites[ASSET_SPRITE_HERO]         = GFX_read_texture(FILEPATH_SPRITE_HERO);
@@ -193,7 +220,16 @@ START_TEST (ENT_colision_update_check_negatvie)
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
 
     entity_t* entity = NULL;
-    entity           = ENT_init(100, 100, NULL, NULL, APPLY_COLLISION, HANDLE_LEFT_UP);
+    entity           = ENT_init(
+        100,
+        100,
+        APPLY_COLLISION,
+        HANDLE_BACK_UP,
+        HANDLE_BACK_UP,
+        NULL,
+        NULL,
+        NULL
+    );
 
     animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
     sprites[ASSET_SPRITE_HERO]         = GFX_read_texture(FILEPATH_SPRITE_HERO);
@@ -228,7 +264,16 @@ START_TEST (ENT_with_friction_flag)
 {
     // GIVEN
     entity_t* e    = NULL;
-    e              = ENT_init(0, 0, NULL, NULL, APPLY_FRICTION, HANDLE_LEFT_UP);
+    e              = ENT_init(
+        0, 
+        0,
+        APPLY_FRICTION,
+        HANDLE_BACK_UP,
+        HANDLE_BACK_UP,
+        NULL,
+        NULL,
+        NULL
+    );
 
     // right
     e->direction = RIGHT;
@@ -269,8 +314,27 @@ START_TEST (ENT_with_controllable_flag)
     // GIVEN
     entity_t* e    = NULL;
     entity_t* hold = NULL;
-    e              = ENT_init(0, 0, NULL, NULL, CONTROLABLE | MOVABLE, HANDLE_LEFT_UP);
-    hold           = ENT_init(0, 0, NULL, NULL, HOLDABLE, HANDLE_LEFT_UP);
+    e              = ENT_init(
+        0,
+        0,
+        CONTROLABLE | MOVABLE,
+        HANDLE_BACK_UP,
+        HANDLE_BACK_UP,
+        NULL,
+        NULL,
+        NULL
+    );
+
+    hold           = ENT_init(
+        0,
+        0,
+        HOLDABLE,
+        HANDLE_BACK_UP,
+        HANDLE_BACK_UP,
+        NULL,
+        NULL,
+        NULL
+    );
     keyboard       = CON_init();
 
     // make entity hold something

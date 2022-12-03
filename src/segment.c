@@ -299,16 +299,43 @@ void SEG_free(
     }
 }
 
-segment_t* SEG_filter_by_rect(segment_t* seg, int x1, int y1, int x2, int y2) {
-    segment_t* filtered = NULL;
-    segment_t* ptr      = NULL;
+segment_t* SEG_filter_by_rect(
+    segment_t* obstacles,
+    int r_x1,
+    int r_y1,
+    int r_x2,
+    int r_y2
+) {
+    segment_t *obs = NULL;
+    segment_t *ptr = NULL;
 
+    ptr = obstacles;
+
+    while(ptr) {
+        if (GEO_seg_in_rect(
+                ptr->x1, ptr->y1,
+                ptr->x2, ptr->y2, 
+                r_x1, r_y1,
+                r_x2, r_y2 != -1)
+            )
+        SEG_push(
+            &obs,
+            ptr->x1, ptr->y1,
+            ptr->x2, ptr->y2 
+        );
+            ptr=ptr->next;
+    }
+    
+    return obs;
+}
+void SEG_debug(
+    segment_t* seg
+) {
+    segment_t* ptr = NULL;
     ptr = seg;
 
     while(ptr) {
- 
+        printf("x1=%d, y1=%d, x2=%d, y2=%d \n", ptr->x1, ptr->y1, ptr->x2, ptr->y2); 
         ptr=ptr->next;
     }
-
-    return filtered;
 }

@@ -19,6 +19,32 @@ float lightpos_up_down_corr[2][5] = {
      {0,   0,     LEFT_RAD-DEG30,  LEFT_RAD+DEG30,  LEFT_RAD}       // LEFT 
 };
 
+light_scene_t* LIG_new_light_scene() {
+    light_scene_t* scene = NULL;
+    scene                = (light_scene_t*)malloc(sizeof(light_scene_t));
+
+    scene->n = 0;
+
+    for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
+        scene->components[i] = NULL;
+    }
+
+    return scene;
+}
+
+void LIG_free_light_scene(
+    light_scene_t* scene
+) {
+    for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
+        VRTX_free(scene->components[i]->coords);
+        scene->components[i]->coords = NULL;
+        free(scene->components[i]);
+        scene->components[i] = NULL;
+    }
+
+    free(scene);
+}
+
 // moves light angle due to wobble and/org looking up/down
 void LIG_move_lightsource(
     lightsource_t     *light,
@@ -38,19 +64,6 @@ void LIG_debug_rays(
 ) {
     for(vertex_t* ptr = light_poly; ptr; ptr = ptr->next) {
         GFX_draw_colored_line(st_x, st_y, ptr->x, ptr->y, alpha, alpha, alpha, 255); 
-    }
-}
-
-// draws obstacles of the light
-void LIG_debug_obstacle(
-    segment_t *obstacles
-) {
-    segment_t *ptr = NULL;
-    ptr            = obstacles;
-
-    while(ptr) {
-        GFX_draw_colored_line(ptr->x1, ptr->y1, ptr->x2, ptr->y2, 255, 0, 0, 255); 
-        ptr=ptr->next;
     }
 }
 
@@ -396,6 +409,26 @@ vertex_t* LIG_find_closest_hit(
     }
 }
 
+vertex_t* LIG_add_aux_hit_points(
+    int        x,
+    int        y,
+    point_t*   aux_hit_points,
+    vertex_t*  light_polygon,
+    segment_t* obstacles
+) {
+    point_t* ptr            = NULL;
+    segment_t* inter        = NULL;
+    vertex_t* aux_vertices  = NULL;
+
+    for (ptr=aux_hit_points; ptr; ptr=ptr->next) {
+        inter = NULL;
+        inter = LIG_ray_intersects_multiple(x, y, ptr->x, ptr->y, obstacles);
+        aux_vertices = LIG_find_closest_hit(inter, x, y, ptr->x, ptr->y);
+        VRTX_merge(&light_polygon, aux_vertices);
+    }
+    return light_polygon;
+}
+
 // Calculates coords of light polygon vertices.
 vertex_t* LIG_get_base_light_polygon(
     int x,                 // x starting point
@@ -404,7 +437,6 @@ vertex_t* LIG_get_base_light_polygon(
     point_t* hit_points    // hit points to be checked
 ) { 
     vertex_t   *light_polygon     = NULL;
-    vertex_t   *v                 = NULL;
     segment_t  *inter             = NULL;
     point_t    *ptr               = NULL;
     point_t    *aux_pts           = NULL;  
@@ -433,16 +465,7 @@ vertex_t* LIG_get_base_light_polygon(
     // slip rays MUST hit something, its end is generated to always range outisde level. Because
     // level is rounded with dummy obstacles lining the border of screen, at list hit of it needs to
     // be calculated.
-    ptr = NULL;
-    v = NULL;
-
-    for (ptr=aux_pts; ptr; ptr=ptr->next) {
-        inter = NULL;
-        inter = LIG_ray_intersects_multiple(x, y, ptr->x, ptr->y, obstacles);
-
-        v = LIG_find_closest_hit(inter, x, y, ptr->x, ptr->y);
-        VRTX_push(&light_polygon, v);
-    }
+    LIG_add_aux_hit_points(x, y, aux_pts, light_polygon, obstacles);
 
     SEG_free(inter);
 
@@ -451,15 +474,19 @@ vertex_t* LIG_get_base_light_polygon(
 
 // adds initial point of light to light polygon
 vertex_t* LIG_initial_point_of_light(
-    int x,                   // hero position 
-    int y,                   // hero position
-    float width              // width (in radians) of light cone
+    int x,                 
+    int y,                
+    float width,
+    vertex_t * light_polygon
 ) {
-    if (width == 0.0) {
-        return NULL;
-    }
+    vertex_t* v = NULL;
 
-    return VRTX_new(x, y, 0.0);
+    if (width != 0.0) {
+        v = VRTX_new(x, y, 0.0);
+        VRTX_merge(&light_polygon, v);
+
+    }
+    return light_polygon;
 }
 
 // adds light border to light cone (if light sweeps all around function is not used)
@@ -517,14 +544,6 @@ vertex_t* LIG_calc_light_wall_shadow(
     }
     return shadow_polygon;
 };
-
-// changes hero lightsource to another one
-// void LIG_change_source(
-//     light_t* lght
-// ) {
-//     lght->src_num = ((lght->src_num) + 1) % ALL;
-//     lght->src = lightsources[lght->src_num];
-// }
 
 int LIG_get_light_penetrating_power(
     lightsource_t *lght
@@ -610,7 +629,7 @@ point_t* LIG_generate_hit_points(
     
     bool res;
 
-    // end each of the obstacle end is checked whether it occurs in light cone.
+    // each of the obstacle end is checked whether it occurs in light cone.
     while(ptr) {
         res = GEO_pt_in_triangle(ptr->x1, ptr->y1, x, y, x_a, y_a, x_b, y_b);
 
@@ -638,14 +657,9 @@ vertex_t* LIG_get_light_polygon(
     float      angle,
     segment_t* obstacles
 ) {
-    vertex_t* light_polygon     = NULL;
-    vertex_t* aux_vertices      = NULL;
-    vertex_t* starting_point    = NULL;
-
-    point_t* hit_points         = NULL;
-    point_t* aux_hit_points     = NULL;
-    point_t* ptr                = NULL;
-
+    vertex_t*  light_polygon    = NULL;
+    point_t*   hit_points       = NULL;
+    point_t*   aux_hit_points   = NULL;
     segment_t* inter            = NULL;
 
     // calculating points to which light rays is casted
@@ -656,23 +670,67 @@ vertex_t* LIG_get_light_polygon(
 
     // calculating aux hitpoints of light polygon
     aux_hit_points = LIG_add_border_light_vertices(x, y, obstacles, angle, width);
-
-    for (ptr=aux_hit_points; ptr; ptr=ptr->next) {
-        inter = NULL;
-        inter = LIG_ray_intersects_multiple(x, y, ptr->x, ptr->y, obstacles);
-        aux_vertices = LIG_find_closest_hit(inter, x, y, ptr->x, ptr->y);
-        VRTX_merge(&light_polygon, aux_vertices);
-    }
-
-    starting_point = LIG_initial_point_of_light(x, y, width);
-    VRTX_merge(&light_polygon, starting_point);
+    
+    light_polygon = LIG_add_aux_hit_points(x, y, aux_hit_points, light_polygon, obstacles);
+    light_polygon = LIG_initial_point_of_light(x, y, width, light_polygon);
 
     PT_free(hit_points);
     PT_free(aux_hit_points);
-
     SEG_free(inter);
 
     return light_polygon;
+}
+vertex_t* LIG_single_add_light_polygon(
+    int              x,
+    int              y,
+    int              n,
+    lightsource_t   *light,
+    segment_t       *obstacles
+) {
+    int   x_corr;                  // x and y correction values 
+    int   y_corr;                  // x and y correction values
+    float width_corr;              // light width correction (some light polygons can be wider)
+    float wobble_corr;             // angle correction due to wobling
+
+    vertex_t* light_polygon     = NULL;
+    wobble_corr                 = LIG_get_wobble_angle_coef(light);
+    x_corr                      = LIG_get_light_polygon_x_corr(light, n);
+    y_corr                      = LIG_get_light_polygon_y_corr(light, n);
+    width_corr                  = LIG_get_light_polygon_width_corr(light, n);
+
+    light_polygon = LIG_get_light_polygon(
+        x+x_corr,
+        y+y_corr,
+        light->width+width_corr,
+        light->angle+wobble_corr,
+        obstacles
+    );
+
+    return light_polygon;
+
+};
+
+void LIG_add_to_scene(
+    int              x,
+    int              y,
+    lightsource_t   *light,
+    light_scene_t   *scene,
+    segment_t       *obstacles
+) {
+    for (int i=0; i < light->n_poly; i++) {
+        if (scene->n >= MAX_LIGHT_ON_SCENE) { continue; }
+
+        vertex_t* vertex = NULL;
+        vertex           = LIG_single_add_light_polygon(x, y, i, light, obstacles);
+
+        scene->components[scene->n]->coords = vertex;
+        scene->components[scene->n]->red    = light->light_polygons[i].red;
+        scene->components[scene->n]->green  = light->light_polygons[i].green;
+        scene->components[scene->n]->blue   = light->light_polygons[i].blue;
+        scene->components[scene->n]->power  = light->light_polygons[i].light_power;
+
+        scene->n++;
+    }
 }
 
 // Calculates and draws light polygons. Every of the light source needs several polygons to be drawn
@@ -723,7 +781,7 @@ void LIG_fill_lightbuffer(
         // light_wall_shadow = LIG_calc_light_wall_shadow(light_polygon, penetrating_power, x, y);
         
         // fill lightbuffer with freshly calulcated light polygon
-        GFX_fill_buffer_single_polygon(light_polygon, GFX_fill_lightbuffer, red, green, blue, light_power);
+        // GFX_fill_buffer_single_polygon(light_polygon, GFX_fill_lightbuffer, red, green, blue, light_power);
 
         // fill lightbuffer with freshly calulcated light polygon
         // GFX_fill_buffer_single_polygon(light_wall_shadow, GFX_fill_mesh_shadowbuffer, red, green, blue, 20);
@@ -732,8 +790,7 @@ void LIG_fill_lightbuffer(
         VRTX_free(light_polygon);
     }
 
-    // LIG_debug_obstacle(obstacles);
-    SEG_free(obstacles);
+    // SEG_free(obstacles);
 };
 
 void LIG_free_wobble(
@@ -864,6 +921,9 @@ lightsource_t* LIG_read_lightsource(
                 state++; break;
         }
     }
+
+    // TODO: add some initialization for this one!
+    lightsource->angle = LEFT_RAD;
 
     return lightsource;
 }

@@ -1,6 +1,5 @@
 #include "assets.h"
 #include "global.h"
-#include "entity.h"
 #include "primitives.h"
 #include "tile.h"
 
@@ -30,18 +29,14 @@ typedef struct level {
                                          // it is one-to-one representation of level->structure, 
                                          // but only indicates if array is an obstacle
     tile_t        **structure;           // matrix of tiles (from tile_array), representing level
-    entity_t      *entities[MAX_ENTITY];
 } level_t;
-
-extern level_t           *levels[ASSET_LEVEL_ALL];
 
 level_t* LVL_new();
 
 void LVL_analyze(level_t *level);
-void LVL_draw(level_t* level);
+void LVL_draw(level_t *level, int camera_x, int camera_y);
+
 void LVL_fill_shadowbuffer_with_tiles(level_t *level, int x, int y, int obstacle);
-int LVL_add_entity(level_t* level, entity_t *entity, int id);
-entity_t* LVL_get_entity_by_id(level_t* level, int id);
 
 tile_t* LVL_tile_on_pos(level_t *level, int x, int y);
 
@@ -53,13 +48,7 @@ void LVL_fill_structure(level_t *level, int x, int y, int i);
 void LVL_fill_obstacle(level_t *level, int x, int y, int i);
 void LVL_fill_tiles(level_t *level);
 
-int LVL_hero_x(level_t* level);
-int LVL_hero_y(level_t* level);
-
-bool LVL_entity_in_range(level_t *level, entity_t *entity, int range_x, int range_y);
-void LVL_apply_collision(level_t* level, entity_t *entity);
-void LVL_update_entities(level_t *level);
-void LVL_draw_entities(level_t *level);
+void LVL_draw_light(level_t *level);
 
 level_t* LVL_read_level(const char *filename);
 void LVL_free(level_t* level);
