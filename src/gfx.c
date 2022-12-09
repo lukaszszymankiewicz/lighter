@@ -307,13 +307,13 @@ sorted_list_t* GFX_calc_intersections_in_scanline(
         }
         // line in perpendicular to x-axis
         else if (ptr->x1 == ptr->x2) {
-            SRTLST_insert(&intersections, ptr->x1);
+            SRTLST_insert(&intersections, ptr->x1,0 );
             ptr=ptr->next;
             (*n)++;
         }
         else {
             x = GEO_x_intersection_with_slope(y, ptr->x1, ptr->y1, ptr->slope);
-            SRTLST_insert(&intersections, x);
+            SRTLST_insert(&intersections, x, 0);
             ptr=ptr->next;
             (*n)++;
         }

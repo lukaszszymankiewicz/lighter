@@ -1,4 +1,7 @@
+#include <assert.h>
 #include "global.h"
+#include "vertex.h"
+#include "sorted_list.h"
 
 // calculates angle between two points
 float GEO_angle_2pt(int ax, int ay, int bx, int by) {
@@ -11,6 +14,21 @@ int GEO_sign (
     int x3, int y3
 ) {
     return (x1 - x3) * (y2- y3) - (x2 - x3) * (y1 - y3);
+}
+
+int GEO_int_sign(
+    int a,
+    int b
+) {
+    int res = a-b;
+
+    if (res < 0) {
+        return -1;
+    } else if (res >0) {
+        return 1;
+    } else {
+         return 0; 
+    }
 }
 
 // checks if given point is inside of the triangle
@@ -231,4 +249,116 @@ int GEO_seg_in_rect(
            r_x2, r_y2
         );
     }
+bool GEO_pt_in_hor_seg(
+    int x, int y,
+    int x1, int y1,
+    int x2, int y2
+) {
+
+    if ((x1 == x && y1 == y) || (x2 == x && y2 == y)) {
+        return true; 
+    }
+
+    if (y1 == y2 && y1 == y) {
+        return GEO_value_between_range(x, x1, x2);
+    }
+
+    return false;
+}
+
+sorted_list_t* GEO_fill_intersection(
+    sorted_list_t* intersections,
+    int x,  int y,
+    int x1, int y1,
+    int x2, int y2
+) {
+    int inter;
+    int sign;
+
+    if (GEO_value_between_range(y, y1, y2)) {
+        inter = (int)GEO_intersection_with_y(y, x1, y1, x2, y2);
+        sign = GEO_int_sign(y2, y1);
+        SRTLST_insert(&intersections, inter, sign);
+    }
+
+    return intersections;
+}
+
+// determines if point is inside of the polygon
+// polygon is defined by its cones (vertex_t)
+// algorithm is using scanline to check where y is crossing the polygon and then check if desired
+// point lays within these intersections
+bool GEO_pt_in_polygon(
+    vertex_t* polygon,
+    int       x,
+    int       y
+) {
+    sorted_list_t *inter     = NULL;
+    vertex_t      *ptr       = NULL;
+    ptr                      = polygon;
+    int            first_x   = polygon->x;
+    int            first_y   = polygon->y;
+
+    while(ptr->next) {
+        if (GEO_pt_in_hor_seg(x, y, ptr->x, ptr->y, ptr->next->x, ptr->next->y)) {
+            SRTLST_free(inter); 
+            return true;
+        }
+        inter = GEO_fill_intersection(inter, x, y, ptr->x, ptr->y, ptr->next->x, ptr->next->y);
+        ptr = ptr->next;
+    }
+
+    // last segment needs to be called by force
+    if (GEO_pt_in_hor_seg(x, y, ptr->x, ptr->y, first_x, first_y)) {
+        SRTLST_free(inter); 
+        return true;
+    }
+    inter = GEO_fill_intersection(inter, x, y, ptr->x, ptr->y, first_x, first_y);
+    
+    // check whether point is within intersections
+    if (!inter) { return false; }
+    
+    sorted_list_t *ptr2 = NULL;
+    ptr2                = inter;
+    int check           = 1;
+
+    while(ptr2->next) {
+
+        // intersection is a cone of the polygon
+        if (ptr2->value == ptr2->next->value) {
+
+            // point we are looking for is exactly this point of a polygon
+            if (ptr2->value == x) {
+                return true;
+            }
+
+            // we must determine if cone is convex of not, we can esasily get this information by
+            // checking the sign of y values strored in sign value
+            else {
+                // cone is pointing inside polygon, we must seek for point inside now
+                if (ptr2->sign != ptr2->next->sign) {
+                    check++;
+                    check = check % 2;
+                }
+
+                ptr2=ptr2->next;
+                continue; 
+            }
+        }
+
+        // point we are looking for is between intersection points. If check flag is on we assume
+        // that this means point inside polygon
+        if (check == 1 && GEO_value_between_range(x, ptr2->value, ptr2->next->value)) {
+            return true;
+        }
+
+        // if no, we proceed to another intersection
+        check++;
+        check = check % 2;
+        ptr2=ptr2->next;
+    }
+
+    SRTLST_free(inter);
+
+    return false;
 }

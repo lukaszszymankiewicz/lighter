@@ -190,4 +190,12 @@ void VRTX_delete(
         }
         ptr = ptr->next;
     }
+vertex_t* VRTX_intersection_with_rect(
+    vertex_t *first,
+    int       x1,
+    int       y1,
+    int       x2,
+    int       y2
+) {
+    return NULL;
 }
