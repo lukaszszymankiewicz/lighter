@@ -381,6 +381,7 @@ Suite* geometry_suite(void)
     s = suite_create("geometry");
     tc_core = tcase_create("Core");
 
+    tcase_add_test(tc_core, GEO_pt_in_rect_check);
     tcase_add_test(tc_core, GEO_seg_intersection_with_y_check);
     tcase_add_test(tc_core, GEO_vertical_segment_intersects_rect_check);
     tcase_add_test(tc_core, GEO_horizontal_segment_intersects_rect_check);

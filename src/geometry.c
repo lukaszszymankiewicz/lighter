@@ -249,6 +249,8 @@ int GEO_seg_in_rect(
            r_x2, r_y2
         );
     }
+}
+
 bool GEO_pt_in_hor_seg(
     int x, int y,
     int x1, int y1,
