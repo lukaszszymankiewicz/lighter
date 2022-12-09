@@ -1,5 +1,5 @@
 #include "assets.h"
-#include "light.h"
+#include "source.h"
 #include "global.h"
 #include "primitives.h"
 #include "sprites.h"

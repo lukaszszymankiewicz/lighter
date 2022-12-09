@@ -32,7 +32,7 @@ START_TEST (SEG_PUSH_check)
     int len = 0;
 
     // WHEN
-    segment_t * head;
+    segment_t* head = NULL;
     head = SEG_init(x1, y1, x2, y2);
     SEG_push(&head, x3, y3, x4, y4);
 

@@ -5,12 +5,14 @@
 #include "check_point.h"
 #include "check_gfx.h"
 #include "check_level.h"
-#include "check_import.h"
+#include "check_sprites.h"
 #include "check_controller.h"
 #include "check_geometry.h"
 #include "check_entity.h"
+#include "check_entity_manager.h"
 #include "check_sorted_list.h"
 #include "check_tests.h"
+#include "check_source.h"
 #include "../src/vertex.h"
 #include "../src/sprites.h"
 #include "../src/sorted_list.h"
@@ -22,6 +24,8 @@
 #include "../src/level.h"
 #include "../src/controller.h"
 #include "../src/entity.h"
+#include "../src/entity_manager.h"
+#include "../src/source.h"
 
 int main(void) {
     int number_failed = 0;
@@ -82,14 +86,26 @@ int main(void) {
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
+    // entity manager
+    s = entity_manager_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
     // intersection
     s = sorted_list_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);
 
-    // import
-    s = import_suite();
+    // sprites
+    s = sprites_suite();
+    sr = srunner_create(s);
+    srunner_run_all(sr, CK_ENV);
+    number_failed += srunner_ntests_failed(sr);
+
+    // source
+    s = source_suite();
     sr = srunner_create(s);
     srunner_run_all(sr, CK_ENV);
     number_failed += srunner_ntests_failed(sr);

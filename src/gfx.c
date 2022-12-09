@@ -124,6 +124,7 @@ void GFX_init_screen_buffer_texture() {
         SCREEN_WIDTH,
         SCREEN_HEIGHT
     );
+
 }
 
 int GFX_init_graphics() {
@@ -467,33 +468,27 @@ SDL_Rect GFX_calc_gradient_rect(
     return gradient_quad;
 }
 
-// Draws whole light effect by sequientally blitting lightbuffers (in a different manner) to screen
-// surface.
-void GFX_draw_lightbuffer(
-    texture_t* gradient,
-    int x,
-    int y
-) {
+void GFX_draw_light() {
     // LIGHT
     SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
     SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
     
     // LIGHT GRADIENT
-    SDL_SetTextureBlendMode(gradient->surface, SDL_BLENDMODE_MOD);
-    SDL_Rect gradient_quad = GFX_calc_gradient_rect(gradient, x, y);
-    SDL_RenderCopy(renderer, gradient->surface, NULL, &gradient_quad);
+    // SDL_SetTextureBlendMode(gradient->surface, SDL_BLENDMODE_MOD);
+    // SDL_Rect gradient_quad = GFX_calc_gradient_rect(gradient, x, y);
+    // SDL_RenderCopy(renderer, gradient->surface, NULL, &gradient_quad);
 
     // DARKNESS
-    GFX_fill_gradient_gaps(lightbuffer, gradient, x, y);
-    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
-    SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
-    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+    // GFX_fill_gradient_gaps(lightbuffer, gradient, x, y);
+    // SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
+    // SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
+    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 
     // LIGHT PENETRATING WALLS
-    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
-    SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
-    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+    // SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
+    // SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
+    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
 
 texture_t* GFX_read_texture(

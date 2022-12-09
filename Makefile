@@ -26,6 +26,7 @@ TARGET =                         \
 	$(SRCDIR)/sorted_list.c      \
 	$(SRCDIR)/light.c            \
 	$(SRCDIR)/vertex.c           \
+	$(SRCDIR)/source.c           \
 	$(SRCDIR)/segment.c          \
 	$(SRCDIR)/sprites.c          \
 	$(SRCDIR)/point.c            \
@@ -35,26 +36,29 @@ TESTTARGET =                        \
     $(TESTDIR)/check_controller.c   \
 	$(TESTDIR)/check_geometry.c     \
 	$(TESTDIR)/check_gfx.c	        \
-	$(TESTDIR)/check_import.c       \
+	$(TESTDIR)/check_sprites.c      \
 	$(TESTDIR)/check_entity.c       \
 	$(TESTDIR)/check_level.c        \
 	$(TESTDIR)/check_light.c        \
 	$(TESTDIR)/check_point.c        \
 	$(TESTDIR)/check_segment.c      \
+	$(TESTDIR)/check_source.c       \
 	$(TESTDIR)/check_sorted_list.c  \
 	$(TESTDIR)/check_vertex.c       \
+	$(TESTDIR)/check_entity_manager.c       \
 	$(SRCDIR)/controller.c          \
 	$(SRCDIR)/geometry.c            \
 	$(SRCDIR)/gfx.c                 \
 	$(SRCDIR)/import.c              \
 	$(SRCDIR)/entity.c              \
-	$(SRCDIR)/entity_manager.c      \
 	$(SRCDIR)/level.c               \
 	$(SRCDIR)/light.c               \
 	$(SRCDIR)/files.c               \
 	$(SRCDIR)/point.c               \
 	$(SRCDIR)/segment.c             \
+	$(SRCDIR)/entity_manager.c      \
 	$(SRCDIR)/sprites.c             \
+	$(SRCDIR)/source.c              \
 	$(SRCDIR)/sorted_list.c         \
 	$(SRCDIR)/timer.c               \
 	$(SRCDIR)/tile.c                \
@@ -71,6 +75,10 @@ tests:
 .PHONY: run_check_tests_suite
 run_check_tests_suite:
 	./$(TESTOBJ)
+
+.PHONY: memory_check
+memory_check:
+	valgrind --leak-check=yes --log-file="memory_check.txt" --track-origins=yes ./lighter
 
 .PHONY: run_lighter
 run_lighter:

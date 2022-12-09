@@ -2,7 +2,6 @@
 #include "../src/assets.h"
 #include "../src/segment.h"
 #include "../src/files.h"
-#include "../src/import.h"
 #include "../src/gfx.h"
 #include "../src/entity.h"
 #include "../src/controller.h"
@@ -10,117 +9,76 @@
 
 START_TEST (ENT_hold_and_handle_check)
 {
-    sprites[ASSET_SPRITE_LIGHTER]         = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
-    entity_t* entity = NULL;
+    // GIVEN
+    sprites[ASSET_SPRITE_LIGHTER] = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
+    entity_t* entity              = NULL;
+
     entity           = ENT_init(
-        100,
-        100,
-        NOTHING_FLAG,
-        HANDLE_BACK_UP,
-        HANDLE_BACK_UP,
-        NULL,
-        sprites[ASSET_SPRITE_LIGHTER],
-        NULL
+        0, 100, 100,
+        NOTHING_FLAG, HANDLE_BACK_UP, HANDLE_BACK_UP,
+        ENTITY_NO, STANDING,
+        NULL, sprites[ASSET_SPRITE_LIGHTER], NULL
     );
 
     int w = sprites[ASSET_SPRITE_LIGHTER]->width;
     int h = sprites[ASSET_SPRITE_LIGHTER]->height;
     int x, y;
 
-    entity->direction = RIGHT;
+    typedef struct testcase {
+          int handle;
+          int exp_x;
+          int exp_y;
+    } testcase_t;
 
-    // CASE 1
-    entity->handle    = HANDLE_BACK_UP;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, 0);
-    ck_assert_int_eq(y, 0);
+    testcase_t testcases[] = {
+        (testcase_t){ HANDLE_BACK_UP,        0,           0        },
+        (testcase_t){ HANDLE_BACK_MIDDLE,    0,           (int)h/2 },
+        (testcase_t){ HANDLE_BACK_DOWN,      0,           h        },
+        (testcase_t){ HANDLE_MIDDLE_UP,      (int)w/2,    0        },
+        (testcase_t){ HANDLE_MIDDLE_MIDDLE,  (int)w/2,    (int)h/2 },
+        (testcase_t){ HANDLE_MIDDLE_DOWN,    (int)w/2,    h        },
+        (testcase_t){ HANDLE_FRONT_UP,       w,           0        },
+        (testcase_t){ HANDLE_FRONT_MIDDLE,   w,           (int)h/2 },
+        (testcase_t){ HANDLE_FRONT_DOWN,     w,           h        },
+    };
+    int n_cases = 9;
 
-    // CASE 2
-    entity->handle    = HANDLE_BACK_MIDDLE;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, 0);
-    ck_assert_int_eq(y, (int)h/2);
+    for (int i=0; i<n_cases; i++) {
+        entity->direction = RIGHT;
+        entity->handle    = testcases[i].handle;
 
-    // CASE 3
-    entity->handle    = HANDLE_BACK_DOWN;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, 0);
-    ck_assert_int_eq(y, h);
+        // WHEN
+        x = ENT_hold_x(entity);
+        y = ENT_hold_y(entity);
 
-    // CASE 4
-    entity->handle    = HANDLE_MIDDLE_UP;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, (int)w/2);
-    ck_assert_int_eq(y, 0);
-    
-    // CASE 5
-    entity->handle    = HANDLE_MIDDLE_MIDDLE;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, (int)w/2);
-    ck_assert_int_eq(y, (int)h/2);
-
-    // CASE 6
-    entity->handle    = HANDLE_MIDDLE_DOWN;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, (int)w/2);
-    ck_assert_int_eq(y, h);
-
-    // CASE 7
-    entity->handle    = HANDLE_FRONT_UP;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, w);
-    ck_assert_int_eq(y, 0);
-
-    // CASE 8
-    entity->handle    = HANDLE_FRONT_MIDDLE;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, w);
-    ck_assert_int_eq(y, (int)h/2);
-
-    // CASE 9
-    entity->handle    = HANDLE_FRONT_DOWN;
-    x = ENT_hold_x(entity);
-    y = ENT_hold_y(entity);
-    ck_assert_int_eq(x, w);
-    ck_assert_int_eq(y, h);
+        // THEN
+        ck_assert_int_eq(x, testcases[i].exp_x);
+        ck_assert_int_eq(y, testcases[i].exp_y);
+    };
 
 }
 END_TEST
 
 START_TEST (ENT_resolve_check)
 {
+    // GIVEN
     entity_t* entity         = NULL;
-    entity                   = ENT_init(
-        100,
-        100,
-        ANIMATIABLE,
-        HANDLE_BACK_UP,
-        HANDLE_BACK_UP,
-        NULL,
-        NULL,
-        NULL
-    );
-    entity->state            = STANDING;
 
     animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
     sprites[ASSET_SPRITE_HERO]         = GFX_read_texture(FILEPATH_SPRITE_HERO);
-
-    entity->sprites          = animations[ASSET_HERO_ANIMATION];
-    entity->sprites->texture = sprites[ASSET_SPRITE_HERO];
+    
+    // WHEN
+    entity                   = ENT_init(
+        0, 100, 100,
+        ANIMATIABLE, HANDLE_BACK_UP, HANDLE_BACK_UP, ENTITY_NO, STANDING,
+        animations[ASSET_HERO_ANIMATION], sprites[ASSET_SPRITE_HERO], NULL
+    );
 
     entity->sprites->animations[entity->state].frames[0].delay = 2;
     entity->sprites->animations[entity->state].frames[1].delay = 2;
     entity->sprites->animations[entity->state].len = 2;
 
-    // WHEN && THEN
+    // THEN
     ck_assert_int_eq(entity->frame_t, 0);
     ck_assert_int_eq(entity->frame, 0);
 
@@ -144,98 +102,75 @@ END_TEST
 
 START_TEST (ENT_colision_update_check_positive)
 {
-    // GIVEN
-    // entity->x = 100;
-    // entity->y = 100;
     // hitbox = {0, 0, 9, 20},
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
 
-    entity_t* entity = NULL;
-    entity           = ENT_init(
-        100,
-        100,
-        APPLY_COLLISION,
-        HANDLE_BACK_UP,
-        HANDLE_BACK_UP,
-        NULL,
-        NULL,
-        NULL
-    );
-
+    // GIVEN
     animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
     sprites[ASSET_SPRITE_HERO]         = GFX_read_texture(FILEPATH_SPRITE_HERO);
-    entity->sprites                    = animations[ASSET_HERO_ANIMATION];
-    entity->sprites->texture           = sprites[ASSET_SPRITE_HERO];
-    entity->state = STANDING;
+
+    entity_t* entity = NULL;
+    entity           = ENT_init(
+        0, 100, 100,
+        APPLY_COLLISION, HANDLE_BACK_UP, HANDLE_BACK_UP, ENTITY_NO, STANDING,
+        animations[ASSET_HERO_ANIMATION], sprites[ASSET_SPRITE_HERO], NULL
+    );
 
     segment_t *obstacles = NULL;
 
-    // CASE 1
-    obstacles = NULL;
-    SEG_push(&obstacles, 105, 80, 105, 130);
-    entity->x = 100;
-    entity->y = 100;
-    entity->x_vel = 1;
-    entity->direction = RIGHT;
-    ENT_update_collision(entity, obstacles);
-    ck_assert_int_eq(entity->x, 96);
+    typedef struct testcase {
+          int x1; int y1; int x2; int y2;
+          int x;  int y;
+          int x_vel; int y_vel;
+          int direction;
+          int exp_x;
+    } testcase_t;
 
-    // CASE 2 (lower edge)
-    obstacles = NULL;
-    SEG_push(&obstacles, 105, 80, 105, 100);
-    entity->x = 100;
-    entity->y = 100;
-    entity->x_vel = 1;
-    ENT_update_collision(entity, obstacles);
-    ck_assert_int_eq(entity->x, 96);
+    testcase_t testcases[] = {
+        (testcase_t){ 105, 80, 105, 130, 100, 100, 1, 0, RIGHT, 78  },
+        (testcase_t){ 105, 80, 105, 100, 100, 100, 1, 0, RIGHT, 78  },
+        (testcase_t){ 0, 110, 200, 110, 100, 100, 0, 1, RIGHT, 100  },
+        (testcase_t){ 105, 80, 105, 130, 100, 100, 1, 0, LEFT, 105  },
+    };
+    int n_cases = 4;
+    
+    // WHEN
+    for (int i=0; i<n_cases; i++) {
+        obstacles = NULL;
 
-    // CASE 3
-    obstacles = NULL;
-    SEG_push(&obstacles, 0, 110, 200, 110);
-    entity->x = 100;
-    entity->y = 100;
-    entity->y_vel = 1;
-    ENT_update_collision(entity, obstacles);
-    ck_assert_int_eq(entity->y, 90);
+        SEG_push(&obstacles,
+            testcases[i].x1, testcases[i].y1,
+            testcases[i].x2, testcases[i].y2
+        );
+        entity->x_vel = testcases[i].x_vel;
+        entity->y_vel = testcases[i].y_vel;
+        entity->x = testcases[i].x;
+        entity->y = testcases[i].y;
+        entity->direction = testcases[i].direction;
 
-    // CASE 4
-    obstacles = NULL;
-    SEG_push(&obstacles, 105, 80, 105, 130);
-    entity->x = 100;
-    entity->y = 100;
-    entity->x_vel = 1;
-    entity->direction = LEFT;
-    ENT_update_collision(entity, obstacles);
-    ck_assert_int_eq(entity->x, 105);
+        // THEN
+        ENT_update_collision(entity, obstacles);
+        ck_assert_int_eq(entity->x, testcases[i].exp_x);
+    };
 }
 END_TEST
 
 START_TEST (ENT_colision_update_check_negatvie)
 {
     // GIVEN
-    // entity as it is have hitbox already in it
-    // entity->x = 100;
-    // entity->y = 100;
     // hitbox = {0, 0, 9, 20},
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
 
-    entity_t* entity = NULL;
-    entity           = ENT_init(
-        100,
-        100,
-        APPLY_COLLISION,
-        HANDLE_BACK_UP,
-        HANDLE_BACK_UP,
-        NULL,
-        NULL,
-        NULL
-    );
-
     animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
     sprites[ASSET_SPRITE_HERO]         = GFX_read_texture(FILEPATH_SPRITE_HERO);
-    entity->sprites                    = animations[ASSET_HERO_ANIMATION];
-    entity->sprites->texture           = sprites[ASSET_SPRITE_HERO];
-    entity->state = STANDING;
+
+    entity_t* entity = NULL;
+    entity           = ENT_init(
+        0, 100, 100,
+        APPLY_COLLISION, HANDLE_BACK_UP, HANDLE_BACK_UP,
+        ENTITY_NO, STANDING,
+        animations[ASSET_HERO_ANIMATION], sprites[ASSET_SPRITE_HERO], NULL
+    );
 
     // CASE 1
     segment_t *obstacles = NULL;
@@ -265,14 +200,10 @@ START_TEST (ENT_with_friction_flag)
     // GIVEN
     entity_t* e    = NULL;
     e              = ENT_init(
-        0, 
-        0,
-        APPLY_FRICTION,
-        HANDLE_BACK_UP,
-        HANDLE_BACK_UP,
-        NULL,
-        NULL,
-        NULL
+        0, 0, 0,
+        APPLY_FRICTION, HANDLE_BACK_UP, HANDLE_BACK_UP,
+        ENTITY_NO, STANDING,
+        NULL, NULL, NULL
     );
 
     // right
@@ -315,25 +246,17 @@ START_TEST (ENT_with_controllable_flag)
     entity_t* e    = NULL;
     entity_t* hold = NULL;
     e              = ENT_init(
-        0,
-        0,
-        CONTROLABLE | MOVABLE,
-        HANDLE_BACK_UP,
-        HANDLE_BACK_UP,
-        NULL,
-        NULL,
-        NULL
+        0, 0, 0,
+        CONTROLABLE | MOVABLE, HANDLE_BACK_UP, HANDLE_BACK_UP,
+        ENTITY_NO, STANDING,
+        NULL, NULL, NULL
     );
 
     hold           = ENT_init(
-        0,
-        0,
-        HOLDABLE,
-        HANDLE_BACK_UP,
-        HANDLE_BACK_UP,
-        NULL,
-        NULL,
-        NULL
+        0, 0, 0,
+        HOLDABLE, HANDLE_BACK_UP, HANDLE_BACK_UP,
+        ENTITY_NO, STANDING,
+        NULL, NULL, NULL
     );
     keyboard       = CON_init();
 
@@ -387,8 +310,8 @@ START_TEST (ENT_with_controllable_flag)
 START_TEST (ENT_generate_check)
 {
     entity_t* e    = NULL;
-    int x = 13;
-    int y = 42;
+    int x          = 420;
+    int y          = 69;
     
     animations[ASSET_HERO_ANIMATION]         = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
     gradients[ASSET_GRADIENT_CIRCULAR]       = GFX_read_texture(FILEPATH_GRADIENT_CIRCULAR);

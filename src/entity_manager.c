@@ -1,9 +1,11 @@
 #include "global.h"
 #include "entity.h"
+#include "light.h"
 #include "entity_manager.h"
 #include "geometry.h"
 #include "primitives.h"
 #include "segment.h"
+#include "vertex.h"
 
 
 entity_manager_t* ENTMAN_new(
@@ -55,7 +57,10 @@ int ENTMAN_hero_y(
     return entity_manager->entities[ENTITY_HERO]->y;
 }
 
-void ENTMAN_apply_collision(segment_t* obstacles, entity_t *entity) {
+void ENTMAN_apply_collision(
+    segment_t* obstacles,
+    entity_t *entity
+) {
     if (!(entity->flags & APPLY_COLLISION)) {
         return;
     }
@@ -188,13 +193,34 @@ segment_t* ENTMAN_light_obstacles(
     return obs;
 }
 
+void ENTMAN_calc_single_entity_light(
+    entity_t*         entity,
+    light_scene_t*    scene,
+    segment_t*        obstacles
+) {
+    if (entity == NULL || (!(entity->flags & EMMIT_LIGHT))) { return; }
+
+    segment_t* obs = NULL;
+    obs            = ENTMAN_light_obstacles(entity, obstacles);
+
+    LIG_add_to_scene(
+        entity->x,
+        entity->y,
+        CAMERA_X - ENT_light_pt_x(entity) - entity->x,
+        CAMERA_Y - ENT_light_pt_y(entity) - entity->y,
+        entity->light,
+        scene,
+        obs
+    );
+    
+    if (obs) { SEG_free(obs); }
+}
+
 void ENTMAN_calc_light(
     entity_manager_t* entity_manager,
     light_scene_t*    scene,
     segment_t*        obstacles
 ) {
-    segment_t* obs = NULL;
-
     for (int i=0; i<MAX_ENTITY; i++) {
         entity_t* entity = NULL;
         entity           = entity_manager->entities[i];
@@ -202,24 +228,8 @@ void ENTMAN_calc_light(
         if (!entity) { continue; }
 
         if (ENTMAN_entity_in_light_update_range(entity_manager, entity)) {
-
-            if (entity->flags & EMMIT_LIGHT) {
-                obs = NULL;
-                obs = ENTMAN_light_obstacles(entity, obstacles);
-
-                LIG_add_to_scene(entity->x, entity->y, entity->light, scene, obs);
-
-                if (obs) { SEG_free(obs); }
-            }
-
-            if (entity->hold && (entity->hold->flags & EMMIT_LIGHT)) {
-                obs = NULL;
-                obs = ENTMAN_light_obstacles(entity->hold, obstacles);
-
-                LIG_add_to_scene(entity->hold->x, entity->hold->y, entity->light, scene, obs);
-
-                if (obs) { SEG_free(obs); }
-            }
+            ENTMAN_calc_single_entity_light(entity, scene, obstacles);
+            ENTMAN_calc_single_entity_light(entity->hold, scene, obstacles);
         }
     }
 }

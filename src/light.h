@@ -1,7 +1,7 @@
 #include "assets.h"
 #include "global.h"
+#include "source.h"
 #include "primitives.h"
-#include "tile.h"
 
 #ifndef LIGHT_H
 #define LIGHT_H
@@ -9,56 +9,14 @@
 #define R                               2000
 #define RAY_THRESHOLD                   2
 
-enum lightsources_names { LIGHTER, LANTERN, ALL };
-enum polydata           { X, Y, RED, GREEN, BLUE, LIGHT_POWER, WIDTH };
-
-typedef struct lightpolygon { 
-    int x;
-    int y;
-    int red;
-    int green;
-    int blue;
-    int light_power;
-    int width;
-} lightpolygon_t;
-
-typedef struct wobble {
-    int   len;
-    float *coefs;
-} wobble_t;
-
-typedef struct lightsource {
-    float             width;
-    float             angle;
-    int               penetrating_power;
-    int               frame;
-    int               n_poly;
-    int               n_wobbles;
-    int               curent_wobble;
-    texture_t        *gradient;
-    lightpolygon_t   *light_polygons;
-    wobble_t         *wobble;
-} lightsource_t;
-
-extern lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
-extern wobble_t          *wobbles[ASSET_WOBBLE_ALL];
-
-
-void LIG_move_lightsource(lightsource_t* light_o, direction_t light_dir, direction_t hero_dir, int frame);
-void LIG_fill_lightbuffer(int x, int y, lightsource_t *light, segment_t *obstacles);
-
-// READ
-lightsource_t* LIG_read_lightsource(const char *filepath);
-wobble_t* LIG_read_wobble( const char *filepath);
-
 // SCENE
 light_scene_t* LIG_new_light_scene();
-void LIG_add_to_scene(int x, int y, lightsource_t *light, light_scene_t *scene, segment_t *obstacles);
+void LIG_add_to_scene(int x, int y, int x_corr, int y_corr, lightsource_t *light, light_scene_t *scene, segment_t *obstacles);
+void LIG_compose_light_scene(light_scene_t* scene);
+void LIG_transpose_scene(light_scene_t* scene, int x_corr, int y_corr);
 
 // FREE
 void LIG_free_light_scene(light_scene_t* scene);
-void LIG_free_wobble(wobble_t* wobble);
-void LIG_free_lightsource(lightsource_t* lightsource);
 
 // TESTING
 vertex_t* LIG_get_base_light_polygon(int x, int y, segment_t *obstacles, point_t* hit_points);

@@ -54,32 +54,25 @@ START_TEST (VRTX_add_point_check) {
 }
 END_TEST
 
-START_TEST (VRTX_pt_in_segment_check) {
-    bool result;
 
-    // FAIL
-    result = VRTX_pt_in_segment(10, 10, 15, 10, 20, 20);
-    ck_assert_int_eq(result, 0);
+START_TEST (VRTX_transpose_check) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(100, 100, 0);
 
-    // PASS (vertical)
-    result = VRTX_pt_in_segment(10, 10, 15, 10, 20, 10);
-    ck_assert_int_eq(result, 1);
+    VRTX_add_point(&vertex, 200, 200, 0);
+
+    // WHEN
+    VRTX_transpose(vertex, 50, 50);
     
-    // PASS (horizontal)
-    result = VRTX_pt_in_segment(10, 10, 10, 15, 10, 20);
-    ck_assert_int_eq(result, 1);
+    // THEN
+    ck_assert_int_eq(vertex->x, 250);
+    ck_assert_int_eq(vertex->y, 250);
 
-    // PASS (vertical edge case)
-    result = VRTX_pt_in_segment(10, 10, 15, 10, 15, 10);
-    ck_assert_int_eq(result, 1);
+    ck_assert_int_eq(vertex->next->x, 150);
+    ck_assert_int_eq(vertex->next->y, 150);
 
-    // PASS (horizontal edge case)
-    result = VRTX_pt_in_segment(10, 10, 10, 15, 10, 15);
-    ck_assert_int_eq(result, 1);
 }
-END_TEST
-
- 
 
 Suite *vertex_suite(void) {
     Suite *s;
@@ -91,8 +84,8 @@ Suite *vertex_suite(void) {
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, VRTX_add_point_check);
-    tcase_add_test(tc_core, VRTX_pt_in_segment_check);
     tcase_add_test(tc_core, VRTX_eq_check);
+    tcase_add_test(tc_core, VRTX_transpose_check);
 
     suite_add_tcase(s, tc_core);
 

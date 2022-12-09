@@ -20,7 +20,9 @@ segment_t* SEG_init(
     return new_segment;
 }
 
-int SEG_determine_type(segment_t * seg) {
+int SEG_determine_type(
+    segment_t* seg
+) {
     if (seg->x1 == seg->x2) {
         return VER;
     }
@@ -31,7 +33,6 @@ int SEG_determine_type(segment_t * seg) {
     return UNKNOWN;
 }
 
-// this push new obstacle to begginig of polygon
 void SEG_push(
     segment_t **head,
     int          x1,
@@ -39,11 +40,11 @@ void SEG_push(
     int          x2,
     int          y2
 ) {
-    segment_t *new_segment = NULL;
-    segment_t *ptr         = NULL;
+    segment_t *new_segment  = NULL;
+    segment_t *ptr          = NULL;
 
+    new_segment             = (segment_t*)malloc(sizeof(segment_t));
     new_segment             = SEG_init(x1, y1, x2, y2);
-    ptr                     = (*head);
 
     if ((*head) == NULL) {
         (*head) = new_segment;
@@ -52,6 +53,7 @@ void SEG_push(
         (*head)->next = new_segment;
     }
     else {
+        ptr                     = (*head);
         while(ptr->next) {
             ptr=ptr->next;
         }

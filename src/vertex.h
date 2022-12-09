@@ -15,8 +15,11 @@ void VRTX_delete(vertex_t **head, int y);
 void VRTX_add_point(vertex_t **head, int x, int y, float angle);
 void VRTX_merge(vertex_t **head, vertex_t  *candidates);
 void VRTX_debug(vertex_t *vertex);
+void VRTX_delete(vertex_t **head, int y);
+void VRTX_transpose(vertex_t *vertex, int x_corr, int y_corr);
 
 bool VRTX_pt_in_segment(int pt_x, int pt_y, int seg_x1, int seg_y1, int seg_x2, int seg_y2);
 bool VRTX_eq(vertex_t *first, vertex_t *second);
+
 
 #endif

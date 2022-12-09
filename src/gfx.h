@@ -52,7 +52,7 @@ void GFX_render_texture(texture_t* texture, SDL_Rect* clip, int x, int y, bool f
 void GFX_render_tile(texture_t* texture, int render_x, int render_y, int x, int y, int w, int h);
 void GFX_free_texture(texture_t *texture);
 void GFX_clean_buffers();
-void GFX_draw_lightbuffer(texture_t* gradient, int x, int y);
+void GFX_draw_light();
 
 texture_t* GFX_read_texture(const char *filepath);
 

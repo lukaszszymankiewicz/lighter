@@ -396,7 +396,6 @@ END_TEST
 
 START_TEST (LIG_calculate_dull_ray_end_check) 
 {
-
     typedef struct testcase {
           int r_beg;
           int r_end;

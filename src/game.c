@@ -5,6 +5,7 @@
 #include "game.h"
 #include "gfx.h"
 #include "timer.h"
+#include "source.h"
 #include "level.h"
 #include "import.h"
 #include "light.h"
@@ -19,11 +20,11 @@ void GAME_read_all_files() {
     sprites[ASSET_SPRITE_HERO]               = GFX_read_texture(FILEPATH_SPRITE_HERO);
     sprites[ASSET_SPRITE_TEST]               = GFX_read_texture(FILEPATH_SPRITE_HERO);
     sprites[ASSET_SPRITE_LIGHTER]            = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
-    wobbles[ASSET_WOBBLE_NO]                 = LIG_read_wobble(FILEPATH_WOBBLE_NO);
-    wobbles[ASSET_WOBBLE_STABLE]             = LIG_read_wobble(FILEPATH_WOBBLE_STABLE);
-    wobbles[ASSET_WOBBLE_WALKING]            = LIG_read_wobble(FILEPATH_WOBBLE_WALKING);
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER]  = LIG_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
-    lightsources[ASSET_LIGHTSOURCE_LANTERN]  = LIG_read_lightsource(FILEPATH_LANTERN_LIGHTSOURCE);
+    wobbles[ASSET_WOBBLE_NO]                 = SRC_read_wobble(FILEPATH_WOBBLE_NO);
+    wobbles[ASSET_WOBBLE_STABLE]             = SRC_read_wobble(FILEPATH_WOBBLE_STABLE);
+    wobbles[ASSET_WOBBLE_WALKING]            = SRC_read_wobble(FILEPATH_WOBBLE_WALKING);
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER]  = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    lightsources[ASSET_LIGHTSOURCE_LANTERN]  = SRC_read_lightsource(FILEPATH_LANTERN_LIGHTSOURCE);
 }
 
 void GAME_update_all_files() {
@@ -35,11 +36,11 @@ void GAME_free_all_files() {
     ANIM_free(animations[ASSET_HERO_ANIMATION]);
     GFX_free_texture(gradients[ASSET_GRADIENT_CIRCULAR]);
     GFX_free_texture(sprites[ASSET_SPRITE_HERO]);
-    LIG_free_wobble(wobbles[ASSET_WOBBLE_NO]);
-    LIG_free_wobble(wobbles[ASSET_WOBBLE_STABLE]);
-    LIG_free_wobble(wobbles[ASSET_WOBBLE_WALKING]);
-    LIG_free_lightsource(lightsources[ASSET_LIGHTSOURCE_LIGHTER]);
-    LIG_free_lightsource(lightsources[ASSET_LIGHTSOURCE_LANTERN]);
+    SRC_free_wobble(wobbles[ASSET_WOBBLE_NO]);
+    SRC_free_wobble(wobbles[ASSET_WOBBLE_STABLE]);
+    SRC_free_wobble(wobbles[ASSET_WOBBLE_WALKING]);
+    SRC_free_lightsource(lightsources[ASSET_LIGHTSOURCE_LIGHTER]);
+    SRC_free_lightsource(lightsources[ASSET_LIGHTSOURCE_LANTERN]);
 }
 
 void GAME_handle_SDL_events(
@@ -283,9 +284,9 @@ void GAME_draw_light(game_t* game) {
     scene                = LIG_new_light_scene();
 
     ENTMAN_calc_light(game->entity_manager, scene, game->level->obstacle_segments);
+    LIG_compose_light_scene(scene);
 
-    // LVL_draw_light(game->level);
-
+    GFX_draw_light();
     LIG_free_light_scene(scene);
 }
 
@@ -321,7 +322,7 @@ void GAME_compose_scene(
 ) {
     GAME_clear_screen(game);
     GAME_draw_level(game);
-    // GAME_draw_light(game);
+    GAME_draw_light(game);
     GAME_draw_entities(game);
     GAME_render(game);
 }
