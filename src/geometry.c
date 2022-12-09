@@ -1,6 +1,7 @@
-#include <math.h>
+#include <assert.h>
 #include "global.h"
-
+#include "vertex.h"
+#include "sorted_list.h"
 
 // calculates angle between two points
 float GEO_angle_2pt(int ax, int ay, int bx, int by) {
@@ -194,4 +195,103 @@ bool GEO_collienar_segs_have_common_pt(
     bool second = ((GEO_value_between_range(b1, a1, a2)) || (GEO_value_between_range(b1, a1, a2)));
 
     return first || second;
+}
+
+bool GEO_pt_in_hor_seg(
+    int x, int y,
+    int x1, int y1,
+    int x2, int y2
+) {
+
+    if ((x1 == x && y1 == y) || (x2 == x && y2 == y)) {
+        return true; 
+    }
+
+    if (y1 == y2 && y1 == y) {
+        return GEO_value_between_range(x, x1, x2);
+    }
+
+    return false;
+}
+
+sorted_list_t* GEO_fill_intersection(
+    sorted_list_t* intersections,
+    int x,  int y,
+    int x1, int y1,
+    int x2, int y2
+) {
+    int inter;
+
+    if (GEO_value_between_range(y, y1, y2)) {
+        inter = (int)GEO_intersection_with_y(y, x1, y1, x2, y2);
+        SRTLST_insert(&intersections, inter);
+    }
+
+    return intersections;
+}
+
+bool GEO_pt_in_polygon(
+    vertex_t* polygon,
+    int       x,
+    int       y
+) {
+
+    sorted_list_t *inter     = NULL;
+    vertex_t      *ptr       = NULL;
+    ptr                      = polygon;
+    int            first_x   = polygon->x;
+    int            first_y   = polygon->y;
+
+    while(ptr->next) {
+        if (GEO_pt_in_hor_seg(x, y, ptr->x, ptr->y, ptr->next->x, ptr->next->y)) {
+            SRTLST_free(inter); 
+            return true;
+        }
+        inter = GEO_fill_intersection(inter, x, y, ptr->x, ptr->y, ptr->next->x, ptr->next->y);
+        ptr = ptr->next;
+    }
+
+    // last segment
+    if (GEO_pt_in_hor_seg(x, y, ptr->x, ptr->y, first_x, first_y)) {
+        SRTLST_free(inter); 
+        return true;
+    }
+
+    inter=GEO_fill_intersection(inter, x, y, ptr->x, ptr->y, first_x, first_y);
+    
+    // check whether point is within intersections
+    if (!inter) { return false; }
+
+    sorted_list_t *ptr2 = NULL;
+    ptr2                = inter;
+
+    int check = 1;
+
+    while(ptr2->next) {
+        if (ptr2->value == ptr2->next->value) {
+
+            if (ptr2->value == x) {
+                return true;
+            }
+            else {
+
+                check++;
+                check = check % 2;
+                ptr2=ptr2->next;
+                continue; 
+            }
+        }
+
+        if (check == 1 && GEO_value_between_range(x, ptr2->value, ptr2->next->value)) {
+            return true;
+        }
+
+        check++;
+        check = check % 2;
+        ptr2=ptr2->next;
+    }
+
+    SRTLST_free(inter);
+
+    return false;
 }

@@ -1,5 +1,6 @@
 #include <check.h>
 #include "../src/geometry.h"
+#include "../src/vertex.h"
 
 START_TEST (GEO_seg_intersection_with_y_check)
 {
@@ -197,6 +198,151 @@ START_TEST ( GEO_collienar_segs_have_common_pt_check)
 }
 END_TEST
 
+START_TEST (GEO_pt_in_polygon_romboid)
+{
+    // GIVEN
+    vertex_t* vertex = NULL;
+
+    VRTX_add_point(&vertex, 100, 100, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
+    VRTX_add_point(&vertex, 300, 100, 0);
+    VRTX_add_point(&vertex, 200, 0  , 0);
+
+    typedef struct testcase { int x; int y; int exp; } testcase_t;
+    
+    testcase_t data[] = {
+        // positive
+        // (testcase_t){ 100, 100, 1},  
+        // (testcase_t){ 200, 200, 1},  
+        // (testcase_t){ 300, 100, 1},  
+        // (testcase_t){ 200, 0  , 1},  
+        // (testcase_t){ 200, 100, 1},  
+        // (testcase_t){ 200, 180, 1},  
+        // (testcase_t){ 200, 20,  1},  
+        // negative
+        // (testcase_t){ 80,  100,  0},  
+        // (testcase_t){ 200, 210,  0},  
+        (testcase_t){ 310, 200,  0},  
+        // (testcase_t){ 200, -10,  0},  
+    };
+
+    int n_cases = 1;
+
+    for (int i=0; i<n_cases; i++) {
+        bool res;
+
+        // WHEN
+        res = GEO_pt_in_polygon(vertex, data[i].x, data[i].y);
+
+        // THEN
+        ck_assert_float_eq(res, data[i].exp);
+    }
+}
+END_TEST
+START_TEST (GEO_pt_in_polygon_rect)
+{
+    // GIVEN
+    vertex_t* vertex = NULL;
+
+    VRTX_add_point(&vertex, 100, 100, 0);
+    VRTX_add_point(&vertex, 200, 100, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
+    VRTX_add_point(&vertex, 100, 200, 0);
+
+    typedef struct testcase { int x; int y; int exp; } testcase_t;
+    
+    testcase_t data[] = {
+        // positive
+        (testcase_t){ 100, 100, 1 },  
+        (testcase_t){ 200, 100, 1 },  
+        (testcase_t){ 200, 200, 1 },  
+        (testcase_t){ 100, 200, 1 },  
+        (testcase_t){ 100, 150, 1 },  
+        (testcase_t){ 200, 150, 1 },  
+        (testcase_t){ 150, 100, 1 },  
+        (testcase_t){ 150, 200, 1 },  
+        (testcase_t){ 150, 150, 1 },  
+        (testcase_t){ 120, 120, 1 },  
+        (testcase_t){ 180, 180, 1 },  
+        (testcase_t){ 120, 180, 1 },  
+        (testcase_t){ 180, 120, 1 },  
+        // negative
+        (testcase_t){ 50,  150, 0 },  
+        (testcase_t){ 250, 150, 0 },  
+        (testcase_t){ 150, 50 , 0 },  
+        (testcase_t){ 150, 250, 0 },  
+        (testcase_t){ 99,  99 , 0 },  
+        (testcase_t){ 201, 99 , 0 },  
+        (testcase_t){ 201, 201, 0 },  
+        (testcase_t){ 99,  201, 0 }  
+    };
+
+    int n_cases = 21;
+
+    for (int i=0; i<n_cases; i++) {
+        bool res;
+
+        // WHEN
+        res = GEO_pt_in_polygon(vertex, data[i].x, data[i].y);
+
+        // THEN
+        ck_assert_float_eq(res, data[i].exp);
+    }
+}
+END_TEST
+
+START_TEST (GEO_pt_in_polygon_strange_shape)
+{
+    // GIVEN
+    vertex_t* vertex = NULL;
+
+    VRTX_add_point(&vertex, 100, 100, 0);
+    VRTX_add_point(&vertex, 100, 200, 0);
+    VRTX_add_point(&vertex, 150, 150, 0);
+    VRTX_add_point(&vertex, 170, 200, 0);
+    VRTX_add_point(&vertex, 200, 150, 0);
+    VRTX_add_point(&vertex, 300, 200, 0);
+    VRTX_add_point(&vertex, 350, 150, 0);
+    VRTX_add_point(&vertex, 350, 100, 0);
+
+    typedef struct testcase { int x; int y; int exp; } testcase_t;
+    
+    testcase_t data[] = {
+        // positive
+        (testcase_t){ 100, 100, 1 },
+        (testcase_t){ 100, 200, 1 },
+        (testcase_t){ 150, 150, 1 },
+        (testcase_t){ 170, 200, 1 },
+        (testcase_t){ 200, 150, 1 },
+        (testcase_t){ 300, 200, 1 },
+        (testcase_t){ 350, 150, 1 },
+        (testcase_t){ 350, 100, 1 },
+        (testcase_t){ 105, 150, 1 },
+        (testcase_t){ 170, 170, 1 },
+        (testcase_t){ 300, 180, 1 },
+        (testcase_t){ 200, 120, 1 },
+
+        // negative
+        (testcase_t){ 110, 200, 0 },
+        (testcase_t){ 180, 200, 0 },
+        (testcase_t){ 310, 200, 0 },
+        (testcase_t){ 360, 180, 0 }
+    };
+
+    int n_cases = 16;
+
+    for (int i=0; i<n_cases; i++) {
+        bool res;
+
+        // WHEN
+        res = GEO_pt_in_polygon(vertex, data[i].x, data[i].y);
+
+        // THEN
+        ck_assert_float_eq(res, data[i].exp);
+    }
+}
+END_TEST
+
 Suite* geometry_suite(void)
 {
     Suite* s;
@@ -210,6 +356,8 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_horizontal_segment_intersects_rect_check);
     tcase_add_test(tc_core, GEO_pt_same_side_check);
     tcase_add_test(tc_core, GEO_collienar_segs_have_common_pt_check);
+    tcase_add_test(tc_core, GEO_pt_in_polygon_rect);
+    tcase_add_test(tc_core, GEO_pt_in_polygon_romboid);
 
     suite_add_tcase(s, tc_core);
 

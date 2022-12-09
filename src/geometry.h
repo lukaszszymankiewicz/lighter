@@ -1,4 +1,5 @@
-#include <stdbool.h>
+#include "global.h"
+#include "vertex.h"
 
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
@@ -18,5 +19,7 @@ bool GEO_pt_same_side (int r_x1, int r_y1, int r_x2, int r_y2, int o_x1, int o_y
 float GEO_line_segment_len(int x1, int y1, int x2, int y2);
 bool GEO_collienar_segs_have_common_pt( int a1, int a2, int b1, int b2);
 bool GEO_pt_in_triangle(int pt_x, int pt_y, int t1_x, int t1_y, int t2_x, int t2_y, int t3_x, int t3_y);
+
+bool GEO_pt_in_polygon(vertex_t* polygon, int x, int y);
 
 #endif
