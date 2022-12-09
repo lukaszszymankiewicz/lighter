@@ -212,21 +212,21 @@ START_TEST (GEO_pt_in_polygon_romboid)
     
     testcase_t data[] = {
         // positive
-        // (testcase_t){ 100, 100, 1},  
-        // (testcase_t){ 200, 200, 1},  
-        // (testcase_t){ 300, 100, 1},  
-        // (testcase_t){ 200, 0  , 1},  
-        // (testcase_t){ 200, 100, 1},  
-        // (testcase_t){ 200, 180, 1},  
-        // (testcase_t){ 200, 20,  1},  
+        (testcase_t){ 100, 100, 1},  
+        (testcase_t){ 200, 200, 1},  
+        (testcase_t){ 300, 100, 1},  
+        (testcase_t){ 200, 0  , 1},  
+        (testcase_t){ 200, 100, 1},  
+        (testcase_t){ 200, 180, 1},  
+        (testcase_t){ 200, 20,  1},  
         // negative
-        // (testcase_t){ 80,  100,  0},  
-        // (testcase_t){ 200, 210,  0},  
+        (testcase_t){ 80,  100,  0},  
+        (testcase_t){ 200, 210,  0},  
         (testcase_t){ 310, 200,  0},  
-        // (testcase_t){ 200, -10,  0},  
+        (testcase_t){ 200, -10,  0},  
     };
 
-    int n_cases = 1;
+    int n_cases = 11;
 
     for (int i=0; i<n_cases; i++) {
         bool res;
@@ -358,6 +358,7 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_collienar_segs_have_common_pt_check);
     tcase_add_test(tc_core, GEO_pt_in_polygon_rect);
     tcase_add_test(tc_core, GEO_pt_in_polygon_romboid);
+    tcase_add_test(tc_core, GEO_pt_in_polygon_strange_shape);
 
     suite_add_tcase(s, tc_core);
 

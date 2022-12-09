@@ -192,10 +192,10 @@ void HERO_check_collision(
 
 
             if (x_collision != -1) {
-                SRTLST_insert(&x_intersections, x_collision); 
+                SRTLST_insert(&x_intersections, x_collision, 0); 
             }
-            if (y_collision != -1) { SRTLST_insert(&y_intersections, y_collision); }
-            if (y_falling   != -1) { SRTLST_insert(&falling, y_falling  );         }
+            if (y_collision != -1) { SRTLST_insert(&y_intersections, y_collision, 0); }
+            if (y_falling   != -1) { SRTLST_insert(&falling, y_falling, 0);         }
         }
     }
     
