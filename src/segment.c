@@ -299,6 +299,10 @@ void SEG_free(
         free(head);
         head = temp;
     }
+
+    if (segments) {
+        segments = NULL;
+    }
 }
 
 segment_t* SEG_filter_by_rect(

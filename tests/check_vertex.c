@@ -54,7 +54,6 @@ START_TEST (VRTX_add_point_check) {
 }
 END_TEST
 
-
 START_TEST (VRTX_transpose_check) {
     // GIVEN
     vertex_t* vertex = NULL;
@@ -71,7 +70,71 @@ START_TEST (VRTX_transpose_check) {
 
     ck_assert_int_eq(vertex->next->x, 150);
     ck_assert_int_eq(vertex->next->y, 150);
+}
 
+START_TEST (VRTX_merge_unique_check_single_point_not_added) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(100, 100, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
+
+    vertex_t* candidates = NULL;
+    candidates           = VRTX_new(100, 100, 0);
+
+    // WHEN
+    VRTX_merge_unique(&vertex, candidates);
+    
+    // THEN
+    ck_assert_int_eq(VRTX_len(vertex), 2);
+}
+
+START_TEST (VRTX_merge_unique_check_two_points_added) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(100, 100, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
+
+    vertex_t* candidates = NULL;
+    candidates           = VRTX_new(300, 300, 0);
+    VRTX_add_point(&candidates, 400, 400, 0);
+
+    // WHEN
+    VRTX_merge_unique(&vertex, candidates);
+    
+    // THEN
+    ck_assert_int_eq(VRTX_len(vertex), 4);
+}
+
+START_TEST (VRTX_merge_unique_check_one_point_added_one_dismissed) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(100, 100, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
+
+    vertex_t* candidates = NULL;
+    candidates           = VRTX_new(300, 300, 0);
+    VRTX_add_point(&candidates, 200, 200, 0);
+
+    // WHEN
+    VRTX_merge_unique(&vertex, candidates);
+    
+    // THEN
+    ck_assert_int_eq(VRTX_len(vertex), 3);
+}
+
+START_TEST (VRTX_merge_unique_check_to_a_null_pointer) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+
+    vertex_t* candidates = NULL;
+    candidates           = VRTX_new(300, 300, 0);
+    VRTX_add_point(&candidates, 200, 200, 0);
+
+    // WHEN
+    VRTX_merge_unique(&vertex, candidates);
+    
+    // THEN
+    ck_assert_int_eq(VRTX_len(vertex), 2);
 }
 
 Suite *vertex_suite(void) {
@@ -86,6 +149,10 @@ Suite *vertex_suite(void) {
     tcase_add_test(tc_core, VRTX_add_point_check);
     tcase_add_test(tc_core, VRTX_eq_check);
     tcase_add_test(tc_core, VRTX_transpose_check);
+    tcase_add_test(tc_core, VRTX_merge_unique_check_single_point_not_added);
+    tcase_add_test(tc_core, VRTX_merge_unique_check_two_points_added);
+    tcase_add_test(tc_core, VRTX_merge_unique_check_one_point_added_one_dismissed);
+    tcase_add_test(tc_core, VRTX_merge_unique_check_to_a_null_pointer);
 
     suite_add_tcase(s, tc_core);
 

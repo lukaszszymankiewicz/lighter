@@ -36,6 +36,7 @@ void LIG_free_light_scene(
     free(scene);
 }
 
+// TODO: replace it with function in geometry.h
 // checks if ray intersects with obstacle
 bool LIG_ray_intersect(
     int o_x1,  // obstacle

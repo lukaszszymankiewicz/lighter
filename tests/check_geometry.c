@@ -1,6 +1,7 @@
 #include <check.h>
 #include "../src/geometry.h"
 #include "../src/vertex.h"
+#include "../src/segment.h"
 
 START_TEST (GEO_pt_in_rect_check)
 {
@@ -19,10 +20,10 @@ START_TEST (GEO_pt_in_rect_check)
     ck_assert_int_eq(res, 1);
 
     res = GEO_pt_in_rect(9, 10, 10, 10, 20, 20);
-    ck_assert_int_eq(res, 1);
+    ck_assert_int_eq(res, 0);
 
     res = GEO_pt_in_rect(10, 9, 10, 10, 20, 20);
-    ck_assert_int_eq(res, 1);
+    ck_assert_int_eq(res, 0);
 
     res = GEO_pt_in_rect(9, 9, 10, 10, 20, 20);
     ck_assert_int_eq(res, 0);
@@ -373,6 +374,241 @@ START_TEST (GEO_pt_in_polygon_strange_shape)
 }
 END_TEST
 
+START_TEST (GEO_polygon_intersecting_rect_polygon_without_any_common_points)
+{
+    // GIVEN
+    segment_t     *rect       = NULL;
+
+    SEG_push(&rect, 0,   0,   0,   100 );
+    SEG_push(&rect, 0,   100, 100, 100 );
+    SEG_push(&rect, 100, 100, 100, 0   );
+    SEG_push(&rect, 100, 0,   0,   0   );
+
+    typedef struct testcase { int x1; int y1; int x2; int y2; int x3; int y3; } testcase_t;
+    
+    testcase_t data[] = {
+        (testcase_t){ -30,    0, -10,  50,  -60,  70 },
+        (testcase_t){  50, -100, 200, -10, -100, -20 },
+        (testcase_t){ 150,    0, 200,  10,  180,  90 },
+        (testcase_t){  50,  120,  70, 200,   10, 210 },
+    };
+
+    int n_cases = 4;
+
+    for (int i=0; i<n_cases; i++) {
+        vertex_t* res  = NULL;
+        vertex_t* poly = NULL;
+
+        // WHEN
+        VRTX_add_point(&poly, data[i].x1, data[i].y1, 0);
+        VRTX_add_point(&poly, data[i].x2, data[i].y2, 0);
+        VRTX_add_point(&poly, data[i].x3, data[i].y3, 0);
+
+        // THEN
+        res = GEO_polygon_intersecting_rect(poly, rect, 0, 0);
+        ck_assert_ptr_null(res);
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_intersecting_rect_polygon_one_common_point)
+{
+    // GIVEN
+    segment_t     *rect       = NULL;
+
+    SEG_push(&rect, 0,   0,   0,   100 );
+    SEG_push(&rect, 0,   100, 100, 100 );
+    SEG_push(&rect, 100, 100, 100, 0   );
+    SEG_push(&rect, 100, 0,   0,   0   );
+
+    typedef struct testcase { int x1; int y1; int x2; int y2; int x3; int y3; } testcase_t;
+    
+    testcase_t data[] = {
+        (testcase_t){   0,   50, -30,   0,  -60,  70 },
+        (testcase_t){  50,    0, 200, -10, -100, -20 },
+        (testcase_t){ 100,    0, 200,  10,  180,  90 },
+        (testcase_t){  50,  100,  70, 200,   10, 210 },
+
+        (testcase_t){   0,    0, -30,   0,  -60,  70 },
+        (testcase_t){ 100,    0, 200, -10, -100, -20 },
+        (testcase_t){ 100,  100, 200,  10,  180,  90 },
+        (testcase_t){   0,  100,  70, 200,   10, 210 },
+    };
+
+    int n_cases = 8;
+
+    for (int i=0; i<n_cases; i++) {
+        vertex_t* res  = NULL;
+        vertex_t* poly = NULL;
+        int len;
+
+        // WHEN
+        VRTX_add_point(&poly, data[i].x1, data[i].y1, 0);
+        VRTX_add_point(&poly, data[i].x2, data[i].y2, 0);
+        VRTX_add_point(&poly, data[i].x3, data[i].y3, 0);
+
+        // THEN
+        res = GEO_polygon_intersecting_rect(poly, rect, 0, 0);
+        len = VRTX_len(res); 
+        ck_assert_ptr_nonnull(res);
+        ck_assert_int_eq(len, 1);
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_intersecting_rect_polygon_two_common_point)
+{
+    // GIVEN
+    segment_t     *rect       = NULL;
+
+    SEG_push(&rect, 0,   0,   0,   100 );
+    SEG_push(&rect, 0,   100, 100, 100 );
+    SEG_push(&rect, 100, 100, 100, 0   );
+    SEG_push(&rect, 100, 0,   0,   0   );
+
+    typedef struct testcase { int x1; int y1; int x2; int y2; int x3; int y3; } testcase_t;
+    
+    testcase_t data[] = {
+        (testcase_t){   0,   10,   0,  90,  -60,  70 },
+        (testcase_t){  10,    0, 90,    0,   80, -20 },
+        (testcase_t){ 100,   10, 100,  90,  180,  60 },
+        (testcase_t){  10,  100,  70, 100,   50, 210 },
+
+        (testcase_t){  50,   50, -30,   0,  -60,  70 },
+        (testcase_t){  50,   50, 200, -10, -100, -20 },
+        (testcase_t){  50,   50, 200,  10,  180,  90 },
+        (testcase_t){  50,   50,  70, 200,   10, 210 },
+
+        (testcase_t){  50,   50,  70,  50,  -60,  70 },
+        (testcase_t){  50,   50,  70,  50,   60, -10 },
+        (testcase_t){  50,   50,  70,  50,  110,  90 },
+        (testcase_t){  50,   50,  70,  50,   60, 110 },
+    };
+
+    int n_cases = 12;
+
+    for (int i=0; i<n_cases; i++) {
+        vertex_t* res  = NULL;
+        vertex_t* poly = NULL;
+        int len;
+
+        // WHEN
+        VRTX_add_point(&poly, data[i].x1, data[i].y1, 0);
+        VRTX_add_point(&poly, data[i].x2, data[i].y2, 0);
+        VRTX_add_point(&poly, data[i].x3, data[i].y3, 0);
+
+        // THEN
+        res = GEO_polygon_intersecting_rect(poly, rect, 0, 0);
+        len = VRTX_len(res); 
+
+        ck_assert_ptr_nonnull(res);
+        ck_assert_int_eq(len, 2);
+    }
+}
+END_TEST
+
+START_TEST (GEO_rect_inside_poly_check)
+{
+    // GIVEN
+    segment_t     *rect       = NULL;
+
+    SEG_push(&rect, 0,   0,   0,   100 );
+    SEG_push(&rect, 0,   100, 100, 100 );
+    SEG_push(&rect, 100, 100, 100, 0   );
+    SEG_push(&rect, 100, 0,   0,   0   );
+
+    typedef struct testcase { int x1; int y1; int x2; int y2; int x3; int y3; int n;} testcase_t;
+    
+    testcase_t data[] = {
+        (testcase_t){ -10,   10, -50, -10,  -50,  70, 0 },
+        (testcase_t){  90,  -10,  80,   0,   85, -70, 0 },
+        (testcase_t){ 110,   90, 180, 200,   85, 170, 0 },
+        (testcase_t){ -10,   90,   0, 110,  -85, 170, 0 },
+
+        (testcase_t){  50,   50, -70,  10,    0, -70, 1 },
+        (testcase_t){  50,   50, 160,  30,  110, -90, 1 },
+        (testcase_t){  50,   50, 200,  60,   80, 140, 1 },
+        (testcase_t){  50,   50,  70, 200,  -50, 150, 1 },
+
+        (testcase_t){  50,   50, -10,   0,  -10,  90, 0 },
+        (testcase_t){  50,   50,   0, -10,   90, -10, 0 },
+        (testcase_t){  50,   50, 110,  10,  110,  90, 0 },
+        (testcase_t){  50,   50,  10, 200,   90, 200, 0 },
+
+        (testcase_t){  10,   10, -10, 110,   50, -90, 0 },
+        (testcase_t){  10,   10,  90,  10,   50, -90, 0 },
+        (testcase_t){  90,   10,  90,  90,  150,  50, 0 },
+        (testcase_t){  10,   90,  90,  90,   50, 200, 0 },
+
+        (testcase_t){ -10,   10, 110,  10,   50,-200, 2 },
+        (testcase_t){ -10,  110, -10, -10,  150, 110, 3 },
+    };
+
+    int n_cases = 18;
+
+    for (int i=0; i<n_cases; i++) {
+        vertex_t* res  = NULL;
+        vertex_t* poly = NULL;
+        int len;
+
+        // WHEN
+        VRTX_add_point(&poly, data[i].x1, data[i].y1, 0);
+        VRTX_add_point(&poly, data[i].x2, data[i].y2, 0);
+        VRTX_add_point(&poly, data[i].x3, data[i].y3, 0);
+
+        // THEN
+        res = GEO_rect_inside_poly(poly, rect, 0, 0);
+        len = VRTX_len(res); 
+        ck_assert_int_eq(len, data[i].n);
+    }
+}
+END_TEST
+
+START_TEST (GEO_vertex_inside_rect_check)
+{
+    // GIVEN
+    typedef struct testcase { int x1; int y1; int x2; int y2; int x3; int y3; int n;} testcase_t;
+    
+    testcase_t data[] = {
+        (testcase_t){ -10,   10, -50, -10,  -50,  70, 0 },
+        (testcase_t){  90,  -10,  20,  -5,   85, -70, 0 },
+        (testcase_t){ 110,   90, 180, 200,   85, 170, 0 },
+        (testcase_t){ -10,   90,   0, 110,  -85, 170, 0 },
+
+        (testcase_t){  50,   50, -70,  10,    0, -70, 1 },
+        (testcase_t){  50,   50, 160,  30,  110, -90, 1 },
+        (testcase_t){  50,   50, 200,  60,   80, 140, 1 },
+        (testcase_t){  50,   50,  70, 200,  -50, 150, 1 },
+
+        (testcase_t){  50,   50, -10,   0,  -10,  90, 1 },
+        (testcase_t){  50,   50,   0, -10,   90, -10, 1 },
+        (testcase_t){  50,   50, 110,  10,  110,  90, 1 },
+        (testcase_t){  50,   50,  10, 200,   90, 200, 1 },
+
+        (testcase_t){ -10,   10, 110,  10,   50,-200, 0 },
+        (testcase_t){ -10,  110, -10, -10,  150, 110, 0 },
+    };
+
+    int n_cases = 14;
+
+    for (int i=0; i<n_cases; i++) {
+        vertex_t* res  = NULL;
+        vertex_t* poly = NULL;
+        int len;
+
+        // WHEN
+        VRTX_add_point(&poly, data[i].x1, data[i].y1, 0);
+        VRTX_add_point(&poly, data[i].x2, data[i].y2, 0);
+        VRTX_add_point(&poly, data[i].x3, data[i].y3, 0);
+
+        // THEN
+        res = GEO_vertex_inside_rect(poly, 0, 0, 100, 100);
+        len = VRTX_len(res); 
+        ck_assert_int_eq(len, data[i].n);
+    }
+}
+END_TEST
+
 Suite* geometry_suite(void)
 {
     Suite* s;
@@ -390,6 +626,11 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_pt_in_polygon_rect);
     tcase_add_test(tc_core, GEO_pt_in_polygon_romboid);
     tcase_add_test(tc_core, GEO_pt_in_polygon_strange_shape);
+    tcase_add_test(tc_core, GEO_polygon_intersecting_rect_polygon_without_any_common_points);
+    tcase_add_test(tc_core, GEO_polygon_intersecting_rect_polygon_one_common_point);
+    tcase_add_test(tc_core, GEO_polygon_intersecting_rect_polygon_two_common_point);
+    tcase_add_test(tc_core, GEO_rect_inside_poly_check);
+    tcase_add_test(tc_core, GEO_vertex_inside_rect_check);
 
     suite_add_tcase(s, tc_core);
 

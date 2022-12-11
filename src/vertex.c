@@ -118,6 +118,49 @@ void VRTX_merge(
     }
 }
 
+bool VRTX_contains(
+    vertex_t *head,
+    int x,
+    int y
+) {
+    vertex_t* ptr = NULL;
+    ptr           = head;
+
+    while(ptr) {
+
+        if(ptr->x == x && ptr->y == y) {
+            return true; 
+        }
+
+        ptr=ptr->next;
+    }
+
+    return false;
+}
+
+void VRTX_merge_unique(
+    vertex_t **head,
+    vertex_t  *candidates
+) {
+    vertex_t *ptr  = NULL;
+    ptr            = candidates;
+
+    while(ptr) {
+
+        if (VRTX_contains( (*head), ptr->x, ptr->y)) {
+            ptr=ptr->next;
+            continue;
+        }
+        
+        VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
+        ptr=ptr->next;
+    }
+
+    if (candidates) {
+        VRTX_free(candidates);
+    }
+}
+
 bool VRTX_eq(
     vertex_t *first,
     vertex_t *second
@@ -164,6 +207,32 @@ int VRTX_max_y(
     }
 }
 
+int VRTX_pop_y(
+    vertex_t* vertex
+) {
+    vertex_t *ptr = NULL;
+    ptr           = vertex;
+
+    while(ptr->next) {
+        ptr = ptr->next;
+    }
+
+    return ptr->y;
+}
+
+int VRTX_pop_x(
+    vertex_t* vertex
+) {
+    vertex_t *ptr = NULL;
+    ptr           = vertex;
+
+    while(ptr->next) {
+        ptr = ptr->next;
+    }
+
+    return ptr->x;
+}
+
 void VRTX_delete(
     vertex_t **head,
     int          y
@@ -192,12 +261,3 @@ void VRTX_delete(
     }
 }
 
-vertex_t* VRTX_intersection_with_rect(
-    vertex_t *first,
-    int       x1,
-    int       y1,
-    int       x2,
-    int       y2
-) {
-    return NULL;
-}

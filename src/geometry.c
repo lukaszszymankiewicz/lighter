@@ -1,7 +1,9 @@
 #include <assert.h>
 #include "global.h"
 #include "vertex.h"
+#include "segment.h"
 #include "sorted_list.h"
+#include "point.h"
 
 // calculates angle between two points
 float GEO_angle_2pt(int ax, int ay, int bx, int by) {
@@ -125,15 +127,7 @@ bool GEO_pt_in_rect(
     int x1, int y1,
     int x2, int y2
 ) {
-    if (GEO_value_between_range (x, x1, x2)) {
-        return true;
-    }
-
-    if (GEO_value_between_range (y, y1, y2)) {
-        return true;
-    }
-
-    return false;
+    return (GEO_value_between_range (x, x1, x2) && GEO_value_between_range (y, y1, y2));
 }
 
 // returns -1 if there is not collision or x-value of the collision 
@@ -215,8 +209,6 @@ float GEO_line_segment_len(
     return sqrt(dy*dy + dx*dx);
 }
 
-// we dont need collinear coord in this function. Client is responsbile for checking and inputting
-// proper coords to this function
 bool GEO_collienar_segs_have_common_pt(
     int a1, int a2, // first segment value
     int b1, int b2 // second segment value
@@ -226,6 +218,13 @@ bool GEO_collienar_segs_have_common_pt(
     bool second = ((GEO_value_between_range(b1, a1, a2)) || (GEO_value_between_range(b1, a1, a2)));
 
     return first || second;
+}
+
+bool GEO_collienar_segs_have_common_start(
+    int a1, int a2, // first segment value
+    int b1, int b2 // second segment value
+) {
+    return (a1 == b1 || a2 == b1 || a2 == b2);
 }
 
 int GEO_seg_in_rect(
@@ -363,4 +362,274 @@ bool GEO_pt_in_polygon(
     SRTLST_free(inter);
 
     return false;
+}
+
+// checks if segment intersects with another segment
+bool GEO_segment_intersect(
+    int o_x1,  // obstacle
+    int o_y1,  // obstacle
+    int o_x2,  // obstacle
+    int o_y2,  // obstacle
+    int r_x1,  // ray
+    int r_y1,  // ray
+    int r_x2,  // ray
+    int r_y2   // ray
+) {
+    // check for obstacle is collinear with ray - special case here needs to be applied
+    if (o_x1 == o_x2) {
+        // collinear
+        if ((r_x1 == r_x2) && (r_x1 == o_x1)) {
+            return GEO_collienar_segs_have_common_pt(o_y1, o_y2, r_y1, r_y2);
+        }
+        // typical case
+        return (GEO_value_between_range(o_x1, r_x1, r_x2)) &&
+            !GEO_pt_same_side(r_x1, r_y1, r_x2, r_y2, o_x1, o_y1, o_x2, o_y2);
+
+    } else {
+        // collinear
+        if ((r_y1 == r_y2) && (r_y1 == o_y1)) {
+            return GEO_collienar_segs_have_common_pt(o_x1, o_x2, r_x1, r_x2);
+        }
+        // typical case
+        return (GEO_value_between_range(o_y1, r_y1, r_y2) && 
+         !GEO_pt_same_side(r_x1, r_y1, r_x2, r_y2, o_x1, o_y1, o_x2, o_y2));
+    }
+}
+
+int GEO_find_common_point(
+    int a1, int a2,
+    int b1, int b2
+) {
+    if (a1 == b1) { return a1; }
+    else if (a1 == b2) { return a1; }
+    else if (a2 == b1) { return a2; }
+    else return a2;
+}
+
+point_t* GEO_intersection_with_segment(
+    segment_t* seg,
+    int x1, int y1,
+    int x2, int y2
+) {
+    if (!GEO_segment_intersect(seg->x1, seg->y1, seg->x2, seg->y2, x1, y1, x2, y2)) {
+        return NULL;
+    }
+
+    // VERTICAL
+    if (seg->type == VER) {
+
+        // collinear
+        if (seg->x1 == x1 && seg->x2 == x2) {
+
+            if (!GEO_collienar_segs_have_common_start(seg->y1, seg->y2, y1, y2)) {
+                return PT_new(seg->x1, y1);
+            }
+            int common_y = GEO_find_common_point(seg->y1, seg->y2, y1, y2);
+
+            return PT_new(x1, common_y);
+        }
+
+        int inter_y = (int) GEO_intersection_with_x (seg->x1, x1, y1, x2, y2);
+        return PT_new(seg->x1, inter_y);
+
+    // HORIZONTAL
+    } else {
+        // collinear
+        if (seg->y1 == y1 && seg->y2 == y2) {
+
+            if (!GEO_collienar_segs_have_common_start(seg->x1, seg->x2, x1, x2)) {
+                return PT_new(x1, seg->y1);
+            }
+
+            int common_x = GEO_find_common_point(seg->x1, seg->x2, x1, x2);
+            return PT_new(common_x, y1);
+        }
+
+        int inter_x = (int) GEO_intersection_with_y (seg->y1, x1, y1, x2, y2);
+        return PT_new(inter_x, seg->y1);
+    }
+}
+
+vertex_t* GEO_polygon_intersecting_rect(
+    vertex_t  *polygon,
+    segment_t *rect,
+    int        poly_st_x,
+    int        poly_st_y
+) {
+    vertex_t      *new       = NULL;
+    vertex_t      *ptr       = NULL;
+    ptr                      = polygon;
+
+    int            first_x   = polygon->x;
+    int            first_y   = polygon->y;
+
+    int            last_x;
+    int            last_y;
+
+    while(ptr->next) {
+        segment_t *seg_ptr = NULL;
+        seg_ptr            = rect;
+
+        while(seg_ptr) {
+            point_t* p = NULL;
+            p          = GEO_intersection_with_segment(seg_ptr, ptr->x, ptr->y, ptr->next->x, ptr->next->y);
+
+            if (!p) {
+                seg_ptr=seg_ptr->next;
+                continue;
+            }
+
+            float angle = GEO_angle_2pt(poly_st_x, poly_st_y, p->x, p->y);
+
+            if (!new) {
+                VRTX_add_point(&new, p->x, p->y, angle);
+                last_x = p->x;
+                last_y = p->y;
+                PT_free(p);
+                seg_ptr=seg_ptr->next;
+                continue;
+            }
+            
+            if ((p->x != last_x) || (p->y != last_y)) {
+                VRTX_add_point(&new, p->x, p->y, angle);
+
+                last_x = p->x;
+                last_y = p->y;
+                PT_free(p);
+                seg_ptr=seg_ptr->next;
+                continue;
+            }
+
+            seg_ptr=seg_ptr->next;
+        }
+        ptr=ptr->next;
+    }
+
+    // last segment
+    segment_t *seg_ptr = NULL;
+    seg_ptr            = rect;
+
+    while(seg_ptr) {
+        point_t* p = NULL;
+        p          = GEO_intersection_with_segment(seg_ptr, ptr->x, ptr->y, first_x, first_y);
+
+        if (!p) {
+            seg_ptr=seg_ptr->next;
+            continue;
+        }
+
+        float angle = GEO_angle_2pt(poly_st_x, poly_st_y, p->x, p->y);
+
+        if (!new) {
+            VRTX_add_point(&new, p->x, p->y, angle);
+
+            last_x = p->x;
+            last_y = p->y;
+            PT_free(p);
+            seg_ptr=seg_ptr->next;
+            continue;
+        }
+        
+        if (p->x != last_x || p->y != last_y) {
+
+            VRTX_add_point(&new, p->x, p->y, angle);
+
+            last_x = p->x;
+            last_y = p->y;
+            PT_free(p);
+            seg_ptr=seg_ptr->next;
+            continue;
+        }
+
+        seg_ptr=seg_ptr->next;
+    }
+
+    return new;
+}
+
+vertex_t* GEO_rect_inside_poly(
+    vertex_t*  polygon,
+    segment_t* rect,
+    int        poly_st_x,
+    int        poly_st_y
+) {
+    vertex_t* new      = NULL;
+    segment_t* seg_ptr = NULL;
+
+    seg_ptr            = rect;
+    
+    while(seg_ptr) {
+
+        if (GEO_pt_in_polygon(polygon, seg_ptr->x1, seg_ptr->y1)) {
+            float angle = GEO_angle_2pt(poly_st_x, poly_st_y, seg_ptr->x1, seg_ptr->y1);
+            VRTX_add_point(&new, seg_ptr->x1, seg_ptr->y1, angle);
+        }
+
+        seg_ptr=seg_ptr->next;
+    }
+
+    return new;
+}
+
+vertex_t* GEO_vertex_inside_rect(
+    vertex_t*  polygon,
+    int x1, int y1,
+    int x2, int y2
+) {
+    vertex_t  *new     = NULL;
+    vertex_t  *ptr     = NULL;
+
+    ptr                = polygon;
+
+    while(ptr) {
+
+        if (GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2)) {
+            VRTX_add_point(&new, ptr->x, ptr->y, ptr->angle);
+        }
+  
+        ptr=ptr->next;
+    }
+
+    return new;
+}
+
+vertex_t* GEO_polygon_union_rect(
+    vertex_t *polygon,
+    int       x1,        int       y1,
+    int       x2,        int       y2,
+    int       poly_st_x, int       poly_st_y
+) {
+    if (!polygon) { return NULL;}
+    
+    vertex_t* new_a = NULL;
+    vertex_t* new_b = NULL;
+    vertex_t* new_c = NULL;
+
+    vertex_t* new    = NULL;
+
+    // create rect from segment
+    segment_t     *rect       = NULL;
+    SEG_push(&rect, x1, y1, x1, y2);
+    SEG_push(&rect, x1, y2, x2, y2);
+    SEG_push(&rect, x2, y2, x2, y1);
+    SEG_push(&rect, x2, y1, x1, y1);
+
+    // A - points on which vertex intersect with rect
+    new_a = GEO_polygon_intersecting_rect(polygon, rect, poly_st_x, poly_st_y);
+
+    // B - rects cones inside polygon
+    new_b = GEO_rect_inside_poly(polygon, rect, poly_st_x, poly_st_y);
+
+    // C - vertex inside rect
+    new_c = GEO_vertex_inside_rect(polygon, x1, y1, x2, y2);
+
+    VRTX_merge_unique(&new, new_a);
+    VRTX_merge_unique(&new, new_b);
+    VRTX_merge_unique(&new, new_c);
+
+    if (new_a) { VRTX_free(new_a); new_a = NULL;}
+    if (new_b) { VRTX_free(new_b); new_b = NULL;}
+    if (new_c) { VRTX_free(new_c); new_c = NULL;}
+
+    return new;
 }
