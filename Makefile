@@ -84,13 +84,17 @@ memory_check:
 run_lighter:
 	./$(OBJ)
 
+.PHONY: clear_screen
+clear_screen:
+	clear
+
 .PHONY: run
 run:
 	make clean lighter run_lighter
 
 .PHONY: runtests
 runtests:
-	make clean tests run_check_tests_suite
+	make clean tests clear_screen run_check_tests_suite
 
 .PHONY: clean
 clean:

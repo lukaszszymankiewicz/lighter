@@ -609,6 +609,302 @@ START_TEST (GEO_vertex_inside_rect_check)
 }
 END_TEST
 
+START_TEST (GEO_polygon_union_rect_no_intersection)
+{
+    // GIVEN
+    vertex_t* res  = NULL;
+    vertex_t* poly = NULL;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+
+    // WHEN
+    VRTX_add_point(&poly, -10, -10, 0);
+    VRTX_add_point(&poly, -70, -10, 0);
+    VRTX_add_point(&poly, -10, -70, 0);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, -1, -1);
+    ck_assert_ptr_null(res);
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_rect_one_point_intersecting_cone_of_rect)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 1;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+
+    // WHEN
+    VRTX_add_point(&poly,   0,   0, 1);
+    VRTX_add_point(&poly, -70, -10, 1);
+    VRTX_add_point(&poly, -10, -70, 1);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, -1, -1);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_rect_one_point_intersecting)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+
+    int len;
+    int expected_len = 1;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+
+    // WHEN
+    VRTX_add_point(&poly,  10,   0, 1);
+    VRTX_add_point(&poly, -70, -10, 1);
+    VRTX_add_point(&poly, -10, -70, 1);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, -1, -1);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_rect_two_point_intersecting_simple)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 2;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+
+    // WHEN
+    VRTX_add_point(&poly,  10,   0, 1);
+    VRTX_add_point(&poly,  90,   0, 1);
+    VRTX_add_point(&poly,  70, -70, 1);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, -1, -1);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_rect_two_point_intersecting)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 2;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+
+    // WHEN
+    VRTX_add_point(&poly,   0,  10, 1);
+    VRTX_add_point(&poly,   0,  90, 1);
+    VRTX_add_point(&poly, -70,  70, 1);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, -1, -1);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+    
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_check_three_point_intersection)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 3;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+
+    // WHEN
+    VRTX_add_point(&poly, -10,  30, 1);
+    VRTX_add_point(&poly,  30, -10, 1);
+    VRTX_add_point(&poly, -10, -10, 1);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, -1, -1);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_check_four_point_intersection)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 4;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+    int x0 = 10; int y0 = 10;
+    float angle;
+
+    // WHEN
+    angle = GEO_angle_2pt(x0, y0, -10, 30);
+    VRTX_add_point(&poly, -10,  30, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 30, -10);
+    VRTX_add_point(&poly, 30, -10, angle);
+
+    angle = GEO_angle_2pt(x0, y0, -10, -10);
+    VRTX_add_point(&poly, -10, -10, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 30, 30);
+    VRTX_add_point(&poly, 30, 30, angle);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, x0, y0);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_check_two_point_intersection_collinear)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 2;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+
+    // WHEN
+    VRTX_add_point(&poly, -10,   0, 1);
+    VRTX_add_point(&poly,  30,   0, 1);
+    VRTX_add_point(&poly,  30, -10, 1);
+    VRTX_add_point(&poly, -10, -10, 1);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, -1, -1);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_check_typical_light_shape)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 4;
+    int x1=0; int y1=0; int x2=100; int y2=100;
+    int y0 = 50; int x0 = 50;
+    float angle;
+
+    // WHEN
+    angle = GEO_angle_2pt(x0, y0, 50, 50);
+    VRTX_add_point(&poly,  50,  50, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 90, 0);
+    VRTX_add_point(&poly, 90, 0, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 0, 90);
+    VRTX_add_point(&poly, 0, 90, angle);
+
+    angle = GEO_angle_2pt(x0, y0, -10, -10);
+    VRTX_add_point(&poly, -10, -10, angle);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, x0, y0);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
 Suite* geometry_suite(void)
 {
     Suite* s;
@@ -631,6 +927,15 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_polygon_intersecting_rect_polygon_two_common_point);
     tcase_add_test(tc_core, GEO_rect_inside_poly_check);
     tcase_add_test(tc_core, GEO_vertex_inside_rect_check);
+    tcase_add_test(tc_core, GEO_polygon_union_rect_one_point_intersecting_cone_of_rect);
+    tcase_add_test(tc_core, GEO_polygon_union_rect_no_intersection);
+    tcase_add_test(tc_core, GEO_polygon_union_rect_one_point_intersecting);
+    tcase_add_test(tc_core, GEO_polygon_union_rect_two_point_intersecting);
+    tcase_add_test(tc_core, GEO_polygon_union_rect_two_point_intersecting_simple);
+    tcase_add_test(tc_core, GEO_polygon_union_check_three_point_intersection);
+    tcase_add_test(tc_core, GEO_polygon_union_check_two_point_intersection_collinear);
+    tcase_add_test(tc_core, GEO_polygon_union_check_typical_light_shape);
+    tcase_add_test(tc_core, GEO_polygon_union_check_four_point_intersection);
 
     suite_add_tcase(s, tc_core);
 
