@@ -87,16 +87,11 @@ int VRTX_len(
 void VRTX_free(
     vertex_t* head
 ) {
-    vertex_t* ptr  = NULL;
-    ptr            = head;
     vertex_t* temp = NULL;
 
-    while (ptr) {
-        temp = ptr->next;
-        free(ptr);
-        ptr = temp;
-    }
-    if (temp) {
+    while (head != NULL) {
+        temp = head;
+        head = head->next;
         free(temp);
     }
 }
@@ -146,18 +141,13 @@ void VRTX_merge_unique(
     ptr            = candidates;
 
     while(ptr) {
-
-        if (VRTX_contains( (*head), ptr->x, ptr->y)) {
+        if (VRTX_contains((*head), ptr->x, ptr->y)) {
             ptr=ptr->next;
             continue;
         }
         
         VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
         ptr=ptr->next;
-    }
-
-    if (candidates) {
-        VRTX_free(candidates);
     }
 }
 
@@ -260,4 +250,3 @@ void VRTX_delete(
         ptr = ptr->next;
     }
 }
-

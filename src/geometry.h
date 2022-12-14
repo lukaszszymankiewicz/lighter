@@ -26,5 +26,6 @@ bool GEO_pt_in_rect(int x, int y, int x1, int y1, int x2, int y2);
 vertex_t* GEO_rect_inside_poly(vertex_t* polygon, segment_t* rect, int poly_st_x, int poly_st_y);
 vertex_t* GEO_polygon_intersecting_rect(vertex_t *polygon, segment_t *rect, int poly_st_x, int poly_st_y);
 vertex_t* GEO_vertex_inside_rect(vertex_t*  polygon, int x1, int y1, int x2, int y2);
+vertex_t* GEO_polygon_union_rect(vertex_t *polygon, int x1, int y1, int x2, int y2, int poly_st_x, int poly_st_y);
 
 #endif

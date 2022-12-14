@@ -622,14 +622,14 @@ vertex_t* GEO_polygon_union_rect(
 
     // C - vertex inside rect
     new_c = GEO_vertex_inside_rect(polygon, x1, y1, x2, y2);
-
+    
     VRTX_merge_unique(&new, new_a);
     VRTX_merge_unique(&new, new_b);
     VRTX_merge_unique(&new, new_c);
 
-    if (new_a) { VRTX_free(new_a); new_a = NULL;}
-    if (new_b) { VRTX_free(new_b); new_b = NULL;}
-    if (new_c) { VRTX_free(new_c); new_c = NULL;}
+    if (new_a != NULL) { VRTX_free(new_a); new_a = NULL;}
+    if (new_b != NULL) { VRTX_free(new_b); new_b = NULL;}
+    if (new_c != NULL) { VRTX_free(new_c); new_c = NULL;}
 
     return new;
 }

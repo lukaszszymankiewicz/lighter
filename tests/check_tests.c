@@ -29,89 +29,40 @@
 
 int main(void) {
     int number_failed = 0;
-    Suite *s;
+    int number_run = 0;
+
+    Suite   *s;
     SRunner *sr;
+    
+    Suite *suites[] = {
+        vertex_suite(),
+        light_suite(),
+        segment_suite(),
+        point_suite(),
+        // gfx_suite(), // silented by now
+        level_suite(),
+        controller_suite(),
+        geometry_suite(),
+        entity_suite(),
+        entity_manager_suite(),
+        sorted_list_suite(),
+        sprites_suite(),
+        source_suite(),
+    };
+    int n_suites = 12;
 
-    // vertex
-    s = vertex_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
+    for (int i=0; i<n_suites; i++) {
+        s = suites[i];
+        sr = srunner_create(s);
+        srunner_run_all(sr, CK_ENV);
+        number_run += srunner_ntests_run(sr);
+        number_failed += srunner_ntests_failed(sr);
+    }
 
-    // light
-    s = light_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // segment
-    s = segment_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // point
-    s = point_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // GFX
-    // s = gfx_suite();
-    // sr = srunner_create(s);
-    // srunner_run_all(sr, CK_ENV);
-    // number_failed += srunner_ntests_failed(sr);
-
-    // level
-    s = level_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // controller
-    s = controller_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // geometry
-    s = geometry_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // entity
-    s = entity_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // entity manager
-    s = entity_manager_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // intersection
-    s = sorted_list_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // sprites
-    s = sprites_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
-    // source
-    s = source_suite();
-    sr = srunner_create(s);
-    srunner_run_all(sr, CK_ENV);
-    number_failed += srunner_ntests_failed(sr);
-
+    printf("\nOVERVIEW:\n");
     srunner_free(sr);
-    printf("/n");
+    printf("\x1B[32mTests passed = %d \x1B[0m\n", number_run);
+    printf("\x1B[31mTests failed = %d \x1B[0m\n", number_failed);
 
     return 0;
 }
