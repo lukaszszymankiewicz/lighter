@@ -4,6 +4,7 @@
 #include "primitives.h"
 
 static char buffer[BUFFER_SIZE];
+
 lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
 wobble_t          *wobbles[ASSET_WOBBLE_ALL];
 
@@ -15,38 +16,38 @@ float lightpos_up_down_corr[2][5] = {
 };
 
 void SRC_move_lightsource(
-    lightsource_t     *light,
+    lightsource_t     *source,
     direction_t        light_dir,
     direction_t        entity_dir
 ) {
-    light->angle = lightpos_up_down_corr[entity_dir][light_dir];
+    source->angle = lightpos_up_down_corr[entity_dir][light_dir];
 }
 
 int SRC_get_light_penetrating_power(
-    lightsource_t *lght
+    lightsource_t *source
 ) {
-    return lght->penetrating_power;
+    return source->penetrating_power;
 }
 
 int SRC_get_light_polygon_x_corr(
-    lightsource_t *lght,
+    lightsource_t *source,
     int      i
 ) {
-    return sin(lght->angle) * lght->light_polygons[i].x + cos(lght->angle) * lght->light_polygons[i].y;
+    return sin(source->angle) * source->light_polygons[i].x + cos(source->angle) * source->light_polygons[i].y;
 }
 
 int SRC_get_light_polygon_y_corr(
-    lightsource_t *lght,
+    lightsource_t *source,
     int            i 
 ) {
-    return sin(lght->angle) * lght->light_polygons[i].y + cos(lght->angle) * lght->light_polygons[i].x;
+    return sin(source->angle) * source->light_polygons[i].y + cos(source->angle) * source->light_polygons[i].x;
 }
 
 float SRC_get_light_polygon_width_corr(
-    lightsource_t *lght,
+    lightsource_t *source,
     int            i
 ) {
-    int coef = lght->light_polygons[i].width;
+    int coef = source->light_polygons[i].width;
 
     if (coef){
         return PI / coef;
@@ -55,20 +56,32 @@ float SRC_get_light_polygon_width_corr(
 }
 
 void SRC_change_wobble(
-    lightsource_t *lght,
-    int wobble_index
+    lightsource_t *source,
+    int            wobble_index
 ) { 
-    lght->curent_wobble = wobble_index;
+    source->curent_wobble = wobble_index;
+}
+
+void SRC_set_wobble(
+    lightsource_t *source,
+    wobble_t      *wobble,
+    int            n
+) { 
+    source->wobble[n] = wobble;
+    source->n_wobbles++;
 }
 
 float SRC_get_wobble_angle_coef(
-    lightsource_t *lght
+    lightsource_t *source
 ) {
-    if (lght->wobble==NULL) {return 0.0;}
+    if (source->n_wobbles==0) {return 0.0;}
 
-    int len = lght->wobble[lght->curent_wobble].len;
+    int len = source->wobble[source->curent_wobble]->len;
 
-    return lght->wobble[lght->curent_wobble].coefs[lght->frame%len];
+    if (source->frame == 0) {
+        return source->wobble[source->curent_wobble]->coefs[0];
+    }
+    return source->wobble[source->curent_wobble]->coefs[source->frame%len];
 }
 
 lightsource_t* SRC_read_lightsource(
@@ -79,10 +92,9 @@ lightsource_t* SRC_read_lightsource(
 
     lightsource->frame          = 0;
     lightsource->curent_wobble  = 0;
-    lightsource->n_wobbles      = 2;
+    lightsource->n_wobbles      = 0;
     lightsource->light_polygons = NULL;
     lightsource->gradient       = NULL;
-    lightsource->wobble         = NULL;
 
     int state                   = READ_LIGHTSOURCE_IDLE;
     FILE *file                  = NULL;
@@ -253,9 +265,9 @@ void SRC_free_wobble(
 };
 
 void SRC_free_lightsource(
-    lightsource_t* lightsource
+    lightsource_t* source
 ) {
-    free(lightsource);
-    lightsource = NULL;
+    free(source);
+    source = NULL;
 };
 

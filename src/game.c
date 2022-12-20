@@ -30,6 +30,10 @@ void GAME_read_all_files() {
 void GAME_update_all_files() {
     lightsources[ASSET_LIGHTSOURCE_LIGHTER]->gradient = gradients[ASSET_GRADIENT_CIRCULAR];
     lightsources[ASSET_LIGHTSOURCE_LANTERN]->gradient = gradients[ASSET_GRADIENT_CIRCULAR];
+    // TODO: it is ugly to have it here - propably some more clever place for such initialization is
+    // needed
+    SRC_set_wobble(lightsources[ASSET_LIGHTSOURCE_LIGHTER], wobbles[ASSET_WOBBLE_STABLE], 0);
+    SRC_set_wobble(lightsources[ASSET_LIGHTSOURCE_LIGHTER], wobbles[ASSET_WOBBLE_WALKING], 1);
 }
 
 void GAME_free_all_files() {

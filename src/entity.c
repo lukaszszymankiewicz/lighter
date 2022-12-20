@@ -407,6 +407,13 @@ void ENT_update_velocity(
     ENT_update_x_vel(entity);
 }
 
+void ENT_update_wobble(
+    entity_t* entity
+) {
+    if (!entity->light) {return;}
+    entity->light->frame++;
+}
+
 entity_t* ENT_init(
     int                id,
     int                x, 
@@ -450,6 +457,10 @@ entity_t* ENT_init(
 
     if (flags & APPLY_FRICTION) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_friction;
+    }
+
+    if (flags & EMMIT_LIGHT) {
+        entity->update_fun[entity->update_fun_t++] = ENT_update_wobble;
     }
 
     if (flags & MOVABLE) {

@@ -5,8 +5,12 @@
 #ifndef SOURCE_H
 #define SOURCE_H
 
+#define LANTERN_WOBBLES_N 2
+
 enum lightsources_names { LIGHTER, LANTERN, ALL };
 enum polydata           { X, Y, RED, GREEN, BLUE, LIGHT_POWER, WIDTH };
+
+# define MAX_WOBBLES 2
 
 typedef struct lightpolygon { 
     int x;
@@ -33,7 +37,7 @@ typedef struct lightsource {
     int               curent_wobble;
     texture_t        *gradient;
     lightpolygon_t   *light_polygons;
-    wobble_t         *wobble;
+    wobble_t         *wobble[MAX_WOBBLES];
 } lightsource_t;
 
 extern lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
@@ -53,5 +57,6 @@ void SRC_move_lightsource(lightsource_t *light, direction_t light_dir, direction
 void SRC_change_wobble(lightsource_t *lght, int wobble_index);
 void SRC_free_wobble(wobble_t* wobble);
 void SRC_free_lightsource(lightsource_t* lightsource);
+void SRC_set_wobble(lightsource_t *lght, wobble_t *wobble, int n);
 
 #endif
