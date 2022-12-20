@@ -171,7 +171,7 @@ bool VRTX_eq(
     return true;
 }
 
-void VRTX_transpose(
+vertex_t* VRTX_transpose(
     vertex_t *vertex,
     int       x_corr,
     int       y_corr
@@ -184,6 +184,8 @@ void VRTX_transpose(
         ptr->y = ptr->y + y_corr;
         ptr = ptr->next;
     }
+
+    return vertex;
 }
 
 int VRTX_max_y(

@@ -7,7 +7,7 @@
 #include "../src/controller.h"
 #include "../src/sprites.h"
 
-START_TEST (ENT_hold_and_handle_check)
+START_TEST (ENT_hold_and_handle_check_empty)
 {
     // GIVEN
     sprites[ASSET_SPRITE_LIGHTER] = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
@@ -26,36 +26,197 @@ START_TEST (ENT_hold_and_handle_check)
 
     typedef struct testcase {
           int handle;
-          int exp_x;
-          int exp_y;
+          int exp_x_l; int exp_y_l;
+          int exp_x_r; int exp_y_r;
     } testcase_t;
 
     testcase_t testcases[] = {
-        (testcase_t){ HANDLE_BACK_UP,        0,           0        },
-        (testcase_t){ HANDLE_BACK_MIDDLE,    0,           (int)h/2 },
-        (testcase_t){ HANDLE_BACK_DOWN,      0,           h        },
-        (testcase_t){ HANDLE_MIDDLE_UP,      (int)w/2,    0        },
-        (testcase_t){ HANDLE_MIDDLE_MIDDLE,  (int)w/2,    (int)h/2 },
-        (testcase_t){ HANDLE_MIDDLE_DOWN,    (int)w/2,    h        },
-        (testcase_t){ HANDLE_FRONT_UP,       w,           0        },
-        (testcase_t){ HANDLE_FRONT_MIDDLE,   w,           (int)h/2 },
-        (testcase_t){ HANDLE_FRONT_DOWN,     w,           h        },
+        (testcase_t){ HANDLE_BACK_UP,        w,           0,        0,         0        },
+        (testcase_t){ HANDLE_BACK_MIDDLE,    w,           (int)h/2, 0,         (int)h/2 },
+        (testcase_t){ HANDLE_BACK_DOWN,      w,           h,        0,         h        },
+
+        (testcase_t){ HANDLE_MIDDLE_UP,      (int)w/2,    0,        (int)w/2,  0        },
+        (testcase_t){ HANDLE_MIDDLE_MIDDLE,  (int)w/2,    (int)h/2, (int)w/2,  (int)h/2 },
+        (testcase_t){ HANDLE_MIDDLE_DOWN,    (int)w/2,    h,        (int)w/2,  h        },
+
+        (testcase_t){ HANDLE_FRONT_UP,       0,           0,        w,         0        },
+        (testcase_t){ HANDLE_FRONT_MIDDLE,   0,           (int)h/2, w,         (int)h/2 },
+        (testcase_t){ HANDLE_FRONT_DOWN,     0,           h,        w,         h        },
     };
     int n_cases = 9;
 
     for (int i=0; i<n_cases; i++) {
-        entity->direction = RIGHT;
         entity->handle    = testcases[i].handle;
 
         // WHEN
+        entity->direction = RIGHT;
         x = ENT_hold_x(entity);
         y = ENT_hold_y(entity);
 
         // THEN
-        ck_assert_int_eq(x, testcases[i].exp_x);
-        ck_assert_int_eq(y, testcases[i].exp_y);
+        ck_assert_int_eq(x, testcases[i].exp_x_r);
+        ck_assert_int_eq(y, testcases[i].exp_y_r);
+
+        // WHEN
+        entity->direction = LEFT;
+        x = ENT_hold_x(entity);
+        y = ENT_hold_y(entity);
+
+        // THEN
+        ck_assert_int_eq(x, testcases[i].exp_x_l);
+        ck_assert_int_eq(y, testcases[i].exp_y_l);
     };
 
+}
+END_TEST
+
+START_TEST (ENT_hold_check)
+{
+    // GIVEN
+    sprites[ASSET_SPRITE_HERO]              = GFX_read_texture(FILEPATH_SPRITE_HERO);
+    animations[ASSET_HERO_ANIMATION]        = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
+
+    entity_t* entity = NULL;
+
+    int x = 500;
+    int y = 400;
+
+    entity = ENT_init(
+        0, x, y,
+        MOVABLE | STATEABLE | ANIMATIABLE,
+        HANDLE_TYPE_NO,
+        HANDLE_TYPE_NO,
+        ENTITY_NO,
+        STANDING,
+        animations[ASSET_HERO_ANIMATION],
+        sprites[ASSET_SPRITE_HERO],
+        NULL
+    );
+
+    typedef struct testcase {
+          int exp_x_l;
+          int exp_y_l;
+          int exp_x_r;
+          int exp_y_r;
+    } testcase_t;
+
+    testcase_t testcases[] = {
+        (testcase_t){ 0, 10, 9, 10 },
+    };
+    int n_cases = 1;
+
+    for (int i=0; i<n_cases; i++) {
+        // WHEN
+        entity->direction = RIGHT;
+        x = ENT_hold_x(entity);
+        y = ENT_hold_y(entity);
+
+        // THEN
+        ck_assert_int_eq(x, testcases[i].exp_x_r);
+        ck_assert_int_eq(y, testcases[i].exp_y_r);
+
+        // WHEN
+        entity->direction = LEFT;
+        x = ENT_hold_x(entity);
+        y = ENT_hold_y(entity);
+
+        // THEN
+        ck_assert_int_eq(x, testcases[i].exp_x_l);
+        ck_assert_int_eq(y, testcases[i].exp_y_l);
+    };
+}
+END_TEST
+
+START_TEST (ENT_held_item_check)
+{
+    sprites[ASSET_SPRITE_HERO]              = GFX_read_texture(FILEPATH_SPRITE_HERO);
+    sprites[ASSET_SPRITE_LIGHTER]           = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
+    animations[ASSET_HERO_ANIMATION]        = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER] = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+
+    entity_t* entity                  = NULL;
+    entity_t* hold                    = NULL;
+    
+    int x = 500;
+    int y = 400;
+
+    entity = ENT_init(
+        0, x, y,
+        MOVABLE | STATEABLE | ANIMATIABLE,
+        HANDLE_TYPE_NO,
+        HANDLE_TYPE_NO,
+        ENTITY_NO,
+        STANDING,
+        animations[ASSET_HERO_ANIMATION],
+        sprites[ASSET_SPRITE_HERO],
+        NULL
+    );
+
+    hold           = ENT_init(
+        1, 0, 0,
+        HOLDABLE,
+        HANDLE_MIDDLE_MIDDLE,
+        HANDLE_MIDDLE_MIDDLE,
+        ENTITY_NO,
+        NOTHING,
+        NULL,
+        sprites[ASSET_SPRITE_LIGHTER],
+        NULL
+    );
+
+    entity->hold = hold;
+
+    typedef struct testcase {
+        int handle;
+        int exp_x_r; int exp_y_r; 
+        int exp_x_l; int exp_y_l; 
+    } testcase_t;
+
+    int w1 = 9;
+    int h1 = 20;
+
+    int w2 = 10;
+    int h2 = 5;
+
+    testcase_t testcases[] = {
+        (testcase_t){HANDLE_BACK_UP,       x+w1,        y+(int)h1/2,           x-w2, y+(int)h1/2           },
+        (testcase_t){HANDLE_BACK_MIDDLE,   x+w1,        y+(int)h1/2-(int)h2/2, x-w2, y+(int)h1/2-(int)h2/2 },
+        (testcase_t){HANDLE_BACK_DOWN,     x+w1,        y+(int)h1/2-h2,        x-w2, y+(int)h1/2-h2        },
+
+        (testcase_t){HANDLE_MIDDLE_UP,     x+(int)w1/2, y+(int)h1/2,           x-(int)w2/2, y+(int)h1/2           },
+        (testcase_t){HANDLE_MIDDLE_MIDDLE, x+(int)w1/2, y+(int)h1/2-(int)h2/2, x-(int)w2/2, y+(int)h1/2-(int)h2/2 },
+        (testcase_t){HANDLE_MIDDLE_DOWN,   x+(int)w1/2, y+(int)h1/2-h2,        x-(int)w2/2, y+(int)h1/2-h2        },
+
+        (testcase_t){HANDLE_FRONT_UP,      x+w1-w2,     y+(int)h1/2,           x, y+(int)h1/2           },
+        (testcase_t){HANDLE_FRONT_MIDDLE,  x+w1-w2,     y+(int)h1/2-(int)h2/2, x, y+(int)h1/2-(int)h2/2 },
+        (testcase_t){HANDLE_FRONT_DOWN,    x+w1-w2,     y+(int)h1/2-h2,        x, y+(int)h1/2-h2        },
+    };
+    int n_cases = 9;
+
+    for (int i=0; i<n_cases; i++) {
+        entity->hold->handle = testcases[i].handle;
+
+        // WHEN
+        entity->direction = RIGHT;
+        entity->hold->direction = RIGHT;
+
+        x = ENT_held_item_x(entity);
+        y = ENT_held_item_y(entity);
+
+        // THEN
+        ck_assert_int_eq(x, testcases[i].exp_x_r);
+        ck_assert_int_eq(y, testcases[i].exp_y_r);
+
+        // WHEN
+        entity->direction = LEFT;
+        entity->hold->direction = LEFT;
+        x = ENT_held_item_x(entity);
+        y = ENT_held_item_y(entity);
+
+        // THEN
+        ck_assert_int_eq(x, testcases[i].exp_x_l);
+        ck_assert_int_eq(y, testcases[i].exp_y_l);
+    };
 }
 END_TEST
 
@@ -245,6 +406,7 @@ START_TEST (ENT_with_controllable_flag)
     // GIVEN
     entity_t* e    = NULL;
     entity_t* hold = NULL;
+
     e              = ENT_init(
         0, 0, 0,
         CONTROLABLE | MOVABLE, HANDLE_BACK_UP, HANDLE_BACK_UP,
@@ -327,6 +489,166 @@ START_TEST (ENT_generate_check)
     }
 }
 
+START_TEST (ENT_get_x_and_get_y)
+{
+    // GIVEN
+    sprites[ASSET_SPRITE_HERO]              = GFX_read_texture(FILEPATH_SPRITE_HERO);
+    sprites[ASSET_SPRITE_LIGHTER]           = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
+    animations[ASSET_HERO_ANIMATION]        = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER] = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+
+    entity_t* entity                  = NULL;
+    entity_t* hold                    = NULL;
+    
+    int x = 500;
+    int y = 400;
+
+    entity = ENT_init(
+        0,
+        x,
+        y,
+        MOVABLE | STATEABLE | ANIMATIABLE,
+        HANDLE_TYPE_NO,
+        HANDLE_TYPE_NO,
+        ENTITY_NO,
+        STANDING,
+        animations[ASSET_HERO_ANIMATION],
+        sprites[ASSET_SPRITE_HERO],
+        NULL
+    );
+
+    hold           = ENT_init(
+        1,
+        0,
+        0,
+        HOLDABLE,
+        HANDLE_MIDDLE_MIDDLE,
+        HANDLE_MIDDLE_MIDDLE,
+        ENTITY_NO,
+        NOTHING,
+        NULL,
+        sprites[ASSET_SPRITE_LIGHTER],
+        NULL
+    );
+
+    entity->hold = hold;
+
+    // WHEN
+    ck_assert_int_eq(ENT_get_x(entity), x);
+    ck_assert_int_eq(ENT_get_y(entity), y);
+
+    entity->direction = RIGHT;
+    ENT_update(entity);
+
+    ck_assert_int_eq(ENT_get_x(entity), x);
+    ck_assert_int_eq(ENT_get_y(entity), y);
+
+    entity->direction = LEFT;
+    ENT_update(entity);
+
+    ck_assert_int_eq(ENT_get_x(entity), x);
+    ck_assert_int_eq(ENT_get_y(entity), y);
+}
+END_TEST
+
+START_TEST (ENT_light_emit_check)
+{
+    sprites[ASSET_SPRITE_HERO]              = GFX_read_texture(FILEPATH_SPRITE_HERO);
+    sprites[ASSET_SPRITE_LIGHTER]           = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
+    animations[ASSET_HERO_ANIMATION]        = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER] = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+
+    entity_t* entity                  = NULL;
+    entity_t* hold                    = NULL;
+    
+    int x = 500;
+    int y = 400;
+
+    entity = ENT_init(
+        0, x, y,
+        MOVABLE | STATEABLE | ANIMATIABLE,
+        HANDLE_TYPE_NO,
+        HANDLE_TYPE_NO,
+        ENTITY_NO,
+        STANDING,
+        animations[ASSET_HERO_ANIMATION],
+        sprites[ASSET_SPRITE_HERO],
+        NULL
+    );
+
+    hold           = ENT_init(
+        1, 0, 0,
+        HOLDABLE,
+        HANDLE_MIDDLE_MIDDLE,
+        HANDLE_MIDDLE_MIDDLE,
+        ENTITY_NO,
+        NOTHING,
+        NULL,
+        sprites[ASSET_SPRITE_LIGHTER],
+        NULL
+    );
+
+    entity->hold = hold;
+
+    typedef struct testcase {
+        int handle;
+        int exp_x_r; int exp_y_r; 
+        int exp_x_l; int exp_y_l; 
+    } testcase_t;
+
+    int w1 = 9;
+    int h1 = 20;
+
+    int w2 = 10;
+    int h2 = 5;
+
+    testcase_t testcases[] = {
+    (testcase_t){HANDLE_BACK_UP,     x+w1,            y+(int)h1/2-(int)h2/2,   x,           y+(int)h1/2-(int)h2/2   },
+    (testcase_t){HANDLE_BACK_MIDDLE, x+w1,            y+(int)h1/2,             x,           y+(int)h1/2             },
+    (testcase_t){HANDLE_BACK_DOWN,   x+w1,            y+(int)h1/2+(int)h2/2+1, x,           y+(int)h1/2+(int)h2/2+1 },
+
+    (testcase_t){HANDLE_MIDDLE_UP,    x+w1+(int)w2/2, y+(int)h1/2-(int)h2/2,   x-(int)w2/2, y+(int)h1/2-(int)h2/2   },
+    (testcase_t){HANDLE_MIDDLE_MIDDLE,x+w1+(int)w2/2, y+(int)h1/2,             x-(int)w2/2, y+(int)h1/2             },
+    (testcase_t){HANDLE_MIDDLE_DOWN,  x+w1+(int)w2/2, y+(int)h1/2+(int)h2/2+1, x-(int)w2/2, y+(int)h1/2+(int)h2/2+1 },
+
+    (testcase_t){HANDLE_FRONT_UP,    x+w1+w2,         y+(int)h1/2-(int)h2/2,   x-w2, y+(int)h1/2-(int)h2/2,         },
+    (testcase_t){HANDLE_FRONT_MIDDLE,x+w1+w2,         y+(int)h1/2,             x-w2, y+(int)h1/2,                   },
+    (testcase_t){HANDLE_FRONT_DOWN,  x+w1+w2,         y+(int)h1/2+(int)h2/2+1, x-w2, y+(int)h1/2+(int)h2/2+1,       },
+
+    };
+    int n_cases = 9;
+
+    entity->hold->handle = HANDLE_BACK_MIDDLE;
+
+    for (int i=0; i<n_cases; i++) {
+        entity->hold->light_pt = testcases[i].handle;
+
+        // WHEN
+        entity->direction = RIGHT;
+        entity->hold->direction = RIGHT;
+        ENT_update_hold(entity);
+
+        x = ENT_light_emit_x(entity->hold);
+        y = ENT_light_emit_y(entity->hold);
+
+        // THEN
+        ck_assert_int_eq(x, testcases[i].exp_x_r);
+        ck_assert_int_eq(y, testcases[i].exp_y_r);
+
+        // WHEN
+        entity->direction = LEFT;
+        entity->hold->direction = LEFT;
+        ENT_update_hold(entity);
+        x = ENT_light_emit_x(entity->hold);
+        y = ENT_light_emit_y(entity->hold);
+
+        // THEN
+        ck_assert_int_eq(x, testcases[i].exp_x_l);
+        ck_assert_int_eq(y, testcases[i].exp_y_l);
+    };
+}
+END_TEST
+
 Suite* entity_suite(void)
 {
     Suite *s;
@@ -341,7 +663,11 @@ Suite* entity_suite(void)
     tcase_add_test(tc_core, ENT_with_friction_flag);
     tcase_add_test(tc_core, ENT_resolve_check);
     tcase_add_test(tc_core, ENT_generate_check);
-    tcase_add_test(tc_core, ENT_hold_and_handle_check);
+    tcase_add_test(tc_core, ENT_hold_and_handle_check_empty);
+    tcase_add_test(tc_core, ENT_hold_check);
+    tcase_add_test(tc_core, ENT_get_x_and_get_y);
+    tcase_add_test(tc_core, ENT_held_item_check);
+    tcase_add_test(tc_core, ENT_light_emit_check);
 
     suite_add_tcase(s, tc_core);
 

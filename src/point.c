@@ -125,7 +125,6 @@ void PT_debug(
     ptr            = point;
 
     while(ptr) {
-        printf("x=%d, y=%d \n", ptr->x, ptr->y);
         ptr = ptr->next;
     }
 }

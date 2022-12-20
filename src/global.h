@@ -25,7 +25,7 @@
 #define SCREEN_FPS               20                 // Frame per second
 #define SCREEN_TICKS_PER_FRAME   1000 / SCREEN_FPS  // ticks per frame in ms
 #define PI                       3.1415             // best approximation of pi known to mankind
-#define LEFT_RAD                 1.193547           // angle on which hero looks left
+#define LEFT_RAD                 PI/2               // angle on which hero looks left
 #define RIGHT_RAD                PI/2 *3            // angle on which hero looks right
 #define DEG30                    0.523583333        // shortcut
 #define DEG90                    PI/2               // shortcut

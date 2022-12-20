@@ -10,15 +10,14 @@ wobble_t          *wobbles[ASSET_WOBBLE_ALL];
 // changes done to light angle if looking in different direction
 float lightpos_up_down_corr[2][5] = {
   // LEFT  RIGHT  UP               DOWN             NONE
-     {0,   0,     RIGHT_RAD+DEG30, RIGHT_RAD-DEG30, RIGHT_RAD},     // RIGHT 
-     {0,   0,     LEFT_RAD-DEG30,  LEFT_RAD+DEG30,  LEFT_RAD}       // LEFT 
+     {0,   0,     RIGHT_RAD+DEG30, RIGHT_RAD-DEG30, RIGHT_RAD },      // RIGHT 
+     {0,   0,     LEFT_RAD-DEG30,  LEFT_RAD+DEG30,  LEFT_RAD  }       // LEFT 
 };
 
 void SRC_move_lightsource(
     lightsource_t     *light,
     direction_t        light_dir,
-    direction_t        entity_dir,
-    int                frame
+    direction_t        entity_dir
 ) {
     light->angle = lightpos_up_down_corr[entity_dir][light_dir];
 }
@@ -243,7 +242,6 @@ wobble_t* SRC_read_wobble(
                 }
         }
     }
-
     return wobble;
 }
 

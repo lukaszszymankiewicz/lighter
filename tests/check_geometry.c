@@ -830,6 +830,90 @@ START_TEST (GEO_polygon_union_check_four_point_intersection)
 }
 END_TEST
 
+START_TEST (GEO_polygon_union_check_real_life_example2)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 5;
+    int x1=0; int y1=0; int x2=SCREEN_WIDTH; int y2=SCREEN_HEIGHT;
+    int x0 = 155; int y0 = 98;
+    float angle;
+
+    // WHEN
+    angle = GEO_angle_2pt(x0, y0, 155, 98);
+    VRTX_add_point(&poly, 155, 98, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 16, -52);
+    VRTX_add_point(&poly, 16, -52, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 0, -52);
+    VRTX_add_point(&poly, 0, -52, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 0, 108);
+    VRTX_add_point(&poly, 0, 108, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 14, 108);
+    VRTX_add_point(&poly, 14, 108, angle);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, x0, y0);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
+START_TEST (GEO_polygon_union_check_real_life_example)
+{
+    // GIVEN
+    vertex_t* res    = NULL;
+    vertex_t* poly   = NULL;
+    int len;
+    int expected_len = 4;
+    int x1=0; int y1=0; int x2=SCREEN_WIDTH; int y2=SCREEN_HEIGHT;
+    int x0 = 155; int y0 = 98;
+    float angle;
+
+    // WHEN
+    angle = GEO_angle_2pt(x0, y0, 155, 98);
+    VRTX_add_point(&poly, 155, 98, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 64, -9);
+    VRTX_add_point(&poly, 64, -9, angle);
+
+    angle = GEO_angle_2pt(x0, y0, 64, 104);
+    VRTX_add_point(&poly, 64, 104, angle);
+
+    // THEN
+    res = GEO_polygon_union_rect(poly, x1, y1, x2, y2, x0, y0);
+    len = VRTX_len(res); 
+    ck_assert_ptr_nonnull(res);
+    ck_assert_int_eq(len, expected_len);
+
+    vertex_t* ptr = NULL;
+    ptr           = res;
+
+    while(ptr) {
+        bool isin;
+        isin = GEO_pt_in_rect(ptr->x, ptr->y, x1, y1, x2, y2);
+        ck_assert_int_eq(isin, 1);
+        ptr=ptr->next;
+    }
+}
+END_TEST
+
 START_TEST (GEO_polygon_union_check_two_point_intersection_collinear)
 {
     // GIVEN
@@ -936,6 +1020,8 @@ Suite* geometry_suite(void)
     tcase_add_test(tc_core, GEO_polygon_union_check_two_point_intersection_collinear);
     tcase_add_test(tc_core, GEO_polygon_union_check_typical_light_shape);
     tcase_add_test(tc_core, GEO_polygon_union_check_four_point_intersection);
+    tcase_add_test(tc_core, GEO_polygon_union_check_real_life_example);
+    tcase_add_test(tc_core, GEO_polygon_union_check_real_life_example2);
 
     suite_add_tcase(s, tc_core);
 

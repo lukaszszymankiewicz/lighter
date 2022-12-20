@@ -478,7 +478,7 @@ vertex_t* GEO_polygon_intersecting_rect(
                 seg_ptr=seg_ptr->next;
                 continue;
             }
-
+            
             float angle = GEO_angle_2pt(poly_st_x, poly_st_y, p->x, p->y);
 
             if (!new) {
@@ -622,10 +622,15 @@ vertex_t* GEO_polygon_union_rect(
 
     // C - vertex inside rect
     new_c = GEO_vertex_inside_rect(polygon, x1, y1, x2, y2);
-    
+
     VRTX_merge_unique(&new, new_a);
     VRTX_merge_unique(&new, new_b);
     VRTX_merge_unique(&new, new_c);
+
+    // And I Would Have Gotten Away With It Too, If It Weren't For You Medling Edge Cases
+    // This is just to be sure that no point will be outside of the edges of the range. This should
+    // not occur but lets be extra safe here
+    new = GEO_vertex_inside_rect(new, x1, y1, x2, y2);
 
     if (new_a != NULL) { VRTX_free(new_a); new_a = NULL;}
     if (new_b != NULL) { VRTX_free(new_b); new_b = NULL;}

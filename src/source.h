@@ -42,13 +42,14 @@ extern wobble_t          *wobbles[ASSET_WOBBLE_ALL];
 int SRC_get_light_penetrating_power(lightsource_t *lght);
 int SRC_get_light_polygon_x_corr(lightsource_t *lght, int i);
 int SRC_get_light_polygon_y_corr(lightsource_t *lght, int i);
+
 float SRC_get_light_polygon_width_corr(lightsource_t *lght, int i);
 float SRC_get_wobble_angle_coef(lightsource_t *lght);
 
-lightsource_t* SRC_read_lightsource( const char *filepath);
+lightsource_t* SRC_read_lightsource(const char *filepath);
 wobble_t* SRC_read_wobble(const char *filepath);
 
-void SRC_move_lightsource(lightsource_t *light, direction_t light_dir, direction_t entity_dir, int frame);
+void SRC_move_lightsource(lightsource_t *light, direction_t light_dir, direction_t entity_dir);
 void SRC_change_wobble(lightsource_t *lght, int wobble_index);
 void SRC_free_wobble(wobble_t* wobble);
 void SRC_free_lightsource(lightsource_t* lightsource);

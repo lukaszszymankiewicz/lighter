@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "global.h"
 #include "import.h"
 #include "segment.h"
@@ -631,53 +632,66 @@ vertex_t* LIG_single_add_light_polygon(
 
 };
 
+vertex_t* LIG_fit_polygon_to_screen(
+    vertex_t* polygon,
+    int       x0,       // polygon center point
+    int       y0        // polygon center point
+) {
+    return GEO_polygon_union_rect(polygon, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, x0, y0);
+}
+
 void LIG_add_to_scene(
     int              x,
     int              y,
-    int              x_corr,
-    int              y_corr,
+    int              i,
     lightsource_t   *light,
     light_scene_t   *scene,
     segment_t       *obstacles
 ) {
 
-    for (int i=0; i < light->n_poly; i++) {
-        if (scene->n >= MAX_LIGHT_ON_SCENE) { continue; }
+    vertex_t* vertex = NULL;
 
-        vertex_t* vertex = NULL;
+    vertex = LIG_single_add_light_polygon(x, y, i, light, obstacles);
 
-        vertex           = LIG_single_add_light_polygon(x, y, i, light, obstacles);
+    scene->components[scene->n]->coords = vertex;
+    scene->components[scene->n]->x0     = x;
+    scene->components[scene->n]->y0     = y;
+    scene->components[scene->n]->red    = light->light_polygons[i].red;
+    scene->components[scene->n]->green  = light->light_polygons[i].green;
+    scene->components[scene->n]->blue   = light->light_polygons[i].blue;
+    scene->components[scene->n]->power  = light->light_polygons[i].light_power;
 
-        VRTX_transpose(vertex, x_corr, y_corr);
-
-        scene->components[scene->n]->coords = vertex;
-        scene->components[scene->n]->red    = light->light_polygons[i].red;
-        scene->components[scene->n]->green  = light->light_polygons[i].green;
-        scene->components[scene->n]->blue   = light->light_polygons[i].blue;
-        scene->components[scene->n]->power  = light->light_polygons[i].light_power;
-
-
-        scene->n++;
-    }
+    scene->n++;
 }
 
-void LIG_transpose_scene(
-    light_scene_t* scene,
-    int            x_corr,
-    int            y_corr
+void LIG_fit_scene_on_screen(
+    light_scene_t   *scene,
+    int              i,
+    int              x_corr,
+    int              y_corr
 ) {
-    for (int i=0; i<scene->n; i++) {
-        VRTX_transpose(scene->components[i]->coords, x_corr, y_corr);
-    }
+    if (scene->components[i] == NULL) { return; }
+
+    vertex_t* vertex = NULL;
+
+    int x0 = scene->components[i]->x0;
+    int y0 = scene->components[i]->y0;
+
+    vertex = VRTX_transpose(scene->components[i]->coords, x_corr, y_corr);
+    vertex = LIG_fit_polygon_to_screen(vertex, x0+x_corr, y0+y_corr);
+
+    scene->components[i]->coords = vertex;
+    scene->components[i]->x0     = x0 + x_corr;
+    scene->components[i]->y0     = y0 + y_corr;
 }
 
 void LIG_compose_light_scene(
     light_scene_t* scene
 ) {
-    // clean buffers
     GFX_clean_buffers();
 
     for (int i=0; i<scene->n; i++) {
+
         GFX_fill_buffer_single_polygon(
             scene->components[i]->coords,
             GFX_fill_lightbuffer,

@@ -115,13 +115,23 @@ void ENT_resolve(entity_t* entity);
 
 void ENT_draw(entity_t *entity, int x, int y);
 void ENT_free(entity_t *entity);
+void ENT_update_hold(entity_t *entity);
 
+int ENT_get_x(entity_t *entity);
+int ENT_get_y(entity_t *entity);
 int ENT_hold_x(entity_t *entity);
 int ENT_hold_y(entity_t *entity);
 int ENT_handle_x(entity_t *entity);
 int ENT_handle_y(entity_t *entity);
+
 int ENT_light_pt_x(entity_t *entity);
 int ENT_light_pt_y(entity_t *entity);
+
+int ENT_light_emit_x(entity_t *entity);
+int ENT_light_emit_y(entity_t *entity);
+
+int ENT_held_item_x(entity_t *entity);
+int ENT_held_item_y(entity_t *entity);
 
 lightsource_t* ENT_get_light(entity_t *entity);
 

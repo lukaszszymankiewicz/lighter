@@ -147,6 +147,18 @@ void ENTMAT_update(
     }
 }
 
+int ENTMAN_camera_corr_by_hero_pos_x(
+    entity_manager_t* entity_manager
+) {
+    return CAMERA_X - ENTMAN_hero_x(entity_manager);
+}
+
+int ENTMAN_camera_corr_by_hero_pos_y(
+    entity_manager_t* entity_manager
+) {
+    return CAMERA_Y - ENTMAN_hero_y(entity_manager);
+}
+
 int ENTMAN_entity_draw_x(
     entity_manager_t* entity_manager,
     entity_t*         entity
@@ -159,20 +171,6 @@ int ENTMAN_entity_draw_y(
     entity_t*         entity
 ) {
     return CAMERA_Y - (ENTMAN_hero_y(entity_manager) - entity->y);
-}
-
-int ENTMAN_entity_light_draw_x(
-    entity_manager_t* entity_manager,
-    entity_t*         entity
-) {
-    return ENTMAN_entity_draw_x(entity_manager, entity) + ENT_light_pt_x(entity);
-}
-
-int ENTMAN_entity_light_draw_y(
-    entity_manager_t* entity_manager,
-    entity_t*         entity
-) {
-    return ENTMAN_entity_draw_y(entity_manager, entity) + ENT_light_pt_y(entity);
 }
 
 segment_t* ENTMAN_light_obstacles(
@@ -194,6 +192,7 @@ segment_t* ENTMAN_light_obstacles(
 }
 
 void ENTMAN_calc_single_entity_light(
+    entity_manager_t* entity_manager,
     entity_t*         entity,
     light_scene_t*    scene,
     segment_t*        obstacles
@@ -203,16 +202,25 @@ void ENTMAN_calc_single_entity_light(
     segment_t* obs = NULL;
     obs            = ENTMAN_light_obstacles(entity, obstacles);
 
-    LIG_add_to_scene(
-        entity->x,
-        entity->y,
-        CAMERA_X - ENT_light_pt_x(entity) - entity->x,
-        CAMERA_Y - ENT_light_pt_y(entity) - entity->y,
-        entity->light,
-        scene,
-        obs
-    );
-    
+    for (int i=0; i < entity->light->n_poly; i++) {
+
+        LIG_add_to_scene(
+            ENT_light_emit_x(entity),
+            ENT_light_emit_y(entity),
+            i,
+            entity->light,
+            scene,
+            obs
+        );
+
+        LIG_fit_scene_on_screen(
+            scene,
+            scene->n-1,
+            CAMERA_X - ENTMAN_hero_x(entity_manager),
+            CAMERA_Y - ENTMAN_hero_y(entity_manager)
+        );
+    }
+
     if (obs) { SEG_free(obs); }
 }
 
@@ -228,8 +236,8 @@ void ENTMAN_calc_light(
         if (!entity) { continue; }
 
         if (ENTMAN_entity_in_light_update_range(entity_manager, entity)) {
-            ENTMAN_calc_single_entity_light(entity, scene, obstacles);
-            ENTMAN_calc_single_entity_light(entity->hold, scene, obstacles);
+            ENTMAN_calc_single_entity_light(entity_manager, entity, scene, obstacles);
+            ENTMAN_calc_single_entity_light(entity_manager, entity->hold, scene, obstacles);
         }
     }
 }

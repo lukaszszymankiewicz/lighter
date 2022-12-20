@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "assets.h"
 #include "global.h"
 #include "gfx.h"
@@ -283,6 +284,10 @@ void GFX_draw_line_to_buffer(
     uint32_t green_color = g << 16;
     uint32_t blue_color = b << 8;
     uint32_t light_color = red_color | green_color | blue_color;
+
+    assert(x1 >= 0);
+    assert(x2 >= 0);
+    assert(y >= 0);
 
     for (int x=x1; x<x2; x++) {
         pix_fill_fun(light_color, x, y, power);

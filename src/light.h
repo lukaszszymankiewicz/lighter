@@ -11,9 +11,9 @@
 
 // SCENE
 light_scene_t* LIG_new_light_scene();
-void LIG_add_to_scene(int x, int y, int x_corr, int y_corr, lightsource_t *light, light_scene_t *scene, segment_t *obstacles);
+void LIG_add_to_scene(int x, int y, int i, lightsource_t *light, light_scene_t *scene, segment_t *obstacles);
 void LIG_compose_light_scene(light_scene_t* scene);
-void LIG_transpose_scene(light_scene_t* scene, int x_corr, int y_corr);
+void LIG_fit_scene_on_screen(light_scene_t *scene, int i, int x_corr, int y_corr);
 
 // FREE
 void LIG_free_light_scene(light_scene_t* scene);

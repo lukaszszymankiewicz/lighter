@@ -35,6 +35,8 @@ typedef struct vertex {
 
 typedef struct lvertex {
     vertex_t* coords;
+    int       x0;
+    int       y0;
     int       power;
     int       red;
     int       green;

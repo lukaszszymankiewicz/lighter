@@ -6,6 +6,7 @@
 #include "primitives.h"
 #include "sorted_list.h"
 #include "sprites.h"
+#include "source.h"
 
 int entities_library[ENTITY_ALL][ENTITY_PARAM_ALL] = {
     // hero
@@ -39,6 +40,162 @@ int state_collisions[3][3] = {
     {0,            0,         0    },
 };
 
+frame_t* ENT_current_frame(
+    entity_t *entity
+) {
+    if (!(entity->flags & ANIMATIABLE)) {
+        return NULL;
+    }
+    return &(entity->sprites->animations[entity->state].frames[entity->frame]);
+}
+
+SDL_Rect* ENT_current_frame_rect(
+    entity_t *entity
+) {
+    if (!(entity->flags & ANIMATIABLE)) {
+        return ANIM_get_whole_texture_size(entity->sprites);
+    }
+    return &(ENT_current_frame(entity)->rect);
+}
+
+int ENT_get_x(
+    entity_t *entity
+) {
+    return entity->x;
+}
+
+int ENT_get_y(
+    entity_t *entity
+) {
+    return entity->y;
+}
+
+// correction value from handle point to point zero of entity
+int ENT_handle_x(
+    entity_t *entity
+) {
+    SDL_Rect *rect = NULL;
+    rect           = ENT_current_frame_rect(entity);
+    int x          = 0;
+
+    if (
+        entity->handle == HANDLE_BACK_UP || 
+        entity->handle == HANDLE_BACK_MIDDLE || 
+        entity->handle == HANDLE_BACK_DOWN
+    ) {
+        if (entity->direction == LEFT) { x = rect->w; }
+        else { x = 0; }
+
+    } else if  (
+        entity->handle == HANDLE_MIDDLE_UP || 
+        entity->handle == HANDLE_MIDDLE_MIDDLE || 
+        entity->handle == HANDLE_MIDDLE_DOWN
+    ) {
+        x = (int) rect->w / 2;
+    } else {
+        if (entity->direction == RIGHT) { x = rect->w; }
+        else { x = 0; }
+    }
+    free(rect);
+
+    return x;
+}
+
+// correction value from handle point to point zero of entity
+int ENT_handle_y(
+    entity_t *entity
+) {
+    SDL_Rect *rect = NULL;
+    rect           = ENT_current_frame_rect(entity);
+    int y          = 0;
+
+    if (
+        entity->handle == HANDLE_BACK_UP || 
+        entity->handle == HANDLE_MIDDLE_UP || 
+        entity->handle == HANDLE_FRONT_UP 
+    ) {
+        y = 0;
+    } else if  (
+        entity->handle == HANDLE_BACK_MIDDLE || 
+        entity->handle == HANDLE_MIDDLE_MIDDLE || 
+        entity->handle == HANDLE_FRONT_MIDDLE
+    ) {
+        y = (int) rect->h / 2;
+    } else {
+        y = rect->h;
+    }
+
+    free(rect);
+
+    return y;
+}
+
+// where entity has "hand" and holds item, it is corr
+int ENT_hold_x(
+    entity_t *entity
+) {
+    if (!(entity->flags & ANIMATIABLE)) {
+        return ENT_handle_x(entity);
+    }
+
+    frame_t* frame = NULL;
+    frame          = ENT_current_frame(entity);
+    int hold_x     = 0;
+
+    if (entity->direction == RIGHT) {
+        hold_x = frame->handle_x;
+    } else {
+        hold_x = frame->rect.w - frame->handle_x;
+    }
+
+    return hold_x;
+}
+
+// where entity has "hand" and holds item, it is corr
+int ENT_hold_y(
+    entity_t *entity
+) {
+    if (!(entity->flags & ANIMATIABLE)) {
+        return ENT_handle_y(entity);
+    }
+
+    frame_t* frame = NULL;
+    frame          = ENT_current_frame(entity);
+    int hold_y     = frame->handle_y;
+
+    return hold_y;
+}
+
+int ENT_held_item_x(
+    entity_t *entity
+) {
+    return entity->x + ENT_hold_x(entity) - ENT_handle_x(entity->hold);
+}
+
+int ENT_held_item_y(
+    entity_t *entity
+) {
+    return entity->y + ENT_hold_y(entity) - ENT_handle_y(entity->hold);
+}
+
+void ENT_set_hold_x(
+    entity_t *entity
+) {
+    entity->hold->x = ENT_held_item_x(entity);
+}
+
+void ENT_set_hold_y(
+    entity_t *entity
+) {
+    entity->hold->y = ENT_held_item_y(entity);
+}
+
+void ENT_update_hold(
+    entity_t *entity
+) {
+    ENT_set_hold_x(entity);
+    ENT_set_hold_y(entity);
+}
 
 int ENT_cur_animation_delay(
     entity_t *entity
@@ -58,7 +215,6 @@ void ENT_update_animation(
     entity->frame_t++;
     int del = ENT_cur_animation_delay(entity);
     int len = ENT_cur_animation_len(entity);
-;
 
     if (entity->frame_t >= del) {
         entity->frame_t=0;
@@ -88,10 +244,67 @@ void ENT_update_state(
     }
 }
 
-void ENT_change_dir_holdable(entity_t* entity, int new_direction) {
-    if (entity->hold) {
-        entity->hold->direction = new_direction;
+void ENT_direct_holdable_upwards(
+    entity_t* entity
+) {
+    if (!(entity)) {return ;}
+
+    if (entity->flags & EMMIT_LIGHT) {
+        SRC_move_lightsource(ENT_get_light(entity), UP, entity->direction);
     }
+}
+
+void ENT_direct_holdable_downwards(
+    entity_t* entity
+) {
+    if (!(entity)) {return ;}
+
+    if (entity->flags & EMMIT_LIGHT) {
+        SRC_move_lightsource(ENT_get_light(entity), DOWN, entity->direction);
+    }
+}
+
+void ENT_direct_holdable_clean(
+    entity_t* entity,
+    int cur_dir
+) {
+    if (!entity) { return; }
+
+    if (entity->flags & EMMIT_LIGHT) {
+        SRC_move_lightsource(ENT_get_light(entity), NONE, cur_dir);
+    }
+}
+
+void ENT_change_dir_holdable(
+    entity_t* entity,
+    int new_direction
+) {
+    if (!(entity) || new_direction == entity->direction) {
+        return;
+    }
+
+    entity->direction = new_direction;
+
+    if (entity->flags & EMMIT_LIGHT) {
+        SRC_move_lightsource(ENT_get_light(entity), NONE, new_direction);
+    }
+}
+
+void ENT_change_dir(
+    entity_t* entity,
+    int new_direction
+) {
+    if (new_direction == entity->direction) {
+        return;
+    }
+
+    entity->direction = new_direction;
+
+    if (entity->flags & EMMIT_LIGHT) {
+        SRC_move_lightsource(ENT_get_light(entity), NONE, new_direction);
+    }
+
+    ENT_change_dir_holdable(entity->hold, new_direction);
 }
 
 void ENT_update_friction(
@@ -133,8 +346,6 @@ void ENT_move(
         else {
             entity->x_vel = MAX(-1*MAX_VEL, (entity->x_vel - MOVE_POWUH));
         }
-
-        entity->direction = direction;
     }
 
     else if (entity->state == JUMPING || entity->state == FALLING_DOWN) {
@@ -144,8 +355,6 @@ void ENT_move(
         else {
             entity->x_vel = MAX(-1*MAX_VEL, (entity->x_vel - MOVE_POWUH));
         }
-
-        entity->direction = direction;
     }
 }
 
@@ -153,15 +362,15 @@ void ENT_update_control(
     entity_t *entity
 ) {
     if (CON_button_still_pressed(keyboard, SDL_SCANCODE_W)) {
-        ENT_change_dir_holdable(entity, UP);
+        ENT_direct_holdable_upwards(entity->hold);
     }
 
     else if (CON_button_still_pressed(keyboard, SDL_SCANCODE_S)) {
-        ENT_change_dir_holdable(entity, DOWN);
+        ENT_direct_holdable_downwards(entity->hold);
     }
 
     else {
-        ENT_change_dir_holdable(entity, entity->direction);
+        ENT_direct_holdable_clean(entity->hold, entity->direction);
     }
 
     if (CON_button_still_pressed(keyboard, SDL_SCANCODE_SPACE)) {
@@ -170,10 +379,12 @@ void ENT_update_control(
 
     if (CON_button_still_pressed(keyboard, SDL_SCANCODE_D)) {
         ENT_move(entity, RIGHT);
+        ENT_change_dir(entity, RIGHT);
     }
 
     if (CON_button_still_pressed(keyboard, SDL_SCANCODE_A)) {
         ENT_move(entity, LEFT);
+        ENT_change_dir(entity, LEFT);
     }
 }
 
@@ -194,170 +405,6 @@ void ENT_update_velocity(
 ) {
     ENT_update_y_vel(entity);
     ENT_update_x_vel(entity);
-}
-
-SDL_Rect* ENT_current_frame_rect(
-    entity_t *entity
-) {
-    if (!(entity->flags & ANIMATIABLE)) {
-        return ANIM_get_whole_texture_size(entity->sprites);
-    }
-    return &(entity->sprites->animations[entity->state].frames[entity->frame].rect);
-}
-
-int ENT_handle_x(
-    entity_t *entity
-) {
-    SDL_Rect *rect = NULL;
-    rect           = ENT_current_frame_rect(entity);
-    int x          = 0;
-
-    if (
-        entity->handle == HANDLE_BACK_UP || 
-        entity->handle == HANDLE_BACK_MIDDLE || 
-        entity->handle == HANDLE_BACK_DOWN
-    ) {
-        x = 0;
-    } else if  (
-        entity->handle == HANDLE_MIDDLE_UP || 
-        entity->handle == HANDLE_MIDDLE_MIDDLE || 
-        entity->handle == HANDLE_MIDDLE_DOWN
-    ) {
-        x = (int) rect->w / 2;
-    } else {
-        x = rect->w;
-    }
-    free(rect);
-
-    return x;
-}
-
-int ENT_handle_y(
-    entity_t *entity
-) {
-    SDL_Rect *rect = NULL;
-    rect           = ENT_current_frame_rect(entity);
-    int y          = 0;
-
-    if (
-        entity->handle == HANDLE_BACK_UP || 
-        entity->handle == HANDLE_MIDDLE_UP || 
-        entity->handle == HANDLE_FRONT_UP 
-    ) {
-        y = 0;
-    } else if  (
-        entity->handle == HANDLE_BACK_MIDDLE || 
-        entity->handle == HANDLE_MIDDLE_MIDDLE || 
-        entity->handle == HANDLE_FRONT_MIDDLE
-    ) {
-        y = (int) rect->h / 2;
-    } else {
-        y = rect->h;
-    }
-
-    free(rect);
-
-    return y;
-}
-
-int ENT_light_pt_x(
-    entity_t *entity
-) {
-    SDL_Rect *rect = NULL;
-    rect           = ENT_current_frame_rect(entity);
-    int x          = 0;
-
-    if (
-        entity->light_pt == HANDLE_BACK_UP || 
-        entity->light_pt == HANDLE_BACK_MIDDLE || 
-        entity->light_pt == HANDLE_BACK_DOWN
-    ) {
-        x = 0;
-    } else if  (
-        entity->light_pt == HANDLE_FRONT_UP || 
-        entity->light_pt == HANDLE_FRONT_MIDDLE || 
-        entity->light_pt == HANDLE_FRONT_DOWN
-    ) {
-        x = (int) rect->w / 2;
-    } else {
-        x = rect->w;
-    }
-    free(rect);
-
-    return x;
-}
-
-int ENT_light_pt_y(
-    entity_t *entity
-) {
-    SDL_Rect *rect = NULL;
-    rect           = ENT_current_frame_rect(entity);
-    int y          = 0;
-
-    if (
-        entity->light_pt == HANDLE_BACK_UP || 
-        entity->light_pt == HANDLE_MIDDLE_UP || 
-        entity->light_pt == HANDLE_FRONT_UP 
-    ) {
-        y = 0;
-    } else if  (
-        entity->light_pt == HANDLE_BACK_MIDDLE || 
-        entity->light_pt == HANDLE_MIDDLE_MIDDLE || 
-        entity->light_pt == HANDLE_FRONT_MIDDLE
-    ) {
-        y = (int) rect->h / 2;
-    } else {
-        y = rect->h;
-    }
-
-    free(rect);
-
-    return y;
-}
-
-int ENT_hold_x(
-    entity_t *entity
-) {
-    if (!(entity->flags & ANIMATIABLE)) {
-        return ENT_handle_x(entity);
-    }
-
-    if (entity->direction == RIGHT) {
-        return entity->sprites->animations[entity->state].frames[entity->frame].handle_x;
-    } else {
-        int w = entity->sprites->animations[entity->state].frames[entity->frame].rect.w; 
-        int handle = entity->sprites->animations[entity->state].frames[entity->frame].handle_x;
-
-        return w - handle;
-    }
-}
-
-int ENT_hold_y(
-    entity_t *entity
-) {
-    if (!(entity->flags & ANIMATIABLE)) {
-        return ENT_handle_y(entity);
-    }
-    return entity->sprites->animations[entity->state].frames[entity->frame].handle_y;
-}
-
-void ENT_set_hold_x(
-    entity_t *entity
-) {
-    entity->hold->x = entity->x + ENT_hold_x(entity) - ENT_handle_x(entity->hold);
-}
-
-void ENT_set_hold_y(
-    entity_t *entity
-) {
-    entity->hold->y = entity->y + ENT_hold_y(entity);
-}
-
-void ENT_update_hold(
-    entity_t *entity
-) {
-    ENT_set_hold_x(entity);
-    ENT_set_hold_y(entity);
 }
 
 entity_t* ENT_init(
@@ -425,7 +472,6 @@ entity_t* ENT_init(
     return entity;
 }
 
-// call every update function in sequence
 void ENT_update(entity_t* entity) {
     for(int i=0; i<entity->update_fun_t; i++) {
         entity->update_fun[i](entity);
@@ -434,9 +480,9 @@ void ENT_update(entity_t* entity) {
     if (entity->hold) {
         ENT_update(entity->hold);
     }
+
 }
 
-// call every resolution function in sequence
 void ENT_resolve(entity_t* entity) {
     for(int i=0; i<entity->resolution_fun_t; i++) {
         entity->resolution_fun[i](entity);
@@ -460,7 +506,6 @@ void ENT_draw(
         entity->direction
     );
 }
-
 void ENT_free(
     entity_t *entity
 ) {
@@ -599,6 +644,66 @@ void ENT_update_collision(
     }
 }
 
+// it is corr
+int ENT_light_pt_x(
+    entity_t *entity
+) {
+    SDL_Rect *rect = NULL;
+    rect           = ENT_current_frame_rect(entity);
+    int x          = 0;
+
+    if (
+        entity->light_pt == HANDLE_BACK_UP || 
+        entity->light_pt == HANDLE_BACK_MIDDLE || 
+        entity->light_pt == HANDLE_BACK_DOWN
+    ) {
+        if (entity->direction == LEFT) { x = rect->w; }
+        else { x = 0; }
+
+    } else if  (
+        entity->light_pt == HANDLE_MIDDLE_UP || 
+        entity->light_pt == HANDLE_MIDDLE_MIDDLE || 
+        entity->light_pt == HANDLE_MIDDLE_DOWN
+    ) {
+        x = (int) rect->w / 2;
+    } else {
+        if (entity->direction == RIGHT) { x = rect->w; }
+        else { x = 0; }
+    }
+    free(rect);
+
+    return x;
+}
+
+// it is corr
+int ENT_light_pt_y(
+    entity_t *entity
+) {
+    SDL_Rect *rect = NULL;
+    rect           = ENT_current_frame_rect(entity);
+    int y          = 0;
+
+    if (
+        entity->light_pt == HANDLE_BACK_UP || 
+        entity->light_pt == HANDLE_MIDDLE_UP || 
+        entity->light_pt == HANDLE_FRONT_UP 
+    ) {
+        y = 0;
+    } else if  (
+        entity->light_pt == HANDLE_BACK_MIDDLE || 
+        entity->light_pt == HANDLE_MIDDLE_MIDDLE || 
+        entity->light_pt == HANDLE_FRONT_MIDDLE
+    ) {
+        y = (int) rect->h / 2;
+    } else {
+        y = rect->h;
+    }
+
+    free(rect);
+
+    return y;
+}
+
 entity_t* ENT_generate(int x, int y, int id) {
     return ENT_init(
         id,
@@ -613,4 +718,18 @@ entity_t* ENT_generate(int x, int y, int id) {
         sprites[entities_library[id][ENTITY_PARAM_SPRITE]],
         lightsources[entities_library[id][ENTITY_PARAM_LIGHT_TYPE]]
     );
+}
+
+// global corrd
+int ENT_light_emit_x(
+    entity_t *entity
+) {
+    return entity->x + ENT_light_pt_x(entity);
+}
+
+// global corrd
+int ENT_light_emit_y(
+    entity_t *entity
+) {
+    return entity->y + ENT_light_pt_y(entity);
 }
