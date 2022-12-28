@@ -30,6 +30,7 @@ const static int ENTITY_NO       = -1;
 enum ENITY_IDX {
     ENTITY_HERO,
     ENTITY_LIGHTER,
+    ENTITY_WALLLIGHT,
     ENTITY_ALL
 };
 
@@ -78,13 +79,13 @@ typedef struct entity {
 
     // interactions
     int handle;                                                     // way of calculating handle pos
-    int light_pt;                                                   // handle where light is emitted
+    int light_pt;                                                   // point from where light is emitted
     char flags;                                                     // entity flags (8 bits)
     struct entity *hold;                                            // entity holded by this entity
 
     // actions
     int update_fun_t;                                               // number of updating function
-    int resolution_fun_t;                                           // number of updating function
+    int resolution_fun_t;                                           // number of resolve function
     void(*update_fun[MAX_UPDATE_FUN_NUMBER])(struct entity *e);     // update functions
     void(*resolution_fun[MAX_UPDATE_FUN_NUMBER])(struct entity *e); // resolution functions 
 

@@ -17,10 +17,12 @@ typedef struct controller {
 extern controller_t *keyboard;
 
 controller_t* CON_init();
+
 void CON_update(controller_t* con);
+void CON_free(controller_t* con);
+
 bool CON_button_is_just_pressed(controller_t*, Uint8);
 bool CON_button_is_just_released(controller_t*, Uint8);
 bool CON_button_still_pressed(controller_t* con, Uint8 key);
-void CON_free(controller_t* con);
 
 #endif

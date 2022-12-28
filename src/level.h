@@ -6,17 +6,6 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#define MAX_ENTITY 32
-#define ENTITY_UPDATE_LIGHT_X_RANGE     SCREEN_WIDTH * 2
-#define ENTITY_UPDATE_LIGHT_Y_RANGE     SCREEN_HEIGHT * 2
-#define ENTITY_UPDATE_X_RANGE           SCREEN_WIDTH
-#define ENTITY_UPDATE_Y_RANGE           SCREEN_HEIGHT
-#define ENTITY_DRAW_X_RANGE             SCREEN_WIDTH / 2
-#define ENTITY_DRAW_Y_RANGE             SCREEN_HEIGHT / 2
-#define SCREEN_TILE_PER_X               10
-#define SCREEN_TILE_PER_Y               12
-#define COLLISION_UPDATE_X_RANGE        100
-#define COLLISION_UPDATE_Y_RANGE        100
 
 // struct for holding level data transalted to ready-to-use object (not raw data like mapfile_t)
 typedef struct level {

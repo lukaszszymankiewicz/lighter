@@ -10,6 +10,9 @@ TESTLINKS = `pkg-config --cflags --libs check sdl2 SDL2_image`
 SRCDIR = src
 TESTDIR = tests
 
+LEVELLOG = level_read_log.txt
+MEMORYLOG = memory_check.txt
+
 TARGET =                         \
 	$(SRCDIR)/game.c             \
 	$(SRCDIR)/main.c             \
@@ -98,5 +101,4 @@ runtests:
 
 .PHONY: clean
 clean:
-	$(RM) $(OBJ) $(TESTOBJ)
-
+	$(RM) $(OBJ) $(TESTOBJ) $(LEVELLOG) $(MEMORYLOG)

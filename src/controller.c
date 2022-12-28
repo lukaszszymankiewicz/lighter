@@ -2,7 +2,8 @@
 
 controller_t *keyboard = NULL;
 
-controller_t* CON_init() {
+controller_t* CON_init(
+) {
     controller_t* con          = NULL;
     con                        = (controller_t*)malloc(sizeof(controller_t));
 
@@ -22,12 +23,12 @@ controller_t* CON_init() {
     memset(con->state, (Uint8)0, sizeof(Uint8) * con->len);
     memset(con->old_state, (Uint8)0, sizeof(Uint8) * con->len);
 
-    void SDL_ResetKeyboard(void);
-
     return con;
 }
 
-void CON_update(controller_t* con) {
+void CON_update(
+    controller_t* con
+) {
     if (con->counter++ >= con->delay) {
         con->counter     = 0;
 
@@ -40,18 +41,29 @@ void CON_update(controller_t* con) {
     }
 }
 
-bool CON_button_is_just_pressed(controller_t* con, Uint8 key) {
+bool CON_button_is_just_pressed(
+    controller_t *con,
+    Uint8         key
+) {
     return con->state[key] && !(con->old_state[key]);
 }
 
-bool CON_button_still_pressed(controller_t* con, Uint8 key) {
+bool CON_button_still_pressed(
+    controller_t *con,
+    Uint8         key
+) {
     return con->state[key];
 }
 
-bool CON_button_is_just_released(controller_t* con, Uint8 key) {
+bool CON_button_is_just_released(
+    controller_t *con,
+    Uint8         key
+) {
     return !(con->state[key]) && con->old_state[key];
 }
 
-void CON_free(controller_t* con) {
+void CON_free(
+    controller_t* con
+) {
     free(con);
 }

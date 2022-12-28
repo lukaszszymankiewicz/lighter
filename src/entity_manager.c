@@ -125,7 +125,7 @@ bool ENTMAN_entity_in_draw_range(
     entity_manager_t* entity_manager,
     entity_t*         entity
 ) {
-    return (ENTMAN_entity_in_range(entity_manager, entity, ENTITY_DRAW_X_RANGE, ENTITY_DRAW_Y_RANGE));
+    return (ENTMAN_entity_in_range(entity_manager, entity, ENTITY_UPDATE_DRAW_X_RANGE, ENTITY_UPDATE_DRAW_Y_RANGE));
 }
 
 void ENTMAT_update(

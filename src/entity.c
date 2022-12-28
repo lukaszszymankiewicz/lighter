@@ -31,6 +31,17 @@ int entities_library[ENTITY_ALL][ENTITY_PARAM_ALL] = {
         ENTITY_NO,
         NOTHING
     }, 
+    // walllight
+    {
+        EMMIT_LIGHT,
+        HANDLE_MIDDLE_MIDDLE,
+        HANDLE_MIDDLE_MIDDLE,
+        ASSET_NO_ANIMATION,
+        ASSET_SPRITE_WALLLIGHT,
+        ASSET_LIGHTSOURCE_WALLLIGHT,
+        ENTITY_NO,
+        NOTHING
+    }, 
 };
 
 int state_collisions[3][3] = {
@@ -294,6 +305,7 @@ void ENT_change_dir(
     entity_t* entity,
     int new_direction
 ) {
+
     if (new_direction == entity->direction) {
         return;
     }
@@ -336,7 +348,7 @@ void ENT_move(
     direction_t  direction
 ) {
     if (!(entity->flags & MOVABLE)) {return;}
-
+    
     if (entity->state == STANDING || entity->state == WALKING || entity->state == NOTHING) {
         entity->state = WALKING;
 
@@ -450,7 +462,6 @@ entity_t* ENT_init(
     entity->resolution_fun_t = 0;                
     entity->hold             = NULL;
 
-    // update
     if (flags & CONTROLABLE) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_control;
     }
@@ -715,7 +726,11 @@ int ENT_light_pt_y(
     return y;
 }
 
-entity_t* ENT_generate(int x, int y, int id) {
+entity_t* ENT_generate(
+    int x,
+    int y,
+    int id
+) {
     return ENT_init(
         id,
         x * TILE_WIDTH,

@@ -404,8 +404,9 @@ START_TEST (ENT_with_friction_flag)
 START_TEST (ENT_with_controllable_flag)
 {
     // GIVEN
-    entity_t* e    = NULL;
-    entity_t* hold = NULL;
+    entity_t* e           = NULL;
+    entity_t* hold        = NULL;
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER] = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
 
     e              = ENT_init(
         0, 0, 0,
@@ -416,9 +417,9 @@ START_TEST (ENT_with_controllable_flag)
 
     hold           = ENT_init(
         0, 0, 0,
-        HOLDABLE, HANDLE_BACK_UP, HANDLE_BACK_UP,
+        HOLDABLE | EMMIT_LIGHT, HANDLE_BACK_UP, HANDLE_BACK_UP,
         ENTITY_NO, STANDING,
-        NULL, NULL, NULL
+        NULL, NULL, lightsources[ASSET_LIGHTSOURCE_LIGHTER]
     );
     keyboard       = CON_init();
 
@@ -428,13 +429,13 @@ START_TEST (ENT_with_controllable_flag)
     // look up
     keyboard->state[SDL_SCANCODE_W] = 1;
     ENT_update(e);
-    ck_assert_int_eq(e->hold->direction, UP);
+    ck_assert_float_ne(e->hold->light->angle, 0.0);
 
     // look down
     keyboard->state[SDL_SCANCODE_W] = 0;
     keyboard->state[SDL_SCANCODE_S] = 1;
     ENT_update(e);
-    ck_assert_int_eq(e->hold->direction, DOWN);
+    ck_assert_float_ne(e->hold->light->angle, 0.0);
 
     // reset look
     keyboard->state[SDL_SCANCODE_W] = 0;

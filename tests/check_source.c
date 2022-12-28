@@ -1,11 +1,12 @@
 #include <check.h>
 #include "../src/source.h"
+#include "../src/files.h"
 
 START_TEST (SRC_read_wobble_check)
 {
     // GIVEN
-    wobble_t *wobble = NULL;
-    char *filename   = "./assets/wobbles/walking.wbl";
+    wobble_t *wobble     = NULL;
+    const char *filename = FILEPATH_WOBBLE_WALKING;         
 
     // WHEN
     wobble = SRC_read_wobble(filename);
@@ -36,7 +37,7 @@ START_TEST (SRC_read_lightsource_lighter_check)
 {
     // GIVEN
     lightsource_t *lightsource  = NULL;
-    char *filename              = "./assets/lightsources/lighter.lsrc";
+    const char *filename        = FILEPATH_LIGTHER_LIGHTSOURCE;
 
     // WHEN
     lightsource = SRC_read_lightsource(filename);
@@ -77,8 +78,8 @@ END_TEST
 START_TEST (SRC_read_lightsource_lantern_check)
 {
     // GIVEN
-    lightsource_t *lightsource  = NULL;
-    char *filename              = "./assets/lightsources/lantern.lsrc";
+    lightsource_t *lightsource = NULL;
+    const char *filename       = FILEPATH_WALLLIGHT_LIGHTSOURCE;
 
     // WHEN
     lightsource = SRC_read_lightsource(filename);

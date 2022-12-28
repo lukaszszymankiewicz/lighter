@@ -14,7 +14,8 @@ typedef struct cell {
 
 const static int EMPTY_CELL = -1;
 
-level_t* LVL_new() {
+level_t* LVL_new(
+) {
     level_t *new_level           = NULL;
     new_level                    = (level_t*)malloc(sizeof(level_t));
 
@@ -141,7 +142,7 @@ int LVL_obstacle_on_pos(level_t* level, int x, int y) {
     if (x<0 || x>level->size_x || y<0 || y>level->size_y) {
         return 0;
     }
-    return level->obstacles[y * level->size_y + x];
+    return level->obstacles[y * level->size_x + x];
 }
 
 texture_t* LVL_get_tile_texture(
@@ -162,7 +163,6 @@ void LVL_analyze(
     }
 
     segment_t *ptr           = NULL;
-
     cell_t cells[level->size_x][level->size_y];
 
     for (int yy = 0; yy < level->size_x; yy++) {

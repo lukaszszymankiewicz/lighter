@@ -5,9 +5,7 @@
 #ifndef SOURCE_H
 #define SOURCE_H
 
-#define LANTERN_WOBBLES_N 2
-
-enum lightsources_names { LIGHTER, LANTERN, ALL };
+enum lightsources_names { LIGHTER, WALLLIGHT, ALL };
 enum polydata           { X, Y, RED, GREEN, BLUE, LIGHT_POWER, WIDTH };
 
 # define MAX_WOBBLES 2

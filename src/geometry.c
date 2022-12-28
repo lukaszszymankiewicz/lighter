@@ -6,7 +6,12 @@
 #include "point.h"
 
 // calculates angle between two points
-float GEO_angle_2pt(int ax, int ay, int bx, int by) {
+float GEO_angle_2pt(
+    int ax,
+    int ay,
+    int bx,
+    int by
+) {
     return atan2(ax - bx, ay - by);
 }
 
