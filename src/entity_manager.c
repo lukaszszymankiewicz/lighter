@@ -188,6 +188,7 @@ segment_t* ENTMAN_light_obstacles(
             entity->y + ENTITY_UPDATE_LIGHT_Y_RANGE
         );
     }
+
     return obs;
 }
 
@@ -203,7 +204,6 @@ void ENTMAN_calc_single_entity_light(
     obs            = ENTMAN_light_obstacles(entity, obstacles);
 
     for (int i=0; i < entity->light->n_poly; i++) {
-
         LIG_add_to_scene(
             ENT_light_emit_x(entity),
             ENT_light_emit_y(entity),

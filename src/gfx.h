@@ -26,9 +26,9 @@ void GFX_fill_shadowbuffer(uint32_t color, int x, int y, int power);
 void GFX_fill_lightbuffer(uint32_t color, int x, int y, int power);
 void GFX_fill_mesh_shadowbuffer(uint32_t color, int x, int y, int power);
 
-void GFX_fill_buffer_single_polygon(
-    vertex_t *poly,
+void GFX_fill_light(
     void (*pix_fill_fun)(uint32_t, int, int, int),
+    vertex_t *poly,
     int r,
     int g,
     int b,

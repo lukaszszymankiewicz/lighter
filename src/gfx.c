@@ -24,7 +24,7 @@ void GFX_fill_shadowbuffer(
     int       y,
     int       power
 ) {
-    shadowbuffer[x+y*SCREEN_WIDTH] = color | power;
+    shadowbuffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
 }
 
 void GFX_fill_mesh_shadowbuffer(
@@ -163,6 +163,7 @@ void GFX_free() {
 };
 
 void GFX_clear_screen() {
+    // SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderClear(renderer);
 };
@@ -289,7 +290,7 @@ void GFX_draw_line_to_buffer(
     assert(x2 >= 0);
     assert(y >= 0);
 
-    for (int x=x1; x<x2; x++) {
+    for (int x=MAX(x1, 0); x<MIN(SCREEN_WIDTH, x2); x++) {
         pix_fill_fun(light_color, x, y, power);
     }
 };
@@ -336,7 +337,7 @@ void GFX_draw_scanline(
     int            b,
     int            power 
 ) {
-    int            n             = 0;
+    int            n      = 0;
     sorted_list_t *intscs = NULL;
     intscs                = GFX_calc_intersections_in_scanline(segments, y, &n);
 
@@ -366,26 +367,38 @@ void GFX_draw_scanline(
     }
 }
 
-// function firstly checks where the polygon "begins" (vertex with highest y coord value) and draw
-// dark rect from y=0 up to y of such vertex. Then iterating by every y up to "end" of polygon
-// (vertex with lowest y coord value), polygon segments which will be drawn is chosen (and these
-// ones which won`t be needed are discarded), intersection points are calculated and then "dark and
-// "light" sectors are filled.
-void GFX_fill_buffer_single_polygon(
+// Fill texture (lightbuffer) with polygon (being geometric shape where light is present and should
+// be drawn). Polygon is expressed as linked list of vertices, scanline algorithm is used to
+// transpose those vertices to filled polygon.
+// Function is secured from drawing outside the screen, as such behavior is unsave and wastes
+// resources.
+void GFX_fill_light(
+    void        (*pix_fill_fun)(uint32_t, int, int, int),
     vertex_t     *poly,
-    void          (*pix_fill_fun)(uint32_t, int, int, int),
     int           r,
     int           g,
     int           b,
     int           power
 ) {
-    int         y            = VRTX_highest_y(poly);
+    int         y            = 0;
+    int         highest      = VRTX_highest_y(poly);
+    int         lowest       = VRTX_lowest_y(poly);
+    
     segment_t *not_drawn_yet = SEG_get_segments_of_polygon(poly); 
     segment_t *current_draw  = NULL;
     segment_t *obstacle_ptr  = NULL;
     segment_t *candidates    = NULL;
 
-    while(y<SCREEN_HEIGHT) {
+    // algorithm is starting from highest vertex of polygon...
+    y = highest;
+
+    // up to the lowest vertex of polygon
+    while(y<lowest) {
+
+        // if algorithm reaches point below screen, no further drawing is needed, algorithm is
+        // terminated
+        if (y>SCREEN_WIDTH) { y++; break; }
+
         obstacle_ptr = current_draw;
 
         // delete segments from current drawn scan_y must be higher than y of any point
@@ -403,14 +416,19 @@ void GFX_fill_buffer_single_polygon(
         // if there isn`t anything to draw or anything to be drawn in future - stop
         if (!not_drawn_yet && !current_draw) { break; }
 
-        GFX_draw_scanline(current_draw, pix_fill_fun, y, r, g, b, power);
-        y++;
+        // if current scanline y is below 0 (outside the screen, no drawing is needed, go to next
+        // scanline)
+        if (y<0) { y++; continue; }
+        else { 
+            GFX_draw_scanline(current_draw, pix_fill_fun, y, r, g, b, power);
+            y++;
+        }
     }
 
-    SEG_free(not_drawn_yet);
-    SEG_free(current_draw);
-    SEG_free(obstacle_ptr);
-    SEG_free(candidates);
+    if (not_drawn_yet) { SEG_free(not_drawn_yet); }
+    if (current_draw) { SEG_free(current_draw); }
+    if (obstacle_ptr) { SEG_free(obstacle_ptr); }
+    if (candidates)  { SEG_free(candidates); }
 }
 
 // sometimes gradient gradient texture is small enough to not fill entire screen leaving some "gaps"
@@ -473,29 +491,6 @@ SDL_Rect GFX_calc_gradient_rect(
     return gradient_quad;
 }
 
-void GFX_draw_light() {
-    // LIGHT
-    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
-    SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
-    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
-    
-    // LIGHT GRADIENT
-    // SDL_SetTextureBlendMode(gradient->surface, SDL_BLENDMODE_MOD);
-    // SDL_Rect gradient_quad = GFX_calc_gradient_rect(gradient, x, y);
-    // SDL_RenderCopy(renderer, gradient->surface, NULL, &gradient_quad);
-
-    // DARKNESS
-    // GFX_fill_gradient_gaps(lightbuffer, gradient, x, y);
-    // SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
-    // SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
-    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
-
-    // LIGHT PENETRATING WALLS
-    // SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
-    // SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
-    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
-}
-
 texture_t* GFX_read_texture(
     const char *filepath
 ) {
@@ -529,3 +524,28 @@ texture_t* GFX_read_texture(
         return p;
     }
 };
+
+void GFX_draw_light() {
+    // LIGHT
+    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
+    SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
+    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+
+    // DARKNESS
+    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
+    SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
+    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+    
+    // LIGHT GRADIENT
+    // SDL_SetTextureBlendMode(gradient->surface, SDL_BLENDMODE_MOD);
+    // SDL_Rect gradient_quad = GFX_calc_gradient_rect(gradient, x, y);
+    // SDL_RenderCopy(renderer, gradient->surface, NULL, &gradient_quad);
+
+    // DARKNESS
+    // GFX_fill_gradient_gaps(lightbuffer, gradient, x, y);
+    // SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
+    // SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
+    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+
+}
+

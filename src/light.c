@@ -648,7 +648,6 @@ void LIG_add_to_scene(
     light_scene_t   *scene,
     segment_t       *obstacles
 ) {
-
     vertex_t* vertex = NULL;
 
     vertex = LIG_single_add_light_polygon(x, y, i, light, obstacles);
@@ -677,8 +676,7 @@ void LIG_fit_scene_on_screen(
     int x0 = scene->components[i]->x0;
     int y0 = scene->components[i]->y0;
 
-    vertex = VRTX_transpose(scene->components[i]->coords, x_corr, y_corr);
-    vertex = LIG_fit_polygon_to_screen(vertex, x0+x_corr, y0+y_corr);
+    vertex = VRTX_transpose(scene->components[i]->coords, x_corr, y_corr, x0, y0);
 
     scene->components[i]->coords = vertex;
     scene->components[i]->x0     = x0 + x_corr;
@@ -692,9 +690,9 @@ void LIG_compose_light_scene(
 
     for (int i=0; i<scene->n; i++) {
 
-        GFX_fill_buffer_single_polygon(
-            scene->components[i]->coords,
+        GFX_fill_light(
             GFX_fill_lightbuffer,
+            scene->components[i]->coords,
             scene->components[i]->red,
             scene->components[i]->green,
             scene->components[i]->blue,

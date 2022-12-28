@@ -1,5 +1,6 @@
  - [x] add wobble
  - [x] add multiple lightsources level (use editor)
- - [ ] add multiple darkness around light (new algo)
+ - [x] add multiple darkness around light
+ - [ ] add gradients to light
  - [ ] clean memory leaks
 

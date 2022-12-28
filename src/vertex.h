@@ -5,9 +5,10 @@
 #define VERTEX_H
 
 vertex_t* VRTX_new(int x, int y, float angle);
-vertex_t* VRTX_transpose(vertex_t *vertex, int x_corr, int y_corr);
+vertex_t* VRTX_transpose(vertex_t *vertex, int x_corr, int y_corr, int x0, int y0);
 
 int VRTX_highest_y(vertex_t* poly);
+int VRTX_lowest_y(vertex_t* poly);
 int VRTX_len(vertex_t *head);
 int VRTX_pop_x(vertex_t* vertex);
 int VRTX_pop_y(vertex_t* vertex);

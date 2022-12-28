@@ -43,6 +43,7 @@
 #define N_COLOR_CHANNELS             4                  // number of color channels for each pixel
 #define EMPTY_TILE                   0                  // index of empty tile in default tileset
 #define BLANK_COLOR                  0x00000000         // this color is fully transparent
+#define BLACK_COLOR                  0xFFFFFFFF         // this color is blackes black
 #define MAX_LIGHT_ON_SCENE           20                 // maximum number of rendered polygon
 #define MAX_ENTITY                   32
 #define ENTITY_DRAW_X_RANGE          SCREEN_WIDTH / 2 

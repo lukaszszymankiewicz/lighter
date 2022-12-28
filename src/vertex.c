@@ -1,4 +1,5 @@
 #include "global.h"
+#include "geometry.h"
 #include "vertex.h"
 
 vertex_t* VRTX_new(
@@ -50,12 +51,11 @@ void VRTX_add_point(
     }
 }
 
-// find highest value of y from list of vertices
 int VRTX_highest_y(
     vertex_t* poly
 ) {
     vertex_t *ptr        = NULL;
-    int       highest_y  = SCREEN_HEIGHT;
+    int       highest_y  = 9999;
 
     ptr = poly;
 
@@ -65,8 +65,24 @@ int VRTX_highest_y(
         }
         ptr = ptr->next;
     }
-
     return highest_y;
+}
+
+int VRTX_lowest_y(
+    vertex_t* poly
+) {
+    vertex_t *ptr        = NULL;
+    int       lowest_y  = -9999;
+
+    ptr = poly;
+
+    while(ptr) {
+        if (ptr->y > lowest_y) {
+            lowest_y = ptr->y;
+        }
+        ptr = ptr->next;
+    }
+    return lowest_y;
 }
 
 int VRTX_len(
@@ -174,12 +190,15 @@ bool VRTX_eq(
 vertex_t* VRTX_transpose(
     vertex_t *vertex,
     int       x_corr,
-    int       y_corr
+    int       y_corr,
+    int       x0,
+    int       y0
 ) {
     vertex_t *ptr  = NULL;
     ptr            = vertex;
 
     while(ptr) {
+        ptr->angle = GEO_angle_2pt(x0, y0, ptr->x + x_corr, ptr->y + y_corr);
         ptr->x = ptr->x + x_corr;
         ptr->y = ptr->y + y_corr;
         ptr = ptr->next;
@@ -250,5 +269,20 @@ void VRTX_delete(
             return;
         }
         ptr = ptr->next;
+    }
+}
+
+
+void VRTX_debug(
+    vertex_t *vertex
+) {
+    vertex_t *ptr = NULL;
+    ptr           = vertex;
+    int i=0;
+
+    while(ptr) {
+        printf("%d) x=%d y=%d \n", i, ptr->x, ptr->y);
+        ptr=ptr->next;
+        i++;
     }
 }
