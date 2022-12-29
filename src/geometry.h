@@ -23,9 +23,4 @@ bool GEO_collienar_segs_have_common_pt( int a1, int a2, int b1, int b2);
 bool GEO_pt_in_triangle(int pt_x, int pt_y, int t1_x, int t1_y, int t2_x, int t2_y, int t3_x, int t3_y);
 bool GEO_pt_in_rect(int x, int y, int x1, int y1, int x2, int y2);
 
-vertex_t* GEO_rect_inside_poly(vertex_t* polygon, segment_t* rect, int poly_st_x, int poly_st_y);
-vertex_t* GEO_polygon_intersecting_rect(vertex_t *polygon, segment_t *rect, int poly_st_x, int poly_st_y);
-vertex_t* GEO_vertex_inside_rect(vertex_t*  polygon, int x1, int y1, int x2, int y2);
-vertex_t* GEO_polygon_union_rect(vertex_t *polygon, int x1, int y1, int x2, int y2, int poly_st_x, int poly_st_y);
-
 #endif

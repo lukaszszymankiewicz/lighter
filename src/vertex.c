@@ -190,15 +190,12 @@ bool VRTX_eq(
 vertex_t* VRTX_transpose(
     vertex_t *vertex,
     int       x_corr,
-    int       y_corr,
-    int       x0,
-    int       y0
+    int       y_corr
 ) {
     vertex_t *ptr  = NULL;
     ptr            = vertex;
 
     while(ptr) {
-        ptr->angle = GEO_angle_2pt(x0, y0, ptr->x + x_corr, ptr->y + y_corr);
         ptr->x = ptr->x + x_corr;
         ptr->y = ptr->y + y_corr;
         ptr = ptr->next;
