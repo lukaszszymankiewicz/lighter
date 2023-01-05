@@ -53,6 +53,8 @@ void GFX_render_tile(texture_t* texture, int render_x, int render_y, int x, int 
 void GFX_free_texture(texture_t *texture);
 void GFX_clean_buffers();
 void GFX_draw_light();
+void GFX_fill_gradient(texture_t *texture, int x, int y);
+void GFX_draw_gradient_gaps();
 
 texture_t* GFX_read_texture(const char *filepath);
 

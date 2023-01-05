@@ -33,6 +33,12 @@ typedef struct vertex {
     float          dist;
 } vertex_t;
 
+typedef struct texture {
+    SDL_Texture *surface;
+    int          width;
+    int          height;
+} texture_t;
+
 typedef struct lvertex {
     vertex_t* coords;
     int       x0;
@@ -43,15 +49,17 @@ typedef struct lvertex {
     int       blue;
 } lvertex_t;
 
-typedef struct light_scene {
-    lvertex_t* components[MAX_LIGHT_ON_SCENE];
-    int        n;
-} light_scene_t;
+typedef struct lgradient {
+    texture_t* texture;
+    int        x;
+    int        y;
+} lgradient_t;
 
-typedef struct texture {
-    SDL_Texture *surface;
-    int          width;
-    int          height;
-} texture_t;
+typedef struct light_scene {
+    lvertex_t   *components[MAX_LIGHT_ON_SCENE];
+    int          n;
+    lgradient_t *gradients[MAX_GRADIENT_ON_SCENE];
+    int          n_gradients;
+} light_scene_t;
 
 #endif

@@ -325,16 +325,33 @@ void GAME_init_graphics(
     GFX_init_graphics();
 }
 
+// TODO: replace 
+void GAME_calc_light(
+    game_t        *game,
+    light_scene_t *scene
+) {
+    ENTMAN_calc_light(game->entity_manager, scene, game->level->obstacle_segments);
+}
+
 void GAME_draw_light(
     game_t* game
 ) {
+    LIG_clean_light();
+
     light_scene_t* scene = NULL; 
     scene                = LIG_new_light_scene();
 
     ENTMAN_calc_light(game->entity_manager, scene, game->level->obstacle_segments);
+
+    // this only fills the lightbuffer!
     LIG_compose_light_scene(scene);
 
-    GFX_draw_light();
+    LIG_draw_gradients(scene);
+
+    // LIG_draw_light_scene(scene);
+
+    // GFX_draw_gradient_gaps();
+
     LIG_free_light_scene(scene);
 }
 
@@ -364,7 +381,7 @@ void GAME_apply_logic(
     GAME_update_entities(game);
 }
 
-void GAME_compose_scene(
+void GAME_draw(
     game_t* game
 ) {
     GAME_clear_screen(game);
@@ -388,7 +405,7 @@ void GAME_loop(
     while(game->loop) {
         GAME_start_time(game);
         GAME_apply_logic(game);
-        GAME_compose_scene(game);
+        GAME_draw(game);
         GAME_update_time(game);
     }
 }

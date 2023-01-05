@@ -224,6 +224,27 @@ void ENTMAN_calc_single_entity_light(
     if (obs) { SEG_free(obs); }
 }
 
+void ENTMAN_add_gradient(
+    entity_manager_t *entity_manager,
+    entity_t         *entity,
+    light_scene_t    *scene
+) {
+
+    if (entity == NULL || (!(entity->flags & EMMIT_LIGHT)) || (!(entity->light->gradient))) { return; }
+
+    // TODO: to separate function
+    int x_corr = CAMERA_X - ENTMAN_hero_x(entity_manager);
+    int y_corr = CAMERA_Y - ENTMAN_hero_y(entity_manager);
+
+    int x = ENT_light_emit_x(entity);
+    int y = ENT_light_emit_y(entity);
+
+    scene->gradients[scene->n_gradients]->texture = entity->light->gradient;
+    scene->gradients[scene->n_gradients]->x = x + x_corr;
+    scene->gradients[scene->n_gradients]->y = y + y_corr;
+    scene->n_gradients++;
+}
+
 void ENTMAN_calc_light(
     entity_manager_t* entity_manager,
     light_scene_t*    scene,
@@ -238,7 +259,11 @@ void ENTMAN_calc_light(
         if (ENTMAN_entity_in_light_update_range(entity_manager, entity)) {
             ENTMAN_calc_single_entity_light(entity_manager, entity, scene, obstacles);
             ENTMAN_calc_single_entity_light(entity_manager, entity->hold, scene, obstacles);
+
+            ENTMAN_add_gradient(entity_manager, entity, scene);
+            ENTMAN_add_gradient(entity_manager, entity->hold, scene);
         }
+
     }
 }
 

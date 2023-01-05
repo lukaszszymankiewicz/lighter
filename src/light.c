@@ -14,11 +14,17 @@ light_scene_t* LIG_new_light_scene() {
     light_scene_t* scene = NULL;
     scene                = (light_scene_t*)malloc(sizeof(light_scene_t));
 
-    scene->n = 0;
+    scene->n           = 0;
+    scene->n_gradients = 0;
 
     for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
         scene->components[i] = NULL;
         scene->components[i] = (lvertex_t*)malloc(sizeof(lvertex_t));
+    }
+
+    for (int i=0; i<MAX_GRADIENT_ON_SCENE; i++) {
+        scene->gradients[i] = NULL;
+        scene->gradients[i] = (lgradient_t*)malloc(sizeof(lgradient_t));
     }
 
     return scene;
@@ -32,6 +38,11 @@ void LIG_free_light_scene(
         scene->components[i]->coords = NULL;
         free(scene->components[i]);
         scene->components[i] = NULL;
+    }
+
+    for (int i=0; i<scene->n_gradients; i++) {
+        scene->gradients[i]->texture = NULL;
+        free(scene->gradients[i]);
     }
 
     free(scene);
@@ -668,13 +679,16 @@ void LIG_fit_scene_on_screen(
     scene->components[i]->y0     += y_corr;
 }
 
+void LIG_clean_light(
+) {
+    GFX_clean_buffers();
+}
+
 void LIG_compose_light_scene(
     light_scene_t* scene
 ) {
-    GFX_clean_buffers();
 
     for (int i=0; i<scene->n; i++) {
-
         GFX_fill_light(
             GFX_fill_lightbuffer,
             scene->components[i]->coords,
@@ -682,6 +696,32 @@ void LIG_compose_light_scene(
             scene->components[i]->green,
             scene->components[i]->blue,
             scene->components[i]->power
+        );
+    }
+};
+
+void LIG_draw_light_scene(
+    light_scene_t* scene 
+) {
+    GFX_draw_light();
+}
+
+void LIG_draw_gradients(
+    light_scene_t* scene
+) {
+
+    printf("\nstart drawing gradients: \n");
+    // for (int i=0; i<scene->n_gradients; i++) {
+    // for (int i=scene->n_gradients-1; i>-1; i--) {
+    for (int i=0; i<scene->n_gradients-1; i++) {
+        if (!scene->gradients[i]) { break; }
+        
+        printf("gradient no %d drawn at: %d %d \n", i, scene->gradients[i]->x, scene->gradients[i]->y);
+        
+        GFX_fill_gradient(
+            scene->gradients[i]->texture,
+            scene->gradients[i]->x,
+            scene->gradients[i]->y
         );
     }
 };
