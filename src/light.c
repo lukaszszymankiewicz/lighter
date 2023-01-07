@@ -676,8 +676,7 @@ void LIG_clean_light(
 void LIG_compose_light_scene(
     light_scene_t* scene
 ) {
-
-    for (int i=0; i<scene->n; i++) {
+    for (int i=scene->n-1; i>-1; i--) {
         GFX_fill_light(
             GFX_fill_lightbuffer,
             scene->components[i]->coords,
@@ -694,6 +693,6 @@ void LIG_compose_light_scene(
 void LIG_draw_light_scene(
     light_scene_t* scene 
 ) {
-    GFX_draw_darkness();
     GFX_draw_light();
+    GFX_draw_darkness();
 }

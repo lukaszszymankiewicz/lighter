@@ -8,6 +8,8 @@
 #include "segment.h"
 
 
+#define GRADIENT_COEF 3.0;
+
 SDL_Window   *window            = NULL;
 SDL_Renderer *renderer          = NULL;
 SDL_Texture  *screen_texture    = NULL;
@@ -23,7 +25,7 @@ float GFX_dist(
     int x1,
     int y1
 ) {
-    return sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1)) * 1.5;
+    return sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1)) * GRADIENT_COEF;
 }
 
 // this is OpenGL version of mix function
@@ -56,15 +58,16 @@ void GFX_fill_lightbuffer(
 ) {
     // TODO (LG-10): this should be a three (?) separate shaders in OpenGL!
     int      shadow = 0;
+    int      old_shadow = 0;
     int      pos    = x+y*SCREEN_WIDTH;
     uint32_t dist   = (uint32_t)GFX_dist(x0, y0, x, y);
 
-    if (dist < 255) {
-        // fill light color, only if light reaches other light
-        shadow = (int)(GFX_lerp(255, 0, (float)MIN(dist, 255)/255));
+    old_shadow = (shadowbuffer[pos] & 0xFF000000) >> 24;
+    shadow = (int)(GFX_lerp(255, old_shadow, (float)MIN(dist, 255)/255));
+    
+    if (shadow == 255) {
+        lightbuffer[pos] = color | ((lightbuffer[pos] & 0xFF) + power);
     }
-
-    lightbuffer[pos] = color | ((lightbuffer[pos] & 0xFF) + power);
 
     // add shadow with light gradient
     shadowbuffer[pos] = (shadow << 24) | (shadow << 16) | (shadow << 8) | 255; 
@@ -492,16 +495,13 @@ texture_t* GFX_read_texture(
 
 void GFX_draw_light(
 ) {
-    // LIGHT
     SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
     SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
-
 }
 
 void GFX_draw_darkness(
 ) {
-    // DARKNESS
     SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
     SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
