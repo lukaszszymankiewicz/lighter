@@ -3,7 +3,6 @@
 #include "check_light.h"
 #include "check_segment.h"
 #include "check_point.h"
-#include "check_gfx.h"
 #include "check_level.h"
 #include "check_sprites.h"
 #include "check_controller.h"
@@ -39,7 +38,6 @@ int main(void) {
         light_suite(),
         segment_suite(),
         point_suite(),
-        // gfx_suite(), // silented by now
         level_suite(),
         controller_suite(),
         geometry_suite(),

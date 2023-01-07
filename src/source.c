@@ -94,7 +94,6 @@ lightsource_t* SRC_read_lightsource(
     lightsource->curent_wobble  = 0;
     lightsource->n_wobbles      = 0;
     lightsource->light_polygons = NULL;
-    lightsource->gradient       = NULL;
 
     int state                   = READ_LIGHTSOURCE_IDLE;
     FILE *file                  = NULL;

@@ -12,7 +12,6 @@ SDL_Window   *window            = NULL;
 SDL_Renderer *renderer          = NULL;
 SDL_Texture  *screen_texture    = NULL;
 
-texture_t    *gradients[ASSET_GRADIENT_ALL];
 texture_t    *sprites[ASSET_SPRITE_ALL];
 
 uint32_t     *lightbuffer;

@@ -45,7 +45,6 @@
 #define BLANK_COLOR                  0x00000000         // this color is fully transparent
 #define BLACK_COLOR                  0xFFFFFFFF         // this color is blackes black
 #define MAX_LIGHT_ON_SCENE           20                 // maximum number of rendered polygon
-#define MAX_GRADIENT_ON_SCENE        10
 #define MAX_ENTITY                   32
 #define ENTITY_DRAW_X_RANGE          SCREEN_WIDTH / 2 
 #define ENTITY_DRAW_Y_RANGE          SCREEN_HEIGHT / 2

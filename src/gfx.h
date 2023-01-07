@@ -9,7 +9,7 @@
 extern SDL_Window *window;
 extern SDL_Surface *surface;
 extern SDL_Renderer *renderer;
-extern texture_t         *gradients[ASSET_GRADIENT_ALL];
+
 extern texture_t         *sprites[ASSET_SPRITE_ALL];
 
 typedef void (*shader_t)(uint32_t, int, int, int, int, int);
@@ -58,8 +58,5 @@ void GFX_draw_light();
 void GFX_draw_darkness();
 
 texture_t* GFX_read_texture(const char *filepath);
-
-// for tests
-sorted_list_t* GFX_calc_intersections_in_scanline(segment_t *segments, int y, int *n);
 
 #endif

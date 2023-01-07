@@ -17,7 +17,6 @@ void GAME_read_all_files(
 ) {
     animations[ASSET_HERO_ANIMATION]           = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
     animations[ASSET_NO_ANIMATION]             = NULL;
-    gradients[ASSET_GRADIENT_CIRCULAR]         = GFX_read_texture(FILEPATH_GRADIENT_CIRCULAR);
     sprites[ASSET_SPRITE_HERO]                 = GFX_read_texture(FILEPATH_SPRITE_HERO);
     sprites[ASSET_SPRITE_TEST]                 = GFX_read_texture(FILEPATH_SPRITE_HERO);
     sprites[ASSET_SPRITE_LIGHTER]              = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
@@ -31,8 +30,6 @@ void GAME_read_all_files(
 
 void GAME_update_all_files(
 ) {
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER]->gradient   = gradients[ASSET_GRADIENT_CIRCULAR];
-    lightsources[ASSET_LIGHTSOURCE_WALLLIGHT]->gradient = gradients[ASSET_GRADIENT_CIRCULAR];
     // TODO: it is ugly to have it here - propably some more clever place for such initialization is
     // needed
     SRC_set_wobble(lightsources[ASSET_LIGHTSOURCE_LIGHTER], wobbles[ASSET_WOBBLE_STABLE], 0);
@@ -42,7 +39,6 @@ void GAME_update_all_files(
 void GAME_free_all_files(
 ) {
     ANIM_free(animations[ASSET_HERO_ANIMATION]);
-    GFX_free_texture(gradients[ASSET_GRADIENT_CIRCULAR]);
     GFX_free_texture(sprites[ASSET_SPRITE_HERO]);
     SRC_free_wobble(wobbles[ASSET_WOBBLE_NO]);
     SRC_free_wobble(wobbles[ASSET_WOBBLE_STABLE]);
@@ -344,9 +340,7 @@ void GAME_draw_light(
     ENTMAN_calc_light(game->entity_manager, scene, game->level->obstacle_segments);
 
     LIG_compose_light_scene(scene);
-
     LIG_draw_light_scene(scene);
-
     LIG_free_light_scene(scene);
 }
 

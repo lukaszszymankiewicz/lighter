@@ -477,7 +477,6 @@ START_TEST (ENT_generate_check)
     int y          = 69;
     
     animations[ASSET_HERO_ANIMATION]         = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    gradients[ASSET_GRADIENT_CIRCULAR]       = GFX_read_texture(FILEPATH_GRADIENT_CIRCULAR);
     sprites[ASSET_SPRITE_HERO]               = GFX_read_texture(FILEPATH_SPRITE_HERO);
 
     for (int id=0; id<ENTITY_ALL; id++) {

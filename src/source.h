@@ -33,7 +33,6 @@ typedef struct lightsource {
     int               n_poly;
     int               n_wobbles;
     int               curent_wobble;
-    texture_t        *gradient;
     lightpolygon_t   *light_polygons;
     wobble_t         *wobble[MAX_WOBBLES];
 } lightsource_t;

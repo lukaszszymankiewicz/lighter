@@ -2,7 +2,6 @@
 #define FILES_H
 
 extern const char *FILEPATH_HERO_ANIMATION         ;
-extern const char *FILEPATH_GRADIENT_CIRCULAR      ;
 extern const char *FILEPATH_SPRITE_HERO            ;
 extern const char *FILEPATH_SPRITE_LIGHTER         ;
 extern const char *FILEPATH_SPRITE_WALLLIGHT       ;

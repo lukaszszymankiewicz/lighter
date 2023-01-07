@@ -15,16 +15,10 @@ light_scene_t* LIG_new_light_scene() {
     scene                = (light_scene_t*)malloc(sizeof(light_scene_t));
 
     scene->n           = 0;
-    scene->n_gradients = 0;
 
     for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
         scene->components[i] = NULL;
         scene->components[i] = (lvertex_t*)malloc(sizeof(lvertex_t));
-    }
-
-    for (int i=0; i<MAX_GRADIENT_ON_SCENE; i++) {
-        scene->gradients[i] = NULL;
-        scene->gradients[i] = (lgradient_t*)malloc(sizeof(lgradient_t));
     }
 
     return scene;
@@ -38,11 +32,6 @@ void LIG_free_light_scene(
         scene->components[i]->coords = NULL;
         free(scene->components[i]);
         scene->components[i] = NULL;
-    }
-
-    for (int i=0; i<scene->n_gradients; i++) {
-        scene->gradients[i]->texture = NULL;
-        free(scene->gradients[i]);
     }
 
     free(scene);
@@ -705,6 +694,6 @@ void LIG_compose_light_scene(
 void LIG_draw_light_scene(
     light_scene_t* scene 
 ) {
-    GFX_draw_light();
     GFX_draw_darkness();
+    GFX_draw_light();
 }
