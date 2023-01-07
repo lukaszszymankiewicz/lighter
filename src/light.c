@@ -695,7 +695,9 @@ void LIG_compose_light_scene(
             scene->components[i]->red,
             scene->components[i]->green,
             scene->components[i]->blue,
-            scene->components[i]->power
+            scene->components[i]->power,
+            scene->components[i]->x0,
+            scene->components[i]->y0
         );
     }
 };
@@ -704,24 +706,5 @@ void LIG_draw_light_scene(
     light_scene_t* scene 
 ) {
     GFX_draw_light();
+    GFX_draw_darkness();
 }
-
-void LIG_draw_gradients(
-    light_scene_t* scene
-) {
-
-    printf("\nstart drawing gradients: \n");
-    // for (int i=0; i<scene->n_gradients; i++) {
-    // for (int i=scene->n_gradients-1; i>-1; i--) {
-    for (int i=0; i<scene->n_gradients-1; i++) {
-        if (!scene->gradients[i]) { break; }
-        
-        printf("gradient no %d drawn at: %d %d \n", i, scene->gradients[i]->x, scene->gradients[i]->y);
-        
-        GFX_fill_gradient(
-            scene->gradients[i]->texture,
-            scene->gradients[i]->x,
-            scene->gradients[i]->y
-        );
-    }
-};

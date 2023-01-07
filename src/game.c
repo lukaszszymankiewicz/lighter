@@ -343,14 +343,9 @@ void GAME_draw_light(
 
     ENTMAN_calc_light(game->entity_manager, scene, game->level->obstacle_segments);
 
-    // this only fills the lightbuffer!
     LIG_compose_light_scene(scene);
 
-    LIG_draw_gradients(scene);
-
-    // LIG_draw_light_scene(scene);
-
-    // GFX_draw_gradient_gaps();
+    LIG_draw_light_scene(scene);
 
     LIG_free_light_scene(scene);
 }

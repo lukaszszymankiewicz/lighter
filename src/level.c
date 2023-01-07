@@ -331,47 +331,6 @@ void LVL_draw(
     }
 }
 
-void LVL_fill_shadowbuffer_with_tiles(
-    level_t *level,
-    int      x,
-    int      y,
-    int      obstacle
-) {
-    int is_obstacle;
-
-    int st_x           = x - SCREEN_WIDTH  / 2;
-    int st_y           = y - SCREEN_HEIGHT / 2;
-    int end_x          = x + SCREEN_WIDTH  / 2;
-    int end_y          = y + SCREEN_HEIGHT / 2;
-    
-    int st_tile_pos_x  = st_x / TILE_WIDTH;
-    int st_tile_pos_y  = st_y / TILE_HEIGHT;
-    int end_tile_pos_x = end_x / TILE_WIDTH + 1;
-    int end_tile_pos_y = end_y / TILE_HEIGHT + 1;
-
-    for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
-        for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
-
-            is_obstacle        = LVL_obstacle_on_pos(level, x, y);
-            
-            int tile_pos_x = TILE_WIDTH  * x-st_x;
-            int tile_pos_y = TILE_HEIGHT * y-st_y;
-
-            // this will allow to decide where shadow on walls should be drawn
-            if (is_obstacle == obstacle) {
-                GFX_fill_rect(
-                    GFX_fill_shadowbuffer,
-                    tile_pos_x,
-                    tile_pos_y,
-                    TILE_WIDTH,
-                    TILE_HEIGHT,
-                    255, 255, 255, 0 
-                );
-            }
-        }
-    }
-}
-
 void LVL_free(
     level_t *level
 ) {

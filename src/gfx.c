@@ -18,32 +18,57 @@ texture_t    *sprites[ASSET_SPRITE_ALL];
 uint32_t     *lightbuffer;
 uint32_t     *shadowbuffer;
 
-void GFX_fill_shadowbuffer(
-    uint32_t  color,
-    int       x,
-    int       y,
-    int       power
+float GFX_dist(
+    int x0,
+    int y0,
+    int x1,
+    int y1
 ) {
-    shadowbuffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
+    return sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1)) * 1.5;
 }
 
-void GFX_fill_mesh_shadowbuffer(
-    uint32_t  color,
-    int       x,
-    int       y,
-    int       power
+// this is OpenGL version of mix function
+float GFX_lerp(
+    float v0,
+    float v1,
+    float t
 ) {
-    static int mesh = 4;
-    shadowbuffer[x+y*SCREEN_WIDTH] = (color | power) * !((x+y) % mesh + (y % 3));
+    return (1 - t) * v0 + t * v1;
 }
 
+// this is the only way to use OpenGL without really calling it. OpenGL implementaiton must be done
+// in separate ticket
+// proper gradient version for GLSL:
+// float dist(vec2 p0, vec2 pf) {return sqrt((pf.x-p0.x)*(pf.x-p0.x)+(pf.y-p0.y)*(pf.y-p0.y));}
+//
+// void mainImage( out vec4 fragColor, in vec2 fragCoord )
+// {
+//  float d = dist(iResolution.xy*0.5,fragCoord.xy)*0.01;
+// 	fragColor = mix(vec4(1.0, 1.0, 1.0, 1.0), vec4(0.0, 0.0, 0.0, 1.0), d);
+// }
+//
 void GFX_fill_lightbuffer(
     uint32_t  color,
     int       x,
     int       y,
-    int       power
+    int       power,
+    int       x0,
+    int       y0
 ) {
-    lightbuffer[x+y*SCREEN_WIDTH] = color | ((lightbuffer[x+y*SCREEN_WIDTH] & 0xFF) + power);
+    // TODO (LG-10): this should be a three (?) separate shaders in OpenGL!
+    int      shadow = 0;
+    int      pos    = x+y*SCREEN_WIDTH;
+    uint32_t dist   = (uint32_t)GFX_dist(x0, y0, x, y);
+
+    if (dist < 255) {
+        // fill light color, only if light reaches other light
+        shadow = (int)(GFX_lerp(255, 0, (float)MIN(dist, 255)/255));
+    }
+
+    lightbuffer[pos] = color | ((lightbuffer[pos] & 0xFF) + power);
+
+    // add shadow with light gradient
+    shadowbuffer[pos] = (shadow << 24) | (shadow << 16) | (shadow << 8) | 255; 
 }
 
 void GFX_init_window() {
@@ -95,22 +120,23 @@ void GFX_dealloc_buffers() {
 }
 
 void GFX_clean_buffers() {
-    memset(lightbuffer,  BLANK_COLOR, FULL_SCREEN_BYTE_SIZE);
-    memset(shadowbuffer, BLACK_COLOR, FULL_SCREEN_BYTE_SIZE);
+    memset(lightbuffer, BLANK_COLOR, FULL_SCREEN_BYTE_SIZE);
+    memset(shadowbuffer, BLANK_COLOR, FULL_SCREEN_BYTE_SIZE);
 }
 
 void GFX_alloc_buffers() {
-    lightbuffer  = NULL;
+    lightbuffer     = NULL;
     shadowbuffer = NULL;
 
-    lightbuffer   = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
-    shadowbuffer  = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
+    lightbuffer     = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
+    shadowbuffer = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
 }
 
 void GFX_free_buffers() {
     free(lightbuffer);
     free(shadowbuffer);
-    lightbuffer  = NULL;
+
+    lightbuffer     = NULL;
     shadowbuffer = NULL;
 }
 
@@ -244,9 +270,9 @@ void GFX_draw_rect_border(
     SDL_RenderFillRect(renderer, &rect);
 };
 
-// fills rect with pix_fill_fun function
+// fills rect with shader function
 void GFX_fill_rect(
-    void  (*pix_fill_fun)(uint32_t, int, int, int),
+    shader_t shader,
     int x,
     int y,
     int w,
@@ -263,20 +289,22 @@ void GFX_fill_rect(
 
     for (int xx=x; xx<x+w; xx++) { 
         for(int yy=y; yy<y+h; yy++) {
-            pix_fill_fun(light_color, xx, yy, power);
+            shader(light_color, xx, yy, power, 0, 0);
         }
     }
 };
 
 void GFX_draw_line_to_buffer(
-    int     x1,                                       // starting point
-    int     x2,                                       // end point
-    void  (*pix_fill_fun)(uint32_t, int, int, int),   // pix fill function
-    int     y,                                        // y-axis coef
-    int     r,                                        // red color (from 00 to FF)
-    int     g,                                        // green color (from 00 to FF)
-    int     b,                                        // blue color (from 00 to FF)
-    int     power                                     // power of  color (mostly alpha channel)
+    int       x1,                                       // starting point
+    int       x2,                                       // end point
+    shader_t  shader,
+    int       y,                                        // y-axis coef
+    int       r,                                        // red color (from 00 to FF)
+    int       g,                                        // green color (from 00 to FF)
+    int       b,                                        // blue color (from 00 to FF)
+    int       power,                                    // power of  color (mostly alpha channel)
+    int       x0,
+    int       y0
 ) {
 
     uint32_t red_color = r << 24;
@@ -285,7 +313,7 @@ void GFX_draw_line_to_buffer(
     uint32_t light_color = red_color | green_color | blue_color;
 
     for (int x=MAX(x1, 0); x<MIN(SCREEN_WIDTH, x2); x++) {
-        pix_fill_fun(light_color, x, y, power);
+        shader(light_color, x, y, power, x0, y0);
     }
 };
 
@@ -324,12 +352,14 @@ sorted_list_t* GFX_calc_intersections_in_scanline(
 
 void GFX_draw_scanline(
     segment_t     *segments,
-    void         (*pix_fill_fun)(uint32_t, int, int, int),
+    shader_t       shader,
     int            y,
     int            r,
     int            g,
     int            b,
-    int            power 
+    int            power,
+    int            x0,
+    int            y0
 ) {
     int            n      = 0;
     sorted_list_t *intscs = NULL;
@@ -340,14 +370,14 @@ void GFX_draw_scanline(
         sorted_list_t* ptr = NULL;
 
         if (n==2) {
-            GFX_draw_line_to_buffer(intscs->value, intscs->next->value, pix_fill_fun, y, r, g, b, power);
+            GFX_draw_line_to_buffer(intscs->value, intscs->next->value, shader, y, r, g, b, power, x0, y0);
         }
 
         else if (n>2) {
             ptr = intscs;
 
             while (ptr->next) {
-                GFX_draw_line_to_buffer(ptr->value, ptr->next->value, pix_fill_fun, y, r, g, b, power);
+                GFX_draw_line_to_buffer(ptr->value, ptr->next->value, shader, y, r, g, b, power, x0, y0);
 
                 ptr=ptr->next;
                 if (ptr->next == NULL) {
@@ -367,12 +397,14 @@ void GFX_draw_scanline(
 // Function is secured from drawing outside the screen, as such behavior is unsave and wastes
 // resources.
 void GFX_fill_light(
-    void        (*pix_fill_fun)(uint32_t, int, int, int),
+    shader_t shader,
     vertex_t     *poly,
     int           r,
     int           g,
     int           b,
-    int           power
+    int           power,
+    int           x0,
+    int           y0
 ) {
     int         y            = 0;
     int         highest      = VRTX_highest_y(poly);
@@ -414,7 +446,7 @@ void GFX_fill_light(
         // scanline)
         if (y<0) { y++; continue; }
         else { 
-            GFX_draw_scanline(current_draw, pix_fill_fun, y, r, g, b, power);
+            GFX_draw_scanline(current_draw, shader, y, r, g, b, power, x0, y0);
             y++;
         }
     }
@@ -423,116 +455,6 @@ void GFX_fill_light(
     if (current_draw) { SEG_free(current_draw); }
     if (obstacle_ptr) { SEG_free(obstacle_ptr); }
     if (candidates)  { SEG_free(candidates); }
-}
-
-void GFX_fill_gradient_gaps2(
-    texture_t    *gradient_texture,
-    int           st_x,
-    int           st_y
-) {
-    int top    = st_y - (int) ((gradient_texture->height) / 2);
-    int bottom = top + gradient_texture->height;
-    int left   = st_x - (int) ((gradient_texture->width) / 2);
-    int right  = left + gradient_texture->width;
-    
-    if (top < 0) { top = 0; };
-    if (bottom > SCREEN_HEIGHT) { bottom = SCREEN_HEIGHT; };
-    if (left < 0) { left = 0; };
-    if (right > SCREEN_WIDTH) { right = SCREEN_WIDTH; };
-
-    // UPPER PART
-    GFX_draw_rect_border(
-        0, 0,
-        SCREEN_WIDTH, top,
-        0, 0, 0, 0
-    );
-
-    GFX_draw_rect_border(
-        0,
-        top,
-        left,
-        bottom-top,
-        0, 0, 0, 0
-    );
-
-    GFX_draw_rect_border(
-        right,
-        top,
-        SCREEN_WIDTH-right,
-        bottom-top,
-        0, 0, 0, 0
-    );
-
-    GFX_draw_rect_border(
-        0,
-        bottom,
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT-bottom,
-        0, 0, 0, 0
-    );
-}
-
-void GFX_fill_gradient_gaps(
-    uint32_t     *light_power_buffer,
-    texture_t    *gradient_texture,
-    int           st_x,
-    int           st_y
-) {
-    int top    = st_y - (int) ((gradient_texture->height) / 2);
-    int bottom = top + gradient_texture->height;
-    int left   = st_x - (int) ((gradient_texture->width) / 2);
-    int right  = left + gradient_texture->width;
-    
-    if (top < 0) { top = 0; };
-    if (bottom > SCREEN_HEIGHT) { bottom = SCREEN_HEIGHT; };
-    if (left < 0) { left = 0; };
-    if (right > SCREEN_WIDTH) { right = SCREEN_WIDTH; };
-
-    // for(int y=bottom; y<top; y++) {
-    //     for (int x=left; x<right; x++) {
-    //         light_power_buffer[x+y*SCREEN_WIDTH] = BLACK_COLOR;
-    //     }
-    // }
-
-    // UPPER PART
-    for(int y=0; y<top; y++) {
-        for (int x=0; x<SCREEN_WIDTH; x++) {
-            light_power_buffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
-        }
-    }
-
-    // MIDDLE PART
-    for(int y=top; y<bottom; y++) {
-        for (int x=0; x<left; x++) {
-            light_power_buffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
-        }
-        for (int x=right; x<SCREEN_WIDTH; x++) {
-            light_power_buffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
-        }
-    }
-
-    // BOTTOM PART
-    for(int y=bottom; y<SCREEN_HEIGHT; y++) {
-        for (int x=0; x<SCREEN_WIDTH; x++) {
-            light_power_buffer[x+y*SCREEN_WIDTH] = BLANK_COLOR;
-        }
-    }
-}
-
-// Calculates rectangle shaped as gradient texture (to fill its negation)
-SDL_Rect GFX_calc_gradient_rect(
-    texture_t* gradient,
-    int x,
-    int y
-) {
-    SDL_Rect gradient_quad = {
-        x - (int)((gradient->width)/2),
-        y - (int)((gradient->height)/2),
-        gradient->width,
-        gradient->height
-    };
-
-    return gradient_quad;
 }
 
 texture_t* GFX_read_texture(
@@ -576,37 +498,12 @@ void GFX_draw_light(
     SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 
+}
+
+void GFX_draw_darkness(
+) {
     // DARKNESS
     SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
-    SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
+    SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
-
-void GFX_fill_gradient(
-    texture_t *gradient,
-    int        x,
-    int        y
-) {
-    // LIGHT GRADIENT
-    // GFX_fill_gradient_gaps2(gradient, x, y);
-
-    int a = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MOD);
-    printf("blending = %d \n", a);
-    SDL_SetTextureBlendMode(gradient->surface, SDL_BLENDMODE_MOD);
-    SDL_Rect gradient_quad = GFX_calc_gradient_rect(gradient, x, y);
-    SDL_RenderCopy(renderer, gradient->surface, NULL, &gradient_quad);
-
-    // DARKNESS
-    // GFX_fill_gradient_gaps(shadowbuffer, gradient, x, y);
-    // SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
-    // SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
-    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
-}
-
-void GFX_draw_gradient_gaps(
-) {
-    // SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
-    // SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
-    // SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
-}
-

@@ -25,8 +25,6 @@ level_t* LVL_new();
 void LVL_analyze(level_t *level);
 void LVL_draw(level_t *level, int camera_x, int camera_y);
 
-void LVL_fill_shadowbuffer_with_tiles(level_t *level, int x, int y, int obstacle);
-
 tile_t* LVL_tile_on_pos(level_t *level, int x, int y);
 
 void LVL_set_size(level_t *level, int size_x, int size_y);
