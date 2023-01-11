@@ -1,4 +1,5 @@
 #include "global.h"
+#include "geometry.h"
 #include "vertex.h"
 
 vertex_t* VRTX_new(
@@ -7,23 +8,13 @@ vertex_t* VRTX_new(
     float angle
 ) {
     vertex_t* new_vertex = (vertex_t*)malloc(sizeof(vertex_t));
+
     new_vertex->x        = x;
     new_vertex->y        = y;
     new_vertex->angle    = angle;
-
-    new_vertex->next = NULL;
-    new_vertex->prev = NULL;
+    new_vertex->next     = NULL;
 
     return new_vertex;
-}
-
-void VRTX_push(
-    vertex_t **head,
-    vertex_t *new_vertex
-) {
-    new_vertex->next = *head;
-    (*head) = new_vertex;
-    (*head)->prev = new_vertex;
 }
 
 // Function to insert a given vertex at its correct position into a vertex list with increasing
@@ -31,56 +22,40 @@ void VRTX_push(
 // polygon.
 void VRTX_add_point(
     vertex_t **head,
-    int x,
-    int y,
-    float angle
+    int        x,
+    int        y,
+    float      angle
 ) {
     vertex_t* current    = NULL;
     vertex_t* new_vertex = NULL;
-    new_vertex = VRTX_new(x, y, angle);
+    new_vertex           = VRTX_new(x, y, angle);
 
-    if (!(*head)) {
-        new_vertex->next = *head;
-        *head = new_vertex;
+    if ((*head) == NULL) {
+        new_vertex->next = (*head);
+        (*head)          = new_vertex;
     }
 
     // place new point at begininng
     else if ((*head)->angle >= new_vertex->angle) {
-        new_vertex->next = *head;
-        *head = new_vertex;
+        new_vertex->next = (*head);
+        (*head)          = new_vertex;
     }
     else {
-        current = *head;
+        current = (*head);
 
         while (current->next && current->next->angle < new_vertex->angle) {
             current = current->next;
         }
         new_vertex->next = current->next;
-        current->next = new_vertex;
+        current->next    = new_vertex;
     }
 }
 
-// checks is lightpoint is inside segment, as segments are only vertical and horizontal, simple
-// tests is made
-bool VRTX_pt_in_segment(
-    int pt_x,   int pt_y,
-    int seg_x1, int seg_y1,
-    int seg_x2, int seg_y2
-) {
-    if ((pt_x == seg_x1 && pt_x == seg_x2) || (pt_y == seg_y1 && pt_y == seg_y2)) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-// find highest value of y from list of vertices
 int VRTX_highest_y(
     vertex_t* poly
 ) {
     vertex_t *ptr        = NULL;
-    int       highest_y  = SCREEN_HEIGHT;
+    int       highest_y  = 9999;
 
     ptr = poly;
 
@@ -90,8 +65,139 @@ int VRTX_highest_y(
         }
         ptr = ptr->next;
     }
-
     return highest_y;
+}
+
+int VRTX_lowest_y(
+    vertex_t* poly
+) {
+    vertex_t *ptr        = NULL;
+    int       lowest_y  = -9999;
+
+    ptr = poly;
+
+    while(ptr) {
+        if (ptr->y > lowest_y) {
+            lowest_y = ptr->y;
+        }
+        ptr = ptr->next;
+    }
+    return lowest_y;
+}
+
+int VRTX_len(
+    vertex_t *head
+) {
+    int len        = 0;
+    vertex_t *ptr  = NULL;
+
+    ptr = head;
+
+    while(ptr) {
+        len++;
+        ptr=ptr->next;
+    }
+    return len;
+}
+
+void VRTX_free(
+    vertex_t* head
+) {
+    vertex_t* temp = NULL;
+
+    while (head) {
+        temp = head;
+        head = head->next;
+        free(temp);
+    }
+}
+
+void VRTX_merge(
+    vertex_t **head,
+    vertex_t  *candidates
+) {
+    vertex_t *ptr  = NULL;
+    ptr            = candidates;
+
+    while(ptr) {
+        VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
+        ptr=ptr->next;
+    }
+}
+
+bool VRTX_contains(
+    vertex_t *head,
+    int x,
+    int y
+) {
+    vertex_t* ptr = NULL;
+    ptr           = head;
+
+    while(ptr) {
+
+        if(ptr->x == x && ptr->y == y) {
+            return true; 
+        }
+
+        ptr=ptr->next;
+    }
+
+    return false;
+}
+
+void VRTX_merge_unique(
+    vertex_t **head,
+    vertex_t  *candidates
+) {
+    vertex_t *ptr  = NULL;
+    ptr            = candidates;
+
+    while(ptr) {
+        if (VRTX_contains((*head), ptr->x, ptr->y)) {
+            ptr=ptr->next;
+            continue;
+        }
+        
+        VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
+        ptr=ptr->next;
+    }
+}
+
+bool VRTX_eq(
+    vertex_t *first,
+    vertex_t *second
+) {
+    if (VRTX_len(first) != VRTX_len(second)) {
+        return false;
+    }
+    vertex_t *ptr  = NULL;
+    vertex_t *ptr2  = NULL;
+
+    while(ptr) {
+        if ((ptr->y != ptr2->y) && (ptr->y != ptr2->y)) {
+            return false;
+        }
+        ptr = ptr->next;
+        ptr2 = ptr2->next;
+    }
+    return true;
+}
+
+vertex_t* VRTX_transpose(
+    vertex_t *vertex,
+    int       x_corr,
+    int       y_corr
+) {
+    vertex_t *ptr  = NULL;
+    ptr            = vertex;
+
+    while(ptr) {
+        ptr->x = ptr->x + x_corr;
+        ptr->y = ptr->y + y_corr;
+        ptr = ptr->next;
+    }
+
+    return vertex;
 }
 
 int VRTX_max_y(
@@ -103,6 +209,32 @@ int VRTX_max_y(
     else {
         return MAX(vertex->y, vertex->next->y);
     }
+}
+
+int VRTX_pop_y(
+    vertex_t* vertex
+) {
+    vertex_t *ptr = NULL;
+    ptr           = vertex;
+
+    while(ptr->next) {
+        ptr = ptr->next;
+    }
+
+    return ptr->y;
+}
+
+int VRTX_pop_x(
+    vertex_t* vertex
+) {
+    vertex_t *ptr = NULL;
+    ptr           = vertex;
+
+    while(ptr->next) {
+        ptr = ptr->next;
+    }
+
+    return ptr->x;
 }
 
 void VRTX_delete(
@@ -133,70 +265,17 @@ void VRTX_delete(
     }
 }
 
-int VRTX_len(
-    vertex_t *head
-) {
-    int len        = 0;
-    vertex_t *ptr  = NULL;
 
-    ptr = head;
+void VRTX_debug(
+    vertex_t *vertex
+) {
+    vertex_t *ptr = NULL;
+    ptr           = vertex;
+    int i=0;
 
     while(ptr) {
-        len++;
+        printf("%d) x=%d y=%d \n", i, ptr->x, ptr->y);
         ptr=ptr->next;
+        i++;
     }
-    return len;
-}
-
-void VRTX_free(
-    vertex_t* head
-) {
-    vertex_t* currentRef = NULL;
-    currentRef           = head;
-
-    vertex_t* temp = NULL;
-
-    while (currentRef != NULL) {
-        vertex_t* temp = currentRef->next;
-        free(currentRef);
-        currentRef = temp;
-    }
-    free(temp);
-}
-
-void VRTX_merge(
-    vertex_t **head,
-    vertex_t  *candidates
-) {
-    vertex_t *ptr  = NULL;
-    ptr            = candidates;
-
-    while(ptr) {
-        VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
-        ptr=ptr->next;
-    }
-
-    if (candidates) {
-        VRTX_free(candidates);
-    }
-}
-
-bool VRTX_eq(
-    vertex_t *first,
-    vertex_t *second
-) {
-    if (VRTX_len(first) != VRTX_len(second)) {
-        return false;
-    }
-    vertex_t *ptr  = NULL;
-    vertex_t *ptr2  = NULL;
-
-    while(ptr) {
-        if ((ptr->y != ptr2->y) && (ptr->y != ptr2->y)) {
-            return false;
-        }
-        ptr = ptr->next;
-        ptr2 = ptr2->next;
-    }
-    return true;
 }

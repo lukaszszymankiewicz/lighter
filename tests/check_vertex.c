@@ -54,32 +54,110 @@ START_TEST (VRTX_add_point_check) {
 }
 END_TEST
 
-START_TEST (VRTX_pt_in_segment_check) {
-    bool result;
+START_TEST (VRTX_transpose_check) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(100, 100, 0);
 
-    // FAIL
-    result = VRTX_pt_in_segment(10, 10, 15, 10, 20, 20);
-    ck_assert_int_eq(result, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
 
-    // PASS (vertical)
-    result = VRTX_pt_in_segment(10, 10, 15, 10, 20, 10);
-    ck_assert_int_eq(result, 1);
+    // WHEN
+    vertex = VRTX_transpose(vertex, 50, 50);
     
-    // PASS (horizontal)
-    result = VRTX_pt_in_segment(10, 10, 10, 15, 10, 20);
-    ck_assert_int_eq(result, 1);
+    // THEN
+    ck_assert_int_eq(vertex->x, 250);
+    ck_assert_int_eq(vertex->y, 250);
 
-    // PASS (vertical edge case)
-    result = VRTX_pt_in_segment(10, 10, 15, 10, 15, 10);
-    ck_assert_int_eq(result, 1);
-
-    // PASS (horizontal edge case)
-    result = VRTX_pt_in_segment(10, 10, 10, 15, 10, 15);
-    ck_assert_int_eq(result, 1);
+    ck_assert_int_eq(vertex->next->x, 150);
+    ck_assert_int_eq(vertex->next->y, 150);
 }
-END_TEST
 
- 
+START_TEST (VRTX_transpose_check_real_life_example) {
+    // GIVEN
+    int old_len;
+    int new_len;
+
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(475, 438, 0);
+
+    VRTX_add_point(&vertex, 336, 288, 0);
+    VRTX_add_point(&vertex, 320, 288, 0);
+    VRTX_add_point(&vertex, 320, 448, 0);
+    VRTX_add_point(&vertex, 334, 448, 0);
+
+    // WHEN
+    old_len = VRTX_len(vertex);
+    vertex = VRTX_transpose(vertex, 320, 340);
+    new_len = VRTX_len(vertex);
+    
+    // THEN
+    ck_assert_int_eq(old_len, new_len);
+}
+
+START_TEST (VRTX_merge_unique_check_single_point_not_added) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(100, 100, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
+
+    vertex_t* candidates = NULL;
+    candidates           = VRTX_new(100, 100, 0);
+
+    // WHEN
+    VRTX_merge_unique(&vertex, candidates);
+    
+    // THEN
+    ck_assert_int_eq(VRTX_len(vertex), 2);
+}
+
+START_TEST (VRTX_merge_unique_check_two_points_added) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(100, 100, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
+
+    vertex_t* candidates = NULL;
+    candidates           = VRTX_new(300, 300, 0);
+    VRTX_add_point(&candidates, 400, 400, 0);
+
+    // WHEN
+    VRTX_merge_unique(&vertex, candidates);
+    
+    // THEN
+    ck_assert_int_eq(VRTX_len(vertex), 4);
+}
+
+START_TEST (VRTX_merge_unique_check_one_point_added_one_dismissed) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+    vertex           = VRTX_new(100, 100, 0);
+    VRTX_add_point(&vertex, 200, 200, 0);
+
+    vertex_t* candidates = NULL;
+    candidates           = VRTX_new(300, 300, 0);
+    VRTX_add_point(&candidates, 200, 200, 0);
+
+    // WHEN
+    VRTX_merge_unique(&vertex, candidates);
+    
+    // THEN
+    ck_assert_int_eq(VRTX_len(vertex), 3);
+}
+
+START_TEST (VRTX_merge_unique_check_to_a_null_pointer) {
+    // GIVEN
+    vertex_t* vertex = NULL;
+
+    vertex_t* candidates = NULL;
+    candidates           = VRTX_new(300, 300, 0);
+    VRTX_add_point(&candidates, 200, 200, 0);
+
+    // WHEN
+    VRTX_merge_unique(&vertex, candidates);
+    
+    // THEN
+    ck_assert_int_eq(VRTX_len(vertex), 2);
+}
 
 Suite *vertex_suite(void) {
     Suite *s;
@@ -91,8 +169,13 @@ Suite *vertex_suite(void) {
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, VRTX_add_point_check);
-    tcase_add_test(tc_core, VRTX_pt_in_segment_check);
     tcase_add_test(tc_core, VRTX_eq_check);
+    tcase_add_test(tc_core, VRTX_transpose_check);
+    tcase_add_test(tc_core, VRTX_merge_unique_check_single_point_not_added);
+    tcase_add_test(tc_core, VRTX_merge_unique_check_two_points_added);
+    tcase_add_test(tc_core, VRTX_merge_unique_check_one_point_added_one_dismissed);
+    tcase_add_test(tc_core, VRTX_merge_unique_check_to_a_null_pointer);
+    tcase_add_test(tc_core, VRTX_transpose_check_real_life_example);
 
     suite_add_tcase(s, tc_core);
 

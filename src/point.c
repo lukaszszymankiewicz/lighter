@@ -92,10 +92,12 @@ int PT_len(
 void PT_free(
     point_t* head
 ) {
-    point_t* ptr = head;
+    point_t* ptr = NULL;
+    ptr          = head;
+    point_t *temp = NULL;
 
     while (ptr) {
-        point_t *temp = ptr->next;
+        temp          = ptr->next;
         free(ptr);
         ptr = temp;
     }
@@ -115,6 +117,17 @@ void PT_merge(
 
     if (candidates) {
         PT_free(candidates);
+    }
+}
+
+void PT_debug(
+    point_t *point
+) {
+    point_t *ptr   = NULL;
+    ptr            = point;
+
+    while(ptr) {
+        ptr = ptr->next;
     }
 }
 

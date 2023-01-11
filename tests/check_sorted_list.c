@@ -6,16 +6,16 @@ START_TEST (SRTLST_insert_check)
 {
     // GIVEN
     sorted_list_t* head = NULL;
-    SRTLST_insert(&head, 2);
+    SRTLST_insert(&head, 2, 1);
 
     // WHEN
     ck_assert_int_eq(head->value, 2);  // one point inserted, should show "2"
 
-    SRTLST_insert(&head, 1);
+    SRTLST_insert(&head, 1, 1);
     ck_assert_int_eq(head->value, 1);  // two points inserted, first one should show "1", second "2"
     ck_assert_int_eq(head->next->value, 2);  
 
-    SRTLST_insert(&head, 0);
+    SRTLST_insert(&head, 0, 1);
     ck_assert_int_eq(head->value, 0);  // three points inserted "1", "2" and "3"
     ck_assert_int_eq(head->next->value, 1);  
     ck_assert_int_eq(head->next->next->value, 2);  
@@ -29,9 +29,9 @@ START_TEST (SRTLST_get_last_check)
 {
     // GIVEN
     sorted_list_t* head = NULL;
-    SRTLST_insert(&head, 1);
-    SRTLST_insert(&head, 2);
-    SRTLST_insert(&head, 0);
+    SRTLST_insert(&head, 1, 1);
+    SRTLST_insert(&head, 2, 1);
+    SRTLST_insert(&head, 0, 1);
 
     // WHEN
     int last = SRTLST_get_last(head);

@@ -93,7 +93,7 @@ START_TEST (LIG_get_base_light_polygon_check)
     hit_points = LIG_generate_hit_points(x, y, width, angle, obstacles);
     light_vertex = LIG_get_base_light_polygon(x, y, obstacles, hit_points);
     calculated_length = VRTX_len(light_vertex);
-    ck_assert_int_eq(calculated_length, 8);
+    ck_assert_int_eq(calculated_length, 7);
     full_light_vertex = LIG_get_light_polygon(x, y, width, angle, obstacles);
     eq = VRTX_eq(light_vertex, full_light_vertex);
 
@@ -241,7 +241,7 @@ START_TEST (LIG_get_light_polygon_check)
     light_vertex = LIG_get_light_polygon(x1, y1, width, angle, obstacles);
     calculated_length = VRTX_len(light_vertex);
 
-    ck_assert_int_eq(calculated_length, 1+2+4+2);
+    ck_assert_int_eq(calculated_length, 2+4+2);
     obstacles = NULL; light_vertex = NULL;
 
     // CASE 2 (border + one obstacle in sight + one obstacle not in sight)
@@ -268,7 +268,7 @@ START_TEST (LIG_get_light_polygon_check)
 
     light_vertex = LIG_get_light_polygon(x1, y1, width, angle, obstacles);
     calculated_length = VRTX_len(light_vertex);
-    ck_assert_int_eq(calculated_length, 1+2+4+2);
+    ck_assert_int_eq(calculated_length, 2+4+2);
 
     obstacles = NULL; light_vertex = NULL;
 
@@ -396,7 +396,6 @@ END_TEST
 
 START_TEST (LIG_calculate_dull_ray_end_check) 
 {
-
     typedef struct testcase {
           int r_beg;
           int r_end;

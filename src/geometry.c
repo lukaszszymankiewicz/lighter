@@ -1,9 +1,15 @@
-#include <math.h>
 #include "global.h"
+#include "vertex.h"
+#include "segment.h"
+#include "sorted_list.h"
+#include "point.h"
 
-
-// calculates angle between two points
-float GEO_angle_2pt(int ax, int ay, int bx, int by) {
+float GEO_angle_2pt(
+    int ax,
+    int ay,
+    int bx,
+    int by
+) {
     return atan2(ax - bx, ay - by);
 }
 
@@ -13,6 +19,21 @@ int GEO_sign (
     int x3, int y3
 ) {
     return (x1 - x3) * (y2- y3) - (x2 - x3) * (y1 - y3);
+}
+
+int GEO_int_sign(
+    int a,
+    int b
+) {
+    int res = a-b;
+
+    if (res < 0) {
+        return -1;
+    } else if (res >0) {
+        return 1;
+    } else {
+         return 0; 
+    }
 }
 
 // checks if given point is inside of the triangle
@@ -104,6 +125,14 @@ bool GEO_value_between_range (
     return ((first <= value && second >= value) || (second <= value && first >= value));
 }
 
+bool GEO_pt_in_rect(
+    int x, int y,
+    int x1, int y1,
+    int x2, int y2
+) {
+    return (GEO_value_between_range (x, x1, x2) && GEO_value_between_range (y, y1, y2));
+}
+
 // returns -1 if there is not collision or x-value of the collision 
 int GEO_vertical_segment_intersects_rect (
     int x1,     // segment
@@ -183,8 +212,6 @@ float GEO_line_segment_len(
     return sqrt(dy*dy + dx*dx);
 }
 
-// we dont need collinear coord in this function. Client is responsbile for checking and inputting
-// proper coords to this function
 bool GEO_collienar_segs_have_common_pt(
     int a1, int a2, // first segment value
     int b1, int b2 // second segment value
@@ -194,4 +221,155 @@ bool GEO_collienar_segs_have_common_pt(
     bool second = ((GEO_value_between_range(b1, a1, a2)) || (GEO_value_between_range(b1, a1, a2)));
 
     return first || second;
+}
+
+bool GEO_collienar_segs_have_common_start(
+    int a1, int a2, // first segment value
+    int b1, int b2 // second segment value
+) {
+    return (a1 == b1 || a2 == b1 || a2 == b2);
+}
+
+int GEO_seg_in_rect(
+    int s_x1, int s_y1,
+    int s_x2, int s_y2,
+    int r_x1, int r_y1,
+    int r_x2, int r_y2
+) {
+    if (s_x1 == s_x2) {
+        return GEO_vertical_segment_intersects_rect(
+           s_x1, s_y1,
+           s_x2, s_y2,
+           r_x1, r_y1,
+           r_x2, r_y2
+        );
+    } else {
+        return GEO_horizontal_segment_intersects_rect(
+           s_x1, s_y1,
+           s_x2, s_y2,
+           r_x1, r_y1,
+           r_x2, r_y2
+        );
+    }
+}
+
+bool GEO_pt_in_hor_seg(
+    int x, int y,
+    int x1, int y1,
+    int x2, int y2
+) {
+
+    if ((x1 == x && y1 == y) || (x2 == x && y2 == y)) {
+        return true; 
+    }
+
+    if (y1 == y2 && y1 == y) {
+        return GEO_value_between_range(x, x1, x2);
+    }
+
+    return false;
+}
+
+sorted_list_t* GEO_fill_intersection(
+    sorted_list_t* intersections,
+    int x,  int y,
+    int x1, int y1,
+    int x2, int y2
+) {
+    int inter;
+    int sign;
+
+    if (GEO_value_between_range(y, y1, y2)) {
+        inter = (int)GEO_intersection_with_y(y, x1, y1, x2, y2);
+        sign = GEO_int_sign(y2, y1);
+        SRTLST_insert(&intersections, inter, sign);
+    }
+
+    return intersections;
+}
+
+// checks if segment intersects with another segment
+bool GEO_segment_intersect(
+    int o_x1,  // obstacle
+    int o_y1,  // obstacle
+    int o_x2,  // obstacle
+    int o_y2,  // obstacle
+    int r_x1,  // ray
+    int r_y1,  // ray
+    int r_x2,  // ray
+    int r_y2   // ray
+) {
+    // check for obstacle is collinear with ray - special case here needs to be applied
+    if (o_x1 == o_x2) {
+        // collinear
+        if ((r_x1 == r_x2) && (r_x1 == o_x1)) {
+            return GEO_collienar_segs_have_common_pt(o_y1, o_y2, r_y1, r_y2);
+        }
+        // typical case
+        return (GEO_value_between_range(o_x1, r_x1, r_x2)) &&
+            !GEO_pt_same_side(r_x1, r_y1, r_x2, r_y2, o_x1, o_y1, o_x2, o_y2);
+
+    } else {
+        // collinear
+        if ((r_y1 == r_y2) && (r_y1 == o_y1)) {
+            return GEO_collienar_segs_have_common_pt(o_x1, o_x2, r_x1, r_x2);
+        }
+        // typical case
+        return (GEO_value_between_range(o_y1, r_y1, r_y2) && 
+         !GEO_pt_same_side(r_x1, r_y1, r_x2, r_y2, o_x1, o_y1, o_x2, o_y2));
+    }
+}
+
+int GEO_find_common_point(
+    int a1, int a2,
+    int b1, int b2
+) {
+    if (a1 == b1) { return a1; }
+    else if (a1 == b2) { return a1; }
+    else if (a2 == b1) { return a2; }
+    else return a2;
+}
+
+point_t* GEO_intersection_with_segment(
+    segment_t* seg,
+    int x1, int y1,
+    int x2, int y2
+) {
+    if (!GEO_segment_intersect(seg->x1, seg->y1, seg->x2, seg->y2, x1, y1, x2, y2)) {
+        return NULL;
+    }
+
+    // VERTICAL
+    if (seg->type == VER) {
+
+        // collinear
+        if (seg->x1 == x1 && seg->x2 == x2) {
+
+            if (!GEO_collienar_segs_have_common_start(seg->y1, seg->y2, y1, y2)) {
+                return PT_new(seg->x1, y1);
+            }
+            int common_y = GEO_find_common_point(seg->y1, seg->y2, y1, y2);
+
+            return PT_new(x1, common_y);
+        }
+
+        int inter_y = (int) GEO_intersection_with_x (seg->x1, x1, y1, x2, y2);
+        return PT_new(seg->x1, inter_y);
+
+    // HORIZONTAL
+    } else {
+        // collinear
+        if (seg->y1 == y1 && seg->y2 == y2) {
+
+            if (!GEO_collienar_segs_have_common_start(seg->x1, seg->x2, x1, x2)) {
+                return PT_new(x1, seg->y1);
+            }
+
+            int common_x = GEO_find_common_point(seg->x1, seg->x2, x1, x2);
+            return PT_new(common_x, y1);
+        }
+
+        int inter_x = (int) GEO_intersection_with_y (seg->y1, x1, y1, x2, y2);
+        return PT_new(inter_x, seg->y1);
+    }
 }

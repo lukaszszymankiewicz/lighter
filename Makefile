@@ -10,48 +10,57 @@ TESTLINKS = `pkg-config --cflags --libs check sdl2 SDL2_image`
 SRCDIR = src
 TESTDIR = tests
 
-TARGET =                      \
-	$(SRCDIR)/game.c          \
-	$(SRCDIR)/gfx.c           \
-	$(SRCDIR)/import.c        \
-	$(SRCDIR)/events.c        \
-	$(SRCDIR)/hero.c          \
-	$(SRCDIR)/timer.c         \
-	$(SRCDIR)/tile.c          \
-	$(SRCDIR)/files.c         \
-	$(SRCDIR)/level.c         \
-	$(SRCDIR)/geometry.c      \
-	$(SRCDIR)/sorted_list.c   \
-	$(SRCDIR)/light.c         \
-	$(SRCDIR)/vertex.c        \
-	$(SRCDIR)/segment.c       \
-	$(SRCDIR)/sprites.c       \
-	$(SRCDIR)/point.c         \
+LEVELLOG = level_read_log.txt
+MEMORYLOG = memory_check.txt
+
+TARGET =                         \
+	$(SRCDIR)/game.c             \
+	$(SRCDIR)/main.c             \
+	$(SRCDIR)/gfx.c              \
+    $(SRCDIR)/import.c           \
+	$(SRCDIR)/controller.c       \
+	$(SRCDIR)/entity.c           \
+	$(SRCDIR)/entity_manager.c   \
+	$(SRCDIR)/timer.c            \
+	$(SRCDIR)/tile.c             \
+	$(SRCDIR)/files.c            \
+	$(SRCDIR)/level.c            \
+	$(SRCDIR)/geometry.c         \
+	$(SRCDIR)/sorted_list.c      \
+	$(SRCDIR)/light.c            \
+	$(SRCDIR)/vertex.c           \
+	$(SRCDIR)/source.c           \
+	$(SRCDIR)/segment.c          \
+	$(SRCDIR)/sprites.c          \
+	$(SRCDIR)/point.c            \
 
 TESTTARGET =                        \
     $(TESTDIR)/check_tests.c        \
-    $(TESTDIR)/check_events.c       \
+    $(TESTDIR)/check_controller.c   \
 	$(TESTDIR)/check_geometry.c     \
-	$(TESTDIR)/check_gfx.c	        \
-	$(TESTDIR)/check_import.c       \
-	$(TESTDIR)/check_hero.c         \
+	$(TESTDIR)/check_sprites.c      \
+	$(TESTDIR)/check_entity.c       \
 	$(TESTDIR)/check_level.c        \
 	$(TESTDIR)/check_light.c        \
 	$(TESTDIR)/check_point.c        \
 	$(TESTDIR)/check_segment.c      \
+	$(TESTDIR)/check_source.c       \
 	$(TESTDIR)/check_sorted_list.c  \
 	$(TESTDIR)/check_vertex.c       \
-	$(SRCDIR)/events.c              \
+	$(TESTDIR)/check_entity_manager.c       \
+	$(SRCDIR)/controller.c          \
 	$(SRCDIR)/geometry.c            \
 	$(SRCDIR)/gfx.c                 \
 	$(SRCDIR)/import.c              \
-	$(SRCDIR)/hero.c                \
+	$(SRCDIR)/entity.c              \
 	$(SRCDIR)/level.c               \
 	$(SRCDIR)/light.c               \
 	$(SRCDIR)/files.c               \
 	$(SRCDIR)/point.c               \
 	$(SRCDIR)/segment.c             \
+	$(SRCDIR)/entity_manager.c      \
 	$(SRCDIR)/sprites.c             \
+	$(SRCDIR)/source.c              \
 	$(SRCDIR)/sorted_list.c         \
 	$(SRCDIR)/timer.c               \
 	$(SRCDIR)/tile.c                \
@@ -69,9 +78,17 @@ tests:
 run_check_tests_suite:
 	./$(TESTOBJ)
 
+.PHONY: memory_check
+memory_check:
+	valgrind --leak-check=yes --log-file="memory_check.txt" --track-origins=yes ./lighter
+
 .PHONY: run_lighter
 run_lighter:
 	./$(OBJ)
+
+.PHONY: clear_screen
+clear_screen:
+	clear
 
 .PHONY: run
 run:
@@ -79,9 +96,8 @@ run:
 
 .PHONY: runtests
 runtests:
-	make clean tests run_check_tests_suite
+	make clean tests clear_screen run_check_tests_suite
 
 .PHONY: clean
 clean:
-	$(RM) $(OBJ) $(TESTOBJ)
-
+	$(RM) $(OBJ) $(TESTOBJ) $(LEVELLOG) $(MEMORYLOG)
