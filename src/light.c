@@ -1,4 +1,3 @@
-#include <assert.h>
 #include "global.h"
 #include "import.h"
 #include "segment.h"
