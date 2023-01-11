@@ -259,6 +259,9 @@ wobble_t* SRC_read_wobble(
 void SRC_free_wobble(
     wobble_t* wobble
 ) {
+    free(wobble->coefs);
+    wobble->coefs = NULL;
+
     free(wobble);
     wobble = NULL;
 };
@@ -266,6 +269,9 @@ void SRC_free_wobble(
 void SRC_free_lightsource(
     lightsource_t* source
 ) {
+    free(source->light_polygons);
+    source->light_polygons = NULL;
+
     free(source);
     source = NULL;
 };

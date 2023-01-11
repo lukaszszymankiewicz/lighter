@@ -131,7 +131,7 @@ START_TEST (LVL_fill_tiles_check)
     // placed in tile_array.
     for (int i=0; i<70; i++) {
         ck_assert_ptr_nonnull(&(level->tile_array[i]));
-        tile_t *tile = &(level->tile_array[i]);
+        tile_t *tile = level->tile_array[i];
         int x = (int)i%cols;
         int y = (int)i/cols;
         ck_assert_int_eq(tile->x, x*TILE_WIDTH);
@@ -151,7 +151,6 @@ START_TEST (LVL_fill_structure_check)
     tex = GFX_read_texture(tex_filepath);
     LVL_set_tileset(level, tex);
     LVL_set_size(level, 10, 10);
-    LVL_set_tile_number(level, 2);
     LVL_add_tile(level, 0, 0, 0);
     LVL_add_tile(level, 1, 32, 0);
 
@@ -166,9 +165,9 @@ START_TEST (LVL_fill_structure_check)
     tile_t *tile_c = LVL_tile_on_pos(level, 7, 7);
 
     // THEN
-    tile_t *ex_tile = &level->tile_array[0];
-    tile_t *ex_tile_b = &level->tile_array[1];
-    tile_t *ex_tile_c = &level->tile_array[1];
+    tile_t *ex_tile = level->tile_array[0];
+    tile_t *ex_tile_b = level->tile_array[1];
+    tile_t *ex_tile_c = level->tile_array[1];
 
     ck_assert_ptr_nonnull(tile);
     ck_assert_ptr_nonnull(tile_b);

@@ -67,13 +67,6 @@ void LVL_set_size(
     LVL_clean_obstacles(level);
 }
 
-// allocs memory for tiles
-void LVL_set_tile_number(
-    level_t *level,
-    int      tile_number
-) {
-    level->tile_array = malloc(tile_number * sizeof(tile_t));
-}
 
 // adds tile to tile array of level
 void LVL_add_tile(
@@ -84,7 +77,7 @@ void LVL_add_tile(
 ) {
     tile_t* tile                  = NULL;
     tile                          = TILE_new(x_offset, y_offset);
-    level->tile_array[tile_index] = *tile;
+    level->tile_array[tile_index] = tile;
 }
 
 void LVL_set_tileset(level_t *level, texture_t* texture) {
@@ -98,7 +91,7 @@ void LVL_fill_structure(
     int      y,
     int      i
 ) {
-    level->structure[y * level->size_x + x] = &(level->tile_array[i]);
+    level->structure[y * level->size_x + x] = level->tile_array[i];
 }
 
 // fills level obstacles (1-obstacle, 0-no obstacle) with single value
@@ -111,10 +104,12 @@ void LVL_fill_obstacle(
     level->obstacles[y * level->size_x + x] = i;
 }
 
-void LVL_fill_tiles(level_t *level) {
-    // allocating memory for all tiles
-    int tile_number = (int)(level->tileset->width/TILE_WIDTH) * (int)(level->tileset->height/TILE_HEIGHT); 
-    LVL_set_tile_number(level, tile_number);
+void LVL_fill_tiles(
+    level_t *level
+) {
+    for (int i=0; i<MAX_TILES; i++) {
+        level->tile_array[i] = NULL;
+    }
 
     // creating actual tiles
     int i = 0;
@@ -135,7 +130,7 @@ tile_t* LVL_tile_on_pos(
     if (x>0 && x<level->size_x && y>0 && y<level->size_y) {
         return level->structure[y * level->size_x + x];
     }
-    return &level->tile_array[EMPTY_TILE];
+    return level->tile_array[EMPTY_TILE];
 }
 
 int LVL_obstacle_on_pos(level_t* level, int x, int y) {
@@ -334,6 +329,25 @@ void LVL_draw(
 void LVL_free(
     level_t *level
 ) {
+    GFX_free_texture(level->tileset);
+    level->tileset = NULL;
+
+    free(level->structure);
+    level->structure = NULL;
+
+    free(level->obstacles);
+    level->obstacles = NULL;
+
+    SEG_free(level->obstacle_segments);
+    level->obstacle_segments = NULL;
+
+    for (int i=0; i<MAX_TILES; i++) {
+        if (level->tile_array[i] == NULL) {
+            continue;
+        }
+        free(level->tile_array[i]);
+    }
+
     free(level);
     level = NULL;
 }

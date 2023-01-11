@@ -18,7 +18,7 @@ int SEG_common_y(segment_t *first, segment_t *second);
 bool SEG_contains(segment_t *seg, int x, int y);
 
 void SEG_push(segment_t** head, int x1, int y1, int x2, int y2);
-void SEG_free(segment_t* obstacles);
+void SEG_free(segment_t* head);
 void SEG_delete(segment_t** head, int y);
 void SEG_merge(segment_t** head, segment_t* candidates);
 void SEG_debug(segment_t* seg);

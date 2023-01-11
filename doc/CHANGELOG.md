@@ -1,6 +1,13 @@
 # LIGHTER changelog
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 11-01-2023
+### Changed:
+- engine can now handle multiple entities
+- engine can now handle multiple lightsources
+- code is somewhat cleaned up
+- everything is prepared to be easily replaced by OpenGl
+
 ## [0.1.3] - 11-09-2022
 ### Changed:
 - light polygon calculation made more robust and optimized

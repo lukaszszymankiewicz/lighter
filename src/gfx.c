@@ -19,6 +19,9 @@ texture_t    *sprites[ASSET_SPRITE_ALL];
 uint32_t     *lightbuffer;
 uint32_t     *shadowbuffer;
 
+/*
+ * THIS SECONDTION WILL BE REPLACED BY OPENGL VERSION
+ */
 float GFX_dist(
     int x0,
     int y0,
@@ -72,6 +75,10 @@ void GFX_fill_lightbuffer(
     // add shadow with light gradient
     shadowbuffer[pos] = (shadow << 24) | (shadow << 16) | (shadow << 8) | 255; 
 }
+
+/*
+ * END OPENGL SECTION
+ */
 
 void GFX_init_window() {
     window = SDL_CreateWindow(
@@ -170,6 +177,8 @@ void GFX_free_texture(
     texture_t *texture
 ) {
     SDL_DestroyTexture(texture->surface);
+    texture->surface = NULL;
+
     free(texture);
     texture = NULL;
 };
@@ -239,6 +248,8 @@ void GFX_render_texture(
     }
 
     SDL_RenderCopyEx(renderer, texture->surface, clip, &render_quad, 0, NULL, flip_tex);
+
+    free(clip);
 };
 
 // simplest line - only for debugging
@@ -268,10 +279,12 @@ void GFX_draw_rect_border(
 ) {
     SDL_SetRenderDrawColor(renderer, r, g, b, a);     
     SDL_Rect rect = (SDL_Rect){x, y, w, h};
-    // SDL_RenderDrawRect(renderer, &rect);
     SDL_RenderFillRect(renderer, &rect);
 };
 
+/*
+ * THIS SECONDTION WILL BE REPLACED BY OPENGL VERSION
+ */
 // fills rect with shader function
 void GFX_fill_rect(
     shader_t shader,
@@ -412,10 +425,12 @@ void GFX_fill_light(
     int         highest      = VRTX_highest_y(poly);
     int         lowest       = VRTX_lowest_y(poly);
     
-    segment_t *not_drawn_yet = SEG_get_segments_of_polygon(poly); 
+    segment_t *not_drawn_yet = NULL;
     segment_t *current_draw  = NULL;
     segment_t *obstacle_ptr  = NULL;
     segment_t *candidates    = NULL;
+
+    not_drawn_yet = SEG_get_segments_of_polygon(poly); 
 
     // algorithm is starting from highest vertex of polygon...
     y = highest;
@@ -425,15 +440,13 @@ void GFX_fill_light(
 
         // if algorithm reaches point below screen, no further drawing is needed, algorithm is
         // terminated
-        if (y>SCREEN_WIDTH) { y++; break; }
-
-        obstacle_ptr = current_draw;
+        if (y>SCREEN_WIDTH) {
+            y++;
+            break;
+        }
 
         // delete segments from current drawn scan_y must be higher than y of any point
-        while(obstacle_ptr) {
-            SEG_delete(&current_draw, y);
-            obstacle_ptr=obstacle_ptr->next;
-        }
+        SEG_delete(&current_draw, y);
 
         // get candidates to draw
         candidates = SEG_find_candidates(&not_drawn_yet, y);
@@ -441,23 +454,36 @@ void GFX_fill_light(
         // add candidates to current draw
         SEG_merge(&current_draw, candidates);       
 
+        SEG_free(candidates);
+        candidates = NULL;
+
         // if there isn`t anything to draw or anything to be drawn in future - stop
         if (!not_drawn_yet && !current_draw) { break; }
 
         // if current scanline y is below 0 (outside the screen, no drawing is needed, go to next
         // scanline)
-        if (y<0) { y++; continue; }
+        if (y<0) {
+            y++;
+            continue; 
+        }
+
         else { 
             GFX_draw_scanline(current_draw, shader, y, r, g, b, power, x0, y0);
             y++;
         }
     }
 
-    if (not_drawn_yet) { SEG_free(not_drawn_yet); }
+    SEG_free(not_drawn_yet);
+    not_drawn_yet = NULL;
+
     if (current_draw) { SEG_free(current_draw); }
     if (obstacle_ptr) { SEG_free(obstacle_ptr); }
     if (candidates)  { SEG_free(candidates); }
 }
+
+/*
+ * END OPENGL SECTION
+ */
 
 texture_t* GFX_read_texture(
     const char *filepath
@@ -493,6 +519,9 @@ texture_t* GFX_read_texture(
     }
 };
 
+/*
+ * THIS SECONDTION WILL BE REPLACED BY OPENGL VERSION
+ */
 void GFX_draw_light(
 ) {
     SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
@@ -506,3 +535,7 @@ void GFX_draw_darkness(
     SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
+/*
+ * OPENGL VERSION END
+ */
+

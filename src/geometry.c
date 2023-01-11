@@ -1,11 +1,9 @@
-#include <assert.h>
 #include "global.h"
 #include "vertex.h"
 #include "segment.h"
 #include "sorted_list.h"
 #include "point.h"
 
-// calculates angle between two points
 float GEO_angle_2pt(
     int ax,
     int ay,

@@ -18,7 +18,6 @@ light_scene_t* LIG_new_light_scene() {
 
     for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
         scene->components[i] = NULL;
-        scene->components[i] = (lvertex_t*)malloc(sizeof(lvertex_t));
     }
 
     return scene;
@@ -27,9 +26,15 @@ light_scene_t* LIG_new_light_scene() {
 void LIG_free_light_scene(
     light_scene_t* scene
 ) {
-    for (int i=0; i<scene->n; i++) {
+    for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
+        
+        if (scene->components[i] == NULL) {
+            continue;
+        }
+
         VRTX_free(scene->components[i]->coords);
         scene->components[i]->coords = NULL;
+
         free(scene->components[i]);
         scene->components[i] = NULL;
     }
@@ -396,7 +401,14 @@ vertex_t* LIG_add_aux_hit_points(
         inter = LIG_ray_intersects_multiple(x, y, ptr->x, ptr->y, obstacles);
         aux_vertices = LIG_find_closest_hit(inter, x, y, ptr->x, ptr->y);
         VRTX_merge(&light_polygon, aux_vertices);
+
+        if (aux_vertices) {VRTX_free(aux_vertices);}
+        aux_vertices = NULL;
+
+        if (inter) {SEG_free(inter); }
+        inter = NULL;
     }
+
     return light_polygon;
 }
 
@@ -424,13 +436,24 @@ vertex_t* LIG_get_base_light_polygon(
             // slip rays are calculatd
             aux_pt = LIG_generate_aux_hit_points(x, y, ptr->x, ptr->y, inter);
             PT_merge(&aux_pts, aux_pt);
+            // PT_free(aux_pt);
 
             // ray end if not interrupted should be added to light polygon
             pt_angle = GEO_angle_2pt(x, y, ptr->x, ptr->y);
             VRTX_add_point(&light_polygon, ptr->x, ptr->y, pt_angle);
 
+            SEG_free(inter);
+            inter = NULL;
+
         // ray hits SOMETHING - nothing happens. Calculating hit point is needed only for slip rays
-        } else { }
+        } else {
+
+            SEG_free(inter);
+            inter = NULL;
+        }
+
+        SEG_free(inter);
+        inter = NULL;
     }
 
     // slip rays MUST hit something, its end is generated to always range outisde level. Because
@@ -438,7 +461,8 @@ vertex_t* LIG_get_base_light_polygon(
     // be calculated.
     LIG_add_aux_hit_points(x, y, aux_pts, light_polygon, obstacles);
 
-    SEG_free(inter);
+    if (inter) { SEG_free(inter); }
+    if (aux_pts) { PT_free(aux_pts); }
 
     return light_polygon;
 };
@@ -455,8 +479,10 @@ vertex_t* LIG_initial_point_of_light(
     if (width != 0.0) {
         v = VRTX_new(x, y, 0.0);
         VRTX_merge(&light_polygon, v);
-
+        
+        if (v) { VRTX_free(v); }
     }
+
     return light_polygon;
 }
 
@@ -641,6 +667,8 @@ void LIG_add_to_scene(
     segment_t       *obstacles
 ) {
     vertex_t* vertex = NULL;
+
+    scene->components[scene->n] = (lvertex_t*)malloc(sizeof(lvertex_t));
 
     vertex = LIG_single_add_light_polygon(x, y, i, light, obstacles);
 

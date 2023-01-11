@@ -17,11 +17,8 @@ controller_t* CON_init(
     con->old_state   = NULL;
     con->counter     = 0;
 
-    con->state       = (Uint8*)malloc(sizeof(Uint8) * con->len);
-    con->old_state   = (Uint8*)malloc(sizeof(Uint8) * con->len);
-
-    memset(con->state, (Uint8)0, sizeof(Uint8) * con->len);
-    memset(con->old_state, (Uint8)0, sizeof(Uint8) * con->len);
+    con->state       = (Uint8*)calloc(con->len, sizeof(Uint8) * con->len);
+    con->old_state   = (Uint8*)calloc(con->len, sizeof(Uint8) * con->len);
 
     return con;
 }
@@ -65,5 +62,16 @@ bool CON_button_is_just_released(
 void CON_free(
     controller_t* con
 ) {
+    if (con->state) {
+        free(con->state);
+    }
+    con->state       = NULL;
+
+    if (con->old_state) {
+        free(con->old_state);
+    }
+    con->old_state   = NULL;
+
     free(con);
+    con = NULL;
 }

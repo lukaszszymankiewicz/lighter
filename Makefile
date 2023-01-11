@@ -38,7 +38,6 @@ TESTTARGET =                        \
     $(TESTDIR)/check_tests.c        \
     $(TESTDIR)/check_controller.c   \
 	$(TESTDIR)/check_geometry.c     \
-	$(TESTDIR)/check_gfx.c	        \
 	$(TESTDIR)/check_sprites.c      \
 	$(TESTDIR)/check_entity.c       \
 	$(TESTDIR)/check_level.c        \

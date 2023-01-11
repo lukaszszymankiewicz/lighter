@@ -66,7 +66,18 @@ SDL_Rect* ENT_current_frame_rect(
     if (!(entity->flags & ANIMATIABLE)) {
         return ANIM_get_whole_texture_size(entity->sprites);
     }
-    return &(ENT_current_frame(entity)->rect);
+
+    frame_t *frame = &(entity->sprites->animations[entity->state].frames[entity->frame]);
+
+    SDL_Rect *rect = NULL;
+    rect           = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+
+    rect->x = frame->rect.x;
+    rect->y = frame->rect.y;
+    rect->w = frame->rect.w;
+    rect->h = frame->rect.h;
+
+    return rect;
 }
 
 int ENT_get_x(
@@ -448,6 +459,7 @@ entity_t* ENT_init(
     entity->light_pt         = light_pt;
     entity->sprites          = NULL;
     entity->sprites          = ANIM_init(animation, texture);
+
     entity->light            = NULL;
     entity->light            = light;
 
@@ -520,19 +532,38 @@ void ENT_draw(
     int x,
     int y
 ) {
+    SDL_Rect *clip = NULL;
+    clip           = ENT_current_frame_rect(entity);
+
     GFX_render_texture(
         entity->sprites->texture,
-        ENT_current_frame_rect(entity),
+        clip,
         x,
         y,
         entity->direction
     );
+
 }
+
 void ENT_free(
     entity_t *entity
 ) {
-    GFX_free_texture(entity->sprites->texture);
-    free(entity->sprites);
+    if (entity->hold) {
+        ENT_free(entity->hold);
+        entity->hold = NULL;
+    }
+
+    entity->light = NULL;
+    entity->sprites->texture = NULL;
+
+    if (entity->sprites->n_animations == 0) {
+        ANIM_free(entity->sprites);
+    }
+
+    entity->sprites = NULL;
+
+    free(entity);
+    entity = NULL;
 }
 
 int ENT_get_n_hitboxes(

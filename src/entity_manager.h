@@ -22,4 +22,6 @@ bool ENTMAN_entity_in_range(entity_manager_t* entity_manager, entity_t* entity, 
 int ENTMAN_hero_x(entity_manager_t* entity_manager); 
 int ENTMAN_hero_y(entity_manager_t* entity_manager); 
 
+void ENTMAN_free(entity_manager_t* entity_manager);
+
 #endif

@@ -10,6 +10,7 @@ animation_sheet_t *animations[ASSET_ANIMATION_ALL];
 void ANIM_free(
     animation_sheet_t* animation
 ) {
+    animation->texture = NULL;
     free(animation);
     animation = NULL;
 }
@@ -115,10 +116,6 @@ animation_sheet_t* ANIM_read_animation(
                 sheet->animations[idx].frames[frame_idx].rect.w = coords[2];
                 sheet->animations[idx].frames[frame_idx].rect.h = coords[3];
 
-                // fill up the symmetry of handle point
-                // sheet->animations[idx].frames[frame_idx].handle_x[LEFT] = sheet->animations[idx].frames[frame_idx].rect.w - sheet->animations[idx].frames[frame_idx].handle_x[RIGHT];
-
-                // sheet->animations[idx].frames[frame_idx].handle_y[LEFT] = sheet->animations[idx].frames[frame_idx].handle_y[RIGHT];
                 rect_coord_idx = 0; state++; 
             }
 

@@ -270,3 +270,19 @@ void ENTMAN_draw_entities(
         }
     }
 }
+
+void ENTMAN_free(
+    entity_manager_t* entity_manager
+) { 
+    for (int i=0; i<MAX_ENTITY; i++) {
+        if (entity_manager->entities[i] == NULL) {
+            continue;
+        }
+
+        ENT_free(entity_manager->entities[i]);
+        entity_manager->entities[i] = NULL;
+    }
+
+    free(entity_manager);
+    entity_manager = NULL;
+}

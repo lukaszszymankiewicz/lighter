@@ -6,18 +6,20 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
+#define MAX_TILES 100
+
 
 // struct for holding level data transalted to ready-to-use object (not raw data like mapfile_t)
 typedef struct level {
-    int            size_x;               // level width in tiles
-    int            size_y;               // level height in tiles
-    segment_t     *obstacle_segments;    // vector of segments, which are obstacles
-    texture_t     *tileset;              // tileset
-    tile_t        *tile_array;           // tiles from tilesets used, vector of unique tiles
-    int           *obstacles;            // matrix of obstacles (1-obstacle 0-no obstacle)
-                                         // it is one-to-one representation of level->structure, 
-                                         // but only indicates if array is an obstacle
-    tile_t        **structure;           // matrix of tiles (from tile_array), representing level
+    int            size_x;                 // level width in tiles
+    int            size_y;                 // level height in tiles
+    segment_t     *obstacle_segments;      // vector of segments, which are obstacles
+    texture_t     *tileset;                // tileset
+    tile_t        *tile_array[MAX_TILES];  // tiles from tilesets used, vector of unique tiles
+    int           *obstacles;              // matrix of obstacles (1-obstacle 0-no obstacle)
+                                           // it is one-to-one representation of level->structure, 
+                                           // but only indicates if array is an obstacle
+    tile_t        **structure;             // matrix of tiles (from tile_array), representing level
 } level_t;
 
 level_t* LVL_new();

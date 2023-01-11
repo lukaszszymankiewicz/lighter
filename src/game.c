@@ -70,10 +70,10 @@ void GAME_close(
     CON_free(keyboard);
     TIMER_free(game->cap_timer);
     TIMER_free(game->fps_timer);
-    GAME_free_all_files();
+    ENTMAN_free(game->entity_manager);
     LVL_free(game->level);
+    GAME_free_all_files();
     free(game);
-    SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
     GFX_free();
     SDL_Quit();
 };
@@ -232,6 +232,9 @@ void GAME_read_level(
     GAME_fill_level(game, file);
 
     LVL_analyze(game->level);
+
+    free(data_path);
+    free(img_path);
 }
 
 game_t* GAME_init(
@@ -321,7 +324,6 @@ void GAME_init_graphics(
     GFX_init_graphics();
 }
 
-// TODO: replace 
 void GAME_calc_light(
     game_t        *game,
     light_scene_t *scene

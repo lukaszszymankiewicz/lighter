@@ -105,7 +105,7 @@ void VRTX_free(
 ) {
     vertex_t* temp = NULL;
 
-    while (head != NULL) {
+    while (head) {
         temp = head;
         head = head->next;
         free(temp);
@@ -122,10 +122,6 @@ void VRTX_merge(
     while(ptr) {
         VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
         ptr=ptr->next;
-    }
-
-    if (candidates) {
-        VRTX_free(candidates);
     }
 }
 
