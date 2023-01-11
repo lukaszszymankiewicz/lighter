@@ -7,9 +7,9 @@
                                         
 
 ```
-Game written in C using SDL2 library.
+Game Demo written in C using SDL2 library.
 
-It will contain awsome light effects and post-apocaliptic vibe.
+This Proof of Concept contain shadowcasting engine both with rudimental game mechanics (and post-apocaliptic vibe!).
 
 
 This repo contains only game code, development tools are put here: [repo](https://github.com/lukaszszymankiewicz/ltools)
