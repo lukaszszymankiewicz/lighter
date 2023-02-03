@@ -2,7 +2,9 @@ CC = gcc
 CFLAGS := --std=c99 -Wall -g
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 LIBS = -lm
-OBJ = lighter
+
+FINAL_OBJ = lighter
+FINAL_TEST_OBJ = lighter_tests
 
 TESTOBJ = check_tests_suite
 TESTLINKS = `pkg-config --cflags --libs check sdl2 SDL2_image` 
@@ -13,91 +15,98 @@ TESTDIR = tests
 LEVELLOG = level_read_log.txt
 MEMORYLOG = memory_check.txt
 
-TARGET =                         \
-	$(SRCDIR)/game.c             \
-	$(SRCDIR)/main.c             \
-	$(SRCDIR)/gfx.c              \
-    $(SRCDIR)/import.c           \
-	$(SRCDIR)/controller.c       \
-	$(SRCDIR)/entity.c           \
-	$(SRCDIR)/entity_manager.c   \
-	$(SRCDIR)/timer.c            \
-	$(SRCDIR)/tile.c             \
-	$(SRCDIR)/files.c            \
-	$(SRCDIR)/level.c            \
-	$(SRCDIR)/geometry.c         \
-	$(SRCDIR)/sorted_list.c      \
-	$(SRCDIR)/light.c            \
-	$(SRCDIR)/vertex.c           \
-	$(SRCDIR)/source.c           \
-	$(SRCDIR)/segment.c          \
-	$(SRCDIR)/sprites.c          \
-	$(SRCDIR)/point.c            \
+BUILDDIR = build
 
-TESTTARGET =                        \
-    $(TESTDIR)/check_tests.c        \
-    $(TESTDIR)/check_controller.c   \
-	$(TESTDIR)/check_geometry.c     \
-	$(TESTDIR)/check_sprites.c      \
-	$(TESTDIR)/check_entity.c       \
-	$(TESTDIR)/check_level.c        \
-	$(TESTDIR)/check_light.c        \
-	$(TESTDIR)/check_point.c        \
-	$(TESTDIR)/check_segment.c      \
-	$(TESTDIR)/check_source.c       \
-	$(TESTDIR)/check_sorted_list.c  \
-	$(TESTDIR)/check_vertex.c       \
-	$(TESTDIR)/check_entity_manager.c       \
-	$(SRCDIR)/controller.c          \
-	$(SRCDIR)/geometry.c            \
-	$(SRCDIR)/gfx.c                 \
-	$(SRCDIR)/import.c              \
-	$(SRCDIR)/entity.c              \
-	$(SRCDIR)/level.c               \
-	$(SRCDIR)/light.c               \
-	$(SRCDIR)/files.c               \
-	$(SRCDIR)/point.c               \
-	$(SRCDIR)/segment.c             \
-	$(SRCDIR)/entity_manager.c      \
-	$(SRCDIR)/sprites.c             \
-	$(SRCDIR)/source.c              \
-	$(SRCDIR)/sorted_list.c         \
-	$(SRCDIR)/timer.c               \
-	$(SRCDIR)/tile.c                \
-	$(SRCDIR)/vertex.c              \
+clear_screen:
+	clear
 
-.PHONY: lighter
-lighter: 
-	$(CC) $(CFLAGS) $(TARGET) -o $(OBJ) $(LINKS) $(LIBS)
+$(BUILDDIR)/%.o:	$(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: tests
-tests: 
-	$(CC) $(CFLAGS) $(TESTTARGET) -o $(TESTOBJ) $(TESTLINKS) $(LIBS)
+$(BUILDDIR)/%.o:	$(TESTDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: run_check_tests_suite
-run_check_tests_suite:
-	./$(TESTOBJ)
+OBJS =                          \
+	$(BUILDDIR)/game.o             \
+	$(BUILDDIR)/gfx.o              \
+    $(BUILDDIR)/import.o           \
+	$(BUILDDIR)/controller.o       \
+	$(BUILDDIR)/entity.o           \
+	$(BUILDDIR)/entity_manager.o   \
+	$(BUILDDIR)/timer.o            \
+	$(BUILDDIR)/tile.o             \
+	$(BUILDDIR)/files.o            \
+	$(BUILDDIR)/level.o            \
+	$(BUILDDIR)/geometry.o         \
+	$(BUILDDIR)/sorted_list.o      \
+	$(BUILDDIR)/light.o            \
+	$(BUILDDIR)/vertex.o           \
+	$(BUILDDIR)/source.o           \
+	$(BUILDDIR)/segment.o          \
+	$(BUILDDIR)/sprites.o          \
+	$(BUILDDIR)/point.o            \
+
+TESTOBJS =                        \
+    $(BUILDDIR)/check_controller.o   \
+	$(BUILDDIR)/check_geometry.o     \
+	$(BUILDDIR)/check_sprites.o      \
+	$(BUILDDIR)/check_entity.o       \
+	$(BUILDDIR)/check_level.o        \
+	$(BUILDDIR)/check_light.o        \
+	$(BUILDDIR)/check_point.o        \
+	$(BUILDDIR)/check_segment.o      \
+	$(BUILDDIR)/check_source.o       \
+	$(BUILDDIR)/check_sorted_list.o  \
+	$(BUILDDIR)/check_vertex.o       \
+	$(BUILDDIR)/check_entity_manager.o       \
+	$(BUILDDIR)/controller.o          \
+	$(BUILDDIR)/geometry.o            \
+	$(BUILDDIR)/gfx.o                 \
+	$(BUILDDIR)/import.o              \
+	$(BUILDDIR)/entity.o              \
+	$(BUILDDIR)/level.o               \
+	$(BUILDDIR)/light.o               \
+	$(BUILDDIR)/files.o               \
+	$(BUILDDIR)/point.o               \
+	$(BUILDDIR)/segment.o             \
+	$(BUILDDIR)/entity_manager.o      \
+	$(BUILDDIR)/sprites.o             \
+	$(BUILDDIR)/source.o              \
+	$(BUILDDIR)/sorted_list.o         \
+	$(BUILDDIR)/timer.o               \
+	$(BUILDDIR)/tile.o                \
+	$(BUILDDIR)/vertex.o              \
+
+
+$(BUILDDIR)/lighter:	$(OBJS) $(BUILDDIR)/main.o
+	$(CC) $(CFLAGS) $(OBJS) $(BUILDDIR)/main.o -o $(BUILDDIR)/$(FINAL_OBJ)  $(LINKS) $(LIBS)
+
+$(BUILDDIR)/test_suite:	$(TESTOBJS) $(BUILDDIR)/check_tests.o
+	$(CC) $(CFLAGS) $(TESTOBJS) $(BUILDDIR)/check_tests.o -o $(BUILDDIR)/$(FINAL_TEST_OBJ) $(TESTLINKS) $(LIBS)
+
+clean:
+	rm -f $(BUILDDIR)/*.o
+	rm -f $(BUILDDIR)/$(FINAL_OBJ)
+	rm -f $(BUILDDIR)/$(FINAL_TEST_OBJ)
+	rm $(LEVELLOG)
+	rm $(MEMORYLOG)
+
+lighter:  $(BUILDDIR)/lighter
+
+tests:	 $(BUILDDIR)/test_suite
+
+run_lighter_tests:
+	./$(BUILDDIR)/$(FINAL_TEST_OBJ)
+
+run_lighter:
+	./$(BUILDDIR)/$(FINAL_OBJ)
+
+all: 
+	make lighter run_lighter
+
+all_tests:
+	make clear_screen tests run_lighter_tests
 
 .PHONY: memory_check
 memory_check:
 	valgrind --leak-check=yes --log-file="memory_check.txt" --track-origins=yes ./lighter
-
-.PHONY: run_lighter
-run_lighter:
-	./$(OBJ)
-
-.PHONY: clear_screen
-clear_screen:
-	clear
-
-.PHONY: run
-run:
-	make clean lighter run_lighter
-
-.PHONY: runtests
-runtests:
-	make clean tests clear_screen run_check_tests_suite
-
-.PHONY: clean
-clean:
-	$(RM) $(OBJ) $(TESTOBJ) $(LEVELLOG) $(MEMORYLOG)
