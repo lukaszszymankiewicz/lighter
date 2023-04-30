@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_opengl.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -35,7 +36,7 @@
 #define DEG5                         PI/36              // shortcut
 #define DEG1                         PI/(36*5)          // shortcut
 #define SCREEN_WIDTH                 320                // screen width in pixels
-#define SCREEN_HEIGHT                200                // screen height in pixels
+#define SCREEN_HEIGHT                240                // screen height in pixels
 #define MAX_KEYS                     SDL_NUM_SCANCODES  // SDL max keys supported
 #define GAME_NAME                    "Lighter"          // game windom nape
 #define TILE_HEIGHT                  32                 // single tile height (in px)

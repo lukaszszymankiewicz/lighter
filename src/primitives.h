@@ -14,7 +14,7 @@ typedef struct segment {
     int   y1;
     int   x2; 
     int   y2;
-    float slope; //TODO: is this needed (?)
+    float slope;
     int   type;
     struct segment *next;
 } segment_t;
@@ -32,12 +32,6 @@ typedef struct vertex {
     struct vertex *next;
     float          dist;
 } vertex_t;
-
-typedef struct texture {
-    SDL_Texture *surface;
-    int          width;
-    int          height;
-} texture_t;
 
 typedef struct lvertex {
     vertex_t* coords;

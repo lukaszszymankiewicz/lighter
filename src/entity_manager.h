@@ -1,6 +1,7 @@
 #include "entity.h"
 #include "global.h"
 #include "primitives.h"
+#include "texture.h"
 
 #ifndef ENTITY_MANAGER_H
 #define ENTITY_MANAGER_H

@@ -2,6 +2,7 @@
 #include "global.h"
 #include "primitives.h"
 #include "tile.h"
+#include "texture.h"
 
 #ifndef LEVEL_H
 #define LEVEL_H

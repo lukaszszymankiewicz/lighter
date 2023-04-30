@@ -2,6 +2,7 @@
 #include "global.h"
 #include "primitives.h"
 #include "sorted_list.h"
+#include "texture.h"
 
 #ifndef GFX_H
 #define GFX_H
@@ -13,9 +14,6 @@ extern SDL_Renderer *renderer;
 extern texture_t         *sprites[ASSET_SPRITE_ALL];
 
 typedef void (*shader_t)(uint32_t, int, int, int, int, int);
-
-void GFX_init_window();
-void GFX_init_renderer();
 
 int GFX_init_graphics();
 
@@ -50,13 +48,21 @@ void GFX_fill_rect(
 );
 
 void GFX_draw_rect_border(int x, int y, int w, int h, int r, int g, int b, int a);
+
 void GFX_render_texture(texture_t* texture, SDL_Rect* clip, int x, int y, bool flip);
 void GFX_render_tile(texture_t* texture, int render_x, int render_y, int x, int y, int w, int h);
+
 void GFX_free_texture(texture_t *texture);
 void GFX_clean_buffers();
 void GFX_draw_light();
 void GFX_draw_darkness();
 
-texture_t* GFX_read_texture(const char *filepath);
+void GFX_render_texture_part(
+    texture_t     *texture,
+    int render_x1, int render_y1,
+    int tex_x1,    int tex_y1,
+    int tex_x2,    int tex_y2,
+    bool flip
+);
 
 #endif

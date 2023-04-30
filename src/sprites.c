@@ -23,8 +23,9 @@ SDL_Rect* ANIM_get_whole_texture_size(
 
     clip->x = 0;
     clip->y = 0;
-    clip->w = animation->texture->width;
-    clip->h = animation->texture->height;
+
+    clip->w = TXTR_width(animation->texture);
+    clip->h = TXTR_height(animation->texture);
 
     return clip;
 }

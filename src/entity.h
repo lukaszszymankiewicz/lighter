@@ -3,6 +3,7 @@
 #include "global.h"
 #include "primitives.h"
 #include "sprites.h"
+#include "texture.h"
 
 #ifndef ENTITY_H
 #define ENTITY_H

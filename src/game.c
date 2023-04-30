@@ -17,10 +17,10 @@ void GAME_read_all_files(
 ) {
     animations[ASSET_HERO_ANIMATION]           = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
     animations[ASSET_NO_ANIMATION]             = NULL;
-    sprites[ASSET_SPRITE_HERO]                 = GFX_read_texture(FILEPATH_SPRITE_HERO);
-    sprites[ASSET_SPRITE_TEST]                 = GFX_read_texture(FILEPATH_SPRITE_HERO);
-    sprites[ASSET_SPRITE_LIGHTER]              = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
-    sprites[ASSET_SPRITE_WALLLIGHT]            = GFX_read_texture(FILEPATH_SPRITE_WALLLIGHT);
+    sprites[ASSET_SPRITE_HERO]                 = TXTR_read_from_file(FILEPATH_SPRITE_HERO);
+    sprites[ASSET_SPRITE_TEST]                 = TXTR_read_from_file(FILEPATH_SPRITE_HERO);
+    sprites[ASSET_SPRITE_LIGHTER]              = TXTR_read_from_file(FILEPATH_SPRITE_LIGHTER);
+    sprites[ASSET_SPRITE_WALLLIGHT]            = TXTR_read_from_file(FILEPATH_SPRITE_WALLLIGHT);
     wobbles[ASSET_WOBBLE_NO]                   = SRC_read_wobble(FILEPATH_WOBBLE_NO);
     wobbles[ASSET_WOBBLE_STABLE]               = SRC_read_wobble(FILEPATH_WOBBLE_STABLE);
     wobbles[ASSET_WOBBLE_WALKING]              = SRC_read_wobble(FILEPATH_WOBBLE_WALKING);
@@ -225,7 +225,7 @@ void GAME_read_level(
     img_path  = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_SUFFIX);
 
     file    = fopen(data_path, LEVEL_READ_MODE);
-    tileset = GFX_read_texture(img_path);
+    tileset = TXTR_read_from_file(img_path);
 
     GAME_read_level_tileset(game, tileset);
     LVL_fill_tiles(game->level);
@@ -292,7 +292,6 @@ void GAME_clear_screen(
     game_t *game
 ) {
     GFX_clear_screen();
-    GFX_clean_buffers();
 }
 
 void GAME_update_entities(
@@ -319,9 +318,9 @@ void GAME_render(
     GFX_update();
 }
 
-void GAME_init_graphics(
+int GAME_init_graphics(
 ) {
-    GFX_init_graphics();
+    return GFX_init_graphics();
 }
 
 void GAME_calc_light(
@@ -346,11 +345,15 @@ void GAME_draw_light(
     LIG_free_light_scene(scene);
 }
 
+// TODO: eveything should have success status enabled
 game_t* GAME_new(
 ) {
     game_t* game = NULL;
 
-    GAME_init_graphics();
+    int gfx_init_success = 0;
+    gfx_init_success = GAME_init_graphics();
+    if (!gfx_init_success) { GAME_close(game); }
+
     GAME_read_all_files();
     GAME_update_all_files();
 
@@ -377,9 +380,9 @@ void GAME_draw(
 ) {
     GAME_clear_screen(game);
     GAME_draw_level(game);
-    GAME_draw_light(game);
     GAME_draw_entities(game);
     GAME_render(game);
+    // GAME_draw_light(game);
 }
 
 void GAME_update_time(

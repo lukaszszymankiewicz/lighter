@@ -2,11 +2,13 @@
 #include "geometry.h"
 #include "controller.h"
 #include "entity.h"
+#include "texture.h"
 #include "gfx.h"
 #include "primitives.h"
 #include "sorted_list.h"
 #include "sprites.h"
 #include "source.h"
+#include <stdio.h>
 
 int entities_library[ENTITY_ALL][ENTITY_PARAM_ALL] = {
     // hero
@@ -262,6 +264,7 @@ void ENT_update_state(
         entity->state=STANDING; 
     }
     if (entity->y_vel > 0) {
+        printf("entity with id %d is start to falling down \n", entity->id);
         entity->state=FALLING_DOWN; 
     }
 }
@@ -339,9 +342,11 @@ void ENT_update_friction(
     else {
         entity->x_vel = MIN(0, entity->x_vel + X_FRICTION);
     }
+    if (entity->id == 0) {printf("state = %d \n", entity->state);  }
 
     if (entity->state == JUMPING || entity->state == FALLING_DOWN) {
         entity->y_vel += Y_FRICTION;
+        printf("XXXXentity with id %d is jumping or falling down \n", entity->id);
     }
 }
 
@@ -464,8 +469,8 @@ entity_t* ENT_init(
     entity->light            = light;
 
     entity->state            = state;
-    entity->direction        = LEFT;   
-    entity->id               = 0;
+    entity->direction        = RIGHT; // right is the default but I donw know why
+    entity->id               = id;
     entity->frame            = 0;
     entity->frame_t          = 0;
     entity->x_vel            = 0;
@@ -514,7 +519,6 @@ void ENT_update(entity_t* entity) {
     if (entity->hold) {
         ENT_update(entity->hold);
     }
-
 }
 
 void ENT_resolve(entity_t* entity) {
@@ -527,6 +531,12 @@ void ENT_resolve(entity_t* entity) {
     }
 }
 
+bool ENT_render_with_flip(
+    entity_t *entity
+) {
+    return entity->direction == LEFT;
+}
+
 void ENT_draw(
     entity_t *entity,
     int x,
@@ -534,13 +544,17 @@ void ENT_draw(
 ) {
     SDL_Rect *clip = NULL;
     clip           = ENT_current_frame_rect(entity);
+    bool flip      = ENT_render_with_flip(entity);
 
-    GFX_render_texture(
+    GFX_render_texture_part(
         entity->sprites->texture,
-        clip,
         x,
         y,
-        entity->direction
+        clip->x,
+        clip->y,
+        clip->x + clip->w,
+        clip->y + clip->h,
+        flip
     );
 
 }

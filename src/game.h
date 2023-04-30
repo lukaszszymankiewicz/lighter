@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "level.h"
 #include "entity_manager.h"
+#include "texture.h"
 
 #ifndef GAME_H
 #define GAME_H

@@ -1,0 +1,3 @@
+- add pre-calculated values to tiles while level creation
+- delete all print statements
+- add light shader

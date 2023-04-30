@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS := --std=c99 -Wall -g
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
-LIBS = -lm
+LIBS = -lGL -lGLU -lGLEW -lm 
 
 FINAL_OBJ = lighter
 FINAL_TEST_OBJ = lighter_tests
@@ -34,6 +34,7 @@ OBJS =                          \
 	$(BUILDDIR)/entity.o           \
 	$(BUILDDIR)/entity_manager.o   \
 	$(BUILDDIR)/timer.o            \
+	$(BUILDDIR)/texture.o          \
 	$(BUILDDIR)/tile.o             \
 	$(BUILDDIR)/files.o            \
 	$(BUILDDIR)/level.o            \
@@ -64,6 +65,7 @@ TESTOBJS =                        \
 	$(BUILDDIR)/gfx.o                 \
 	$(BUILDDIR)/import.o              \
 	$(BUILDDIR)/entity.o              \
+	$(BUILDDIR)/texture.o             \
 	$(BUILDDIR)/level.o               \
 	$(BUILDDIR)/light.o               \
 	$(BUILDDIR)/files.o               \

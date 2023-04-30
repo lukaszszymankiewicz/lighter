@@ -1,6 +1,16 @@
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+
+#include <SDL2/SDL_video.h>
+
+#include <math.h>
+#include <stdio.h>
+
 #include "assets.h"
 #include "global.h"
 #include "gfx.h"
+#include "texture.h"
 #include "primitives.h"
 #include "sorted_list.h"
 #include "geometry.h"
@@ -8,7 +18,21 @@
 #include "segment.h"
 
 
-#define GRADIENT_COEF 3.0;
+#define GRADIENT_COEF 3.0
+#define OPENGL_MAJOR_VERSION 3
+#define OPENGL_MINOR_VERSION 3
+
+GLint  gVertexPos2DLocation = -1;
+GLuint opengl_program_id    = 0;
+GLuint gVBO                 = 0;
+GLuint gIBO                 = 0;
+
+float global_x_scale        = 1.0;
+float global_y_scale        = 1.0;
+
+bool gRenderQuad = true;
+
+SDL_GLContext gl_context;
 
 SDL_Window   *window            = NULL;
 SDL_Renderer *renderer          = NULL;
@@ -18,6 +42,66 @@ texture_t    *sprites[ASSET_SPRITE_ALL];
 
 uint32_t     *lightbuffer;
 uint32_t     *shadowbuffer;
+
+void GFX_print_program_log(
+    GLuint program 
+) {
+    //Make sure name is shader
+    if(glIsProgram(program)) {
+        //Program log length
+        int infoLogLength = 0;
+        int maxLength = infoLogLength;
+        
+        //Get info string length
+        glGetProgramiv( program, GL_INFO_LOG_LENGTH, &maxLength );
+        
+        //Allocate string
+        char* infoLog = NULL;
+        infoLog = (char*)malloc(maxLength * sizeof(char));
+        
+        //Get info log
+        glGetProgramInfoLog(program, maxLength, &infoLogLength, infoLog);
+        if( infoLogLength > 0 ) {
+            printf( "%s\n", infoLog );
+        }
+        
+        free(infoLog);
+    }
+    else {
+        printf("Name %d is not a program\n", program);
+    }
+}
+
+void GFX_print_shader_log(
+    GLuint shader 
+) {
+    //Make sure name is shader
+    if(glIsShader(shader)) {
+        //Shader log length
+        int infoLogLength = 0;
+        int maxLength = infoLogLength;
+        
+        //Get info string length
+        glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &maxLength );
+        
+        //Allocate string
+        char* infoLog = NULL;
+        infoLog = (char*)malloc(maxLength * sizeof(char));
+        
+        //Get info log
+        glGetShaderInfoLog( shader, maxLength, &infoLogLength, infoLog );
+        if(infoLogLength > 0) {
+            //Print Log
+            printf( "%s\n", infoLog );
+        }
+
+        //Deallocate string
+        free(infoLog);
+    }
+    else {
+        printf( "Name %d is not a shader\n", shader );
+    }
+}
 
 /*
  * THIS SECONDTION WILL BE REPLACED BY OPENGL VERSION
@@ -80,47 +164,222 @@ void GFX_fill_lightbuffer(
  * END OPENGL SECTION
  */
 
-void GFX_init_window() {
+// sets global rendering scale which must be a positive integer. Scale tries to fit best tile_per_x 
+// and tile_per_y. This is needed to achieve pixel-perfect rendering (which can be done only if each
+// pixel in every drawing routine is multiplied by some scale).
+void GFX_set_global_render_scale(
+) {
+    float tile_per_x = 10.0;
+    float tile_per_y = 7.0;
+
+    GLint m_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+    // printf("viewport: %i, %i %i, %i\n", m_viewport[0], m_viewport[1], m_viewport[2], m_viewport[3]);
+    
+    float max_screen_w = (float)m_viewport[2];
+    float max_screen_h = (float)m_viewport[3];
+
+    int closestSclaleX = (int)((float)max_screen_w / ((float)TILE_WIDTH * tile_per_x));
+    int closestSclaleY = (int)((float)max_screen_h / ((float)TILE_HEIGHT * tile_per_y));
+    
+    // best scaling is chosen (fit most of tile_per_x or tile_per_y)
+    int scale = MAX(closestSclaleX, closestSclaleY);
+    
+    // global scale is calculated and set
+    global_x_scale = (float)TILE_WIDTH / (max_screen_w / 2.0 / tile_per_x) * closestSclaleX;
+    global_y_scale = (float)TILE_HEIGHT / (max_screen_h / 2.0 / tile_per_y) * closestSclaleX;
+}
+
+int GFX_init_window() {
     window = SDL_CreateWindow(
+
         GAME_NAME,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         DEFAULT_SCREEN_WIDTH,
         DEFAULT_SCREEN_HEIGHT,
-        SDL_WINDOW_FULLSCREEN
+        SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL 
     );
 
     if (window == NULL) {
         printf("window cannot be created");
+        return 0;
     }
+
+    SDL_ShowCursor(SDL_DISABLE); // disable cursor on window
+
+    return 1;
 };
 
-void GFX_init_video() {
+int GFX_init_video() {
     int init_video = SDL_Init(SDL_INIT_VIDEO);
 
     if(init_video) {
         printf("video cannot be initialized!");
-        exit(-1);
+        return 0;
     };
+
+    SDL_GL_SetAttribute(OPENGL_MAJOR_VERSION, OPENGL_MAJOR_VERSION);
+    SDL_GL_SetAttribute(OPENGL_MINOR_VERSION, OPENGL_MINOR_VERSION);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    
+    return 1;
 };
 
-void GFX_init_renderer() {
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-    SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+bool GFX_init_OpenGL_shaders(
+) {
+	//Generate program
+	opengl_program_id = glCreateProgram();
 
-    if (renderer == NULL) {
-        printf("renderer cannot be initialized!");
+	//Create vertex shader
+	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+
+	//Get vertex source
+	const GLchar* vertex_shader_src[] = {
+		"#version 140\nin vec2 LVertexPos2D; void main() { gl_Position = vec4( LVertexPos2D.x, LVertexPos2D.y, 0, 1 ); }"
+	};
+
+	//Set vertex source
+	glShaderSource(vertex_shader, 1, vertex_shader_src, NULL);
+
+	//Compile vertex source
+	glCompileShader(vertex_shader);
+
+	//Check vertex shader for errors
+	GLint vertex_shader_compiled = GL_FALSE;
+	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_shader_compiled);
+
+	if(vertex_shader_compiled != GL_TRUE) {
+		printf("Unable to compile vertex shader %d!\n", vertex_shader);
+		GFX_print_shader_log(vertex_shader);
+
+        return false;
     }
 
-};
+    // Attach vertex shader to program
+    glAttachShader(opengl_program_id, vertex_shader);
 
-void GFX_init_png() {
+    // Create fragment shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    // Get fragment source
+    const GLchar* fragmentShaderSource[] = {
+        "#version 140\nout vec4 LFragment; void main() { LFragment = vec4( 1.0, 1.0, 1.0, 1.0 ); }"
+    };
+
+    // Set fragment source
+    glShaderSource(fragmentShader, 1, fragmentShaderSource, NULL);
+
+    //Compile fragment source
+    glCompileShader(fragmentShader);
+
+    // Check fragment shader for errors
+    GLint fShaderCompiled = GL_FALSE;
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fShaderCompiled);
+
+    if(fShaderCompiled != GL_TRUE) {
+        printf("Unable to compile fragment shader %d!\n", fragmentShader );
+        GFX_print_shader_log(fragmentShader);
+        return false;
+    }
+
+    // Attach fragment shader to program
+    glAttachShader(opengl_program_id, fragmentShader);
+
+    // Link program
+    glLinkProgram(opengl_program_id);
+
+    //Check for errors
+    GLint programSuccess = GL_TRUE;
+    glGetProgramiv( opengl_program_id, GL_LINK_STATUS, &programSuccess );
+
+    if(programSuccess != GL_TRUE) {
+        printf("Error linking program %d!\n", opengl_program_id );
+        GFX_print_program_log(opengl_program_id);
+        return false;
+    }
+
+    //Get vertex attribute location
+    gVertexPos2DLocation = glGetAttribLocation(opengl_program_id, "LVertexPos2D");
+
+    if(gVertexPos2DLocation == -1) {
+        printf("LVertexPos2D is not a valid glsl program variable!\n" );
+        return false;
+    }
+
+    // Initialize clear color
+    glClearColor(0.f, 0.f, 0.f, 1.f);
+
+    //VBO data
+    GLfloat vertexData[] =
+    {
+        -0.5f, -0.5f,
+         0.5f, -0.5f,
+         0.5f,  0.5f,
+        -0.5f,  0.5f
+    };
+
+    // IBO data
+    GLuint indexData[] = { 0, 1, 2, 3 };
+
+    // Create VBO
+    glGenBuffers(1, &gVBO );
+    glBindBuffer(GL_ARRAY_BUFFER, gVBO );
+    glBufferData(GL_ARRAY_BUFFER, 2 * 4 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
+
+    // Create IBO
+    glGenBuffers(1, &gIBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO );
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), indexData, GL_STATIC_DRAW);
+	
+	return true;
+}
+
+int GFX_init_renderer() {
+    // Create context
+    gl_context = SDL_GL_CreateContext(window);
+
+    if(!gl_context) {
+        printf("OpenGL context could not be created! SDL Error: %s\n", SDL_GetError());
+        return 0;
+    }
+
+    GLenum glew_err = glewInit();
+
+    if(glew_err != GLEW_OK) {
+        printf( "Error initializing GLEW! %s\n", glewGetErrorString(glew_err));
+        return 0;
+    }
+
+    if(SDL_GL_SetSwapInterval( 1 ) < 0) {
+        printf( "Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
+        return 0;
+    }
+
+    // Initialize OpenGL
+    // if(!GFX_init_OpenGL_shaders()) {
+    //     printf("Unable to initialize OpenGL!\n");
+    //     return 0;
+    // }
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GFX_set_global_render_scale();
+
+    return 1;
+}
+
+int GFX_init_png(
+) {
     int imgFlags = IMG_INIT_PNG;
 
     if(!(IMG_Init(imgFlags) & imgFlags)) {
-        printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+        printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+        return 0;
     }
+
+    return 1;
 };
 
 void GFX_dealloc_buffers() {
@@ -145,7 +404,7 @@ void GFX_free_buffers() {
     free(lightbuffer);
     free(shadowbuffer);
 
-    lightbuffer     = NULL;
+    lightbuffer  = NULL;
     shadowbuffer = NULL;
 }
 
@@ -161,31 +420,56 @@ void GFX_init_screen_buffer_texture(
         SCREEN_HEIGHT
     );
 }
+int GFX_init_graphics(
+) {
 
-int GFX_init_graphics() {
-    GFX_init_video();
-    GFX_init_window();
-    GFX_init_renderer();
-    GFX_init_png();
-    GFX_alloc_buffers();
-    GFX_init_screen_buffer_texture();
+    if(!GFX_init_video()) {
+        printf("Unable to initialize Video Settings\n");
+        return 0;
+    }
 
+    if(!GFX_init_window()) {
+        printf("Unable to initialize Window\n");
+        return 0;
+    }
+
+    if(!GFX_init_renderer()) {
+        printf("Unable to initialize Renderer\n");
+        return 0;
+    }
+
+    if(!GFX_init_png()) {
+        printf("Unable to initialize PNG images rendering\n");
+        return 0;
+    }
+
+    // printf("after gfx init\n");
+    GLint m_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+    // printf("viewport: %i, %i %i, %i\n", m_viewport[0], m_viewport[1], m_viewport[2], m_viewport[3]);
+    
     return 1;
 };
 
 void GFX_free_texture(
     texture_t *texture
 ) {
-    SDL_DestroyTexture(texture->surface);
-    texture->surface = NULL;
-
-    free(texture);
-    texture = NULL;
+    if (texture && texture->surface) {
+        SDL_FreeSurface(texture->surface);
+        texture->surface    = NULL;
+        GLuint TextureID    = texture->id;
+        glDeleteTextures(1, &TextureID);
+        free(texture);
+        texture = NULL;
+    }
 };
 
 void GFX_free() {
     GFX_free_buffers();
     SDL_DestroyTexture(screen_texture);
+
+	// Deallocate program
+	glDeleteProgram(opengl_program_id);
 
     if (renderer) {
         SDL_DestroyRenderer(renderer);
@@ -199,29 +483,122 @@ void GFX_free() {
 };
 
 void GFX_clear_screen() {
-    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
-    SDL_RenderClear(renderer);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    uint32_t z = 0;
+    // for (int i=0; i<10; i++) {
+    //     glClearTexImage(i, 0, GL_RGBA, GL_UNSIGNED_BYTE, &z);
+    // }
 };
 
 void GFX_update() {
-    SDL_RenderPresent(renderer);
-    SDL_UpdateWindowSurface(window);
+    SDL_GL_SwapWindow(window);
+    // SDL_UpdateWindowSurface(window);
 };
 
-// renders texture to screen
-void GFX_render_tile(
+
+// render part of the texture to the screen
+// render_x1 and render_y1 are refering to global screen resolution (320x240) placement
+// 'bool' argument will flip texture vertically
+void GFX_render_texture_part(
     texture_t *texture,
-    int        render_x,
-    int        render_y,
-    int        x,
-    int        y,
-    int        w,        
-    int        h
+    int        render_x1,
+    int        render_y1,
+    int        tex_x1, // position on texture
+    int        tex_y1, // position on texture
+    int        tex_x2, // position on texture
+    int        tex_y2, // position on texture
+    bool       flip
 ) {
-    SDL_Rect clip = {x, y, w, h};
-    SDL_Rect render_quad = {render_x, render_y, w, h};
-    SDL_RenderCopy(renderer, texture->surface, &clip, &render_quad);
+    // printf("binded texture id: %d \n", texture->id);
+    // printf("texture name: %s \n", texture->filepath);
+    glBindTexture(GL_TEXTURE_2D, texture->id);
+
+    // texture is always rendered 1:1 to achieve pixel perfect effect
+    float texW = (float)TXTR_width(texture);
+    float texH = (float)TXTR_height(texture);
+
+    // orient it in a way that OpenGL will digest it
+    render_x1 -= (float)SCREEN_WIDTH / 2.0;
+    render_y1 -= (float)SCREEN_HEIGHT / 2.0;
+
+    render_y1 *= -1;
+
+    float render_y2 = (float)render_y1 - (float)abs(tex_y2 - tex_y1);
+    float render_x2 = (float)render_x1 + (float)abs(tex_x2 - tex_x1);
+
+    // printf("tex on tile: %f, %f |  %f, %f | %f %f | %f %f \n",
+    //     (float)tex_x2/(float)texW,
+    //     (float)tex_y2/(float)texH,
+    //     (float)tex_x1/(float)texW,
+    //     (float)tex_y2/(float)texH,
+    //     (float)tex_x1/(float)texW,
+    //     (float)tex_y1/(float)texH,
+    //     (float)tex_x2/(float)texW,
+    //     (float)tex_y1/(float)texH
+    // );
+
+    // printf("render on pix %f, %f | %f, %f \n",
+    //     (float)render_x1 + 160,
+    //     (float)render_y1 + 120,
+    //     (float)render_x2 + 160,
+    //     (float)render_y2 + 120
+    // );
+
+    // printf("render on %f, %f | %f, %f | %f %f | %f %f \n",
+    //     global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
+    //     global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT,
+    //     global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
+    //     global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT,
+    //     global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
+    //     global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT,
+    //     global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
+    //     global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT
+    // );
+    
+    float tex_x1_good = (float)tex_x1/(float)texW;
+    float tex_x2_good = (float)tex_x2/(float)texW;
+
+    float tex_y1_good = (float)tex_y1/(float)texH;
+    float tex_y2_good = (float)tex_y2/(float)texH;
+
+    float temp;
+
+    if (flip) {
+        temp = tex_x1_good; 
+        tex_x1_good = tex_x2_good;
+        tex_x2_good = temp;
+    }
+
+    glBegin(GL_QUADS);
+        // up right (1,1)
+        glTexCoord2f(tex_x2_good, tex_y1_good);
+        glVertex2f(
+            global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
+            global_y_scale * (float)render_y1/(float)(SCREEN_HEIGHT)
+        );
+        // up left (-1, 1)
+        glTexCoord2f(tex_x1_good, tex_y1_good);
+        glVertex2f(
+            global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
+            global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT
+        );
+        // down left (-1, -1)
+        glTexCoord2f(tex_x1_good, tex_y2_good);
+        glVertex2f(
+            global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
+            global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT
+        );
+        // down right (1, -1)
+        glTexCoord2f(tex_x2_good, tex_y2_good); 
+        glVertex2f(
+            global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
+            global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT
+        );
+    glEnd();
 };
+
 
 // renders texture to screen
 void GFX_render_texture(
@@ -231,7 +608,7 @@ void GFX_render_texture(
     int        y,         // y coord of screen to have texture rendered
     bool       flip       // indiaction if texture should be flipped horizontally
 ) {
-    SDL_Rect render_quad = {x, y, texture->width, texture->height};
+    SDL_Rect render_quad = {x, y, texture->surface->w, texture->surface->h};
     SDL_RendererFlip flip_tex;
     
     // if clip is not given render whole texture
@@ -247,7 +624,7 @@ void GFX_render_texture(
         flip_tex = SDL_FLIP_NONE; 
     }
 
-    SDL_RenderCopyEx(renderer, texture->surface, clip, &render_quad, 0, NULL, flip_tex);
+    // SDL_RenderCopyEx(renderer, texture->surface, clip, &render_quad, 0, NULL, flip_tex);
 
     free(clip);
 };
@@ -338,7 +715,7 @@ sorted_list_t* GFX_calc_intersections_in_scanline(
     int       *n
 ) {
     sorted_list_t *intersections = NULL;
-    segment_t        *ptr           = NULL;
+    segment_t        *ptr        = NULL;
     int               x;
 
     ptr = segments;
@@ -481,47 +858,7 @@ void GFX_fill_light(
     if (candidates)  { SEG_free(candidates); }
 }
 
-/*
- * END OPENGL SECTION
- */
-
-texture_t* GFX_read_texture(
-    const char *filepath
-) {
-	SDL_Texture *new_texture    = NULL;
-    SDL_Surface *loaded_surface = NULL;
-
-    loaded_surface              = IMG_Load(filepath);
-
-    // dummy texture if reading file failed
-    if (loaded_surface == NULL) {
-        new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 20, 20);
-        texture_t* p = malloc(sizeof(texture_t));
-
-        p->surface = new_texture;
-        p->width   = loaded_surface->w;
-        p->height  = loaded_surface->h;
-
-        return p;
-    }
-    else {
-        SDL_SetColorKey(loaded_surface, SDL_TRUE, SDL_MapRGB(loaded_surface->format, 0x80, 0xFF, 0xFF));
-        new_texture  = SDL_CreateTextureFromSurface(renderer, loaded_surface);
-        texture_t* p = malloc(sizeof(texture_t));
-
-        p->surface = new_texture;
-        p->width   = loaded_surface->w;
-        p->height  = loaded_surface->h;
-
-        SDL_FreeSurface(loaded_surface);
-
-        return p;
-    }
-};
-
-/*
- * THIS SECONDTION WILL BE REPLACED BY OPENGL VERSION
- */
+// TODO: this should be deleted later on!
 void GFX_draw_light(
 ) {
     SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
@@ -529,13 +866,10 @@ void GFX_draw_light(
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
 
+// TODO: this should be deleted later on!
 void GFX_draw_darkness(
 ) {
     SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
     SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
     SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }
-/*
- * OPENGL VERSION END
- */
-

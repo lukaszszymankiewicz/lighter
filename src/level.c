@@ -114,8 +114,8 @@ void LVL_fill_tiles(
     // creating actual tiles
     int i = 0;
 
-    for (int y=0; y<level->tileset->height; y+=TILE_WIDTH) {
-        for (int x=0; x<level->tileset->width; x+=TILE_WIDTH) {
+    for (int y=0; y<level->tileset->surface->h; y+=TILE_WIDTH) {
+        for (int x=0; x<level->tileset->surface->w; x+=TILE_WIDTH) {
             LVL_add_tile(level, i, x, y);
             i++;
         }
@@ -312,17 +312,20 @@ void LVL_draw(
             int tile_pos_y = TILE_HEIGHT * y - st_y;
             
             if (tile != NULL) {
-                GFX_render_tile(
-                    texture ,
+
+                GFX_render_texture_part(
+                    texture,
                     tile_pos_x,
                     tile_pos_y,
                     tile->x,
                     tile->y,
-                    TILE_WIDTH,
-                    TILE_HEIGHT
+                    tile->x + TILE_WIDTH,
+                    tile->y + TILE_HEIGHT,
+                    false
                 );
             }
         }
+
     }
 }
 

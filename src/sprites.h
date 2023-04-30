@@ -2,6 +2,7 @@
 #include "global.h"
 #include "assets.h"
 #include "primitives.h"
+#include "texture.h"
 
 #ifndef SPRITES_H
 #define SPRITES_H
