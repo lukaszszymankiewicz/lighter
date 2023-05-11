@@ -5,7 +5,6 @@ const char *LEVEL_STRUCTURE_SUFFIX = "level.llv";
 const char *LEVEL_TILESET_SUFFIX   = "level.png";
 const char *SEPARATOR              = "/";
 
-const int ANIMATION_PREAMBULE[PREAMBULE_LEN]   = { 16718, 18765 };
 const int WOBBLE_PREAMBULE[PREAMBULE_LEN]      = { 22338, 16972 };
 const int LIGHTSOURCE_PREAMBULE[PREAMBULE_LEN] = { 19539, 21059 };
 const int LEVEL_PREAMBULE[PREAMBULE_LEN]       = { 19525, 22092 };

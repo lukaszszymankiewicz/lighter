@@ -4,6 +4,8 @@
 #include "level.h"
 #include "primitives.h"
 #include "segment.h"
+#include <math.h>
+#include <stdio.h>
 
 enum { W, S, A, D };
 
@@ -40,7 +42,6 @@ void LVL_clean_structure(
     }
 }
 
-// initialise level structure
 void LVL_clean_obstacles(
     level_t *level
 ) {
@@ -60,28 +61,11 @@ void LVL_set_size(
     level->size_x    = size_x;
     level->size_y    = size_y;
 
-    level->structure = malloc(sizeof (tile_t*) * level->size_x * level->size_y);
+    level->structure = malloc(sizeof (tile_t) * level->size_x * level->size_y);
     LVL_clean_structure(level);
 
     level->obstacles = malloc(sizeof (int)    * level->size_x * level->size_y);
     LVL_clean_obstacles(level);
-}
-
-
-// adds tile to tile array of level
-void LVL_add_tile(
-    level_t *level,
-    int      tile_index,
-    int      x_offset,
-    int      y_offset
-) {
-    tile_t* tile                  = NULL;
-    tile                          = TILE_new(x_offset, y_offset);
-    level->tile_array[tile_index] = tile;
-}
-
-void LVL_set_tileset(level_t *level, texture_t* texture) {
-    level->tileset = texture;
 }
 
 // fills level structure with one tile
@@ -91,7 +75,24 @@ void LVL_fill_structure(
     int      y,
     int      i
 ) {
-    level->structure[y * level->size_x + x] = level->tile_array[i];
+    int tileset_x, tileset_y;
+    tile_t *tile                            = NULL;
+
+    // determine place in the tileset
+    int tile_per_row = (int)((float)TXTR_width(level->tileset) / (float)TILE_WIDTH);
+    tileset_x = (i % tile_per_row) * TILE_WIDTH;
+    tileset_y = (i / tile_per_row) * TILE_HEIGHT;
+
+    tile = TILE_new(
+        level->tileset,
+        tileset_x,
+        tileset_y,
+        tileset_x + TILE_WIDTH,
+        tileset_y + TILE_HEIGHT,
+        x * TILE_WIDTH,
+        y * TILE_HEIGHT
+    );
+    level->structure[y * level->size_x + x] = tile;
 }
 
 // fills level obstacles (1-obstacle, 0-no obstacle) with single value
@@ -104,24 +105,6 @@ void LVL_fill_obstacle(
     level->obstacles[y * level->size_x + x] = i;
 }
 
-void LVL_fill_tiles(
-    level_t *level
-) {
-    for (int i=0; i<MAX_TILES; i++) {
-        level->tile_array[i] = NULL;
-    }
-
-    // creating actual tiles
-    int i = 0;
-
-    for (int y=0; y<level->tileset->surface->h; y+=TILE_WIDTH) {
-        for (int x=0; x<level->tileset->surface->w; x+=TILE_WIDTH) {
-            LVL_add_tile(level, i, x, y);
-            i++;
-        }
-    }
-}
-
 tile_t* LVL_tile_on_pos(
     level_t *level,
     int      x,
@@ -130,7 +113,7 @@ tile_t* LVL_tile_on_pos(
     if (x>0 && x<level->size_x && y>0 && y<level->size_y) {
         return level->structure[y * level->size_x + x];
     }
-    return level->tile_array[EMPTY_TILE];
+    return NULL;
 }
 
 int LVL_obstacle_on_pos(level_t* level, int x, int y) {
@@ -293,11 +276,15 @@ void LVL_draw(
 ) {
     int st_x           = camera_x - ENTITY_DRAW_X_RANGE;
     int st_y           = camera_y - ENTITY_DRAW_Y_RANGE;
-    
+
     int st_tile_pos_x  = st_x / TILE_WIDTH;
     int st_tile_pos_y  = st_y / TILE_HEIGHT;
     int end_tile_pos_x = st_tile_pos_x + SCREEN_TILE_PER_Y;
     int end_tile_pos_y = st_tile_pos_y + SCREEN_TILE_PER_X;
+
+    // camera to absolute orientation
+    float x_diff = (((float)camera_x) / (float)SCREEN_WIDTH) * global_x_scale;
+    float y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT) * global_y_scale;
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
@@ -310,17 +297,27 @@ void LVL_draw(
             
             int tile_pos_x = TILE_WIDTH  * x - st_x;
             int tile_pos_y = TILE_HEIGHT * y - st_y;
-            
+
             if (tile != NULL) {
+
+                printf(
+                    "am I correct? %f %f %f %f\n",
+                    tile->coord.x1 - x_diff,
+                    tile->coord.y1 + y_diff,
+                    tile->coord.x2 - x_diff,
+                    tile->coord.y2 + y_diff
+                ); 
 
                 GFX_render_texture_part(
                     texture,
-                    tile_pos_x,
-                    tile_pos_y,
-                    tile->x,
-                    tile->y,
-                    tile->x + TILE_WIDTH,
-                    tile->y + TILE_HEIGHT,
+                    tile->coord.x1 - x_diff,
+                    tile->coord.y1 + y_diff,
+                    tile->coord.x2 - x_diff,
+                    tile->coord.y2 + y_diff,
+                    tile->img.x1,
+                    tile->img.y1,
+                    tile->img.x2,
+                    tile->img.y2,
                     false
                 );
             }
@@ -343,13 +340,6 @@ void LVL_free(
 
     SEG_free(level->obstacle_segments);
     level->obstacle_segments = NULL;
-
-    for (int i=0; i<MAX_TILES; i++) {
-        if (level->tile_array[i] == NULL) {
-            continue;
-        }
-        free(level->tile_array[i]);
-    }
 
     free(level);
     level = NULL;

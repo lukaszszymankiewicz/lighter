@@ -21,6 +21,7 @@
 #define SIGN(a) ((a) > 0 ? (1) : (-1))
 
 // constans
+#define MAX_ANIMATION                10
 #define DEFAULT_SCREEN_WIDTH         1366               // default screen resolution
 #define DEFAULT_SCREEN_HEIGHT        768                // default screen resolution
 #define SCREEN_FPS                   20                 // Frame per second

@@ -5,7 +5,7 @@
 #include "../src/level.h"
 #include "../src/gfx.h"
 #include "../src/segment.h"
-#include "../src/sprites.h"
+#include "../src/animation.h"
 
 
 START_TEST (LVL_analyze_check)
@@ -128,10 +128,10 @@ START_TEST (LVL_fill_tiles_check)
 
     // THEN
     // test texture is 320*224 image resulting in 10 * 7 = 70 tiles. Each of them should be read and
-    // placed in tile_array.
+    // placed in tile_library.
     for (int i=0; i<70; i++) {
-        ck_assert_ptr_nonnull(&(level->tile_array[i]));
-        tile_t *tile = level->tile_array[i];
+        ck_assert_ptr_nonnull(&(level->tile_library[i]));
+        tile_img_t *tile = level->tile_library[i];
         int x = (int)i%cols;
         int y = (int)i/cols;
         ck_assert_int_eq(tile->x, x*TILE_WIDTH);
@@ -156,18 +156,18 @@ START_TEST (LVL_fill_structure_check)
 
     // WHEN
     LVL_fill_structure(level, 5, 5, 0);
-    tile_t *tile = LVL_tile_on_pos(level, 5, 5);
+    tile_img_t *tile = LVL_tile_on_pos(level, 5, 5);
 
     LVL_fill_structure(level, 6, 6, 1);
-    tile_t *tile_b = LVL_tile_on_pos(level, 6, 6);
+    tile_img_t *tile_b = LVL_tile_on_pos(level, 6, 6);
 
     LVL_fill_structure(level, 7, 7, 1);
-    tile_t *tile_c = LVL_tile_on_pos(level, 7, 7);
+    tile_img_t *tile_c = LVL_tile_on_pos(level, 7, 7);
 
     // THEN
-    tile_t *ex_tile = level->tile_array[0];
-    tile_t *ex_tile_b = level->tile_array[1];
-    tile_t *ex_tile_c = level->tile_array[1];
+    tile_img_t *ex_tile = level->tile_library[0];
+    tile_img_t *ex_tile_b = level->tile_library[1];
+    tile_img_t *ex_tile_c = level->tile_library[1];
 
     ck_assert_ptr_nonnull(tile);
     ck_assert_ptr_nonnull(tile_b);

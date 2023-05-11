@@ -1,3 +1,7 @@
+#include <SDL2/SDL_timer.h>
+
+#include "data/library.h"
+
 #include "global.h"
 #include "files.h"
 #include "controller.h"
@@ -9,23 +13,24 @@
 #include "level.h"
 #include "import.h"
 #include "light.h"
-#include "sprites.h"
+#include "animation.h"
+#include "texture.h"
 
 static char buffer[BUFFER_SIZE];
 
 void GAME_read_all_files(
 ) {
-    animations[ASSET_HERO_ANIMATION]           = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    animations[ASSET_NO_ANIMATION]             = NULL;
-    sprites[ASSET_SPRITE_HERO]                 = TXTR_read_from_file(FILEPATH_SPRITE_HERO);
-    sprites[ASSET_SPRITE_TEST]                 = TXTR_read_from_file(FILEPATH_SPRITE_HERO);
-    sprites[ASSET_SPRITE_LIGHTER]              = TXTR_read_from_file(FILEPATH_SPRITE_LIGHTER);
-    sprites[ASSET_SPRITE_WALLLIGHT]            = TXTR_read_from_file(FILEPATH_SPRITE_WALLLIGHT);
+    TXTR_read_all_sprites();
     wobbles[ASSET_WOBBLE_NO]                   = SRC_read_wobble(FILEPATH_WOBBLE_NO);
     wobbles[ASSET_WOBBLE_STABLE]               = SRC_read_wobble(FILEPATH_WOBBLE_STABLE);
     wobbles[ASSET_WOBBLE_WALKING]              = SRC_read_wobble(FILEPATH_WOBBLE_WALKING);
     lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
     lightsources[ASSET_LIGHTSOURCE_WALLLIGHT]  = SRC_read_lightsource(FILEPATH_WALLLIGHT_LIGHTSOURCE);
+}
+
+void GAME_create_library(
+) {
+    LIB_create_entity_library();
 }
 
 void GAME_update_all_files(
@@ -38,7 +43,7 @@ void GAME_update_all_files(
 
 void GAME_free_all_files(
 ) {
-    ANIM_free(animations[ASSET_HERO_ANIMATION]);
+    // ANIM_free(animations[ASSET_HERO_ANIMATION]);
     GFX_free_texture(sprites[ASSET_SPRITE_HERO]);
     SRC_free_wobble(wobbles[ASSET_WOBBLE_NO]);
     SRC_free_wobble(wobbles[ASSET_WOBBLE_STABLE]);
@@ -228,7 +233,6 @@ void GAME_read_level(
     tileset = TXTR_read_from_file(img_path);
 
     GAME_read_level_tileset(game, tileset);
-    LVL_fill_tiles(game->level);
     GAME_fill_level(game, file);
 
     LVL_analyze(game->level);
@@ -379,7 +383,7 @@ void GAME_draw(
     game_t* game
 ) {
     GAME_clear_screen(game);
-    GAME_draw_level(game);
+    // GAME_draw_level(game);
     GAME_draw_entities(game);
     GAME_render(game);
     // GAME_draw_light(game);

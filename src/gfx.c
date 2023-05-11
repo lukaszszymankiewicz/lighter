@@ -38,8 +38,6 @@ SDL_Window   *window            = NULL;
 SDL_Renderer *renderer          = NULL;
 SDL_Texture  *screen_texture    = NULL;
 
-texture_t    *sprites[ASSET_SPRITE_ALL];
-
 uint32_t     *lightbuffer;
 uint32_t     *shadowbuffer;
 
@@ -498,17 +496,19 @@ void GFX_update() {
 };
 
 
-// render part of the texture to the screen
-// render_x1 and render_y1 are refering to global screen resolution (320x240) placement
-// 'bool' argument will flip texture vertically
+// Render part of the texture to the screen. render and tex parameters are expressed in OpenGL
+// orientation units, but in "global" orientation (not taking camera position). 'bool' argument will
+// flip texture vertically
 void GFX_render_texture_part(
     texture_t *texture,
-    int        render_x1,
-    int        render_y1,
-    int        tex_x1, // position on texture
-    int        tex_y1, // position on texture
-    int        tex_x2, // position on texture
-    int        tex_y2, // position on texture
+    float      render_x1,   // place on screen (OpenGL coords)
+    float      render_y1,   // place on screen (OpenGL coords)
+    float      render_x2,   // place on screen (OpenGL coords)
+    float      render_y2,   // place on screen (OpenGL coords)
+    float      tex_x1,      // position on texture (OpenGL coords)
+    float      tex_y1,      // position on texture (OpenGL coords)
+    float      tex_x2,      // position on texture (OpenGL coords)
+    float      tex_y2,      // position on texture (OpenGL coords)
     bool       flip
 ) {
     // printf("binded texture id: %d \n", texture->id);
@@ -516,52 +516,23 @@ void GFX_render_texture_part(
     glBindTexture(GL_TEXTURE_2D, texture->id);
 
     // texture is always rendered 1:1 to achieve pixel perfect effect
-    float texW = (float)TXTR_width(texture);
-    float texH = (float)TXTR_height(texture);
+    // float texW = (float)TXTR_width(texture);
+    // float texH = (float)TXTR_height(texture);
 
     // orient it in a way that OpenGL will digest it
-    render_x1 -= (float)SCREEN_WIDTH / 2.0;
-    render_y1 -= (float)SCREEN_HEIGHT / 2.0;
+    // render_x1 -= (float)SCREEN_WIDTH / 2.0;
+    // render_y1 -= (float)SCREEN_HEIGHT / 2.0;
 
-    render_y1 *= -1;
+    // render_y1 *= -1;
+    // float render_y2 = (float)render_y1 - ((tex_y2 - tex_y1) * texH);
+    // float render_x2 = (float)render_x1 + ((tex_x2 - tex_x1) * texW);
+    // float render_y2 = (float)render_y1 - (float)TILE_WIDTH;
+    // float render_x2 = (float)render_x1 + (float)TILE_HEIGHT;
 
-    float render_y2 = (float)render_y1 - (float)abs(tex_y2 - tex_y1);
-    float render_x2 = (float)render_x1 + (float)abs(tex_x2 - tex_x1);
-
-    // printf("tex on tile: %f, %f |  %f, %f | %f %f | %f %f \n",
-    //     (float)tex_x2/(float)texW,
-    //     (float)tex_y2/(float)texH,
-    //     (float)tex_x1/(float)texW,
-    //     (float)tex_y2/(float)texH,
-    //     (float)tex_x1/(float)texW,
-    //     (float)tex_y1/(float)texH,
-    //     (float)tex_x2/(float)texW,
-    //     (float)tex_y1/(float)texH
-    // );
-
-    // printf("render on pix %f, %f | %f, %f \n",
-    //     (float)render_x1 + 160,
-    //     (float)render_y1 + 120,
-    //     (float)render_x2 + 160,
-    //     (float)render_y2 + 120
-    // );
-
-    // printf("render on %f, %f | %f, %f | %f %f | %f %f \n",
-    //     global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
-    //     global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT,
-    //     global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
-    //     global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT,
-    //     global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
-    //     global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT,
-    //     global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
-    //     global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT
-    // );
-    
-    float tex_x1_good = (float)tex_x1/(float)texW;
-    float tex_x2_good = (float)tex_x2/(float)texW;
-
-    float tex_y1_good = (float)tex_y1/(float)texH;
-    float tex_y2_good = (float)tex_y2/(float)texH;
+    float tex_x1_good = (float)tex_x1;
+    float tex_x2_good = (float)tex_x2;
+    float tex_y1_good = (float)tex_y1;
+    float tex_y2_good = (float)tex_y2;
 
     float temp;
 
@@ -571,31 +542,40 @@ void GFX_render_texture_part(
         tex_x2_good = temp;
     }
 
+    printf("texture : %f, %f |  %f, %f \n",
+        tex_x1_good,
+        tex_x2_good,
+        tex_y1_good,
+        tex_y2_good
+    );
+
+    printf("render on : %f, %f |  %f, %f \n",
+        render_x1,
+        render_y1,
+        render_x2,
+        render_y2
+    );
+
+    // printf("this is correct: %f, %f | %f, %f \n",
+    //     global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
+    //     global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT,
+    //     global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
+    //     global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT
+    // );
+    
     glBegin(GL_QUADS);
         // up right (1,1)
         glTexCoord2f(tex_x2_good, tex_y1_good);
-        glVertex2f(
-            global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
-            global_y_scale * (float)render_y1/(float)(SCREEN_HEIGHT)
-        );
+        glVertex2f(render_x2, render_y1);
         // up left (-1, 1)
         glTexCoord2f(tex_x1_good, tex_y1_good);
-        glVertex2f(
-            global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
-            global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT
-        );
+        glVertex2f(render_x1, render_y1);
         // down left (-1, -1)
         glTexCoord2f(tex_x1_good, tex_y2_good);
-        glVertex2f(
-            global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
-            global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT
-        );
+        glVertex2f(render_x1, render_y2);
         // down right (1, -1)
         glTexCoord2f(tex_x2_good, tex_y2_good); 
-        glVertex2f(
-            global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
-            global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT
-        );
+        glVertex2f(render_x2, render_y2);
     glEnd();
 };
 

@@ -1,9 +1,14 @@
-#include "global.h"
-#include "texture.h"
-#include <SDL2/SDL_surface.h>
 #include <stdio.h>
 
+#include <SDL2/SDL_surface.h>
+
+#include "files.h"
+#include "global.h"
+#include "texture.h"
+
 int texture_id_counter = 0;
+
+texture_t         *sprites[ASSET_SPRITE_ALL];
 
 // generate unique ID for texture
 GLuint TXTR_generate_texture_ID(
@@ -101,7 +106,7 @@ int TXTR_height(
     }
 }
 
-// create texture_t from image in filepath
+// create texture_t from file image
 texture_t* TXTR_read_from_file(
     const char *filepath
 ) {
@@ -111,3 +116,10 @@ texture_t* TXTR_read_from_file(
     return TXTR_new(surface, GL_RGB, filepath);
 };
 
+void TXTR_read_all_sprites(
+) {
+    sprites[ASSET_SPRITE_HERO]       = TXTR_read_from_file(FILEPATH_SPRITE_HERO);
+    sprites[ASSET_SPRITE_TEST]       = TXTR_read_from_file(FILEPATH_SPRITE_HERO);
+    sprites[ASSET_SPRITE_LIGHTER]    = TXTR_read_from_file(FILEPATH_SPRITE_LIGHTER);
+    sprites[ASSET_SPRITE_WALLLIGHT]  = TXTR_read_from_file(FILEPATH_SPRITE_WALLLIGHT);
+};

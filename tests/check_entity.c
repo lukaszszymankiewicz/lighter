@@ -1,27 +1,41 @@
 #include <check.h>
+#include <stdlib.h>
+
+#include "../src/data/library.h"
+
 #include "../src/assets.h"
 #include "../src/segment.h"
 #include "../src/files.h"
 #include "../src/gfx.h"
 #include "../src/entity.h"
 #include "../src/controller.h"
-#include "../src/sprites.h"
+#include "../src/animation.h"
+#include "../src/texture.h"
 
 START_TEST (ENT_hold_and_handle_check_empty)
 {
     // GIVEN
-    sprites[ASSET_SPRITE_LIGHTER] = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
-    entity_t* entity              = NULL;
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
 
-    entity           = ENT_init(
-        0, 100, 100,
-        NOTHING_FLAG, HANDLE_BACK_UP, HANDLE_BACK_UP,
-        ENTITY_NO, STANDING,
-        NULL, sprites[ASSET_SPRITE_LIGHTER], NULL
-    );
+    entity_blueprint_t *b = NULL;
+    b                     = (entity_blueprint_t*)malloc(sizeof(entity_blueprint_t));
 
-    int w = sprites[ASSET_SPRITE_LIGHTER]->width;
-    int h = sprites[ASSET_SPRITE_LIGHTER]->height;
+    b->id = -1;
+    b->flags = NOTHING_FLAG;
+    b->handle_type = HANDLE_BACK_UP;
+    b->light_emmit_pt = HANDLE_BACK_UP;
+    b->texture_id = ASSET_SPRITE_LIGHTER; 
+    b->lightsource_id = ASSET_LIGHTSOURCE_NO; 
+    b->hold_id = ENTITY_NO; 
+    b->starting_state = STANDING; 
+    b->animation = (animation_sheet_t){ NULL };
+
+    entity_t *entity = NULL;
+    entity = ENT_init(0, 0, b);
+
+    int w = sprites[ASSET_SPRITE_LIGHTER]->surface->w;
+    int h = sprites[ASSET_SPRITE_LIGHTER]->surface->h;
     int x, y;
 
     typedef struct testcase {
@@ -73,25 +87,18 @@ END_TEST
 START_TEST (ENT_hold_check)
 {
     // GIVEN
-    sprites[ASSET_SPRITE_HERO]              = GFX_read_texture(FILEPATH_SPRITE_HERO);
-    animations[ASSET_HERO_ANIMATION]        = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
 
-    entity_t* entity = NULL;
+    entity_library[ENTITY_HERO]->flags          = MOVABLE | STATEABLE | ANIMATIABLE;
+    entity_library[ENTITY_HERO]->handle_type    = HANDLE_TYPE_NO;
+    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_TYPE_NO;
+    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
 
-    int x = 500;
-    int y = 400;
+    int x=500; int y=400;
 
-    entity = ENT_init(
-        0, x, y,
-        MOVABLE | STATEABLE | ANIMATIABLE,
-        HANDLE_TYPE_NO,
-        HANDLE_TYPE_NO,
-        ENTITY_NO,
-        STANDING,
-        animations[ASSET_HERO_ANIMATION],
-        sprites[ASSET_SPRITE_HERO],
-        NULL
-    );
+    entity_t *entity = NULL;
+    entity           = ENT_init(x, y, entity_library[ENTITY_HERO]);
 
     typedef struct testcase {
           int exp_x_l;
@@ -129,42 +136,25 @@ END_TEST
 
 START_TEST (ENT_held_item_check)
 {
-    sprites[ASSET_SPRITE_HERO]              = GFX_read_texture(FILEPATH_SPRITE_HERO);
-    sprites[ASSET_SPRITE_LIGHTER]           = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
-    animations[ASSET_HERO_ANIMATION]        = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER] = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    TXTR_read_all_sprites();
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
 
-    entity_t* entity                  = NULL;
-    entity_t* hold                    = NULL;
-    
-    int x = 500;
-    int y = 400;
+    int x = 500; int y = 400;
 
-    entity = ENT_init(
-        0, x, y,
-        MOVABLE | STATEABLE | ANIMATIABLE,
-        HANDLE_TYPE_NO,
-        HANDLE_TYPE_NO,
-        ENTITY_NO,
-        STANDING,
-        animations[ASSET_HERO_ANIMATION],
-        sprites[ASSET_SPRITE_HERO],
-        NULL
-    );
+    LIB_create_entity_library();
 
-    hold           = ENT_init(
-        1, 0, 0,
-        HOLDABLE,
-        HANDLE_MIDDLE_MIDDLE,
-        HANDLE_MIDDLE_MIDDLE,
-        ENTITY_NO,
-        NOTHING,
-        NULL,
-        sprites[ASSET_SPRITE_LIGHTER],
-        NULL
-    );
+    entity_library[ENTITY_LIGHTER]->flags = HOLDABLE;
+    entity_library[ENTITY_LIGHTER]->handle_type = HANDLE_MIDDLE_MIDDLE;
+    entity_library[ENTITY_LIGHTER]->light_emmit_pt = HANDLE_MIDDLE_MIDDLE;
+    entity_library[ENTITY_LIGHTER]->hold_id = ENTITY_NO;
 
-    entity->hold = hold;
+    entity_library[ENTITY_HERO]->flags = MOVABLE | STATEABLE | ANIMATIABLE;
+    entity_library[ENTITY_HERO]->handle_type = HANDLE_TYPE_NO;
+    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_TYPE_NO;
+    entity_library[ENTITY_HERO]->hold_id = ENTITY_LIGHTER;
+
+    entity_t *entity = NULL;
+    entity           = ENT_init(x, y, entity_library[ENTITY_HERO]);
 
     typedef struct testcase {
         int handle;
@@ -223,18 +213,20 @@ END_TEST
 START_TEST (ENT_resolve_check)
 {
     // GIVEN
-    entity_t* entity         = NULL;
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
 
-    animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    sprites[ASSET_SPRITE_HERO]         = GFX_read_texture(FILEPATH_SPRITE_HERO);
+    entity_library[ENTITY_HERO]->flags          = ANIMATIABLE;
+    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
+
+    int x=500; int y=400;
+
+    entity_t *entity = NULL;
+    entity           = ENT_init(x, y, entity_library[ENTITY_HERO]);
     
     // WHEN
-    entity                   = ENT_init(
-        0, 100, 100,
-        ANIMATIABLE, HANDLE_BACK_UP, HANDLE_BACK_UP, ENTITY_NO, STANDING,
-        animations[ASSET_HERO_ANIMATION], sprites[ASSET_SPRITE_HERO], NULL
-    );
-
     entity->sprites->animations[entity->state].frames[0].delay = 2;
     entity->sprites->animations[entity->state].frames[1].delay = 2;
     entity->sprites->animations[entity->state].len = 2;
@@ -265,18 +257,20 @@ START_TEST (ENT_colision_update_check_positive)
 {
     // hitbox = {0, 0, 9, 20},
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
+
+    entity_library[ENTITY_HERO]->flags          = APPLY_COLLISION;
+    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
+
+    int x=100; int y=100;
+
+    entity_t *entity = NULL;
+    entity           = ENT_init(x, y, entity_library[ENTITY_HERO]);
 
     // GIVEN
-    animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    sprites[ASSET_SPRITE_HERO]         = GFX_read_texture(FILEPATH_SPRITE_HERO);
-
-    entity_t* entity = NULL;
-    entity           = ENT_init(
-        0, 100, 100,
-        APPLY_COLLISION, HANDLE_BACK_UP, HANDLE_BACK_UP, ENTITY_NO, STANDING,
-        animations[ASSET_HERO_ANIMATION], sprites[ASSET_SPRITE_HERO], NULL
-    );
-
     segment_t *obstacles = NULL;
 
     typedef struct testcase {
@@ -321,17 +315,18 @@ START_TEST (ENT_colision_update_check_negatvie)
     // GIVEN
     // hitbox = {0, 0, 9, 20},
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
 
-    animations[ASSET_HERO_ANIMATION]   = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    sprites[ASSET_SPRITE_HERO]         = GFX_read_texture(FILEPATH_SPRITE_HERO);
+    entity_library[ENTITY_HERO]->flags          = APPLY_COLLISION;
+    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
 
-    entity_t* entity = NULL;
-    entity           = ENT_init(
-        0, 100, 100,
-        APPLY_COLLISION, HANDLE_BACK_UP, HANDLE_BACK_UP,
-        ENTITY_NO, STANDING,
-        animations[ASSET_HERO_ANIMATION], sprites[ASSET_SPRITE_HERO], NULL
-    );
+    int x=100; int y=100;
+
+    entity_t *entity = NULL;
+    entity           = ENT_init(x, y, entity_library[ENTITY_HERO]);
 
     // CASE 1
     segment_t *obstacles = NULL;
@@ -359,13 +354,18 @@ END_TEST
 START_TEST (ENT_with_friction_flag)
 {
     // GIVEN
-    entity_t* e    = NULL;
-    e              = ENT_init(
-        0, 0, 0,
-        APPLY_FRICTION, HANDLE_BACK_UP, HANDLE_BACK_UP,
-        ENTITY_NO, STANDING,
-        NULL, NULL, NULL
-    );
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
+
+    entity_library[ENTITY_HERO]->flags          = APPLY_FRICTION;
+    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
+
+    int x=100; int y=100;
+
+    entity_t *e = NULL;
+    e           = ENT_init(x, y, entity_library[ENTITY_HERO]);
 
     // right
     e->direction = RIGHT;
@@ -403,28 +403,29 @@ START_TEST (ENT_with_friction_flag)
 
 START_TEST (ENT_with_controllable_flag)
 {
+
+    // GIVEN
+    TXTR_read_all_sprites();
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER]     = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+
+    LIB_create_entity_library();
+
+    entity_library[ENTITY_LIGHTER]->flags          = HOLDABLE | EMMIT_LIGHT;
+    entity_library[ENTITY_LIGHTER]->handle_type    = HANDLE_BACK_UP;
+    entity_library[ENTITY_LIGHTER]->light_emmit_pt = HANDLE_BACK_UP;
+
+    entity_library[ENTITY_HERO]->flags          = CONTROLABLE | MOVABLE;
+    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
+    entity_library[ENTITY_HERO]->hold_id        = ENTITY_LIGHTER;
+
+    int x=100; int y=100;
+
     // GIVEN
     entity_t* e           = NULL;
-    entity_t* hold        = NULL;
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER] = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    e                     = ENT_init(x, y, entity_library[ENTITY_HERO]);
 
-    e              = ENT_init(
-        0, 0, 0,
-        CONTROLABLE | MOVABLE, HANDLE_BACK_UP, HANDLE_BACK_UP,
-        ENTITY_NO, STANDING,
-        NULL, NULL, NULL
-    );
-
-    hold           = ENT_init(
-        0, 0, 0,
-        HOLDABLE | EMMIT_LIGHT, HANDLE_BACK_UP, HANDLE_BACK_UP,
-        ENTITY_NO, STANDING,
-        NULL, NULL, lightsources[ASSET_LIGHTSOURCE_LIGHTER]
-    );
     keyboard       = CON_init();
-
-    // make entity hold something
-    e->hold        = hold;
 
     // look up
     keyboard->state[SDL_SCANCODE_W] = 1;
@@ -475,9 +476,9 @@ START_TEST (ENT_generate_check)
     entity_t* e    = NULL;
     int x          = 420;
     int y          = 69;
-    
-    animations[ASSET_HERO_ANIMATION]         = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    sprites[ASSET_SPRITE_HERO]               = GFX_read_texture(FILEPATH_SPRITE_HERO);
+
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
 
     for (int id=0; id<ENTITY_ALL; id++) {
         e = ENT_generate(x, y, id);
@@ -492,103 +493,55 @@ START_TEST (ENT_generate_check)
 START_TEST (ENT_get_x_and_get_y)
 {
     // GIVEN
-    sprites[ASSET_SPRITE_HERO]              = GFX_read_texture(FILEPATH_SPRITE_HERO);
-    sprites[ASSET_SPRITE_LIGHTER]           = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
-    animations[ASSET_HERO_ANIMATION]        = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER] = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
+
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
 
     entity_t* entity                  = NULL;
-    entity_t* hold                    = NULL;
     
-    int x = 500;
-    int y = 400;
+    entity_library[ENTITY_HERO]->flags          = MOVABLE | STATEABLE | ANIMATIABLE;
+    entity_library[ENTITY_LIGHTER]->flags       = HOLDABLE;
+        
+    int x = 10;
+    int y = 12;
 
-    entity = ENT_init(
-        0,
-        x,
-        y,
-        MOVABLE | STATEABLE | ANIMATIABLE,
-        HANDLE_TYPE_NO,
-        HANDLE_TYPE_NO,
-        ENTITY_NO,
-        STANDING,
-        animations[ASSET_HERO_ANIMATION],
-        sprites[ASSET_SPRITE_HERO],
-        NULL
-    );
-
-    hold           = ENT_init(
-        1,
-        0,
-        0,
-        HOLDABLE,
-        HANDLE_MIDDLE_MIDDLE,
-        HANDLE_MIDDLE_MIDDLE,
-        ENTITY_NO,
-        NOTHING,
-        NULL,
-        sprites[ASSET_SPRITE_LIGHTER],
-        NULL
-    );
-
-    entity->hold = hold;
+    entity = ENT_generate(x, y, ENTITY_HERO);
 
     // WHEN
-    ck_assert_int_eq(ENT_get_x(entity), x);
-    ck_assert_int_eq(ENT_get_y(entity), y);
+    ck_assert_int_eq(ENT_get_x(entity), x * TILE_WIDTH);
+    ck_assert_int_eq(ENT_get_y(entity), y * TILE_HEIGHT);
 
     entity->direction = RIGHT;
     ENT_update(entity);
 
-    ck_assert_int_eq(ENT_get_x(entity), x);
-    ck_assert_int_eq(ENT_get_y(entity), y);
+    ck_assert_int_eq(ENT_get_x(entity), x * TILE_WIDTH);
+    ck_assert_int_eq(ENT_get_y(entity), y * TILE_HEIGHT);
 
     entity->direction = LEFT;
     ENT_update(entity);
 
-    ck_assert_int_eq(ENT_get_x(entity), x);
-    ck_assert_int_eq(ENT_get_y(entity), y);
+    ck_assert_int_eq(ENT_get_x(entity), x * TILE_WIDTH);
+    ck_assert_int_eq(ENT_get_y(entity), y * TILE_HEIGHT);
 }
 END_TEST
 
 START_TEST (ENT_light_emit_check)
 {
-    sprites[ASSET_SPRITE_HERO]              = GFX_read_texture(FILEPATH_SPRITE_HERO);
-    sprites[ASSET_SPRITE_LIGHTER]           = GFX_read_texture(FILEPATH_SPRITE_LIGHTER);
-    animations[ASSET_HERO_ANIMATION]        = ANIM_read_animation(FILEPATH_HERO_ANIMATION);
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER] = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    TXTR_read_all_sprites();
+    LIB_create_entity_library();
+
+    lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
 
     entity_t* entity                  = NULL;
-    entity_t* hold                    = NULL;
     
-    int x = 500;
-    int y = 400;
+    int x = 15;
+    int y = 12;
 
-    entity = ENT_init(
-        0, x, y,
-        MOVABLE | STATEABLE | ANIMATIABLE,
-        HANDLE_TYPE_NO,
-        HANDLE_TYPE_NO,
-        ENTITY_NO,
-        STANDING,
-        animations[ASSET_HERO_ANIMATION],
-        sprites[ASSET_SPRITE_HERO],
-        NULL
-    );
+    entity_library[ENTITY_HERO]->flags          = MOVABLE | STATEABLE | ANIMATIABLE;
+    entity_library[ENTITY_LIGHTER]->flags       = HOLDABLE;
 
-    hold           = ENT_init(
-        1, 0, 0,
-        HOLDABLE,
-        HANDLE_MIDDLE_MIDDLE,
-        HANDLE_MIDDLE_MIDDLE,
-        ENTITY_NO,
-        NOTHING,
-        NULL,
-        sprites[ASSET_SPRITE_LIGHTER],
-        NULL
-    );
-
-    entity->hold = hold;
+    entity = ENT_generate(x, y, ENTITY_HERO);
 
     typedef struct testcase {
         int handle;
@@ -603,19 +556,72 @@ START_TEST (ENT_light_emit_check)
     int h2 = 5;
 
     testcase_t testcases[] = {
-    (testcase_t){HANDLE_BACK_UP,     x+w1,            y+(int)h1/2-(int)h2/2,   x,           y+(int)h1/2-(int)h2/2   },
-    (testcase_t){HANDLE_BACK_MIDDLE, x+w1,            y+(int)h1/2,             x,           y+(int)h1/2             },
-    (testcase_t){HANDLE_BACK_DOWN,   x+w1,            y+(int)h1/2+(int)h2/2+1, x,           y+(int)h1/2+(int)h2/2+1 },
-
-    (testcase_t){HANDLE_MIDDLE_UP,    x+w1+(int)w2/2, y+(int)h1/2-(int)h2/2,   x-(int)w2/2, y+(int)h1/2-(int)h2/2   },
-    (testcase_t){HANDLE_MIDDLE_MIDDLE,x+w1+(int)w2/2, y+(int)h1/2,             x-(int)w2/2, y+(int)h1/2             },
-    (testcase_t){HANDLE_MIDDLE_DOWN,  x+w1+(int)w2/2, y+(int)h1/2+(int)h2/2+1, x-(int)w2/2, y+(int)h1/2+(int)h2/2+1 },
-
-    (testcase_t){HANDLE_FRONT_UP,    x+w1+w2,         y+(int)h1/2-(int)h2/2,   x-w2, y+(int)h1/2-(int)h2/2,         },
-    (testcase_t){HANDLE_FRONT_MIDDLE,x+w1+w2,         y+(int)h1/2,             x-w2, y+(int)h1/2,                   },
-    (testcase_t){HANDLE_FRONT_DOWN,  x+w1+w2,         y+(int)h1/2+(int)h2/2+1, x-w2, y+(int)h1/2+(int)h2/2+1,       },
+        (testcase_t){
+            HANDLE_BACK_UP,
+            (x*TILE_WIDTH)+w1,
+            (y*TILE_HEIGHT)+(int)h1/2-(int)h2/2,
+            (x*TILE_WIDTH),
+            (y*TILE_HEIGHT)+(int)h1/2-(int)h2/2   
+        },
+        (testcase_t) {
+            HANDLE_BACK_MIDDLE,
+            (x*TILE_WIDTH)+w1,
+            (y*TILE_HEIGHT)+(int)h1/2,
+            (x*TILE_WIDTH),
+            (y*TILE_HEIGHT)+(int)h1/2             
+        },
+        (testcase_t) {
+            HANDLE_BACK_DOWN,
+            (x*TILE_WIDTH)+w1,
+            (y*TILE_HEIGHT)+(int)h1/2+(int)h2/2+1,
+            (x*TILE_WIDTH),
+            (y*TILE_HEIGHT)+(int)h1/2+(int)h2/2+1 
+        },
+        (testcase_t){
+            HANDLE_MIDDLE_UP,
+            (x*TILE_WIDTH)+w1+(int)w2/2,
+            (y*TILE_HEIGHT)+(int)h1/2-(int)h2/2,
+            (x*TILE_WIDTH)-(int)w2/2,
+            (y*TILE_HEIGHT)+(int)h1/2-(int)h2/2   
+        },
+        (testcase_t){
+            HANDLE_MIDDLE_MIDDLE,
+            (x*TILE_WIDTH)+w1+(int)w2/2,
+            (y*TILE_HEIGHT)+(int)h1/2,
+            (x*TILE_WIDTH)-(int)w2/2,
+            (y*TILE_HEIGHT)+(int)h1/2             
+        },
+        (testcase_t){
+            HANDLE_MIDDLE_DOWN,
+            (x*TILE_WIDTH)+w1+(int)w2/2,
+            (y*TILE_HEIGHT)+(int)h1/2+(int)h2/2+1,
+            (x*TILE_WIDTH)-(int)w2/2,
+            (y*TILE_HEIGHT)+(int)h1/2+(int)h2/2+1 
+        },
+        (testcase_t){
+            HANDLE_FRONT_UP,
+            (x*TILE_WIDTH)+w1+w2,
+            (y*TILE_HEIGHT)+(int)h1/2-(int)h2/2,
+            (x*TILE_WIDTH)-w2,
+            (y*TILE_HEIGHT)+(int)h1/2-(int)h2/2,
+        },
+        (testcase_t){
+            HANDLE_FRONT_MIDDLE,
+            (x*TILE_WIDTH)+w1+w2,
+            (y*TILE_HEIGHT)+(int)h1/2,
+            (x*TILE_WIDTH)-w2,
+            (y*TILE_HEIGHT)+(int)h1/2,
+        },
+        (testcase_t){
+            HANDLE_FRONT_DOWN,
+            (x*TILE_WIDTH)+w1+w2,
+            (y*TILE_HEIGHT)+(int)h1/2+(int)h2/2+1,
+            (x*TILE_WIDTH)-w2,
+            (y*TILE_HEIGHT)+(int)h1/2+(int)h2/2+1,
+        },
 
     };
+
     int n_cases = 9;
 
     entity->hold->handle = HANDLE_BACK_MIDDLE;
@@ -638,7 +644,9 @@ START_TEST (ENT_light_emit_check)
         // WHEN
         entity->direction = LEFT;
         entity->hold->direction = LEFT;
+
         ENT_update_hold(entity);
+
         x = ENT_light_emit_x(entity->hold);
         y = ENT_light_emit_y(entity->hold);
 
@@ -657,16 +665,16 @@ Suite* entity_suite(void)
     s = suite_create("entity");
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, ENT_colision_update_check_positive);
-    tcase_add_test(tc_core, ENT_colision_update_check_negatvie); 
-    tcase_add_test(tc_core, ENT_with_controllable_flag);
-    tcase_add_test(tc_core, ENT_with_friction_flag);
-    tcase_add_test(tc_core, ENT_resolve_check);
-    tcase_add_test(tc_core, ENT_generate_check);
     tcase_add_test(tc_core, ENT_hold_and_handle_check_empty);
     tcase_add_test(tc_core, ENT_hold_check);
-    tcase_add_test(tc_core, ENT_get_x_and_get_y);
     tcase_add_test(tc_core, ENT_held_item_check);
+    tcase_add_test(tc_core, ENT_resolve_check);
+    tcase_add_test(tc_core, ENT_colision_update_check_positive);
+    tcase_add_test(tc_core, ENT_colision_update_check_negatvie); 
+    tcase_add_test(tc_core, ENT_with_friction_flag);
+    tcase_add_test(tc_core, ENT_with_controllable_flag);
+    tcase_add_test(tc_core, ENT_generate_check);
+    tcase_add_test(tc_core, ENT_get_x_and_get_y);
     tcase_add_test(tc_core, ENT_light_emit_check);
 
     suite_add_tcase(s, tc_core);

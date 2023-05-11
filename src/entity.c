@@ -1,3 +1,7 @@
+#include <stdio.h>
+
+#include "data/library.h"
+
 #include "global.h"
 #include "geometry.h"
 #include "controller.h"
@@ -6,45 +10,8 @@
 #include "gfx.h"
 #include "primitives.h"
 #include "sorted_list.h"
-#include "sprites.h"
+#include "animation.h"
 #include "source.h"
-#include <stdio.h>
-
-int entities_library[ENTITY_ALL][ENTITY_PARAM_ALL] = {
-    // hero
-    {
-        MOVABLE | APPLY_COLLISION | CONTROLABLE | STATEABLE | APPLY_FRICTION | ANIMATIABLE,
-        HANDLE_TYPE_NO,
-        HANDLE_TYPE_NO,
-        ASSET_HERO_ANIMATION,
-        ASSET_SPRITE_HERO,
-        ASSET_LIGHTSOURCE_NO,
-        ENTITY_LIGHTER,
-        STANDING
-    }, 
-    // lighter
-    {
-        HOLDABLE | EMMIT_LIGHT,
-        HANDLE_MIDDLE_UP,
-        HANDLE_FRONT_MIDDLE,
-        ASSET_NO_ANIMATION,
-        ASSET_SPRITE_LIGHTER,
-        ASSET_LIGHTSOURCE_LIGHTER,
-        ENTITY_NO,
-        NOTHING
-    }, 
-    // walllight
-    {
-        EMMIT_LIGHT,
-        HANDLE_MIDDLE_MIDDLE,
-        HANDLE_MIDDLE_MIDDLE,
-        ASSET_NO_ANIMATION,
-        ASSET_SPRITE_WALLLIGHT,
-        ASSET_LIGHTSOURCE_WALLLIGHT,
-        ENTITY_NO,
-        NOTHING
-    }, 
-};
 
 int state_collisions[3][3] = {
     //  STANDING, WALKING, JUMPING
@@ -59,17 +26,17 @@ frame_t* ENT_current_frame(
     if (!(entity->flags & ANIMATIABLE)) {
         return NULL;
     }
-    return &(entity->sprites->animations[entity->state].frames[entity->frame]);
+    return &(entity->sheet->animations[entity->state].frames[entity->frame]);
 }
 
 SDL_Rect* ENT_current_frame_rect(
     entity_t *entity
 ) {
     if (!(entity->flags & ANIMATIABLE)) {
-        return ANIM_get_whole_texture_size(entity->sprites);
+        return ANIM_get_whole_texture_size(entity->sheet);
     }
 
-    frame_t *frame = &(entity->sprites->animations[entity->state].frames[entity->frame]);
+    frame_t *frame = &(entity->sheet->animations[entity->state].frames[entity->frame]);
 
     SDL_Rect *rect = NULL;
     rect           = (SDL_Rect*)malloc(sizeof(SDL_Rect));
@@ -224,13 +191,13 @@ void ENT_update_hold(
 int ENT_cur_animation_delay(
     entity_t *entity
 ) {
-    return entity->sprites->animations[entity->state].frames[entity->frame].delay;
+    return entity->sheet->animations[entity->state].frames[entity->frame].delay;
 }
 
 int ENT_cur_animation_len(
     entity_t *entity
 ) {
-    return entity->sprites->animations[entity->state].len;
+    return entity->sheet->animations[entity->state].len;
 }
 
 void ENT_update_animation(
@@ -342,11 +309,9 @@ void ENT_update_friction(
     else {
         entity->x_vel = MIN(0, entity->x_vel + X_FRICTION);
     }
-    if (entity->id == 0) {printf("state = %d \n", entity->state);  }
 
     if (entity->state == JUMPING || entity->state == FALLING_DOWN) {
         entity->y_vel += Y_FRICTION;
-        printf("XXXXentity with id %d is jumping or falling down \n", entity->id);
     }
 }
 
@@ -443,69 +408,71 @@ void ENT_update_wobble(
 }
 
 entity_t* ENT_init(
-    int                id,
-    int                x, 
-    int                y,
-    int                flags,
-    int                handle,
-    int                light_pt,
-    int                hold_id,
-    int                state,
-    animation_sheet_t* animation,
-    texture_t*         texture,
-    lightsource_t*     light
+    int                 x, 
+    int                 y,
+    entity_blueprint_t* blueprint
 ) {
     entity_t* entity  = (entity_t*)malloc(sizeof(entity_t));
 
+    // global
+    entity->id               = blueprint->id;
+    
+    // position 
     entity->x                = x;        
     entity->y                = y;
-    entity->flags            = flags;
-    entity->handle           = handle;
-    entity->light_pt         = light_pt;
-    entity->sprites          = NULL;
-    entity->sprites          = ANIM_init(animation, texture);
-
-    entity->light            = NULL;
-    entity->light            = light;
-
-    entity->state            = state;
     entity->direction        = RIGHT; // right is the default but I donw know why
-    entity->id               = id;
-    entity->frame            = 0;
-    entity->frame_t          = 0;
     entity->x_vel            = 0;
     entity->y_vel            = 0;
-    entity->update_fun_t     = 0;                
-    entity->resolution_fun_t = 0;                
+
+    // state
+    entity->state            = blueprint->starting_state;
+    entity->frame            = 0;
+    entity->frame_t          = 0;
+
+    // interactions
+    entity->handle           = blueprint->handle_type;
+    entity->light_pt         = blueprint->light_emmit_pt;
+    entity->flags            = blueprint->flags;
     entity->hold             = NULL;
 
-    if (flags & CONTROLABLE) {
+    // assets
+    entity->sheet              = &blueprint->animation;
+    entity->sheet->texture     = sprites[blueprint->texture_id];
+
+    entity->light            = NULL;
+    entity->light            = lightsources[blueprint->lightsource_id];
+
+    // actions
+    entity->update_fun_t     = 0;                
+    entity->resolution_fun_t = 0;                
+
+    if (entity->flags & CONTROLABLE) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_control;
     }
 
-    if (flags & APPLY_FRICTION) {
+    if (entity->flags & APPLY_FRICTION) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_friction;
     }
 
-    if (flags & EMMIT_LIGHT) {
+    if (entity->flags & EMMIT_LIGHT) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_wobble;
     }
 
-    if (flags & MOVABLE) {
+    if (entity->flags & MOVABLE) {
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_velocity;
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_hold;
     }
 
-    if (flags & STATEABLE) {
+    if (entity->flags & STATEABLE) {
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_state;
     }
 
-    if (flags & ANIMATIABLE) {
+    if (entity->flags & ANIMATIABLE) {
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_animation;
     }
     
-    if (hold_id != ENTITY_NO) {
-        entity->hold = ENT_generate(entity->x, entity->y, hold_id);
+    if (blueprint->hold_id != ENTITY_NO) {
+        entity->hold = ENT_generate(entity->x, entity->y, blueprint->hold_id);
     }
 
     return entity;
@@ -537,23 +504,71 @@ bool ENT_render_with_flip(
     return entity->direction == LEFT;
 }
 
+// returns texture clip from tileset according to current frame and animation
+render_img_t ENT_texture_coord(
+    entity_t *entity
+) {
+    if (!(entity->flags & ANIMATIABLE)) {
+        return ANIM_texture_coord_full(entity->sheet);
+    }
+    return ANIM_texture_coord(entity->sheet->animations, entity->state, entity->frame);
+}
+
+// calculate where on screen entity texture should be rendered
+render_coord_t ENT_img_coord(
+    entity_t       *entity,
+    render_img_t    texture_coord
+) {
+    // texture is always rendered 1:1 to achieve pixel perfect effect
+    float x1, y1, x2, y2;
+    render_coord_t coord;
+
+    // TODO: this should be moved to separate function
+    float texW = (float)TXTR_width(entity->sheet->texture);
+    float texH = (float)TXTR_height(entity->sheet->texture);
+
+    // orient it in a way that OpenGL will digest it
+    x1 = (float)entity->x - (float)SCREEN_WIDTH / 2.0;
+    y1 = (float)entity->y - (float)SCREEN_HEIGHT / 2.0;
+
+    y1 *= -1;
+    y2 = (float)y1 - ((texture_coord.y2 - texture_coord.y1) * texH);
+    x2 = (float)x1 + ((texture_coord.x2 - texture_coord.x1) * texW);
+    y2 = (float)y1 - (float)TILE_WIDTH;
+    x2 = (float)x1 + (float)TILE_HEIGHT;
+
+    coord.x1 = x1;
+    coord.y1 = y1;
+    coord.x2 = x2;
+    coord.y2 = y2;
+
+    return coord;
+}
+
 void ENT_draw(
     entity_t *entity,
     int x,
     int y
 ) {
-    SDL_Rect *clip = NULL;
-    clip           = ENT_current_frame_rect(entity);
-    bool flip      = ENT_render_with_flip(entity);
+    // do not draw if not needed!
+    if (!(entity->flags & NOT_DRAWABLE)) {
+        return;
+    }
+
+    bool flip                  = ENT_render_with_flip(entity);
+    render_img_t texture_coord = ENT_texture_coord(entity);
+    render_coord_t img_coord   = ENT_img_coord(entity, texture_coord);
 
     GFX_render_texture_part(
-        entity->sprites->texture,
-        x,
-        y,
-        clip->x,
-        clip->y,
-        clip->x + clip->w,
-        clip->y + clip->h,
+        entity->sheet->texture,
+        img_coord.x1,
+        img_coord.y1,
+        img_coord.x2,
+        img_coord.y2,
+        texture_coord.x1, 
+        texture_coord.y1, 
+        texture_coord.x2, 
+        texture_coord.y2, 
         flip
     );
 
@@ -568,13 +583,13 @@ void ENT_free(
     }
 
     entity->light = NULL;
-    entity->sprites->texture = NULL;
+    entity->sheet->texture = NULL;
 
-    if (entity->sprites->n_animations == 0) {
-        ANIM_free(entity->sprites);
+    if (entity->sheet->n_animations == 0) {
+        ANIM_free(entity->sheet);
     }
 
-    entity->sprites = NULL;
+    entity->sheet = NULL;
 
     free(entity);
     entity = NULL;
@@ -583,14 +598,14 @@ void ENT_free(
 int ENT_get_n_hitboxes(
     entity_t *entity
 ) {
-    return entity->sprites->animations[entity->state].frames[entity->frame].n_hit_box;
+    return entity->sheet->animations[entity->state].frames[entity->frame].n_hit_box;
 }
 
 SDL_Rect ENT_get_hitbox(
     entity_t *entity,
     int i
 ) {
-    return entity->sprites->animations[entity->state].frames[entity->frame].hit_boxes[i];
+    return entity->sheet->animations[entity->state].frames[entity->frame].hit_boxes[i];
 }
 
 lightsource_t* ENT_get_light(
@@ -777,17 +792,9 @@ entity_t* ENT_generate(
     int id
 ) {
     return ENT_init(
-        id,
         x * TILE_WIDTH,
         y * TILE_HEIGHT,
-        entities_library[id][ENTITY_PARAM_FLAGS],
-        entities_library[id][ENTITY_PARAM_HANDLE_TYPE],
-        entities_library[id][ENTITY_PARAM_LIGHT_EMMIT_PT],
-        entities_library[id][ENTITY_PARAM_HOLD_ID],
-        entities_library[id][ENTITY_PARAM_STARTING_STATE],
-        animations[entities_library[id][ENTITY_PARAM_ANIMATION]],
-        sprites[entities_library[id][ENTITY_PARAM_SPRITE]],
-        lightsources[entities_library[id][ENTITY_PARAM_LIGHT_TYPE]]
+        entity_library[id]
     );
 }
 

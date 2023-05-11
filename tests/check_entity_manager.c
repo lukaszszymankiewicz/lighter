@@ -6,7 +6,7 @@
 #include "../src/entity_manager.h"
 #include "../src/gfx.h"
 #include "../src/segment.h"
-#include "../src/sprites.h"
+#include "../src/animation.h"
 
 
 START_TEST (ENTMAN_entity_in_range_check)

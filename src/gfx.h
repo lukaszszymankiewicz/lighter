@@ -11,7 +11,8 @@ extern SDL_Window *window;
 extern SDL_Surface *surface;
 extern SDL_Renderer *renderer;
 
-extern texture_t         *sprites[ASSET_SPRITE_ALL];
+extern float global_x_scale;
+extern float global_y_scale;
 
 typedef void (*shader_t)(uint32_t, int, int, int, int, int);
 
@@ -58,10 +59,11 @@ void GFX_draw_light();
 void GFX_draw_darkness();
 
 void GFX_render_texture_part(
-    texture_t     *texture,
-    int render_x1, int render_y1,
-    int tex_x1,    int tex_y1,
-    int tex_x2,    int tex_y2,
+    texture_t        *texture,
+    float render_x1, float render_y1,
+    float render_x2, float render_y2,
+    float tex_x1,    float tex_y1,
+    float tex_x2,    float tex_y2,
     bool flip
 );
 
