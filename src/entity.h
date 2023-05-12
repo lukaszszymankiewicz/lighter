@@ -1,10 +1,12 @@
-#include "assets.h"
-#include "source.h"
+#include "data/library.h"
+
+#include "animation.h"
+#include "animation.h"
 #include "global.h"
 #include "primitives.h"
-#include "animation.h"
+#include "source.h"
 #include "texture.h"
-#include "data/library.h"
+
 
 #ifndef ENTITY_H
 #define ENTITY_H

@@ -1,12 +1,3 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_opengl.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
@@ -21,7 +12,6 @@
 #define SIGN(a) ((a) > 0 ? (1) : (-1))
 
 // constans
-#define MAX_ANIMATION                10
 #define DEFAULT_SCREEN_WIDTH         1366               // default screen resolution
 #define DEFAULT_SCREEN_HEIGHT        768                // default screen resolution
 #define SCREEN_FPS                   20                 // Frame per second
@@ -38,7 +28,6 @@
 #define DEG1                         PI/(36*5)          // shortcut
 #define SCREEN_WIDTH                 320                // screen width in pixels
 #define SCREEN_HEIGHT                240                // screen height in pixels
-#define MAX_KEYS                     SDL_NUM_SCANCODES  // SDL max keys supported
 #define GAME_NAME                    "Lighter"          // game windom nape
 #define TILE_HEIGHT                  32                 // single tile height (in px)
 #define TILE_WIDTH                   32                 // single tile width (in px)
@@ -61,8 +50,7 @@
 #define SCREEN_TILE_PER_X            10
 #define SCREEN_TILE_PER_Y            12
 
-// yeah... full screen overall pix number is apparently higher than it should be from simple
-// multiplication. This is propably due to reshaping resolution size to window size
+// TODO: after implementing OpenGL it should be deleted
 #define FULL_SCREEN_PIX_SIZE     SCREEN_WIDTH * (SCREEN_HEIGHT+40)
 #define FULL_SCREEN_BYTE_SIZE    SCREEN_WIDTH * SCREEN_HEIGHT * N_COLOR_CHANNELS
 #define PIX_PER_SCREEN_ROW       SCREEN_WIDTH * N_COLOR_CHANNELS

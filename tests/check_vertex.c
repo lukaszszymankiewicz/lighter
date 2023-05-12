@@ -1,4 +1,6 @@
 #include <check.h>
+#include <stdbool.h>
+
 #include "../src/vertex.h"
 
 START_TEST (VRTX_eq_check) {

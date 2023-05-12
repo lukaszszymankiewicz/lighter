@@ -295,9 +295,6 @@ void LVL_draw(
             tile    = LVL_tile_on_pos(level, x, y);
             texture = LVL_get_tile_texture(level);
             
-            int tile_pos_x = TILE_WIDTH  * x - st_x;
-            int tile_pos_y = TILE_HEIGHT * y - st_y;
-
             if (tile != NULL) {
 
                 printf(

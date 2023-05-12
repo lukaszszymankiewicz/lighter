@@ -1,4 +1,6 @@
 #include <check.h>
+#include <stdbool.h>
+
 #include "../src/point.h"
 
 

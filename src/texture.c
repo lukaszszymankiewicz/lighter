@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include <GL/glu.h>
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_surface.h>
 
 #include "files.h"
@@ -14,7 +16,8 @@ texture_t         *sprites[ASSET_SPRITE_ALL];
 GLuint TXTR_generate_texture_ID(
 ) {
     texture_id_counter++;
-    return (GLuint) texture_id_counter ;
+
+    return (GLuint) texture_id_counter;
 }
 
 // set texture interpolation method in OpenGL
@@ -114,7 +117,7 @@ texture_t* TXTR_read_from_file(
     surface                     = IMG_Load(filepath);
      
     return TXTR_new(surface, GL_RGB, filepath);
-};
+}
 
 void TXTR_read_all_sprites(
 ) {

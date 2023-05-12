@@ -1,12 +1,4 @@
-#include "data/library.h"
-
-#include "assets.h"
-#include "global.h"
-#include "primitives.h"
 #include "animation.h"
-#include "import.h"
-
-#include <stdio.h>
 
 void ANIM_free(
     animation_sheet_t* animation
@@ -16,6 +8,9 @@ void ANIM_free(
     animation          = NULL;
 }
 
+// TODO: add width and height to animation_sheet_t struct
+// TODO: divide this method into two separate parts (width and height), do not
+// fight with SDL_Rect
 SDL_Rect* ANIM_get_whole_texture_size(
     animation_sheet_t* animation
 ) {

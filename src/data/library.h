@@ -1,5 +1,6 @@
-#include "../global.h"
 #include "../animation.h"
+#include "../global.h"
+#include "../source.h"
 
 #ifndef LIBRARY_H
 #define LIBRARY_H
@@ -24,6 +25,13 @@ enum ENITY_IDX {
     ENTITY_LIGHTER,
     ENTITY_WALLLIGHT,
     ENTITY_ALL
+};
+
+enum WOBBLE_IDX {
+    WOBBLE_NO,
+    WOBBLE_STABLE,
+    WOBBLE_WALKING,
+    WOBBLE_ALL
 };
 
 enum ANIMATION_IDX {
@@ -66,8 +74,10 @@ typedef struct entity_blueprint {
 } entity_blueprint_t;
 
 extern entity_blueprint_t* entity_library[ENTITY_ALL];
+extern wobble_t* wobble_library[WOBBLE_ALL];
 
 void LIB_create_entity_library();
+void LIB_create_wobble_library();
 
 #endif
 

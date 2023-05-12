@@ -1,8 +1,12 @@
+#include <stdbool.h>
+
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
+#include <SDL2/SDL_image.h>
 
 #include <math.h>
 #include <stdio.h>

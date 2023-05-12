@@ -1,3 +1,9 @@
+#include <math.h>
+#include <stdlib.h>
+
+// TODO: TBD
+#include <stdio.h>
+
 #include "global.h"
 #include "import.h"
 #include "source.h"
@@ -6,7 +12,6 @@
 static char buffer[BUFFER_SIZE];
 
 lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
-wobble_t          *wobbles[ASSET_WOBBLE_ALL];
 
 // changes done to light angle if looking in different direction
 float lightpos_up_down_corr[2][5] = {
@@ -203,65 +208,10 @@ lightsource_t* SRC_read_lightsource(
     return lightsource;
 }
 
-wobble_t* SRC_read_wobble(
-    const char *filepath
-) {
-    wobble_t *wobble = NULL;
-    wobble           = (wobble_t*)malloc(sizeof(wobble_t));
-
-    int state                     = READ_WOBBLE_IDLE;
-    FILE *file                    = NULL;
-    file                          = fopen(filepath, LEVEL_READ_MODE);
-     
-    int coef_n                    = 0;
-    int sign                      = 0;
-    int val                       = 0;
-
-    state++;
-
-    if (!file) {return NULL;}
-
-    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
-        switch (state) 
-        {
-            case READ_WOBBLE_PREAMBULE_FIRST_HALF:
-                if(IMP_cast_val_to_dec(buffer) != WOBBLE_PREAMBULE[FIRST_HALF]) { return NULL; }
-                state++; break;
-
-            case READ_WOBBLE_PREAMBULE_SECOND_HALF:
-                if(IMP_cast_val_to_dec(buffer) != WOBBLE_PREAMBULE[SECOND_HALF]) { return NULL; }
-                state++; break;
-
-            case READ_WOBBLE_NUMBER:
-                wobble->len = IMP_cast_val_to_dec(buffer);
-                wobble->coefs = (float*)malloc(sizeof(float) * wobble->len);
-                state++; break;
-
-            case READ_WOBBLE_SIGN:
-                val = IMP_cast_val_to_dec(buffer);
-                sign = val==1 ? 1 : -1;
-                state++; break;
-
-            case READ_WOBBLE_COEF:
-                val = IMP_cast_val_to_dec(buffer);
-                wobble->coefs[coef_n] = (float)(sign * val) / 1000.0;
-
-                if (++coef_n == wobble->len) {
-                    state++; break;
-                } else {
-                    state = READ_WOBBLE_SIGN; break;
-                }
-        }
-    }
-    return wobble;
-}
 
 void SRC_free_wobble(
     wobble_t* wobble
 ) {
-    free(wobble->coefs);
-    wobble->coefs = NULL;
-
     free(wobble);
     wobble = NULL;
 };

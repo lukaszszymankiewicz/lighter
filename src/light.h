@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "assets.h"
 #include "global.h"
 #include "source.h"

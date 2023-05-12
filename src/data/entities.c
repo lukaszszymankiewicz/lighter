@@ -68,7 +68,6 @@ entity_blueprint_t entity_blueprint_hero = {
                     },
                 }
             },
-
             { // FALLING
                 1, // len
                 {
@@ -98,9 +97,9 @@ entity_blueprint_t entity_blueprint_lighter = {
 
 entity_blueprint_t entity_blueprint_walllight = {
     ENTITY_WALLLIGHT,
+    EMMIT_LIGHT,
     HANDLE_MIDDLE_MIDDLE,
     HANDLE_MIDDLE_MIDDLE,
-    ASSET_NO_ANIMATION,
     ASSET_SPRITE_WALLLIGHT,
     ASSET_LIGHTSOURCE_WALLLIGHT,
     ENTITY_NO,
@@ -112,5 +111,5 @@ void LIB_create_entity_library(
 ) {
     entity_library[ENTITY_HERO] = &entity_blueprint_hero;
     entity_library[ENTITY_LIGHTER] = &entity_blueprint_lighter;
-    entity_library[ENTITY_WALLLIGHT] = &entity_blueprint_walllight ;
+    entity_library[ENTITY_WALLLIGHT] = &entity_blueprint_walllight;
 }

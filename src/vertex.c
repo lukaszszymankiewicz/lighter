@@ -1,3 +1,7 @@
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+
 #include "global.h"
 #include "geometry.h"
 #include "vertex.h"

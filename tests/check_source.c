@@ -1,15 +1,17 @@
 #include <check.h>
-#include "../src/source.h"
+
+#include "../src/data/library.h"
 #include "../src/files.h"
+#include "../src/source.h"
 
 START_TEST (SRC_read_wobble_check)
 {
     // GIVEN
+    LIB_create_wobble_library();
     wobble_t *wobble     = NULL;
-    const char *filename = FILEPATH_WOBBLE_WALKING;         
 
     // WHEN
-    wobble = SRC_read_wobble(filename);
+    wobble = wobble_library[WOBBLE_WALKING];
 
     // THEN
     ck_assert_ptr_nonnull(wobble);
@@ -142,8 +144,8 @@ Suite *source_suite(void) {
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, SRC_read_wobble_check);
-    tcase_add_test(tc_core, SRC_read_lightsource_lantern_check);
     tcase_add_test(tc_core, SRC_read_lightsource_lighter_check);
+    tcase_add_test(tc_core, SRC_read_lightsource_lantern_check);
 
     suite_add_tcase(s, tc_core);
 

@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <string.h>
+
 #include "import.h"
 
 const char *LEVEL_READ_MODE        = "rb";

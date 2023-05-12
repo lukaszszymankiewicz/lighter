@@ -1,3 +1,6 @@
+#include <math.h>
+#include <stdlib.h>
+
 #include "global.h"
 #include "vertex.h"
 #include "segment.h"

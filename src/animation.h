@@ -1,11 +1,12 @@
-#include "assets.h"
-#include "global.h"
+#include <SDL2/SDL.h>
+
 #include "img.h"
 #include "texture.h"
 
 #ifndef SPRITES_H
 #define SPRITES_H
 
+#define MAX_ANIMATION              10
 #define MAX_HITBOXES_PER_FRAME     4
 #define MAX_FRAMES_PER_ANIMATION   4
 

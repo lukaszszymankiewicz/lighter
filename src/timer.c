@@ -1,3 +1,8 @@
+#include <stdlib.h>
+#include <stdbool.h>
+
+#include <SDL2/SDL.h>
+
 #include "timer.h"
 
 // Basically the https://lazyfoo.net/tutorials/SDL/25_capping_frame_rate/index.php 

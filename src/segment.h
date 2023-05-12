@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "primitives.h"
 
 #ifndef SEGMENT_H
@@ -22,6 +24,5 @@ void SEG_free(segment_t* head);
 void SEG_delete(segment_t** head, int y);
 void SEG_merge(segment_t** head, segment_t* candidates);
 void SEG_debug(segment_t* seg);
-
 
 #endif

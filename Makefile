@@ -30,62 +30,63 @@ $(BUILDDIR)/$(DATADIR)/%.o:	$(SRCDIR)/$(DATADIR)/%.c
 $(BUILDDIR)/%.o:	$(TESTDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-OBJS =                               \
-	$(BUILDDIR)/$(DATADIR)/library.o \
-	$(BUILDDIR)/game.o               \
-	$(BUILDDIR)/gfx.o                \
-    $(BUILDDIR)/import.o             \
-    $(BUILDDIR)/img.o                \
-	$(BUILDDIR)/controller.o         \
-	$(BUILDDIR)/entity.o             \
-	$(BUILDDIR)/entity_manager.o     \
-	$(BUILDDIR)/timer.o              \
-	$(BUILDDIR)/texture.o            \
-	$(BUILDDIR)/tile.o               \
-	$(BUILDDIR)/files.o              \
-	$(BUILDDIR)/level.o              \
-	$(BUILDDIR)/geometry.o           \
-	$(BUILDDIR)/sorted_list.o        \
-	$(BUILDDIR)/light.o              \
-	$(BUILDDIR)/vertex.o             \
-	$(BUILDDIR)/source.o             \
-	$(BUILDDIR)/segment.o            \
-	$(BUILDDIR)/animation.o          \
-	$(BUILDDIR)/point.o              \
-
-TESTOBJS =                            \
-	$(BUILDDIR)/$(DATADIR)/library.o  \
-    $(BUILDDIR)/check_controller.o    \
-	$(BUILDDIR)/check_geometry.o      \
-	$(BUILDDIR)/check_animation.o     \
-	$(BUILDDIR)/check_entity.o        \
-	$(BUILDDIR)/check_light.o         \
-	$(BUILDDIR)/check_point.o         \
-	$(BUILDDIR)/check_segment.o       \
-	$(BUILDDIR)/check_source.o        \
-	$(BUILDDIR)/check_sorted_list.o   \
-	$(BUILDDIR)/check_vertex.o        \
-	$(BUILDDIR)/controller.o          \
-	$(BUILDDIR)/geometry.o            \
+OBJS =                                \
+	$(BUILDDIR)/$(DATADIR)/entities.o \
+	$(BUILDDIR)/$(DATADIR)/wobbles.o  \
+	$(BUILDDIR)/game.o                \
 	$(BUILDDIR)/gfx.o                 \
-	$(BUILDDIR)/import.o              \
-	$(BUILDDIR)/img.o                 \
+    $(BUILDDIR)/import.o              \
+    $(BUILDDIR)/img.o                 \
+	$(BUILDDIR)/controller.o          \
 	$(BUILDDIR)/entity.o              \
-	$(BUILDDIR)/texture.o             \
-	$(BUILDDIR)/level.o               \
-	$(BUILDDIR)/light.o               \
-	$(BUILDDIR)/files.o               \
-	$(BUILDDIR)/point.o               \
-	$(BUILDDIR)/segment.o             \
 	$(BUILDDIR)/entity_manager.o      \
-	$(BUILDDIR)/animation.o           \
-	$(BUILDDIR)/source.o              \
-	$(BUILDDIR)/sorted_list.o         \
 	$(BUILDDIR)/timer.o               \
+	$(BUILDDIR)/texture.o             \
 	$(BUILDDIR)/tile.o                \
+	$(BUILDDIR)/files.o               \
+	$(BUILDDIR)/level.o               \
+	$(BUILDDIR)/geometry.o            \
+	$(BUILDDIR)/sorted_list.o         \
+	$(BUILDDIR)/light.o               \
 	$(BUILDDIR)/vertex.o              \
+	$(BUILDDIR)/source.o              \
+	$(BUILDDIR)/segment.o             \
+	$(BUILDDIR)/animation.o           \
+	$(BUILDDIR)/point.o               \
 
-	# $(BUILDDIR)/check_entity_manager.o       \
+TESTOBJS =                               \
+	$(BUILDDIR)/$(DATADIR)/entities.o    \
+	$(BUILDDIR)/$(DATADIR)/wobbles.o     \
+    $(BUILDDIR)/check_controller.o       \
+	$(BUILDDIR)/check_geometry.o         \
+	$(BUILDDIR)/check_animation.o        \
+	$(BUILDDIR)/check_entity.o           \
+	$(BUILDDIR)/check_entity_manager.o   \
+	$(BUILDDIR)/check_light.o            \
+	$(BUILDDIR)/check_point.o            \
+	$(BUILDDIR)/check_segment.o          \
+	$(BUILDDIR)/check_source.o           \
+	$(BUILDDIR)/check_sorted_list.o      \
+	$(BUILDDIR)/check_vertex.o           \
+	$(BUILDDIR)/controller.o             \
+	$(BUILDDIR)/geometry.o               \
+	$(BUILDDIR)/gfx.o                    \
+	$(BUILDDIR)/import.o                 \
+	$(BUILDDIR)/img.o                    \
+	$(BUILDDIR)/entity.o                 \
+	$(BUILDDIR)/texture.o                \
+	$(BUILDDIR)/level.o                  \
+	$(BUILDDIR)/light.o                  \
+	$(BUILDDIR)/files.o                  \
+	$(BUILDDIR)/point.o                  \
+	$(BUILDDIR)/segment.o                \
+	$(BUILDDIR)/entity_manager.o         \
+	$(BUILDDIR)/animation.o              \
+	$(BUILDDIR)/source.o                 \
+	$(BUILDDIR)/sorted_list.o            \
+	$(BUILDDIR)/timer.o                  \
+	$(BUILDDIR)/tile.o                   \
+	$(BUILDDIR)/vertex.o                 \
 	# $(BUILDDIR)/check_level.o        \
 
 
@@ -101,6 +102,8 @@ clean:
 	rm -f $(BUILDDIR)/$(FINAL_TEST_OBJ)
 	rm $(LEVELLOG)
 	rm $(MEMORYLOG)
+
+# TODO: add creating build/data folder
 
 lighter:  $(BUILDDIR)/lighter
 

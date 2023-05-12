@@ -1,4 +1,6 @@
 #include <check.h>
+#include <stdbool.h>
+
 #include "../src/geometry.h"
 #include "../src/vertex.h"
 #include "../src/segment.h"

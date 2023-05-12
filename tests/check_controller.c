@@ -1,4 +1,8 @@
 #include <check.h>
+#include <stdbool.h>
+
+#include <SDL2/SDL.h>
+
 #include "../src/controller.h"
 
 START_TEST (CON_init_check)

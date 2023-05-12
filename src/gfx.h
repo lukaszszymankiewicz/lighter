@@ -1,3 +1,7 @@
+#include <stdbool.h>
+
+#include <SDL2/SDL.h>
+
 #include "assets.h"
 #include "global.h"
 #include "primitives.h"

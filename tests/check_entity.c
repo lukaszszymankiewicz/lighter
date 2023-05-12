@@ -227,9 +227,9 @@ START_TEST (ENT_resolve_check)
     entity           = ENT_init(x, y, entity_library[ENTITY_HERO]);
     
     // WHEN
-    entity->sprites->animations[entity->state].frames[0].delay = 2;
-    entity->sprites->animations[entity->state].frames[1].delay = 2;
-    entity->sprites->animations[entity->state].len = 2;
+    entity->sheet->animations[entity->state].frames[0].delay = 2;
+    entity->sheet->animations[entity->state].frames[1].delay = 2;
+    entity->sheet->animations[entity->state].len = 2;
 
     // THEN
     ck_assert_int_eq(entity->frame_t, 0);

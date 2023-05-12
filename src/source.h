@@ -8,7 +8,8 @@
 enum lightsources_names { LIGHTER, WALLLIGHT, ALL };
 enum polydata           { X, Y, RED, GREEN, BLUE, LIGHT_POWER, WIDTH };
 
-# define MAX_WOBBLES 2
+#define MAX_WOBBLES 2
+#define MAX_WOBBLE_LEN 100
 
 typedef struct lightpolygon { 
     int x;
@@ -22,7 +23,7 @@ typedef struct lightpolygon {
 
 typedef struct wobble {
     int   len;
-    float *coefs;
+    float coefs[MAX_WOBBLE_LEN];
 } wobble_t;
 
 typedef struct lightsource {
@@ -38,7 +39,6 @@ typedef struct lightsource {
 } lightsource_t;
 
 extern lightsource_t     *lightsources[ASSET_LIGHTSOURCE_ALL];
-extern wobble_t          *wobbles[ASSET_WOBBLE_ALL];
 
 int SRC_get_light_penetrating_power(lightsource_t *lght);
 int SRC_get_light_polygon_x_corr(lightsource_t *lght, int i);
@@ -48,7 +48,6 @@ float SRC_get_light_polygon_width_corr(lightsource_t *lght, int i);
 float SRC_get_wobble_angle_coef(lightsource_t *lght);
 
 lightsource_t* SRC_read_lightsource(const char *filepath);
-wobble_t* SRC_read_wobble(const char *filepath);
 
 void SRC_move_lightsource(lightsource_t *light, direction_t light_dir, direction_t entity_dir);
 void SRC_change_wobble(lightsource_t *lght, int wobble_index);
