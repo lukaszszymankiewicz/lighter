@@ -87,7 +87,7 @@ TESTOBJS =                               \
 	$(BUILDDIR)/timer.o                  \
 	$(BUILDDIR)/tile.o                   \
 	$(BUILDDIR)/vertex.o                 \
-	# $(BUILDDIR)/check_level.o        \
+	$(BUILDDIR)/check_level.o            \
 
 
 $(BUILDDIR)/lighter:	$(OBJS) $(BUILDDIR)/main.o

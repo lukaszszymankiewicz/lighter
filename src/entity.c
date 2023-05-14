@@ -436,8 +436,7 @@ entity_t* ENT_init(
     entity->hold             = NULL;
 
     // assets
-    entity->sheet              = &blueprint->animation;
-    entity->sheet->texture     = sprites[blueprint->texture_id];
+    entity->sheet            = &blueprint->animation;
 
     entity->light            = NULL;
     entity->light            = lightsources[blueprint->lightsource_id];
@@ -523,9 +522,8 @@ render_coord_t ENT_img_coord(
     float x1, y1, x2, y2;
     render_coord_t coord;
 
-    // TODO: this should be moved to separate function
-    float texW = (float)TXTR_width(entity->sheet->texture);
-    float texH = (float)TXTR_height(entity->sheet->texture);
+    float texW = entity->sheet->width;
+    float texH = entity->sheet->height;
 
     // orient it in a way that OpenGL will digest it
     x1 = (float)entity->x - (float)SCREEN_WIDTH / 2.0;
@@ -560,7 +558,7 @@ void ENT_draw(
     render_coord_t img_coord   = ENT_img_coord(entity, texture_coord);
 
     GFX_render_texture_part(
-        entity->sheet->texture,
+        sprites[entity->sheet->texture_id],
         img_coord.x1,
         img_coord.y1,
         img_coord.x2,
@@ -583,7 +581,6 @@ void ENT_free(
     }
 
     entity->light = NULL;
-    entity->sheet->texture = NULL;
 
     if (entity->sheet->n_animations == 0) {
         ANIM_free(entity->sheet);

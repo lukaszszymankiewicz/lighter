@@ -3,7 +3,7 @@
 #include "check_light.h"
 #include "check_segment.h"
 #include "check_point.h"
-// #include "check_level.h"
+#include "check_level.h"
 #include "check_animation.h"
 #include "check_controller.h"
 #include "check_geometry.h"
@@ -20,7 +20,7 @@
 #include "../src/segment.h"
 #include "../src/gfx.h"
 #include "../src/import.h"
-// #include "../src/level.h"
+#include "../src/level.h"
 #include "../src/controller.h"
 #include "../src/entity.h"
 #include "../src/entity_manager.h"
@@ -34,20 +34,20 @@ int main(void) {
     SRunner *sr;
     
     Suite *suites[] = {
-        // vertex_suite(),
-        // light_suite(),
-        // segment_suite(),
-        // point_suite(),
-        // level_suite(),
-        // controller_suite(),
-        // geometry_suite(),
+        vertex_suite(),
+        light_suite(),
+        segment_suite(),
+        point_suite(),
+        level_suite(),
+        controller_suite(),
+        geometry_suite(),
         entity_suite(),
         entity_manager_suite(),
-        // sorted_list_suite(),
+        sorted_list_suite(),
         animation_suite(),
-        // source_suite(),
+        source_suite(),
     };
-    int n_suites = 3;
+    int n_suites = 12;
 
     for (int i=0; i<n_suites; i++) {
         s = suites[i];

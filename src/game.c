@@ -21,15 +21,16 @@ static char buffer[BUFFER_SIZE];
 void GAME_read_all_files(
 ) {
     TXTR_read_all_sprites();
-    wobbles[ASSET_WOBBLE_NO]                   = SRC_read_wobble(FILEPATH_WOBBLE_NO);
-    wobbles[ASSET_WOBBLE_STABLE]               = SRC_read_wobble(FILEPATH_WOBBLE_STABLE);
-    wobbles[ASSET_WOBBLE_WALKING]              = SRC_read_wobble(FILEPATH_WOBBLE_WALKING);
+    // wobbles[ASSET_WOBBLE_NO]                   = SRC_read_wobble(FILEPATH_WOBBLE_NO);
+    // wobbles[ASSET_WOBBLE_STABLE]               = SRC_read_wobble(FILEPATH_WOBBLE_STABLE);
+    // wobbles[ASSET_WOBBLE_WALKING]              = SRC_read_wobble(FILEPATH_WOBBLE_WALKING);
     lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
     lightsources[ASSET_LIGHTSOURCE_WALLLIGHT]  = SRC_read_lightsource(FILEPATH_WALLLIGHT_LIGHTSOURCE);
 }
 
 void GAME_create_library(
 ) {
+    LIB_create_wobble_library();
     LIB_create_entity_library();
 }
 

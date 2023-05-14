@@ -9,6 +9,7 @@ enum ASSETS_LIGHTSOURCES_IDX {
     ASSET_LIGHTSOURCE_ALL
 };
 
+// TODO: this should be moved to texture.h maybe?
 enum ASSETS_SPRITE_IDX {
     ASSET_SPRITE_HERO,
     ASSET_SPRITE_TEST,

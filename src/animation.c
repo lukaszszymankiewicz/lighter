@@ -3,7 +3,6 @@
 void ANIM_free(
     animation_sheet_t* animation
 ) {
-    animation->texture = NULL;
     free(animation);
     animation          = NULL;
 }
@@ -20,8 +19,8 @@ SDL_Rect* ANIM_get_whole_texture_size(
     clip->x = 0;
     clip->y = 0;
 
-    clip->w = TXTR_width(animation->texture);
-    clip->h = TXTR_height(animation->texture);
+    clip->w = animation->width;
+    clip->h = animation->height;
 
     return clip;
 }
@@ -41,8 +40,8 @@ render_img_t ANIM_texture_coord_full(
 
     coord.x1 = 0.0;
     coord.y1 = 0.0;
-    coord.x2 = (float)TXTR_width(animation->texture);
-    coord.y2 = (float)TXTR_height(animation->texture);
+    coord.x2 = (float)animation->width;
+    coord.y2 = (float)animation->height;
 
     return coord;
 }

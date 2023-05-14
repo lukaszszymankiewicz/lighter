@@ -109,73 +109,37 @@ START_TEST (LVL_analyze_check)
     ck_assert_int_eq(len, expected_obstacles_num);
 }
 END_TEST
-
-START_TEST (LVL_fill_tiles_check)
-{
-    // GIVEN
-    texture_t* tex = NULL;
-    level_t *level = NULL;
-    char *tex_filepath = "./tests/testfiles/testlevel/level.png";
-
-    level = LVL_new();
-    tex = GFX_read_texture(tex_filepath);
-    int cols = (int)tex->width/TILE_WIDTH;
-
-    LVL_set_tileset(level, tex);
-
-    // WHEN
-    LVL_fill_tiles(level);
-
-    // THEN
-    // test texture is 320*224 image resulting in 10 * 7 = 70 tiles. Each of them should be read and
-    // placed in tile_library.
-    for (int i=0; i<70; i++) {
-        ck_assert_ptr_nonnull(&(level->tile_library[i]));
-        tile_img_t *tile = level->tile_library[i];
-        int x = (int)i%cols;
-        int y = (int)i/cols;
-        ck_assert_int_eq(tile->x, x*TILE_WIDTH);
-        ck_assert_int_eq(tile->y, y*TILE_HEIGHT);
-    }
-}
-END_TEST
-
 START_TEST (LVL_fill_structure_check)
 {
     // GIVEN
-    texture_t* tex = NULL;
-    level_t *level = NULL;
+    texture_t *tex   = NULL;
+    level_t   *level = NULL;
     char *tex_filepath = "./tests/testfiles/testlevel/level.png";
 
     level = LVL_new();
-    tex = GFX_read_texture(tex_filepath);
-    LVL_set_tileset(level, tex);
+    tex   = TXTR_read_from_file(tex_filepath);
+    
+    level->tileset = tex;
     LVL_set_size(level, 10, 10);
-    LVL_add_tile(level, 0, 0, 0);
-    LVL_add_tile(level, 1, 32, 0);
 
     // WHEN
     LVL_fill_structure(level, 5, 5, 0);
-    tile_img_t *tile = LVL_tile_on_pos(level, 5, 5);
+    tile_t *tile = NULL;
+    tile         = LVL_tile_on_pos(level, 5, 5);
 
-    LVL_fill_structure(level, 6, 6, 1);
-    tile_img_t *tile_b = LVL_tile_on_pos(level, 6, 6);
-
-    LVL_fill_structure(level, 7, 7, 1);
-    tile_img_t *tile_c = LVL_tile_on_pos(level, 7, 7);
-
-    // THEN
-    tile_img_t *ex_tile = level->tile_library[0];
-    tile_img_t *ex_tile_b = level->tile_library[1];
-    tile_img_t *ex_tile_c = level->tile_library[1];
-
+    // check if LVL_fill_structure is sucessful
     ck_assert_ptr_nonnull(tile);
-    ck_assert_ptr_nonnull(tile_b);
-    ck_assert_ptr_nonnull(tile_c);
 
-    ck_assert_ptr_eq(ex_tile, tile);
-    ck_assert_ptr_eq(ex_tile_b, tile_b);
-    ck_assert_ptr_eq(ex_tile_c, tile_c);
+    ck_assert_float_eq(tile->coord.x1, 0.5);
+    ck_assert_float_eq(tile->coord.y1, (2.0/3.0 * -1.0 ));
+    ck_assert_float_eq(tile->coord.x2, 0.6);
+    ck_assert_float_eq(tile->coord.y2, -0.8);
+
+    ck_assert_float_eq(tile->img.x1, 0.0);
+    ck_assert_float_eq(tile->img.y1, 0.0);
+    ck_assert_float_eq(tile->img.x2, 0.1);
+    ck_assert_float_eq(tile->img.y2, (32.0 / 224.0));
+
 }
 END_TEST
 
@@ -190,7 +154,6 @@ Suite *level_suite(void)
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, LVL_analyze_check);
-    tcase_add_test(tc_core, LVL_fill_tiles_check);
     tcase_add_test(tc_core, LVL_fill_structure_check);
 
     suite_add_tcase(s, tc_core);

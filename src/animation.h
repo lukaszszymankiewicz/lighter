@@ -23,12 +23,15 @@ typedef struct frame {
 
 typedef struct animation {
     int        len;
+    int        wobble_id;
     frame_t    frames[MAX_FRAMES_PER_ANIMATION];
 } animation_t;
 
 typedef struct animation_sheet {
-  texture_t   *texture;
+  int          texture_id;
   int          n_animations;
+  int          width;
+  int          height;
   animation_t  animations[MAX_ANIMATION];
 } animation_sheet_t;
 

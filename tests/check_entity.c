@@ -29,7 +29,7 @@ START_TEST (ENT_hold_and_handle_check_empty)
     b->lightsource_id = ASSET_LIGHTSOURCE_NO; 
     b->hold_id = ENTITY_NO; 
     b->starting_state = STANDING; 
-    b->animation = (animation_sheet_t){ NULL };
+    b->animation = (animation_sheet_t) { ASSET_SPRITE_LIGHTER, 0, 10, 5, { } };
 
     entity_t *entity = NULL;
     entity = ENT_init(0, 0, b);
@@ -80,7 +80,6 @@ START_TEST (ENT_hold_and_handle_check_empty)
         ck_assert_int_eq(x, testcases[i].exp_x_l);
         ck_assert_int_eq(y, testcases[i].exp_y_l);
     };
-
 }
 END_TEST
 

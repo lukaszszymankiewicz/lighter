@@ -40,7 +40,7 @@ tile_t* TILE_new(
     new_tile               = (tile_t*)malloc(sizeof(tile_t));
 
     float render_x1, render_y1, render_x2, render_y2;
-    
+        
     // TODO: this should be moved to separate function
     render_x1    = (float)x / (float)SCREEN_WIDTH;
     render_y1    = (float)y / (float)SCREEN_HEIGHT;

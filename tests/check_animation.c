@@ -7,24 +7,25 @@
 START_TEST (ANIM_read_animation_check)
 {
     // GIVEN
-    //
     LIB_create_entity_library();
-    animation_sheet_t sheet  = entity_library[ENTITY_HERO]->animation;
-
-    // WHEN
-    // sheet = ANIM_read_animation(data, NULL);
-
-    // THEN
-    // ck_assert_ptr_nonnull(sheet);
+    animation_sheet_t sheet = entity_library[ENTITY_HERO]->animation;
 
     // sheet
     ck_assert_int_eq(sheet.n_animations, 4);
+    ck_assert_int_eq(sheet.texture_id, 0);
+    ck_assert_int_eq(sheet.width, 27);
+    ck_assert_int_eq(sheet.height, 20);
 
     // single animation
     ck_assert_int_eq(sheet.animations[0].len, 2);
     ck_assert_int_eq(sheet.animations[1].len, 2);
     ck_assert_int_eq(sheet.animations[2].len, 1);
     ck_assert_int_eq(sheet.animations[3].len, 1);
+
+    ck_assert_int_eq(sheet.animations[0].wobble_id, 2);
+    ck_assert_int_eq(sheet.animations[1].wobble_id, 1);
+    ck_assert_int_eq(sheet.animations[2].wobble_id, 0);
+    ck_assert_int_eq(sheet.animations[3].wobble_id, 0);
 
     // // single frame
     // // first animation 

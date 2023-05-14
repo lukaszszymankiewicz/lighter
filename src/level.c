@@ -75,8 +75,9 @@ void LVL_fill_structure(
     int      y,
     int      i
 ) {
-    int tileset_x, tileset_y;
-    tile_t *tile                            = NULL;
+    int tileset_x;
+    int tileset_y;
+    tile_t *tile    = NULL;
 
     // determine place in the tileset
     int tile_per_row = (int)((float)TXTR_width(level->tileset) / (float)TILE_WIDTH);
