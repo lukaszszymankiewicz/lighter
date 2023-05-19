@@ -11,7 +11,6 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "assets.h"
 #include "global.h"
 #include "gfx.h"
 #include "texture.h"
@@ -840,20 +839,4 @@ void GFX_fill_light(
     if (current_draw) { SEG_free(current_draw); }
     if (obstacle_ptr) { SEG_free(obstacle_ptr); }
     if (candidates)  { SEG_free(candidates); }
-}
-
-// TODO: this should be deleted later on!
-void GFX_draw_light(
-) {
-    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_BLEND);
-    SDL_UpdateTexture(screen_texture, NULL, lightbuffer, PIX_PER_SCREEN_ROW);
-    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
-}
-
-// TODO: this should be deleted later on!
-void GFX_draw_darkness(
-) {
-    SDL_SetTextureBlendMode(screen_texture, SDL_BLENDMODE_MOD);
-    SDL_UpdateTexture(screen_texture, NULL, shadowbuffer, PIX_PER_SCREEN_ROW);
-    SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 }

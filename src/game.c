@@ -18,39 +18,15 @@
 
 static char buffer[BUFFER_SIZE];
 
-void GAME_read_all_files(
-) {
-    TXTR_read_all_sprites();
-    // wobbles[ASSET_WOBBLE_NO]                   = SRC_read_wobble(FILEPATH_WOBBLE_NO);
-    // wobbles[ASSET_WOBBLE_STABLE]               = SRC_read_wobble(FILEPATH_WOBBLE_STABLE);
-    // wobbles[ASSET_WOBBLE_WALKING]              = SRC_read_wobble(FILEPATH_WOBBLE_WALKING);
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
-    lightsources[ASSET_LIGHTSOURCE_WALLLIGHT]  = SRC_read_lightsource(FILEPATH_WALLLIGHT_LIGHTSOURCE);
-}
 
 void GAME_create_library(
 ) {
-    LIB_create_wobble_library();
-    LIB_create_entity_library();
-}
-
-void GAME_update_all_files(
-) {
-    // TODO: it is ugly to have it here - propably some more clever place for such initialization is
-    // needed
-    SRC_set_wobble(lightsources[ASSET_LIGHTSOURCE_LIGHTER], wobbles[ASSET_WOBBLE_STABLE], 0);
-    SRC_set_wobble(lightsources[ASSET_LIGHTSOURCE_LIGHTER], wobbles[ASSET_WOBBLE_WALKING], 1);
+    LIB_create_all();
 }
 
 void GAME_free_all_files(
 ) {
-    // ANIM_free(animations[ASSET_HERO_ANIMATION]);
-    GFX_free_texture(sprites[ASSET_SPRITE_HERO]);
-    SRC_free_wobble(wobbles[ASSET_WOBBLE_NO]);
-    SRC_free_wobble(wobbles[ASSET_WOBBLE_STABLE]);
-    SRC_free_wobble(wobbles[ASSET_WOBBLE_WALKING]);
-    SRC_free_lightsource(lightsources[ASSET_LIGHTSOURCE_LIGHTER]);
-    SRC_free_lightsource(lightsources[ASSET_LIGHTSOURCE_WALLLIGHT]);
+    LIB_free_all();
 }
 
 void GAME_handle_SDL_events(
@@ -254,7 +230,7 @@ game_t* GAME_init(
 
     game->level          = NULL;
     game->level          = LVL_new();
-    GAME_read_level(game, FILEPATH_LEVEL_SAMPLE);
+    GAME_read_level(game, "./data/levels/sample");
 
     game->frame          = 0;
     game->fps_timer      = TIMER_new();
@@ -358,9 +334,6 @@ game_t* GAME_new(
     int gfx_init_success = 0;
     gfx_init_success = GAME_init_graphics();
     if (!gfx_init_success) { GAME_close(game); }
-
-    GAME_read_all_files();
-    GAME_update_all_files();
 
     game         = GAME_init();
 

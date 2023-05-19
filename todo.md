@@ -3,7 +3,11 @@
 - [x] all assets needs to have one functio to load them and fill the library (LIB_create_entity_library())
 - [x] entity needs a blueprint which holds all data
 - [x] wobble needs a blueprint which holds all data
-- [ ] lightsource needs a blueprint which holds all data
 - [x] shorten the generate method
-- [ ] delete all print statements
+- [x] lightsource needs a blueprint which holds all data
+- [x] textures to data
+- [x] delete assets.h and files. (?)
+- [x] textures should use blueprint
+- [x] move level to data
 - [ ] add light shader
+- [ ] delete all print statements

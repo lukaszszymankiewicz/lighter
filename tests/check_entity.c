@@ -3,9 +3,7 @@
 
 #include "../src/data/library.h"
 
-#include "../src/assets.h"
 #include "../src/segment.h"
-#include "../src/files.h"
 #include "../src/gfx.h"
 #include "../src/entity.h"
 #include "../src/controller.h"
@@ -15,27 +13,16 @@
 START_TEST (ENT_hold_and_handle_check_empty)
 {
     // GIVEN
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
+    LIB_create_all();
 
-    entity_blueprint_t *b = NULL;
-    b                     = (entity_blueprint_t*)malloc(sizeof(entity_blueprint_t));
-
-    b->id = -1;
-    b->flags = NOTHING_FLAG;
-    b->handle_type = HANDLE_BACK_UP;
-    b->light_emmit_pt = HANDLE_BACK_UP;
-    b->texture_id = ASSET_SPRITE_LIGHTER; 
-    b->lightsource_id = ASSET_LIGHTSOURCE_NO; 
-    b->hold_id = ENTITY_NO; 
-    b->starting_state = STANDING; 
-    b->animation = (animation_sheet_t) { ASSET_SPRITE_LIGHTER, 0, 10, 5, { } };
+    // modified lighter entity will be used
+    entity_library[ENTITY_LIGHTER]->flags      = NOTHING_FLAG;
 
     entity_t *entity = NULL;
-    entity = ENT_init(0, 0, b);
+    entity           = ENT_init(0, 0, entity_library[ENTITY_LIGHTER]);
 
-    int w = sprites[ASSET_SPRITE_LIGHTER]->surface->w;
-    int h = sprites[ASSET_SPRITE_LIGHTER]->surface->h;
+    int w = sprites_library[SPRITE_LIGHTER]->surface->w;
+    int h = sprites_library[SPRITE_LIGHTER]->surface->h;
     int x, y;
 
     typedef struct testcase {
@@ -60,7 +47,7 @@ START_TEST (ENT_hold_and_handle_check_empty)
     int n_cases = 9;
 
     for (int i=0; i<n_cases; i++) {
-        entity->handle    = testcases[i].handle;
+        entity_library[ENTITY_LIGHTER]->handle_type = testcases[i].handle;
 
         // WHEN
         entity->direction = RIGHT;
@@ -86,13 +73,7 @@ END_TEST
 START_TEST (ENT_hold_check)
 {
     // GIVEN
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
-
-    entity_library[ENTITY_HERO]->flags          = MOVABLE | STATEABLE | ANIMATIABLE;
-    entity_library[ENTITY_HERO]->handle_type    = HANDLE_TYPE_NO;
-    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_TYPE_NO;
-    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
+    LIB_create_all();
 
     int x=500; int y=400;
 
@@ -135,22 +116,9 @@ END_TEST
 
 START_TEST (ENT_held_item_check)
 {
-    TXTR_read_all_sprites();
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    LIB_create_all();
 
     int x = 500; int y = 400;
-
-    LIB_create_entity_library();
-
-    entity_library[ENTITY_LIGHTER]->flags = HOLDABLE;
-    entity_library[ENTITY_LIGHTER]->handle_type = HANDLE_MIDDLE_MIDDLE;
-    entity_library[ENTITY_LIGHTER]->light_emmit_pt = HANDLE_MIDDLE_MIDDLE;
-    entity_library[ENTITY_LIGHTER]->hold_id = ENTITY_NO;
-
-    entity_library[ENTITY_HERO]->flags = MOVABLE | STATEABLE | ANIMATIABLE;
-    entity_library[ENTITY_HERO]->handle_type = HANDLE_TYPE_NO;
-    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_TYPE_NO;
-    entity_library[ENTITY_HERO]->hold_id = ENTITY_LIGHTER;
 
     entity_t *entity = NULL;
     entity           = ENT_init(x, y, entity_library[ENTITY_HERO]);
@@ -183,7 +151,7 @@ START_TEST (ENT_held_item_check)
     int n_cases = 9;
 
     for (int i=0; i<n_cases; i++) {
-        entity->hold->handle = testcases[i].handle;
+        entity_library[ENTITY_LIGHTER]->handle_type = testcases[i].handle;
 
         // WHEN
         entity->direction = RIGHT;
@@ -212,13 +180,7 @@ END_TEST
 START_TEST (ENT_resolve_check)
 {
     // GIVEN
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
-
-    entity_library[ENTITY_HERO]->flags          = ANIMATIABLE;
-    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
+    LIB_create_all();
 
     int x=500; int y=400;
 
@@ -226,29 +188,30 @@ START_TEST (ENT_resolve_check)
     entity           = ENT_init(x, y, entity_library[ENTITY_HERO]);
     
     // WHEN
-    entity->sheet->animations[entity->state].frames[0].delay = 2;
-    entity->sheet->animations[entity->state].frames[1].delay = 2;
-    entity->sheet->animations[entity->state].len = 2;
+    // ovverride some animation values
+    entity_library[ENTITY_HERO]->animation.animations[entity->state].frames[0].delay = 2;
+    entity_library[ENTITY_HERO]->animation.animations[entity->state].frames[1].delay = 2;
+    entity_library[ENTITY_HERO]->animation.animations[entity->state].len = 2;
 
     // THEN
-    ck_assert_int_eq(entity->frame_t, 0);
-    ck_assert_int_eq(entity->frame, 0);
+    ck_assert_int_eq(entity->anim_frame_t, 0);
+    ck_assert_int_eq(entity->anim_frame, 0);
 
     ENT_resolve(entity);
-    ck_assert_int_eq(entity->frame_t, 1);
-    ck_assert_int_eq(entity->frame, 0);
+    ck_assert_int_eq(entity->anim_frame_t, 1);
+    ck_assert_int_eq(entity->anim_frame, 0);
 
     ENT_resolve(entity);
-    ck_assert_int_eq(entity->frame_t, 0);
-    ck_assert_int_eq(entity->frame, 1);
+    ck_assert_int_eq(entity->anim_frame_t, 0);
+    ck_assert_int_eq(entity->anim_frame, 1);
 
     ENT_resolve(entity);
-    ck_assert_int_eq(entity->frame_t, 1);
-    ck_assert_int_eq(entity->frame, 1);
+    ck_assert_int_eq(entity->anim_frame_t, 1);
+    ck_assert_int_eq(entity->anim_frame, 1);
 
     ENT_resolve(entity);
-    ck_assert_int_eq(entity->frame_t, 0);
-    ck_assert_int_eq(entity->frame, 0);
+    ck_assert_int_eq(entity->anim_frame_t, 0);
+    ck_assert_int_eq(entity->anim_frame, 0);
 }
 END_TEST
 
@@ -256,13 +219,9 @@ START_TEST (ENT_colision_update_check_positive)
 {
     // hitbox = {0, 0, 9, 20},
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
+    LIB_create_all();
 
     entity_library[ENTITY_HERO]->flags          = APPLY_COLLISION;
-    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
 
     int x=100; int y=100;
 
@@ -314,13 +273,9 @@ START_TEST (ENT_colision_update_check_negatvie)
     // GIVEN
     // hitbox = {0, 0, 9, 20},
     // overall hitbox = { 100, 100, 109, 120 } + 1 (velocity)
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
+    LIB_create_all();
 
     entity_library[ENTITY_HERO]->flags          = APPLY_COLLISION;
-    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
 
     int x=100; int y=100;
 
@@ -353,13 +308,9 @@ END_TEST
 START_TEST (ENT_with_friction_flag)
 {
     // GIVEN
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
+    LIB_create_all();
 
     entity_library[ENTITY_HERO]->flags          = APPLY_FRICTION;
-    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->hold_id        = ENTITY_NO;
 
     int x=100; int y=100;
 
@@ -402,40 +353,28 @@ START_TEST (ENT_with_friction_flag)
 
 START_TEST (ENT_with_controllable_flag)
 {
-
     // GIVEN
-    TXTR_read_all_sprites();
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER]     = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
-
-    LIB_create_entity_library();
-
-    entity_library[ENTITY_LIGHTER]->flags          = HOLDABLE | EMMIT_LIGHT;
-    entity_library[ENTITY_LIGHTER]->handle_type    = HANDLE_BACK_UP;
-    entity_library[ENTITY_LIGHTER]->light_emmit_pt = HANDLE_BACK_UP;
+    LIB_create_all();
 
     entity_library[ENTITY_HERO]->flags          = CONTROLABLE | MOVABLE;
-    entity_library[ENTITY_HERO]->handle_type    = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->light_emmit_pt = HANDLE_BACK_UP;
-    entity_library[ENTITY_HERO]->hold_id        = ENTITY_LIGHTER;
 
     int x=100; int y=100;
 
     // GIVEN
     entity_t* e           = NULL;
     e                     = ENT_init(x, y, entity_library[ENTITY_HERO]);
-
-    keyboard       = CON_init();
+    keyboard              = CON_init();
 
     // look up
     keyboard->state[SDL_SCANCODE_W] = 1;
     ENT_update(e);
-    ck_assert_float_ne(e->hold->light->angle, 0.0);
+    ck_assert_float_ne(e->hold->light.angle, 0.0);
 
     // look down
     keyboard->state[SDL_SCANCODE_W] = 0;
     keyboard->state[SDL_SCANCODE_S] = 1;
     ENT_update(e);
-    ck_assert_float_ne(e->hold->light->angle, 0.0);
+    ck_assert_float_ne(e->hold->light.angle, 0.0);
 
     // reset look
     keyboard->state[SDL_SCANCODE_W] = 0;
@@ -470,14 +409,14 @@ START_TEST (ENT_with_controllable_flag)
     ck_assert_int_ne(e->x_vel, 0);
 }
 
+// test is iterating by all entities and check if its creation cause any issues
 START_TEST (ENT_generate_check)
 {
     entity_t* e    = NULL;
     int x          = 420;
     int y          = 69;
 
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
+    LIB_create_all();
 
     for (int id=0; id<ENTITY_ALL; id++) {
         e = ENT_generate(x, y, id);
@@ -492,15 +431,11 @@ START_TEST (ENT_generate_check)
 START_TEST (ENT_get_x_and_get_y)
 {
     // GIVEN
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
-
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    LIB_create_all();
 
     entity_t* entity                  = NULL;
     
     entity_library[ENTITY_HERO]->flags          = MOVABLE | STATEABLE | ANIMATIABLE;
-    entity_library[ENTITY_LIGHTER]->flags       = HOLDABLE;
         
     int x = 10;
     int y = 12;
@@ -527,18 +462,13 @@ END_TEST
 
 START_TEST (ENT_light_emit_check)
 {
-    TXTR_read_all_sprites();
-    LIB_create_entity_library();
-
-    lightsources[ASSET_LIGHTSOURCE_LIGHTER]    = SRC_read_lightsource(FILEPATH_LIGTHER_LIGHTSOURCE);
+    LIB_create_all();
 
     entity_t* entity                  = NULL;
     
-    int x = 15;
-    int y = 12;
+    int x = 15; int y = 12;
 
     entity_library[ENTITY_HERO]->flags          = MOVABLE | STATEABLE | ANIMATIABLE;
-    entity_library[ENTITY_LIGHTER]->flags       = HOLDABLE;
 
     entity = ENT_generate(x, y, ENTITY_HERO);
 
@@ -548,11 +478,9 @@ START_TEST (ENT_light_emit_check)
         int exp_x_l; int exp_y_l; 
     } testcase_t;
 
-    int w1 = 9;
-    int h1 = 20;
+    int w1 = 9; int h1 = 20;
 
-    int w2 = 10;
-    int h2 = 5;
+    int w2 = 10; int h2 = 5;
 
     testcase_t testcases[] = {
         (testcase_t){
@@ -618,15 +546,14 @@ START_TEST (ENT_light_emit_check)
             (x*TILE_WIDTH)-w2,
             (y*TILE_HEIGHT)+(int)h1/2+(int)h2/2+1,
         },
-
     };
 
     int n_cases = 9;
 
-    entity->hold->handle = HANDLE_BACK_MIDDLE;
+    entity_library[ENTITY_LIGHTER]->handle_type = HANDLE_BACK_MIDDLE;
 
     for (int i=0; i<n_cases; i++) {
-        entity->hold->light_pt = testcases[i].handle;
+        entity_library[ENTITY_LIGHTER]->light_emmit_pt = testcases[i].handle;
 
         // WHEN
         entity->direction = RIGHT;

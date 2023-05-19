@@ -1,4 +1,5 @@
 #include "../animation.h"
+#include "../source.h"
 #include "../global.h"
 #include "../source.h"
 
@@ -34,6 +35,13 @@ enum WOBBLE_IDX {
     WOBBLE_ALL
 };
 
+enum LIGHTSOURCES_IDX {
+    LIGHTSOURCE_LIGHTER,
+    LIGHTSOURCE_WALLLIGHT,
+    LIGHTSOURCE_NO,
+    LIGHTSOURCE_ALL
+};
+
 enum ANIMATION_IDX {
     ANIMATION_STANDING,
     ANIMATION_WALKING,
@@ -61,6 +69,13 @@ enum HANDLE_TYPE {
     HANDLE_TYPE_NO
 };
 
+enum SPRITE_IDX {
+    SPRITE_HERO,
+    SPRITE_LIGHTER,
+    SPRITE_WALLLIGHT,
+    SPRITE_ALL
+};
+
 typedef struct entity_blueprint {
     int  id;
     int  flags;
@@ -73,11 +88,23 @@ typedef struct entity_blueprint {
     animation_sheet_t animation;
 } entity_blueprint_t;
 
-extern entity_blueprint_t* entity_library[ENTITY_ALL];
-extern wobble_t* wobble_library[WOBBLE_ALL];
+typedef struct texture_blueprint {
+    const char *filepath;
+} texture_blueprint_t;
+
+extern entity_blueprint_t *entity_library[ENTITY_ALL];
+extern wobble_t           *wobble_library[WOBBLE_ALL];
+extern lightsource_t      *lighsources_library[LIGHTSOURCE_ALL];
+extern texture_t          *sprites_library[SPRITE_ALL];
 
 void LIB_create_entity_library();
 void LIB_create_wobble_library();
+void LIB_create_lightsources_library();
+void LIB_create_sprites_library();
+
+void LIB_create_all();
+
+void LIB_free_all();
 
 #endif
 

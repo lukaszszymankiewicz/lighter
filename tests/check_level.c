@@ -1,5 +1,4 @@
 #include <check.h>
-#include "../src/files.h"
 #include "../src/primitives.h"
 #include "../src/import.h"
 #include "../src/level.h"
@@ -109,6 +108,7 @@ START_TEST (LVL_analyze_check)
     ck_assert_int_eq(len, expected_obstacles_num);
 }
 END_TEST
+
 START_TEST (LVL_fill_structure_check)
 {
     // GIVEN

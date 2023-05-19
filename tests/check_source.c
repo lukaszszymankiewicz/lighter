@@ -1,7 +1,6 @@
 #include <check.h>
 
 #include "../src/data/library.h"
-#include "../src/files.h"
 #include "../src/source.h"
 
 START_TEST (SRC_read_wobble_check)
@@ -38,11 +37,11 @@ END_TEST
 START_TEST (SRC_read_lightsource_lighter_check)
 {
     // GIVEN
-    lightsource_t *lightsource  = NULL;
-    const char *filename        = FILEPATH_LIGTHER_LIGHTSOURCE;
+    LIB_create_lightsources_library();
 
     // WHEN
-    lightsource = SRC_read_lightsource(filename);
+    lightsource_t *lightsource = NULL;
+    lightsource = lighsources_library[LIGHTSOURCE_LIGHTER];
 
     // THEN
     ck_assert_ptr_nonnull(lightsource);
@@ -54,7 +53,7 @@ START_TEST (SRC_read_lightsource_lighter_check)
     ck_assert_int_eq(lightsource->light_polygons[0].x, 0);
     ck_assert_int_eq(lightsource->light_polygons[0].y, 0);
     ck_assert_int_eq(lightsource->light_polygons[0].red, 255);
-    ck_assert_int_eq(lightsource->light_polygons[0].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[0].green, 252);
     ck_assert_int_eq(lightsource->light_polygons[0].blue, 187);
     ck_assert_int_eq(lightsource->light_polygons[0].light_power, 50);
     ck_assert_int_eq(lightsource->light_polygons[0].width, 0);
@@ -62,7 +61,7 @@ START_TEST (SRC_read_lightsource_lighter_check)
     ck_assert_int_eq(lightsource->light_polygons[1].x, 0);
     ck_assert_int_eq(lightsource->light_polygons[1].y, 0);
     ck_assert_int_eq(lightsource->light_polygons[1].red, 255);
-    ck_assert_int_eq(lightsource->light_polygons[1].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[1].green, 252);
     ck_assert_int_eq(lightsource->light_polygons[1].blue, 187);
     ck_assert_int_eq(lightsource->light_polygons[1].light_power, 30);
     ck_assert_int_eq(lightsource->light_polygons[1].width, 36);
@@ -70,7 +69,7 @@ START_TEST (SRC_read_lightsource_lighter_check)
     ck_assert_int_eq(lightsource->light_polygons[2].x, 0);
     ck_assert_int_eq(lightsource->light_polygons[2].y, 0);
     ck_assert_int_eq(lightsource->light_polygons[2].red, 255);
-    ck_assert_int_eq(lightsource->light_polygons[2].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[2].green, 252);
     ck_assert_int_eq(lightsource->light_polygons[2].blue, 187);
     ck_assert_int_eq(lightsource->light_polygons[2].light_power, 20);
     ck_assert_int_eq(lightsource->light_polygons[2].width, 72);
@@ -80,11 +79,11 @@ END_TEST
 START_TEST (SRC_read_lightsource_lantern_check)
 {
     // GIVEN
-    lightsource_t *lightsource = NULL;
-    const char *filename       = FILEPATH_WALLLIGHT_LIGHTSOURCE;
+    LIB_create_lightsources_library();
 
     // WHEN
-    lightsource = SRC_read_lightsource(filename);
+    lightsource_t *lightsource = NULL;
+    lightsource = lighsources_library[LIGHTSOURCE_WALLLIGHT];
 
     // THEN
     ck_assert_ptr_nonnull(lightsource);
@@ -96,7 +95,7 @@ START_TEST (SRC_read_lightsource_lantern_check)
     ck_assert_int_eq(lightsource->light_polygons[0].x, -10);
     ck_assert_int_eq(lightsource->light_polygons[0].y, -10);
     ck_assert_int_eq(lightsource->light_polygons[0].red, 255);
-    ck_assert_int_eq(lightsource->light_polygons[0].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[0].green, 252);
     ck_assert_int_eq(lightsource->light_polygons[0].blue, 187);
     ck_assert_int_eq(lightsource->light_polygons[0].light_power, 10);
     ck_assert_int_eq(lightsource->light_polygons[0].width, 0);
@@ -104,15 +103,15 @@ START_TEST (SRC_read_lightsource_lantern_check)
     ck_assert_int_eq(lightsource->light_polygons[1].x, 10);
     ck_assert_int_eq(lightsource->light_polygons[1].y, -10);
     ck_assert_int_eq(lightsource->light_polygons[1].red, 255);
-    ck_assert_int_eq(lightsource->light_polygons[1].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[1].green, 252);
     ck_assert_int_eq(lightsource->light_polygons[1].blue, 187);
     ck_assert_int_eq(lightsource->light_polygons[1].light_power, 10);
     ck_assert_int_eq(lightsource->light_polygons[1].width, 0);
 
-    ck_assert_int_eq(lightsource->light_polygons[2].x, 10);
-    ck_assert_int_eq(lightsource->light_polygons[2].y, 10);
+    ck_assert_int_eq(lightsource->light_polygons[2].x, -10);
+    ck_assert_int_eq(lightsource->light_polygons[2].y, -10);
     ck_assert_int_eq(lightsource->light_polygons[2].red, 255);
-    ck_assert_int_eq(lightsource->light_polygons[2].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[2].green, 252);
     ck_assert_int_eq(lightsource->light_polygons[2].blue, 187);
     ck_assert_int_eq(lightsource->light_polygons[2].light_power, 10);
     ck_assert_int_eq(lightsource->light_polygons[2].width, 0);
@@ -120,7 +119,7 @@ START_TEST (SRC_read_lightsource_lantern_check)
     ck_assert_int_eq(lightsource->light_polygons[3].x, -10);
     ck_assert_int_eq(lightsource->light_polygons[3].y, 10);
     ck_assert_int_eq(lightsource->light_polygons[3].red, 255);
-    ck_assert_int_eq(lightsource->light_polygons[3].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[3].green, 252);
     ck_assert_int_eq(lightsource->light_polygons[3].blue, 187);
     ck_assert_int_eq(lightsource->light_polygons[3].light_power, 10);
     ck_assert_int_eq(lightsource->light_polygons[3].width, 0);
@@ -128,7 +127,7 @@ START_TEST (SRC_read_lightsource_lantern_check)
     ck_assert_int_eq(lightsource->light_polygons[4].x, 0);
     ck_assert_int_eq(lightsource->light_polygons[4].y, 0);
     ck_assert_int_eq(lightsource->light_polygons[4].red, 255);
-    ck_assert_int_eq(lightsource->light_polygons[4].green, 251);
+    ck_assert_int_eq(lightsource->light_polygons[4].green, 252);
     ck_assert_int_eq(lightsource->light_polygons[4].blue, 187);
     ck_assert_int_eq(lightsource->light_polygons[4].light_power, 50);
     ck_assert_int_eq(lightsource->light_polygons[4].width, 0);

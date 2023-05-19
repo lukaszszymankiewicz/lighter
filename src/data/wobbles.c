@@ -4,7 +4,7 @@
 wobble_t* wobble_library[WOBBLE_ALL] = { NULL };
 
 wobble_t wobble_no = {
-    1,
+    0,
     { 0.0 }
 };
 

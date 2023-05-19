@@ -20,33 +20,165 @@ int state_collisions[3][3] = {
     {0,            0,         0    },
 };
 
-frame_t* ENT_current_frame(
+char ENT_flags(
     entity_t *entity
 ) {
-    if (!(entity->flags & ANIMATIABLE)) {
-        return NULL;
-    }
-    return &(entity->sheet->animations[entity->state].frames[entity->frame]);
+    return entity_library[entity->id]->flags;
 }
 
-SDL_Rect* ENT_current_frame_rect(
+int ENT_texture_id(
     entity_t *entity
 ) {
-    if (!(entity->flags & ANIMATIABLE)) {
-        return ANIM_get_whole_texture_size(entity->sheet);
+    return entity_library[entity->id]->texture_id;
+}
+
+float ENT_light_angle(
+    entity_t *entity
+) {
+    return entity->light.angle;
+}
+
+int ENT_lightsource_id(
+    entity_t *entity
+) {
+    return entity_library[entity->id]->lightsource_id;
+}
+
+texture_t* ENT_texture(
+    entity_t *entity
+) {
+    int id = ENT_texture_id(entity);
+    return sprites_library[id];
+}
+
+char ENT_light_pt(
+    entity_t *entity
+) {
+    return entity_library[entity->id]->light_emmit_pt;
+}
+
+bool ENT_has_flag(
+    entity_t *entity,
+    int       flag
+) {
+    return ((entity_library[entity->id]->flags) & flag);
+}
+
+bool ENT_has_not_flag(
+    entity_t *entity,
+    int       flag
+) {
+    return !(ENT_has_flag(entity, flag));
+}
+
+animation_sheet_t ENT_get_animation_sheet(
+    entity_t *entity
+) {
+    return entity_library[entity->id]->animation;
+}
+
+lightsource_t* ENT_get_light(
+    entity_t *entity
+) {
+    int id = ENT_lightsource_id(entity);
+    return lighsources_library[id];
+}
+
+float ENT_wobble_coef(
+    entity_t* entity
+) {
+    wobble_t *wobble = NULL;
+    wobble           = ENT_get_wobble(entity);
+        
+    int frame = entity->anim_frame_t;
+
+    if (wobble->len == 0) {return 0.0;}
+
+    if (frame == 0) {
+        return wobble->coefs[0];
+    }
+    return wobble->coefs[frame%(wobble->len)];
+}
+
+int ENT_get_animation_sheet_width(
+    entity_t *entity
+) {
+    return ENT_get_animation_sheet(entity).width;
+}
+
+int ENT_get_animation_sheet_height(
+    entity_t *entity
+) {
+    return ENT_get_animation_sheet(entity).height;
+}
+
+animation_t ENT_get_animation(
+    entity_t *entity,
+    int       anim_idx
+) {
+    return ENT_get_animation_sheet(entity).animations[anim_idx];
+}
+
+wobble_t* ENT_get_wobble(
+    entity_t *entity
+) {
+    int id = ENT_get_animation(entity, entity->state).wobble_id;
+    return wobble_library[id];
+}
+
+frame_t ENT_get_animation_frame(
+    entity_t *entity,
+    int       anim_idx,
+    int       frame_idx
+) {
+    return ENT_get_animation(entity, anim_idx).frames[frame_idx];
+}
+
+frame_t ENT_current_frame(
+    entity_t *entity
+) {
+    return ENT_get_animation_frame(entity, entity->state, entity->anim_frame);
+}
+
+int ENT_current_frame_width(
+    entity_t *entity
+) {
+    if (ENT_has_not_flag(entity, ANIMATIABLE)) {
+        return ANIM_get_texture_width(ENT_get_animation_sheet(entity));
     }
 
-    frame_t *frame = &(entity->sheet->animations[entity->state].frames[entity->frame]);
+    return ENT_current_frame(entity).rect.w;
+}
 
-    SDL_Rect *rect = NULL;
-    rect           = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+int ENT_current_frame_height(
+    entity_t *entity
+) {
+    if (ENT_has_not_flag(entity, ANIMATIABLE)) {
+        return ANIM_get_texture_height(ENT_get_animation_sheet(entity));
+    }
 
-    rect->x = frame->rect.x;
-    rect->y = frame->rect.y;
-    rect->w = frame->rect.w;
-    rect->h = frame->rect.h;
+    return ENT_current_frame(entity).rect.w;
+}
 
-    return rect;
+int ENT_current_frame_handle_x(
+    entity_t *entity
+) {
+    frame_t f = ENT_current_frame(entity);
+    
+    return f.handle_x;
+}
+
+int ENT_get_n_hitboxes(
+    entity_t *entity
+) {
+    return ENT_current_frame(entity).n_hit_box;
+}
+
+SDL_Rect ENT_get_hitbox(
+    entity_t *entity,
+    int       hit_box_idx
+) {
+    return ENT_current_frame(entity).hit_boxes[hit_box_idx];
 }
 
 int ENT_get_x(
@@ -61,33 +193,38 @@ int ENT_get_y(
     return entity->y;
 }
 
+int ENT_handle(
+    entity_t *entity
+) {
+    return entity_library[entity->id]->handle_type;
+}
+
 // correction value from handle point to point zero of entity
 int ENT_handle_x(
     entity_t *entity
 ) {
-    SDL_Rect *rect = NULL;
-    rect           = ENT_current_frame_rect(entity);
+    int w          = ENT_current_frame_width(entity);
     int x          = 0;
+    int handle     = ENT_handle(entity);
 
     if (
-        entity->handle == HANDLE_BACK_UP || 
-        entity->handle == HANDLE_BACK_MIDDLE || 
-        entity->handle == HANDLE_BACK_DOWN
+        handle == HANDLE_BACK_UP || 
+        handle == HANDLE_BACK_MIDDLE || 
+        handle == HANDLE_BACK_DOWN
     ) {
-        if (entity->direction == LEFT) { x = rect->w; }
+        if (entity->direction == LEFT) { x = w; }
         else { x = 0; }
 
     } else if  (
-        entity->handle == HANDLE_MIDDLE_UP || 
-        entity->handle == HANDLE_MIDDLE_MIDDLE || 
-        entity->handle == HANDLE_MIDDLE_DOWN
+        handle == HANDLE_MIDDLE_UP || 
+        handle == HANDLE_MIDDLE_MIDDLE || 
+        handle == HANDLE_MIDDLE_DOWN
     ) {
-        x = (int) rect->w / 2;
+        x = (int) w / 2;
     } else {
-        if (entity->direction == RIGHT) { x = rect->w; }
+        if (entity->direction == RIGHT) { x = w; }
         else { x = 0; }
     }
-    free(rect);
 
     return x;
 }
@@ -96,27 +233,25 @@ int ENT_handle_x(
 int ENT_handle_y(
     entity_t *entity
 ) {
-    SDL_Rect *rect = NULL;
-    rect           = ENT_current_frame_rect(entity);
+    int h          = ENT_current_frame_height(entity);
     int y          = 0;
+    int handle     = ENT_handle(entity);
 
     if (
-        entity->handle == HANDLE_BACK_UP || 
-        entity->handle == HANDLE_MIDDLE_UP || 
-        entity->handle == HANDLE_FRONT_UP 
+        handle == HANDLE_BACK_UP || 
+        handle == HANDLE_MIDDLE_UP || 
+        handle == HANDLE_FRONT_UP 
     ) {
         y = 0;
     } else if  (
-        entity->handle == HANDLE_BACK_MIDDLE || 
-        entity->handle == HANDLE_MIDDLE_MIDDLE || 
-        entity->handle == HANDLE_FRONT_MIDDLE
+        handle == HANDLE_BACK_MIDDLE || 
+        handle == HANDLE_MIDDLE_MIDDLE || 
+        handle == HANDLE_FRONT_MIDDLE
     ) {
-        y = (int) rect->h / 2;
+        y = (int) h / 2;
     } else {
-        y = rect->h;
+        y = h;
     }
-
-    free(rect);
 
     return y;
 }
@@ -125,18 +260,17 @@ int ENT_handle_y(
 int ENT_hold_x(
     entity_t *entity
 ) {
-    if (!(entity->flags & ANIMATIABLE)) {
+    if (ENT_has_not_flag(entity, ANIMATIABLE)) {
         return ENT_handle_x(entity);
     }
 
-    frame_t* frame = NULL;
-    frame          = ENT_current_frame(entity);
-    int hold_x     = 0;
+    frame_t f   = ENT_current_frame(entity);
+    int hold_x  = 0;
 
     if (entity->direction == RIGHT) {
-        hold_x = frame->handle_x;
+        hold_x = f.handle_x;
     } else {
-        hold_x = frame->rect.w - frame->handle_x;
+        hold_x = f.rect.w - f.handle_x;
     }
 
     return hold_x;
@@ -146,15 +280,13 @@ int ENT_hold_x(
 int ENT_hold_y(
     entity_t *entity
 ) {
-    if (!(entity->flags & ANIMATIABLE)) {
+    if (ENT_has_not_flag(entity, ANIMATIABLE)) {
         return ENT_handle_y(entity);
     }
 
-    frame_t* frame = NULL;
-    frame          = ENT_current_frame(entity);
-    int hold_y     = frame->handle_y;
+    frame_t f   = ENT_current_frame(entity);
 
-    return hold_y;
+    return f.handle_y;
 }
 
 int ENT_held_item_x(
@@ -188,31 +320,20 @@ void ENT_update_hold(
     ENT_set_hold_y(entity);
 }
 
-int ENT_cur_animation_delay(
-    entity_t *entity
-) {
-    return entity->sheet->animations[entity->state].frames[entity->frame].delay;
-}
-
-int ENT_cur_animation_len(
-    entity_t *entity
-) {
-    return entity->sheet->animations[entity->state].len;
-}
-
 void ENT_update_animation(
     entity_t *entity
 ) {
-    entity->frame_t++;
-    int del = ENT_cur_animation_delay(entity);
-    int len = ENT_cur_animation_len(entity);
+    entity->anim_frame_t++;
 
-    if (entity->frame_t >= del) {
-        entity->frame_t=0;
-        entity->frame++; 
+    int del = ENT_current_frame(entity).delay;
+    int len = ENT_get_animation(entity, entity->state).len;
 
-        if (entity->frame >= len) {
-            entity->frame=0;
+    if (entity->anim_frame_t >= del) {
+        entity->anim_frame_t =0;
+        entity->anim_frame++; 
+
+        if (entity->anim_frame >= len) {
+            entity->anim_frame =0;
         }
     }
 }
@@ -231,18 +352,25 @@ void ENT_update_state(
         entity->state=STANDING; 
     }
     if (entity->y_vel > 0) {
-        printf("entity with id %d is start to falling down \n", entity->id);
         entity->state=FALLING_DOWN; 
     }
+}
+
+void ENT_set_light_angle(
+    entity_t *entity,
+    float     angle
+) {
+    entity->light.angle = angle;
 }
 
 void ENT_direct_holdable_upwards(
     entity_t* entity
 ) {
     if (!(entity)) {return ;}
-
-    if (entity->flags & EMMIT_LIGHT) {
-        SRC_move_lightsource(ENT_get_light(entity), UP, entity->direction);
+    
+    if (ENT_has_flag(entity, EMMIT_LIGHT)) {
+        float new_angle = SRC_move_lightsource(UP, entity->direction);
+        ENT_set_light_angle(entity, new_angle);
     }
 }
 
@@ -251,8 +379,9 @@ void ENT_direct_holdable_downwards(
 ) {
     if (!(entity)) {return ;}
 
-    if (entity->flags & EMMIT_LIGHT) {
-        SRC_move_lightsource(ENT_get_light(entity), DOWN, entity->direction);
+    if (ENT_has_flag(entity, EMMIT_LIGHT)) {
+        float new_angle = SRC_move_lightsource(DOWN, entity->direction);
+        ENT_set_light_angle(entity, new_angle);
     }
 }
 
@@ -262,8 +391,9 @@ void ENT_direct_holdable_clean(
 ) {
     if (!entity) { return; }
 
-    if (entity->flags & EMMIT_LIGHT) {
-        SRC_move_lightsource(ENT_get_light(entity), NONE, cur_dir);
+    if (ENT_has_flag(entity, EMMIT_LIGHT)) {
+        float new_angle = SRC_move_lightsource(NONE, cur_dir);
+        ENT_set_light_angle(entity, new_angle);
     }
 }
 
@@ -277,8 +407,9 @@ void ENT_change_dir_holdable(
 
     entity->direction = new_direction;
 
-    if (entity->flags & EMMIT_LIGHT) {
-        SRC_move_lightsource(ENT_get_light(entity), NONE, new_direction);
+    if (ENT_has_flag(entity, EMMIT_LIGHT)) {
+        float new_angle = SRC_move_lightsource(NONE, new_direction);
+        ENT_set_light_angle(entity, new_angle);
     }
 }
 
@@ -293,8 +424,9 @@ void ENT_change_dir(
 
     entity->direction = new_direction;
 
-    if (entity->flags & EMMIT_LIGHT) {
-        SRC_move_lightsource(ENT_get_light(entity), NONE, new_direction);
+    if (ENT_has_flag(entity, EMMIT_LIGHT)) {
+        float new_angle = SRC_move_lightsource(NONE, new_direction);
+        ENT_set_light_angle(entity, new_angle);
     }
 
     ENT_change_dir_holdable(entity->hold, new_direction);
@@ -328,7 +460,9 @@ void ENT_move(
     entity_t      *entity,
     direction_t  direction
 ) {
-    if (!(entity->flags & MOVABLE)) {return;}
+    if (ENT_has_not_flag(entity, MOVABLE)) {
+        return;
+    }
     
     if (entity->state == STANDING || entity->state == WALKING || entity->state == NOTHING) {
         entity->state = WALKING;
@@ -403,8 +537,10 @@ void ENT_update_velocity(
 void ENT_update_wobble(
     entity_t* entity
 ) {
-    if (!entity->light) {return;}
-    entity->light->frame++;
+    if (ENT_has_flag(entity, EMMIT_LIGHT)) {
+        return;
+    }
+    entity->light.frame++;
 }
 
 entity_t* ENT_init(
@@ -426,47 +562,50 @@ entity_t* ENT_init(
 
     // state
     entity->state            = blueprint->starting_state;
-    entity->frame            = 0;
-    entity->frame_t          = 0;
+    entity->anim_frame       = 0;
+    entity->anim_frame_t     = 0;
+
+    // light
+    entity->light            = (entity_light_t) {0, 0, RIGHT_RAD};
 
     // interactions
-    entity->handle           = blueprint->handle_type;
-    entity->light_pt         = blueprint->light_emmit_pt;
-    entity->flags            = blueprint->flags;
+    // entity->handle           = blueprint->handle_type;
+    // entity->light_pt         = blueprint->light_emmit_pt;
+    // entity->flags            = blueprint->flags;
     entity->hold             = NULL;
 
     // assets
-    entity->sheet            = &blueprint->animation;
-
-    entity->light            = NULL;
-    entity->light            = lightsources[blueprint->lightsource_id];
+    // entity->sheet            = &blueprint->animation;
+    // entity->lightsource_id   = blueprint->lightsource_id;
 
     // actions
     entity->update_fun_t     = 0;                
     entity->resolution_fun_t = 0;                
+    
+    int flags = blueprint->flags;
 
-    if (entity->flags & CONTROLABLE) {
+    if (flags & CONTROLABLE) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_control;
     }
 
-    if (entity->flags & APPLY_FRICTION) {
+    if (flags & APPLY_FRICTION) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_friction;
     }
 
-    if (entity->flags & EMMIT_LIGHT) {
+    if (flags & EMMIT_LIGHT) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_wobble;
     }
 
-    if (entity->flags & MOVABLE) {
+    if (flags & MOVABLE) {
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_velocity;
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_hold;
     }
 
-    if (entity->flags & STATEABLE) {
+    if (flags & STATEABLE) {
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_state;
     }
 
-    if (entity->flags & ANIMATIABLE) {
+    if (flags & ANIMATIABLE) {
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_animation;
     }
     
@@ -507,10 +646,10 @@ bool ENT_render_with_flip(
 render_img_t ENT_texture_coord(
     entity_t *entity
 ) {
-    if (!(entity->flags & ANIMATIABLE)) {
-        return ANIM_texture_coord_full(entity->sheet);
+    if (ENT_has_not_flag(entity, ANIMATIABLE)) {
+        return ANIM_texture_coord_full(ENT_get_animation_sheet(entity));
     }
-    return ANIM_texture_coord(entity->sheet->animations, entity->state, entity->frame);
+    return ENT_current_frame(entity).img;
 }
 
 // calculate where on screen entity texture should be rendered
@@ -522,8 +661,8 @@ render_coord_t ENT_img_coord(
     float x1, y1, x2, y2;
     render_coord_t coord;
 
-    float texW = entity->sheet->width;
-    float texH = entity->sheet->height;
+    float texW = (float) ENT_get_animation_sheet_width(entity);
+    float texH = (float) ENT_get_animation_sheet_height(entity);
 
     // orient it in a way that OpenGL will digest it
     x1 = (float)entity->x - (float)SCREEN_WIDTH / 2.0;
@@ -548,8 +687,8 @@ void ENT_draw(
     int x,
     int y
 ) {
-    // do not draw if not needed!
-    if (!(entity->flags & NOT_DRAWABLE)) {
+    
+    if (ENT_has_not_flag(entity, NOT_DRAWABLE)) {
         return;
     }
 
@@ -558,7 +697,7 @@ void ENT_draw(
     render_coord_t img_coord   = ENT_img_coord(entity, texture_coord);
 
     GFX_render_texture_part(
-        sprites[entity->sheet->texture_id],
+        ENT_texture(entity),
         img_coord.x1,
         img_coord.y1,
         img_coord.x2,
@@ -569,7 +708,6 @@ void ENT_draw(
         texture_coord.y2, 
         flip
     );
-
 }
 
 void ENT_free(
@@ -580,39 +718,12 @@ void ENT_free(
         entity->hold = NULL;
     }
 
-    entity->light = NULL;
-
-    if (entity->sheet->n_animations == 0) {
-        ANIM_free(entity->sheet);
-    }
-
-    entity->sheet = NULL;
-
     free(entity);
     entity = NULL;
 }
 
-int ENT_get_n_hitboxes(
-    entity_t *entity
-) {
-    return entity->sheet->animations[entity->state].frames[entity->frame].n_hit_box;
-}
-
-SDL_Rect ENT_get_hitbox(
-    entity_t *entity,
-    int i
-) {
-    return entity->sheet->animations[entity->state].frames[entity->frame].hit_boxes[i];
-}
-
-lightsource_t* ENT_get_light(
-    entity_t *entity
-) {
-    return entity->light;
-}
-
 void ENT_update_collision(
-    entity_t *entity,
+    entity_t  *entity,
     segment_t *obstacles
 ) {
     int  n_boxes     = ENT_get_n_hitboxes(entity);
@@ -686,9 +797,8 @@ void ENT_update_collision(
             entity->x = SRTLST_get_last(x_intersections);
         }
         else {
-            SDL_Rect *frame = NULL;
-            frame = ENT_current_frame_rect(entity);
-            entity->x = x_intersections->value - frame->w;
+            int w = ENT_current_frame_width(entity);
+            entity->x = x_intersections->value - w;
         }
     }
 
@@ -701,8 +811,8 @@ void ENT_update_collision(
 
         // falling down
         else {
-            SDL_Rect *frame = ENT_current_frame_rect(entity);
-            entity->y = y_intersections->value - frame->h;
+            int h = ENT_current_frame_height(entity);
+            entity->y = y_intersections->value - h;
             entity->state = STANDING;
         }
 
@@ -727,29 +837,28 @@ void ENT_update_collision(
 int ENT_light_pt_x(
     entity_t *entity
 ) {
-    SDL_Rect *rect = NULL;
-    rect           = ENT_current_frame_rect(entity);
-    int x          = 0;
+    int w        = ENT_current_frame_width(entity);
+    int x        = 0;
+    int light_pt = ENT_light_pt(entity);
 
     if (
-        entity->light_pt == HANDLE_BACK_UP || 
-        entity->light_pt == HANDLE_BACK_MIDDLE || 
-        entity->light_pt == HANDLE_BACK_DOWN
+        light_pt == HANDLE_BACK_UP || 
+        light_pt == HANDLE_BACK_MIDDLE || 
+        light_pt == HANDLE_BACK_DOWN
     ) {
-        if (entity->direction == LEFT) { x = rect->w; }
+        if (entity->direction == LEFT) { x = w; }
         else { x = 0; }
 
     } else if  (
-        entity->light_pt == HANDLE_MIDDLE_UP || 
-        entity->light_pt == HANDLE_MIDDLE_MIDDLE || 
-        entity->light_pt == HANDLE_MIDDLE_DOWN
+        light_pt == HANDLE_MIDDLE_UP || 
+        light_pt == HANDLE_MIDDLE_MIDDLE || 
+        light_pt == HANDLE_MIDDLE_DOWN
     ) {
-        x = (int) rect->w / 2;
+        x = (int) w / 2;
     } else {
-        if (entity->direction == RIGHT) { x = rect->w; }
+        if (entity->direction == RIGHT) { x = w; }
         else { x = 0; }
     }
-    free(rect);
 
     return x;
 }
@@ -758,27 +867,25 @@ int ENT_light_pt_x(
 int ENT_light_pt_y(
     entity_t *entity
 ) {
-    SDL_Rect *rect = NULL;
-    rect           = ENT_current_frame_rect(entity);
-    int y          = 0;
+    int h        = ENT_current_frame_height(entity);
+    int y        = 0;
+    int light_pt = ENT_light_pt(entity);
 
     if (
-        entity->light_pt == HANDLE_BACK_UP || 
-        entity->light_pt == HANDLE_MIDDLE_UP || 
-        entity->light_pt == HANDLE_FRONT_UP 
+        light_pt == HANDLE_BACK_UP || 
+        light_pt == HANDLE_MIDDLE_UP || 
+        light_pt == HANDLE_FRONT_UP 
     ) {
         y = 0;
     } else if  (
-        entity->light_pt == HANDLE_BACK_MIDDLE || 
-        entity->light_pt == HANDLE_MIDDLE_MIDDLE || 
-        entity->light_pt == HANDLE_FRONT_MIDDLE
+        light_pt == HANDLE_BACK_MIDDLE || 
+        light_pt == HANDLE_MIDDLE_MIDDLE || 
+        light_pt == HANDLE_FRONT_MIDDLE
     ) {
-        y = (int) rect->h / 2;
+        y = (int) h / 2;
     } else {
-        y = rect->h;
+        y = h;
     }
-
-    free(rect);
 
     return y;
 }
@@ -808,3 +915,4 @@ int ENT_light_emit_y(
 ) {
     return entity->y + ENT_light_pt_y(entity);
 }
+

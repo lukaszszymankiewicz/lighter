@@ -35,11 +35,12 @@ typedef struct animation_sheet {
   animation_t  animations[MAX_ANIMATION];
 } animation_sheet_t;
 
-SDL_Rect* ANIM_get_whole_texture_size(animation_sheet_t* animation);
+render_img_t ANIM_texture_coord(animation_t animation, int idx, int frame);
+render_img_t ANIM_texture_coord_full(animation_sheet_t animation);
+
+int ANIM_get_texture_width(animation_sheet_t animation);
+int ANIM_get_texture_height(animation_sheet_t animation);
 
 void ANIM_free(animation_sheet_t* animation);
-
-render_img_t ANIM_texture_coord(animation_t *animation, int idx, int frame);
-render_img_t ANIM_texture_coord_full(animation_sheet_t* animation);
 
 #endif

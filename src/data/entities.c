@@ -1,5 +1,4 @@
 #include "library.h"
-#include "../assets.h"
 #include "../primitives.h"
 #include "../animation.h"
 
@@ -11,12 +10,12 @@ entity_blueprint_t entity_blueprint_hero = {
     MOVABLE | APPLY_COLLISION | CONTROLABLE | STATEABLE | APPLY_FRICTION | ANIMATIABLE, // flags
     HANDLE_TYPE_NO,  // handle_type
     HANDLE_TYPE_NO,  // light_emmit_pt
-    ASSET_SPRITE_HERO, // texture_id
-    ASSET_LIGHTSOURCE_NO, // lighsource
+    SPRITE_HERO, // texture_id
+    LIGHTSOURCE_NO, // lighsource
     ENTITY_LIGHTER,  // hold id
     STANDING,  // starting_state
     {
-        ASSET_SPRITE_HERO, 4, 27, 20,
+        SPRITE_HERO, 4, 27, 20,
         {
             { // WALKING
                 2, // len
@@ -88,12 +87,12 @@ entity_blueprint_t entity_blueprint_lighter = {
     HOLDABLE | EMMIT_LIGHT,
     HANDLE_MIDDLE_UP,
     HANDLE_FRONT_MIDDLE,
-    ASSET_SPRITE_LIGHTER,
-    ASSET_LIGHTSOURCE_LIGHTER,
+    SPRITE_LIGHTER,
+    LIGHTSOURCE_LIGHTER,
     ENTITY_NO,
     NOTHING,
     {
-        ASSET_SPRITE_LIGHTER, 0, 10, 5, { } 
+        SPRITE_LIGHTER, 0, 10, 5, { } 
     }
 };
 
@@ -102,18 +101,18 @@ entity_blueprint_t entity_blueprint_walllight = {
     EMMIT_LIGHT,
     HANDLE_MIDDLE_MIDDLE,
     HANDLE_MIDDLE_MIDDLE,
-    ASSET_SPRITE_WALLLIGHT,
-    ASSET_LIGHTSOURCE_WALLLIGHT,
+    SPRITE_WALLLIGHT,
+    LIGHTSOURCE_WALLLIGHT,
     ENTITY_NO,
     NOTHING,
     {
-        ASSET_LIGHTSOURCE_WALLLIGHT, 0, 32, 32, { } 
+        SPRITE_WALLLIGHT, 0, 32, 32, { } 
     }
 };
 
 void LIB_create_entity_library(
 ) {
-    entity_library[ENTITY_HERO] = &entity_blueprint_hero;
-    entity_library[ENTITY_LIGHTER] = &entity_blueprint_lighter;
+    entity_library[ENTITY_HERO]      = &entity_blueprint_hero;
+    entity_library[ENTITY_LIGHTER]   = &entity_blueprint_lighter;
     entity_library[ENTITY_WALLLIGHT] = &entity_blueprint_walllight;
 }

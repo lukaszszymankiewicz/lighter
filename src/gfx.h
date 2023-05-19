@@ -2,7 +2,6 @@
 
 #include <SDL2/SDL.h>
 
-#include "assets.h"
 #include "global.h"
 #include "primitives.h"
 #include "sorted_list.h"
@@ -56,11 +55,6 @@ void GFX_draw_rect_border(int x, int y, int w, int h, int r, int g, int b, int a
 
 void GFX_render_texture(texture_t* texture, SDL_Rect* clip, int x, int y, bool flip);
 void GFX_render_tile(texture_t* texture, int render_x, int render_y, int x, int y, int w, int h);
-
-void GFX_free_texture(texture_t *texture);
-void GFX_clean_buffers();
-void GFX_draw_light();
-void GFX_draw_darkness();
 
 void GFX_render_texture_part(
     texture_t        *texture,

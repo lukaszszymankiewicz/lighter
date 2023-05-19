@@ -1,0 +1,36 @@
+#include "library.h"
+#include "../source.h"
+#include "../global.h"
+
+lightsource_t* lighsources_library[LIGHTSOURCE_ALL] = {NULL};
+
+lightsource_t lighsource_wallight = {
+    0.0, 7, 5, 
+    {
+        (lightpolygon_t){-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0},
+        (lightpolygon_t){ 10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0},
+        (lightpolygon_t){-10, -10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0},
+        (lightpolygon_t){-10,  10, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 10, 0},
+        (lightpolygon_t){ 0 ,   0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0},
+    }
+};
+
+lightsource_t lighsource_lighter = {
+    PI/7, 7, 3, 
+    {
+        (lightpolygon_t){0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0},
+        (lightpolygon_t){0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 36},
+        (lightpolygon_t){0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 20, 72},
+    }
+};
+
+lightsource_t lighsource_no = {
+    0, 0, 0, { }
+};
+
+void LIB_create_lightsources_library(
+) {
+    lighsources_library[LIGHTSOURCE_LIGHTER] = &lighsource_lighter ;
+    lighsources_library[LIGHTSOURCE_WALLLIGHT] = &lighsource_wallight;
+    lighsources_library[LIGHTSOURCE_NO] = &lighsource_no;
+}

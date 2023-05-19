@@ -61,7 +61,7 @@ void ENTMAN_apply_collision(
     segment_t* obstacles,
     entity_t *entity
 ) {
-    if (!(entity->flags & APPLY_COLLISION)) {
+    if (ENT_has_not_flag(entity, APPLY_COLLISION)) {
         return;
     }
 
@@ -178,8 +178,8 @@ segment_t* ENTMAN_light_obstacles(
     segment_t* obstacles
 ) {
     segment_t *obs = NULL;
-
-    if (entity->flags & EMMIT_LIGHT) {
+    
+    if (ENT_has_flag(entity, EMMIT_LIGHT)) {
         obs = SEG_filter_by_rect(
             obstacles,
             entity->x - ENTITY_UPDATE_LIGHT_X_RANGE,
@@ -198,17 +198,35 @@ void ENTMAN_calc_single_entity_light(
     light_scene_t*    scene,
     segment_t*        obstacles
 ) {
-    if (entity == NULL || (!(entity->flags & EMMIT_LIGHT))) { return; }
+    if (entity == NULL || ENT_has_not_flag(entity, EMMIT_LIGHT)) {
+        return; 
+    }
 
     segment_t* obs = NULL;
     obs            = ENTMAN_light_obstacles(entity, obstacles);
+        
+    lightsource_t* light = NULL;
+    light                = ENT_get_light(entity);
 
-    for (int i=0; i < entity->light->n_poly; i++) {
+    int emit_x = ENT_light_emit_x(entity);
+    int emit_y = ENT_light_emit_y(entity);
+
+    float angle = ENT_light_angle(entity);
+    float wobble_corr = ENT_wobble_coef( entity);
+
+    int rel_x = CAMERA_X - ENTMAN_hero_x(entity_manager);
+    int rel_y = CAMERA_Y - ENTMAN_hero_y(entity_manager);
+    
+    int n_poly = light->n_poly;
+
+    for (int i=0; i < n_poly; i++) {
         LIG_add_to_scene(
-            ENT_light_emit_x(entity),
-            ENT_light_emit_y(entity),
+            emit_x,
+            emit_y,
             i,
-            entity->light,
+            angle,
+            wobble_corr,
+            light,
             scene,
             obs
         );
@@ -216,8 +234,8 @@ void ENTMAN_calc_single_entity_light(
         LIG_fit_scene_on_screen(
             scene,
             scene->n-1,
-            CAMERA_X - ENTMAN_hero_x(entity_manager),
-            CAMERA_Y - ENTMAN_hero_y(entity_manager)
+            rel_x,
+            rel_y
         );
     }
 

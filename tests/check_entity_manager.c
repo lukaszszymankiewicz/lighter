@@ -1,7 +1,6 @@
 #include <check.h>
 #include <stdbool.h>
 
-#include "../src/files.h"
 #include "../src/primitives.h"
 #include "../src/import.h"
 #include "../src/entity.h"

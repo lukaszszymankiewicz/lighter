@@ -631,25 +631,27 @@ vertex_t* LIG_single_add_light_polygon(
     int              x,
     int              y,
     int              n,
+    float            angle,
+    float            coef,
     lightsource_t   *light,
     segment_t       *obstacles
 ) {
     int   x_corr;                  // x and y correction values 
     int   y_corr;                  // x and y correction values
+    float width;                   // light width
     float width_corr;              // light width correction (some light polygons can be wider)
-    float wobble_corr;             // angle correction due to wobling
 
     vertex_t* light_polygon     = NULL;
-    wobble_corr                 = SRC_get_wobble_angle_coef(light);
-    x_corr                      = SRC_get_light_polygon_x_corr(light, n);
-    y_corr                      = SRC_get_light_polygon_y_corr(light, n);
+    x_corr                      = SRC_get_light_polygon_x_corr(light, angle, n);
+    y_corr                      = SRC_get_light_polygon_y_corr(light, angle, n);
+    width                       = light->width;
     width_corr                  = SRC_get_light_polygon_width_corr(light, n);
 
     light_polygon = LIG_get_light_polygon(
         x+x_corr,
         y+y_corr,
-        light->width+width_corr,
-        light->angle+wobble_corr,
+        width+width_corr,
+        angle+coef,
         obstacles
     );
 
@@ -661,6 +663,8 @@ void LIG_add_to_scene(
     int              x,
     int              y,
     int              i,
+    float            angle,
+    float            coef,
     lightsource_t   *light,
     light_scene_t   *scene,
     segment_t       *obstacles
@@ -669,7 +673,7 @@ void LIG_add_to_scene(
 
     scene->components[scene->n] = (lvertex_t*)malloc(sizeof(lvertex_t));
 
-    vertex = LIG_single_add_light_polygon(x, y, i, light, obstacles);
+    vertex = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
 
     scene->components[scene->n]->coords = vertex;
     scene->components[scene->n]->x0     = x;
@@ -720,6 +724,7 @@ void LIG_compose_light_scene(
 void LIG_draw_light_scene(
     light_scene_t* scene 
 ) {
-    GFX_draw_light();
-    GFX_draw_darkness();
+    // TODO: TBD
+    // GFX_draw_light();
+    // GFX_draw_darkness();
 }

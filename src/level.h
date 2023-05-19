@@ -1,4 +1,3 @@
-#include "assets.h"
 #include "global.h"
 #include "primitives.h"
 #include "tile.h"
