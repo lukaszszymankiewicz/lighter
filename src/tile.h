@@ -21,4 +21,6 @@ tile_t* TILE_new(
     int x,       int y
 );
 
+void TILE_free(tile_t *tile);
+
 #endif

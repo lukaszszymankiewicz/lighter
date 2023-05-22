@@ -98,5 +98,10 @@ tile_t* TILE_new(
     ///// 
     // render_x1 / SCREEN_WIDTH  - camera / SCREEN_WIDTH
     // render_y1 / SCREEN_HEIGHT - camera / SCREEN_HEIGHT
+}
 
+void TILE_free(
+    tile_t *tile
+) {
+    free(tile);    
 }

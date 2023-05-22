@@ -10,19 +10,13 @@ void LIB_create_all(
     LIB_create_lightsources_library();
     LIB_create_sprites_library();
     LIB_create_levels_library();
+    LIB_create_tile_library();
 }
 
-bool LIB_validate(
-) {
-    for (int i=0; i<ENTITY_ALL; i++) {
-        if (entity_library[i] == NULL) { return false; }     
-    }
-
-    return true;
-}
-
+// some iterations here?
 void LIB_free_all(
 ) {
+    // full objects
     TXTR_free(sprites_library[SPRITE_HERO]);
     TXTR_free(sprites_library[SPRITE_LIGHTER]);
     TXTR_free(sprites_library[SPRITE_WALLLIGHT]);
@@ -31,5 +25,15 @@ void LIB_free_all(
     SRC_free_wobble(wobble_library[WOBBLE_WALKING]);
     SRC_free_lightsource(lighsources_library[LIGHTSOURCE_LIGHTER]);
     SRC_free_lightsource(lighsources_library[LIGHTSOURCE_WALLLIGHT]);
+    
+    // blueprints
     LVL_free(levels_library[LEVEL_SAMPLE]);
+
+    free(entity_library[ENTITY_HERO]);
+    free(entity_library[ENTITY_LIGHTER]);
+    free(entity_library[ENTITY_WALLLIGHT]);
+
+    free(tiles_library[TILE_WALL]);
+    free(tiles_library[TILE_BROKEN_WALL]);
+    free(tiles_library[TILE_BLACK]);
 }

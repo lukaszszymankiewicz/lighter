@@ -89,6 +89,13 @@ enum TILESET_IDX {
     TILESET_ALL
 };
 
+enum TILE_IDX {
+    TILE_WALL,
+    TILE_BROKEN_WALL,
+    TILE_BLACK,
+    TILE_ALL
+};
+
 typedef struct entity_blueprint {
     int  id;
     int  flags;
@@ -104,6 +111,15 @@ typedef struct entity_blueprint {
 typedef struct texture_blueprint {
     const char *filepath;
 } texture_blueprint_t;
+
+typedef struct tile_blueprint {
+    int   tileset_id;
+    float x1;
+    float y1;
+    float x2;
+    float y2;
+    bool  obstacle;
+} tile_blueprint_t;
 
 typedef struct level_blueprint {
     const char *data_path;
@@ -123,6 +139,7 @@ void LIB_create_lightsources_library();
 void LIB_create_sprites_library();
 void LIB_create_levels_library();
 void LIB_create_tilesets_library();
+void LIB_create_tile_library()
 
 void LIB_create_all();
 bool LIB_validate();

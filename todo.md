@@ -15,5 +15,6 @@
 - [ ] test to run game (without graphic!)
 - [ ] validate if everything were read to library correctly
 - [ ] store levels on c file (like others)
-- [ ] store tilesets on c files (like others)
-- [ ] store tiles on c fles (like others)
+- [x] store tilesets on c files (like others)
+- [x] store tiles on c fles (like others)
+- [ ] add library tests to check whether the files are read correctly

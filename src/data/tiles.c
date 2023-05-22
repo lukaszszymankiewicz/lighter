@@ -1,25 +1,32 @@
+#include <stdbool.h>
+
 #include "library.h"
 
 #include "../tile.h"
 
 tile_t *tiles_library[TILE_ALL] = {NULL};
 
-texture_blueprint_t texture_blueprint_hero = {
-    "./src/data/sprites/hero.png"
+tile_blueprint_t tile_blueprint_wall = {
+    TILESET_BASIC, 
+    0.0, 0.0, 32.0/512.0, 0.0,
+    false
 };
 
-texture_blueprint_t texture_blueprint_lighter = {
-    "./src/data/sprites/lighter.png"
+tile_blueprint_t tile_blueprint_broken_wall = {
+    TILESET_BASIC,
+    32.0/512.0, 0.0, 64.0/512.0, 0.0,
+    false
 };
 
-texture_blueprint_t texture_blueprint_walllight = {
-    "./src/data/sprites/walllight.png"
+tile_blueprint_t tile_blueprint_black = {
+    TILESET_BASIC,
+    64.0/512.0, 0.0, 96.0/512.0, 0.0,
+    true
 };
 
-void LIB_create_sprites_library(
+void LIB_create_tile_library(
 ) {
-    sprites_library[SPRITE_HERO]       = TXTR_read_from_file(texture_blueprint_hero.filepath);
-    sprites_library[SPRITE_LIGHTER]    = TXTR_read_from_file(texture_blueprint_lighter.filepath);
-    sprites_library[SPRITE_WALLLIGHT]  = TXTR_read_from_file(texture_blueprint_walllight.filepath);
+    tiles_library[TILE_WALL]        = &tile_blueprint_wall;
+    tiles_library[TILE_BROKEN_WALL] = &tile_blueprint_broken_wall;
+    tiles_library[TILE_BLACK]       = &tile_blueprint_black;
 };
-

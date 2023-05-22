@@ -10,6 +10,6 @@ texture_blueprint_t texture_blueprint_hero = {
 
 void LIB_create_tilesets_library(
 ) {
-    tilesets_library[TILESET_BASIC]       = TXTR_read_from_file(texture_blueprint_hero .filepath);
+    tilesets_library[TILESET_BASIC] = TXTR_read_from_file(texture_blueprint_hero.filepath);
 };
 
