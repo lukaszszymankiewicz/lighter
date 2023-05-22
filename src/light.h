@@ -25,7 +25,6 @@ void LIG_compose_light_scene(light_scene_t* scene);
 void LIG_fit_scene_on_screen(light_scene_t *scene, int i, int x_corr, int y_corr);
 void LIG_draw_light_scene(light_scene_t* scene);
 void LIG_free_light_scene(light_scene_t* scene);
-void LIG_clean_light();
 
 // TESTING
 vertex_t* LIG_get_base_light_polygon(int x, int y, segment_t *obstacles, point_t* hit_points);

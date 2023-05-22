@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "global.h"
 
 #ifndef TIMER_H

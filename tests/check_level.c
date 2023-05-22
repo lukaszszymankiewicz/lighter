@@ -1,6 +1,5 @@
 #include <check.h>
 #include "../src/primitives.h"
-#include "../src/import.h"
 #include "../src/level.h"
 #include "../src/gfx.h"
 #include "../src/segment.h"
@@ -143,6 +142,22 @@ START_TEST (LVL_fill_structure_check)
 }
 END_TEST
 
+START_TEST (LVL_add_entity_fill_check)
+{
+    // GIVEN
+    level_t* level = NULL;
+    level =  LVL_new();
+
+    // WHEN
+    LVL_add_entity_fill(level, 6, 9, 0);
+
+    // THEN
+    ck_assert_int_eq(level->n_fill, 1);
+    ck_assert_int_eq(level->entities_fill[0].x, 6);
+    ck_assert_int_eq(level->entities_fill[0].y, 9);
+    ck_assert_int_eq(level->entities_fill[0].id, 0);
+}
+
 Suite *level_suite(void)
 {
     Suite *s;
@@ -155,6 +170,7 @@ Suite *level_suite(void)
 
     tcase_add_test(tc_core, LVL_analyze_check);
     tcase_add_test(tc_core, LVL_fill_structure_check);
+    tcase_add_test(tc_core, LVL_add_entity_fill_check);
 
     suite_add_tcase(s, tc_core);
 

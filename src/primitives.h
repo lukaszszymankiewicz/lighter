@@ -4,7 +4,7 @@
 #define PRIMITIVES_H
 
 typedef short int direction_t;
-
+// TODO: clean it up, please
 enum direction { RIGHT, LEFT, UP, DOWN, NONE };
 enum segtype { HOR, VER, UNKNOWN };
 enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };

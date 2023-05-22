@@ -1,5 +1,4 @@
 #include "global.h"
-#include "import.h"
 #include "segment.h"
 #include "geometry.h"
 #include "source.h"
@@ -699,25 +698,11 @@ void LIG_fit_scene_on_screen(
     scene->components[i]->y0     += y_corr;
 }
 
-void LIG_clean_light(
-) {
-    GFX_clean_buffers();
-}
-
 void LIG_compose_light_scene(
     light_scene_t* scene
 ) {
     for (int i=scene->n-1; i>-1; i--) {
-        GFX_fill_light(
-            GFX_fill_lightbuffer,
-            scene->components[i]->coords,
-            scene->components[i]->red,
-            scene->components[i]->green,
-            scene->components[i]->blue,
-            scene->components[i]->power,
-            scene->components[i]->x0,
-            scene->components[i]->y0
-        );
+        // GFX_fill_light();
     }
 };
 

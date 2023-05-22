@@ -3,7 +3,6 @@
 #include "data/library.h"
 
 #include "global.h"
-#include "files.h"
 #include "controller.h"
 #include "entity_manager.h"
 #include "game.h"
@@ -11,13 +10,11 @@
 #include "timer.h"
 #include "source.h"
 #include "level.h"
-#include "import.h"
 #include "light.h"
 #include "animation.h"
 #include "texture.h"
 
-static char buffer[BUFFER_SIZE];
-
+#define LEVEL LEVEL_SAMPLE
 
 void GAME_create_library(
 ) {
@@ -60,165 +57,19 @@ void GAME_close(
     SDL_Quit();
 };
 
-void GAME_fill_level(
-    game_t* game,
-    FILE*   file
+void GAME_init_entities(
+    game_t *game
 ) {
-    int tiles_counter = 0;
-    int layer_counter = 0;
-    int layer_read    = 0;
-    int cur_tile_idx  = 0;
-    int cur_tile_id   = 0;
-    int state         = 0;
-    int coords_per_single_tile_per_layer;
-    int coords_per_single_tile;
-    int x_size, y_size;
-    int x_tile, y_tile;
-
-    state++;
-
-    // TODO (LG-15): all comments should will part of "DEBUG READ LEVEL" mode
-    // FILE *f = fopen("level_read_log.txt", "w");
-
-    while((fread(buffer, DOUBLE_BYTE, PROPER_PACK_COUNT, file) == PROPER_PACK_COUNT)) {
-      int dec_value = IMP_cast_val_to_dec(buffer);
-
-      switch (state) {
-
-        case READ_LEVEL_PREAMBULE_FIRST_HALF:
-            if(dec_value != LEVEL_PREAMBULE[FIRST_HALF]) { return; }
-            state++; break;
-
-        case READ_LEVEL_PREAMBULE_SECOND_HALF:
-            if(dec_value != LEVEL_PREAMBULE[SECOND_HALF]) { return; }
-            state++; break;
-
-        case READ_LEVEL_X_SIZE:
-            x_size = dec_value;
-            state++; break;
-
-        case READ_LEVEL_Y_SIZE:
-            y_size = dec_value;
-            LVL_set_size(game->level, x_size, y_size);
-            state++; break;
-
-        case READ_LEVEL_TILES_SUM:
-            // TODO(LG-15): all comments should will part of "DEBUG READ LEVEL" mode
-            // fprintf(f, "detected tile per layer %d, n=%d \n", layer_read, (int)dec_value/2);
-            coords_per_single_tile_per_layer = dec_value;
-            state++;
-            break;
-
-        case READ_LEVEL_TILES_ID:
-            cur_tile_id = dec_value;
-            // TODO (LG-15): all comments should will part of "DEBUG READ LEVEL" mode
-            // fprintf(f, "detected tile with index id=%d\n", cur_tile_id);
-            state++;
-            break;
-
-        case READ_LEVEL_TILE_SUM:
-            // TODO (LG-15): all comments should will part of "DEBUG READ LEVEL" mode
-            // fprintf(f, "    n=%d per single tile\n", (int)dec_value/2);
-            coords_per_single_tile = dec_value;
-            state++;
-            break;
-
-        case READ_LEVEL_TILE_X:
-            x_tile = dec_value;
-            tiles_counter++;
-            layer_counter++;
-            state++;
-            break;
-
-        case READ_LEVEL_TILE_Y:
-            y_tile = dec_value;
-            tiles_counter++;
-            layer_counter++;
-            
-            // both coords are read - Tile is ready to be placed somewhere on level
-            if (layer_read == 0) {
-                // TODO (LG-15): all comments should will part of "DEBUG READ LEVEL" mode
-                // fprintf(f, "        tile put on x=%d y=%d \n",  x_tile, y_tile);
-                LVL_fill_structure(game->level, x_tile, y_tile, cur_tile_idx);
-            } else if (layer_read == 1) {
-                // TODO (LG-15): this is temporary - it will be valid only for one type of obstacle
-                // this 1 is means obstacle type
-                // TODO (LG-15): all comments should will part of "DEBUG READ LEVEL" mode
-                // fprintf(f, "        obstacle with index: 1 put on %d %d \n", x_tile, y_tile);
-                LVL_fill_obstacle(game->level, x_tile, y_tile, 1);
-
-            } else {
-                // TODO (LG-15): all comments should will part of "DEBUG READ LEVEL" mode
-                // fprintf(f, "        entity with index: %d put on %d %d on \n", cur_tile_id, x_tile, y_tile);
-                ENTMAN_add_entity(game->entity_manager, x_tile, y_tile, cur_tile_id);
-            }
-
-            if (layer_counter == coords_per_single_tile_per_layer) {
-                // current tile on this layer is done - proceed to next tile
-                layer_read++;
-
-                if (layer_read == 3) {
-                    // eveything is read - move on 
-                    state = READ_LEVEL_ALL_TILES_READ;
-                    break;
-                }
-
-                state = READ_LEVEL_TILES_SUM;
-                layer_counter = 0;
-                cur_tile_idx  = 0;
-                cur_tile_id   = 0;
-                tiles_counter = 0;
-                break;
-            } else if (tiles_counter == coords_per_single_tile) {
-                cur_tile_idx++;
-                state = READ_LEVEL_TILES_ID;
-                tiles_counter = 0;
-                break;
-            // current tile is not yet read
-            } else {
-                state = READ_LEVEL_TILE_X;
-                break;
-            }
-        case READ_LEVEL_ALL_TILES_READ:
-            break;
-      }
+    for (int i=0; i<game->level->n_fill; i++) {
+        int x  = game->level->entities_fill[i].x;
+        int y  = game->level->entities_fill[i].y;
+        int id = game->level->entities_fill[i].id;
+        ENTMAN_add_entity(game->entity_manager, x, y, id);
     }
-    // TODO (LG-15): all comments should will part of "DEBUG READ LEVEL" mode
-    // fclose(f);
-}
-
-void GAME_read_level_tileset(
-    game_t*    game,
-    texture_t* tileset
-) {
-    game->level->tileset = tileset;
-}
-
-void GAME_read_level(
-    game_t*     game,
-    const char* filename
-) {
-    FILE *file         = NULL;
-    char *data_path    = NULL;
-    char *img_path     = NULL;
-    texture_t *tileset = NULL;
-
-    data_path = IMP_concatenate_string(filename, SEPARATOR, LEVEL_STRUCTURE_SUFFIX);
-    img_path  = IMP_concatenate_string(filename, SEPARATOR, LEVEL_TILESET_SUFFIX);
-
-    file    = fopen(data_path, LEVEL_READ_MODE);
-    tileset = TXTR_read_from_file(img_path);
-
-    GAME_read_level_tileset(game, tileset);
-    GAME_fill_level(game, file);
-
-    LVL_analyze(game->level);
-
-    free(data_path);
-    free(img_path);
 }
 
 game_t* GAME_init(
+    int level_id
 ) {
     game_t* game         = NULL;
     game                 = (game_t*)malloc(sizeof(game_t));
@@ -229,8 +80,9 @@ game_t* GAME_init(
     game->entity_manager = ENTMAN_new();
 
     game->level          = NULL;
-    game->level          = LVL_new();
-    GAME_read_level(game, "./data/levels/sample");
+    game->level          = levels_library[LEVEL_SAMPLE];
+
+    GAME_init_entities(game);
 
     game->frame          = 0;
     game->fps_timer      = TIMER_new();
@@ -304,18 +156,9 @@ int GAME_init_graphics(
     return GFX_init_graphics();
 }
 
-void GAME_calc_light(
-    game_t        *game,
-    light_scene_t *scene
-) {
-    ENTMAN_calc_light(game->entity_manager, scene, game->level->obstacle_segments);
-}
-
 void GAME_draw_light(
     game_t* game
 ) {
-    LIG_clean_light();
-
     light_scene_t* scene = NULL; 
     scene                = LIG_new_light_scene();
 
@@ -328,14 +171,23 @@ void GAME_draw_light(
 
 // TODO: eveything should have success status enabled
 game_t* GAME_new(
+    int level_id
 ) {
     game_t* game = NULL;
 
     int gfx_init_success = 0;
     gfx_init_success = GAME_init_graphics();
+
     if (!gfx_init_success) { GAME_close(game); }
 
-    game         = GAME_init();
+    GAME_create_library();
+
+    if (LIB_validate() == false ) {
+        printf("library not read properly! \n");
+        GAME_close(game); 
+    }
+
+    game         = GAME_init(level_id);
 
     return game;
 }
@@ -357,7 +209,7 @@ void GAME_draw(
     game_t* game
 ) {
     GAME_clear_screen(game);
-    // GAME_draw_level(game);
+    GAME_draw_level(game);
     GAME_draw_entities(game);
     GAME_render(game);
     // GAME_draw_light(game);
@@ -385,7 +237,7 @@ void GAME_loop(
 void GAME_run(
 ) {
     game_t* game = NULL;
-    game         = GAME_new();
+    game         = GAME_new(LEVEL);
     GAME_loop(game);
     GAME_close(game);
 }

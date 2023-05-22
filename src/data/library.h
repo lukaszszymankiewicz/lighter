@@ -1,7 +1,10 @@
+#include <stdbool.h>
+
 #include "../animation.h"
 #include "../source.h"
 #include "../global.h"
 #include "../source.h"
+#include "../level.h"
 
 #ifndef LIBRARY_H
 #define LIBRARY_H
@@ -76,6 +79,16 @@ enum SPRITE_IDX {
     SPRITE_ALL
 };
 
+enum LEVEL_IDX {
+    LEVEL_SAMPLE,
+    LEVEL_ALL
+};
+
+enum TILESET_IDX {
+    TILESET_BASIC,
+    TILESET_ALL
+};
+
 typedef struct entity_blueprint {
     int  id;
     int  flags;
@@ -92,18 +105,27 @@ typedef struct texture_blueprint {
     const char *filepath;
 } texture_blueprint_t;
 
+typedef struct level_blueprint {
+    const char *data_path;
+    const char *texture_path;
+} level_blueprint_t;
+
 extern entity_blueprint_t *entity_library[ENTITY_ALL];
 extern wobble_t           *wobble_library[WOBBLE_ALL];
 extern lightsource_t      *lighsources_library[LIGHTSOURCE_ALL];
+extern level_t            *levels_library[LEVEL_ALL];
 extern texture_t          *sprites_library[SPRITE_ALL];
+extern texture_t          *tilesets_library[TILESET_ALL];
 
 void LIB_create_entity_library();
 void LIB_create_wobble_library();
 void LIB_create_lightsources_library();
 void LIB_create_sprites_library();
+void LIB_create_levels_library();
+void LIB_create_tilesets_library();
 
 void LIB_create_all();
-
+bool LIB_validate();
 void LIB_free_all();
 
 #endif

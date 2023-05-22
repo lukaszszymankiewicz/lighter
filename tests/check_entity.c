@@ -437,8 +437,7 @@ START_TEST (ENT_get_x_and_get_y)
     
     entity_library[ENTITY_HERO]->flags          = MOVABLE | STATEABLE | ANIMATIABLE;
         
-    int x = 10;
-    int y = 12;
+    int x = 10; int y = 12;
 
     entity = ENT_generate(x, y, ENTITY_HERO);
 
@@ -462,13 +461,14 @@ END_TEST
 
 START_TEST (ENT_light_emit_check)
 {
+    // GIVEN
     LIB_create_all();
 
     entity_t* entity                  = NULL;
-    
     int x = 15; int y = 12;
 
     entity_library[ENTITY_HERO]->flags          = MOVABLE | STATEABLE | ANIMATIABLE;
+    entity_library[ENTITY_LIGHTER]->handle_type = HANDLE_BACK_MIDDLE;
 
     entity = ENT_generate(x, y, ENTITY_HERO);
 
@@ -479,7 +479,6 @@ START_TEST (ENT_light_emit_check)
     } testcase_t;
 
     int w1 = 9; int h1 = 20;
-
     int w2 = 10; int h2 = 5;
 
     testcase_t testcases[] = {
@@ -549,8 +548,6 @@ START_TEST (ENT_light_emit_check)
     };
 
     int n_cases = 9;
-
-    entity_library[ENTITY_LIGHTER]->handle_type = HANDLE_BACK_MIDDLE;
 
     for (int i=0; i<n_cases; i++) {
         entity_library[ENTITY_LIGHTER]->light_emmit_pt = testcases[i].handle;

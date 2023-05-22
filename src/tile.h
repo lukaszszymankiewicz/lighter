@@ -10,6 +10,8 @@
 typedef struct tile {
   render_img_t   img;
   render_coord_t coord;
+  int            tileset_id;
+  bol            obstacle;
 } tile_t;
 
 tile_t* TILE_new(

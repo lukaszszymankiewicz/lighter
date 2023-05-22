@@ -383,32 +383,6 @@ int GFX_init_png(
     return 1;
 };
 
-void GFX_dealloc_buffers() {
-    lightbuffer  = NULL;
-    shadowbuffer = NULL;
-}
-
-void GFX_clean_buffers() {
-    memset(lightbuffer, BLANK_COLOR, FULL_SCREEN_BYTE_SIZE);
-    memset(shadowbuffer, BLANK_COLOR, FULL_SCREEN_BYTE_SIZE);
-}
-
-void GFX_alloc_buffers() {
-    lightbuffer     = NULL;
-    shadowbuffer = NULL;
-
-    lightbuffer     = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
-    shadowbuffer = (uint32_t*)malloc(FULL_SCREEN_PIX_SIZE * sizeof(uint32_t));
-}
-
-void GFX_free_buffers() {
-    free(lightbuffer);
-    free(shadowbuffer);
-
-    lightbuffer  = NULL;
-    shadowbuffer = NULL;
-}
-
 // every pixel specific graphic will be stored in this texture. Sprites are rendered in normal
 // fashion but pixel-sharp shapes needs to be put in the buffer first.
 void GFX_init_screen_buffer_texture(
@@ -421,6 +395,7 @@ void GFX_init_screen_buffer_texture(
         SCREEN_HEIGHT
     );
 }
+
 int GFX_init_graphics(
 ) {
 
@@ -466,7 +441,6 @@ void GFX_free_texture(
 };
 
 void GFX_free() {
-    GFX_free_buffers();
     SDL_DestroyTexture(screen_texture);
 
 	// Deallocate program
@@ -582,7 +556,6 @@ void GFX_render_texture_part(
     glEnd();
 };
 
-
 // renders texture to screen
 void GFX_render_texture(
     texture_t *texture,   // Texture to be rendered
@@ -611,232 +584,3 @@ void GFX_render_texture(
 
     free(clip);
 };
-
-// simplest line - only for debugging
-void GFX_draw_colored_line(
-    int x1,
-    int y1,
-    int x2,
-    int y2,
-    int r,
-    int g,
-    int b,
-    int a
-) {
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);     
-    SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
-};
-
-void GFX_draw_rect_border(
-    int x,
-    int y,
-    int w,
-    int h,
-    int r,
-    int g,
-    int b,
-    int a
-) {
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);     
-    SDL_Rect rect = (SDL_Rect){x, y, w, h};
-    SDL_RenderFillRect(renderer, &rect);
-};
-
-/*
- * THIS SECONDTION WILL BE REPLACED BY OPENGL VERSION
- */
-// fills rect with shader function
-void GFX_fill_rect(
-    shader_t shader,
-    int x,
-    int y,
-    int w,
-    int h,
-    int r,
-    int g,
-    int b,
-    int power 
-) {
-    uint32_t red_color = r << 24;
-    uint32_t green_color = g << 16;
-    uint32_t blue_color = b << 8;
-    uint32_t light_color = red_color | green_color | blue_color;
-
-    for (int xx=x; xx<x+w; xx++) { 
-        for(int yy=y; yy<y+h; yy++) {
-            shader(light_color, xx, yy, power, 0, 0);
-        }
-    }
-};
-
-void GFX_draw_line_to_buffer(
-    int       x1,                                       // starting point
-    int       x2,                                       // end point
-    shader_t  shader,
-    int       y,                                        // y-axis coef
-    int       r,                                        // red color (from 00 to FF)
-    int       g,                                        // green color (from 00 to FF)
-    int       b,                                        // blue color (from 00 to FF)
-    int       power,                                    // power of  color (mostly alpha channel)
-    int       x0,
-    int       y0
-) {
-
-    uint32_t red_color = r << 24;
-    uint32_t green_color = g << 16;
-    uint32_t blue_color = b << 8;
-    uint32_t light_color = red_color | green_color | blue_color;
-
-    for (int x=MAX(x1, 0); x<MIN(SCREEN_WIDTH, x2); x++) {
-        shader(light_color, x, y, power, x0, y0);
-    }
-};
-
-sorted_list_t* GFX_calc_intersections_in_scanline(
-    segment_t *segments,
-    int        y,
-    int       *n
-) {
-    sorted_list_t *intersections = NULL;
-    segment_t        *ptr        = NULL;
-    int               x;
-
-    ptr = segments;
-
-    while(ptr){
-        // line in perpendicular to y-axis
-        if (ptr->y1 == ptr->y2){
-            ptr=ptr->next;
-        }
-        // line in perpendicular to x-axis
-        else if (ptr->x1 == ptr->x2) {
-            SRTLST_insert(&intersections, ptr->x1,0 );
-            ptr=ptr->next;
-            (*n)++;
-        }
-        else {
-            x = GEO_x_intersection_with_slope(y, ptr->x1, ptr->y1, ptr->slope);
-            SRTLST_insert(&intersections, x, 0);
-            ptr=ptr->next;
-            (*n)++;
-        }
-    }
-
-    return intersections;
-}
-
-void GFX_draw_scanline(
-    segment_t     *segments,
-    shader_t       shader,
-    int            y,
-    int            r,
-    int            g,
-    int            b,
-    int            power,
-    int            x0,
-    int            y0
-) {
-    int            n      = 0;
-    sorted_list_t *intscs = NULL;
-    intscs                = GFX_calc_intersections_in_scanline(segments, y, &n);
-
-    if (intscs) {
-
-        sorted_list_t* ptr = NULL;
-
-        if (n==2) {
-            GFX_draw_line_to_buffer(intscs->value, intscs->next->value, shader, y, r, g, b, power, x0, y0);
-        }
-
-        else if (n>2) {
-            ptr = intscs;
-
-            while (ptr->next) {
-                GFX_draw_line_to_buffer(ptr->value, ptr->next->value, shader, y, r, g, b, power, x0, y0);
-
-                ptr=ptr->next;
-                if (ptr->next == NULL) {
-                    break;
-                }
-                ptr=ptr->next;
-            }
-        }
-
-        SRTLST_free(intscs);
-    }
-}
-
-// Fill texture (lightbuffer) with polygon (being geometric shape where light is present and should
-// be drawn). Polygon is expressed as linked list of vertices, scanline algorithm is used to
-// transpose those vertices to filled polygon.
-// Function is secured from drawing outside the screen, as such behavior is unsave and wastes
-// resources.
-void GFX_fill_light(
-    shader_t shader,
-    vertex_t     *poly,
-    int           r,
-    int           g,
-    int           b,
-    int           power,
-    int           x0,
-    int           y0
-) {
-    int         y            = 0;
-    int         highest      = VRTX_highest_y(poly);
-    int         lowest       = VRTX_lowest_y(poly);
-    
-    segment_t *not_drawn_yet = NULL;
-    segment_t *current_draw  = NULL;
-    segment_t *obstacle_ptr  = NULL;
-    segment_t *candidates    = NULL;
-
-    not_drawn_yet = SEG_get_segments_of_polygon(poly); 
-
-    // algorithm is starting from highest vertex of polygon...
-    y = highest;
-
-    // up to the lowest vertex of polygon
-    while(y<lowest) {
-
-        // if algorithm reaches point below screen, no further drawing is needed, algorithm is
-        // terminated
-        if (y>SCREEN_WIDTH) {
-            y++;
-            break;
-        }
-
-        // delete segments from current drawn scan_y must be higher than y of any point
-        SEG_delete(&current_draw, y);
-
-        // get candidates to draw
-        candidates = SEG_find_candidates(&not_drawn_yet, y);
-
-        // add candidates to current draw
-        SEG_merge(&current_draw, candidates);       
-
-        SEG_free(candidates);
-        candidates = NULL;
-
-        // if there isn`t anything to draw or anything to be drawn in future - stop
-        if (!not_drawn_yet && !current_draw) { break; }
-
-        // if current scanline y is below 0 (outside the screen, no drawing is needed, go to next
-        // scanline)
-        if (y<0) {
-            y++;
-            continue; 
-        }
-
-        else { 
-            GFX_draw_scanline(current_draw, shader, y, r, g, b, power, x0, y0);
-            y++;
-        }
-    }
-
-    SEG_free(not_drawn_yet);
-    not_drawn_yet = NULL;
-
-    if (current_draw) { SEG_free(current_draw); }
-    if (obstacle_ptr) { SEG_free(obstacle_ptr); }
-    if (candidates)  { SEG_free(candidates); }
-}

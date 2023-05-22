@@ -16,4 +16,6 @@ texture_t* TXTR_read_from_file(const char *filepath);
 int TXTR_width(texture_t* texture);
 int TXTR_height(texture_t* texture);
 
+void TXTR_free(texture_t* texture);
+
 #endif

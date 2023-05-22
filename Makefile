@@ -35,10 +35,10 @@ OBJS =                                     \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o       \
 	$(BUILDDIR)/$(DATADIR)/lightsources.o  \
 	$(BUILDDIR)/$(DATADIR)/sprites.o       \
+	$(BUILDDIR)/$(DATADIR)/levels.o        \
 	$(BUILDDIR)/$(DATADIR)/library.o       \
 	$(BUILDDIR)/game.o                     \
 	$(BUILDDIR)/gfx.o                      \
-    $(BUILDDIR)/import.o                   \
     $(BUILDDIR)/img.o                      \
 	$(BUILDDIR)/controller.o               \
 	$(BUILDDIR)/entity.o                   \
@@ -61,6 +61,7 @@ TESTOBJS =                                    \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o          \
 	$(BUILDDIR)/$(DATADIR)/lightsources.o     \
 	$(BUILDDIR)/$(DATADIR)/sprites.o          \
+	$(BUILDDIR)/$(DATADIR)/levels.o           \
 	$(BUILDDIR)/$(DATADIR)/library.o          \
     $(BUILDDIR)/check_controller.o            \
 	$(BUILDDIR)/check_geometry.o              \
@@ -76,7 +77,6 @@ TESTOBJS =                                    \
 	$(BUILDDIR)/controller.o                  \
 	$(BUILDDIR)/geometry.o                    \
 	$(BUILDDIR)/gfx.o                         \
-	$(BUILDDIR)/import.o                      \
 	$(BUILDDIR)/img.o                         \
 	$(BUILDDIR)/entity.o                      \
 	$(BUILDDIR)/texture.o                     \
@@ -121,6 +121,9 @@ run_lighter:
 
 all: 
 	make lighter run_lighter
+
+debug: 
+	gdb ./$(BUILDDIR)/$(FINAL_OBJ)
 
 all_tests:
 	make clear_screen tests run_lighter_tests

@@ -116,3 +116,10 @@ texture_t* TXTR_read_from_file(
     return TXTR_new(surface, GL_RGB, filepath);
 }
 
+void TXTR_free(
+    texture_t* texture
+) {
+    //TODO: TBU
+    return;
+}
+

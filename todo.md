@@ -11,3 +11,9 @@
 - [x] move level to data
 - [ ] add light shader
 - [ ] delete all print statements
+- [ ] add option to run game without making window and graphic
+- [ ] test to run game (without graphic!)
+- [ ] validate if everything were read to library correctly
+- [ ] store levels on c file (like others)
+- [ ] store tilesets on c files (like others)
+- [ ] store tiles on c fles (like others)

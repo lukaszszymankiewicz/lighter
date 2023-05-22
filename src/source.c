@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "global.h"
-#include "import.h"
 #include "source.h"
 #include "primitives.h"
 

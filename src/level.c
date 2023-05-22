@@ -21,6 +21,7 @@ level_t* LVL_new(
     level_t *new_level           = NULL;
     new_level                    = (level_t*)malloc(sizeof(level_t));
 
+    new_level->n_fill            = 0;
     new_level->structure         = NULL;
     new_level->obstacles         = NULL;
     new_level->obstacle_segments = NULL;
@@ -29,6 +30,13 @@ level_t* LVL_new(
     new_level->tileset           = (texture_t*)malloc(sizeof(texture_t));
 
     return new_level;
+}
+
+void LVL_add_entity_fill(
+    level_t *level,
+    int x, int y, int id
+) {
+    level->entities_fill[level->n_fill++] = (entity_fill_t) {x, y, id};
 }
 
 // initialise level structure
@@ -264,7 +272,6 @@ void LVL_analyze(
                         ptr->x2 += TILE_WIDTH;
                     }
                 }
-
             }
         }
     }
@@ -327,7 +334,7 @@ void LVL_draw(
 void LVL_free(
     level_t *level
 ) {
-    GFX_free_texture(level->tileset);
+    TXTR_free(level->tileset);
     level->tileset = NULL;
 
     free(level->structure);
