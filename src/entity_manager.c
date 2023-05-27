@@ -1,12 +1,10 @@
-#include "global.h"
 #include "entity.h"
-#include "light.h"
 #include "entity_manager.h"
 #include "geometry.h"
-#include "primitives.h"
+#include "global.h"
+#include "light.h"
 #include "segment.h"
 #include "vertex.h"
-
 
 entity_manager_t* ENTMAN_new(
 ) {

@@ -1,6 +1,9 @@
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "img.h"
+
+scene_t *scene = NULL;
 
 void IMG_clear_scene(
     scene_t* scene
@@ -38,13 +41,17 @@ void IMG_add_sprite_to_scene(
     scene_t* scene,
     int            id,
     render_coord_t render,
-    render_coord_t clip
+    render_coord_t clip,
+    bool           flip_w,
+    bool           flip_h
 ) {
     if (scene->n_tile >= MAX_SPRITES_ON_SPRITES_LAYER) { return; }
 
     scene->tile_layer[scene->n_sprite].id     = id;
     scene->tile_layer[scene->n_sprite].render = render;
     scene->tile_layer[scene->n_sprite].clip   = clip;
+    scene->tile_layer[scene->n_sprite].flip_w = flip_w;
+    scene->tile_layer[scene->n_sprite].flip_h = flip_h;
 
     scene->n_sprite++;
 }

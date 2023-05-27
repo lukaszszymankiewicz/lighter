@@ -1,10 +1,17 @@
 #include <stdbool.h>
 
 #include "global.h"
-#include "primitives.h"
 
 #ifndef VERTEX_H
 #define VERTEX_H
+
+typedef struct vertex {
+    int            x;
+    int            y;
+    float          angle;
+    struct vertex *next;
+    float          dist;
+} vertex_t;
 
 vertex_t* VRTX_new(int x, int y, float angle);
 vertex_t* VRTX_transpose(vertex_t *vertex, int x_corr, int y_corr);

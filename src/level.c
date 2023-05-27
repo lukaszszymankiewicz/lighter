@@ -6,8 +6,8 @@
 
 #include "gfx.h"
 #include "global.h"
+#include "img.h"
 #include "level.h"
-#include "primitives.h"
 #include "segment.h"
 #include "texture.h"
 #include "tile.h"
@@ -313,13 +313,10 @@ void LVL_draw(
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
 
-            tile_t    *tile    = NULL;
-            texture_t *texture = NULL;
-
-            tile        = LVL_tile_on_pos(level, x, y);
-            texture     = tilesets_library[tile->tileset_id];
+            tile_t *tile = NULL;
+            tile         = LVL_tile_on_pos(level, x, y);
             
-            if (tile != NULL) {
+            if (tile) {
 
                 // printf(
                 //     "am I correct? %f %f %f %f\n",
@@ -328,18 +325,18 @@ void LVL_draw(
                 //     tile->coord.x2 - x_diff,
                 //     tile->coord.y2 + y_diff
                 // ); 
-
-                GFX_render_texture_part(
-                    texture,
+                render_coord_t render = { 
                     tile->coord.x1 - x_diff,
                     tile->coord.y1 + y_diff,
                     tile->coord.x2 - x_diff,
-                    tile->coord.y2 + y_diff,
-                    tile->img.x1,
-                    tile->img.y1,
-                    tile->img.x2,
-                    tile->img.y2,
-                    false
+                    tile->coord.y2 + y_diff
+                };
+
+                IMG_add_tile_to_scene(
+                    scene,
+                    tile->tileset_id,
+                    render,
+                    tile->img
                 );
             }
         }
@@ -362,8 +359,6 @@ void LVL_free(
 
     SEG_free(level->obstacle_segments);
     level->obstacle_segments = NULL;
-
-    
 
     free(level);
     level = NULL;

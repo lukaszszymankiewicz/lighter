@@ -4,7 +4,6 @@
 
 #include "animation.h"
 #include "global.h"
-#include "primitives.h"
 #include "source.h"
 #include "texture.h"
 

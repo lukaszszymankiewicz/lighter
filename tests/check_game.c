@@ -10,7 +10,7 @@ START_TEST (GAME_run_check)
     int level_id       = LEVEL_SAMPLE;
 
     // WHEN && THEN
-    GAME_run(LEVEL_SAMPLE, GRAPHIC_OFF, max_frames);
+    GAME_run(level_id, graphic_option, max_frames);
 }
 END_TEST
 

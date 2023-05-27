@@ -8,8 +8,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include "data/library.h"
+
 #include "gfx.h"
-#include "texture.h"
+#include "img.h"
 
 #define GRADIENT_COEF 3.0
 #define OPENGL_MAJOR_VERSION 3
@@ -27,7 +29,6 @@ bool gRenderQuad = true;
 
 SDL_GLContext gl_context        = NULL;
 SDL_Window   *window            = NULL;
-SDL_Renderer *renderer          = NULL;
 
 void GFX_print_program_log(
     GLuint program 
@@ -89,67 +90,6 @@ void GFX_print_shader_log(
     }
 }
 
-/*
- * THIS SECONDTION WILL BE REPLACED BY OPENGL VERSION
- */
-float GFX_dist(
-    int x0,
-    int y0,
-    int x1,
-    int y1
-) {
-    return sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1)) * GRADIENT_COEF;
-}
-
-// this is OpenGL version of mix function
-float GFX_lerp(
-    float v0,
-    float v1,
-    float t
-) {
-    return (1 - t) * v0 + t * v1;
-}
-
-// this is the only way to use OpenGL without really calling it. OpenGL implementaiton must be done
-// in separate ticket
-// proper gradient version for GLSL:
-// float dist(vec2 p0, vec2 pf) {return sqrt((pf.x-p0.x)*(pf.x-p0.x)+(pf.y-p0.y)*(pf.y-p0.y));}
-//
-// void mainImage( out vec4 fragColor, in vec2 fragCoord )
-// {
-//  float d = dist(iResolution.xy*0.5,fragCoord.xy)*0.01;
-// 	fragColor = mix(vec4(1.0, 1.0, 1.0, 1.0), vec4(0.0, 0.0, 0.0, 1.0), d);
-// }
-//
-// void GFX_fill_lightbuffer(
-//     uint32_t  color,
-//     int       x,
-//     int       y,
-//     int       power,
-//     int       x0,
-//     int       y0
-// ) {
-//     // TODO (LG-10): this should be a three (?) separate shaders in OpenGL!
-//     int      shadow = 0;
-//     int      old_shadow = 0;
-//     int      pos    = x+y*SCREEN_WIDTH;
-//     uint32_t dist   = (uint32_t)GFX_dist(x0, y0, x, y);
-// 
-//     old_shadow = (shadowbuffer[pos] & 0xFF000000) >> 24;
-//     shadow = (int)(GFX_lerp(255, old_shadow, (float)MIN(dist, 255)/255));
-//     
-//     if (shadow == 255) {
-//         lightbuffer[pos] = color | ((lightbuffer[pos] & 0xFF) + power);
-//     }
-// 
-//     // add shadow with light gradient
-//     shadowbuffer[pos] = (shadow << 24) | (shadow << 16) | (shadow << 8) | 255; 
-// }
-
-/*
- * END OPENGL SECTION
- */
-
 // sets global rendering scale which must be a positive integer. Scale tries to fit best tile_per_x 
 // and tile_per_y. This is needed to achieve pixel-perfect rendering (which can be done only if each
 // pixel in every drawing routine is multiplied by some scale).
@@ -178,7 +118,6 @@ void GFX_set_global_render_scale(
 
 int GFX_init_window() {
     window = SDL_CreateWindow(
-
         GAME_NAME,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
@@ -187,7 +126,7 @@ int GFX_init_window() {
         SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL 
     );
 
-    if (window == NULL) {
+    if (!window) {
         printf("window cannot be created");
         return 0;
     }
@@ -405,10 +344,6 @@ void GFX_free(
         glDeleteProgram(opengl_program_id);
     }
 
-    if (renderer) {
-        SDL_DestroyRenderer(renderer);
-    }
-
     if (window) {
         SDL_DestroyWindow(window);
     }
@@ -431,10 +366,6 @@ void GFX_update() {
     // SDL_UpdateWindowSurface(window);
 };
 
-
-// Render part of the texture to the screen. render and tex parameters are expressed in OpenGL
-// orientation units, but in "global" orientation (not taking camera position). 'bool' argument will
-// flip texture vertically
 void GFX_render_texture_part(
     texture_t *texture,
     float      render_x1,   // place on screen (OpenGL coords)
@@ -503,31 +434,36 @@ void GFX_render_texture_part(
     glEnd();
 };
 
-// renders texture to screen
-void GFX_render_texture(
-    texture_t *texture,   // Texture to be rendered
-    SDL_Rect  *clip,      // rect from texture to be rendered
-    int        x,         // x coord of screen to have texture rendered
-    int        y,         // y coord of screen to have texture rendered
-    bool       flip       // indiaction if texture should be flipped horizontally
+void GFX_draw_scene(
+    scene_t* scene 
 ) {
-    SDL_Rect render_quad = {x, y, texture->surface->w, texture->surface->h};
-    SDL_RendererFlip flip_tex;
-    
-    // if clip is not given render whole texture
-    if(clip != NULL) {
-        render_quad.w = clip->w;
-        render_quad.h = clip->h;
+    for (int tile=0; tile<scene->n_tile; tile++) {
+        GFX_render_texture_part(
+            tilesets_library[scene->tile_layer[tile].id],
+            scene->tile_layer[tile].render.x1,
+            scene->tile_layer[tile].render.y1,
+            scene->tile_layer[tile].render.x2,
+            scene->tile_layer[tile].render.y2,
+            scene->tile_layer[tile].clip.x1,
+            scene->tile_layer[tile].clip.y1,
+            scene->tile_layer[tile].clip.x2,
+            scene->tile_layer[tile].clip.y2,
+            false
+        );
     }
 
-    if (flip) {
-        flip_tex = SDL_FLIP_HORIZONTAL; 
+    for (int sprite=0; sprite<scene->n_sprite; sprite++) {
+        GFX_render_texture_part(
+            sprites_library[scene->sprite_layer[sprite].id],
+            scene->sprite_layer[sprite].render.x1,
+            scene->sprite_layer[sprite].render.y1,
+            scene->sprite_layer[sprite].render.x2,
+            scene->sprite_layer[sprite].render.y2,
+            scene->sprite_layer[sprite].clip.x1,
+            scene->sprite_layer[sprite].clip.y1,
+            scene->sprite_layer[sprite].clip.x2,
+            scene->sprite_layer[sprite].clip.y2,
+            scene->sprite_layer[sprite].flip_w
+        );
     }
-    else {
-        flip_tex = SDL_FLIP_NONE; 
-    }
-
-    // SDL_RenderCopyEx(renderer, texture->surface, clip, &render_quad, 0, NULL, flip_tex);
-
-    free(clip);
-};
+}

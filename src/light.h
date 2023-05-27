@@ -1,14 +1,30 @@
 #include <stdbool.h>
 
 #include "global.h"
+#include "point.h"
+#include "segment.h"
 #include "source.h"
-#include "primitives.h"
 
 #ifndef LIGHT_H
 #define LIGHT_H
 
 #define R                               2000
 #define RAY_THRESHOLD                   2
+
+typedef struct lvertex {
+    vertex_t* coords;
+    int       x0;
+    int       y0;
+    int       power;
+    int       red;
+    int       green;
+    int       blue;
+} lvertex_t;
+
+typedef struct light_scene {
+    lvertex_t   *components[MAX_LIGHT_ON_SCENE];
+    int          n;
+} light_scene_t;
 
 // SCENE
 light_scene_t* LIG_new_light_scene();

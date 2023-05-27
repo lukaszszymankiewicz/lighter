@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #ifndef IMG_H
 #define IMG_H
 
@@ -15,6 +17,8 @@ typedef struct drawable {
     int            id;
     render_coord_t render;
     render_coord_t clip;
+    bool           flip_h;
+    bool           flip_w;
 } drawable_t;
 
 typedef struct scene {
@@ -28,7 +32,16 @@ scene_t* IMG_new_scene();
 
 void IMG_clear_scene(scene_t* scene);
 void IMG_add_tile_to_scene(scene_t* scene, int id, render_coord_t render, render_coord_t clip);
-void IMG_add_sprite_to_scene( scene_t* scene, int id, render_coord_t render, render_coord_t clip);
+void IMG_add_sprite_to_scene(
+    scene_t* scene,
+    int id,
+    render_coord_t render,
+    render_coord_t clip,
+    bool flip_w,
+    bool flip_h
+);
 void IMG_free_scene(scene_t* scene);
+
+extern scene_t *scene;
 
 #endif

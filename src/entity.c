@@ -2,16 +2,14 @@
 
 #include "data/library.h"
 
-#include "global.h"
-#include "geometry.h"
+#include "animation.h"
 #include "controller.h"
 #include "entity.h"
-#include "texture.h"
-#include "gfx.h"
-#include "primitives.h"
+#include "geometry.h"
+#include "global.h"
 #include "sorted_list.h"
-#include "animation.h"
 #include "source.h"
+#include "texture.h"
 
 int state_collisions[3][3] = {
     //  STANDING, WALKING, JUMPING
@@ -687,27 +685,16 @@ void ENT_draw(
     int x,
     int y
 ) {
-    
     if (ENT_has_not_flag(entity, NOT_DRAWABLE)) {
         return;
     }
 
-    bool flip                  = ENT_render_with_flip(entity);
-    render_coord_t texture_coord = ENT_texture_coord(entity);
-    render_coord_t img_coord   = ENT_img_coord(entity, texture_coord);
+    bool           flip   = ENT_render_with_flip(entity);
+    int            id     = ENT_texture_id(entity);
+    render_coord_t clip   = ENT_texture_coord(entity);
+    render_coord_t render = ENT_img_coord(entity, clip);
 
-    GFX_render_texture_part(
-        ENT_texture(entity),
-        img_coord.x1,
-        img_coord.y1,
-        img_coord.x2,
-        img_coord.y2,
-        texture_coord.x1, 
-        texture_coord.y1, 
-        texture_coord.x2, 
-        texture_coord.y2, 
-        flip
-    );
+    IMG_add_sprite_to_scene(scene, id, render, clip, flip, false);
 }
 
 void ENT_free(

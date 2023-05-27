@@ -3,7 +3,6 @@
 
 #include "global.h"
 #include "source.h"
-#include "primitives.h"
 
 // changes done to light angle if looking in different direction
 float lightpos_up_down_corr[2][5] = {

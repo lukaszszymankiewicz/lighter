@@ -1,9 +1,19 @@
 #include <stdbool.h>
 
-#include "primitives.h"
+#include "vertex.h"
 
 #ifndef SEGMENT_H
 #define SEGMENT_H
+
+typedef struct segment {
+    int   x1;
+    int   y1;
+    int   x2; 
+    int   y2;
+    float slope;
+    int   type;
+    struct segment *next;
+} segment_t;
 
 segment_t* SEG_init(int x1, int y1, int x2, int y2);
 segment_t* SEG_get_segments_of_polygon(vertex_t *poly);

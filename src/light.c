@@ -1,12 +1,11 @@
-#include "global.h"
-#include "segment.h"
 #include "geometry.h"
-#include "source.h"
 #include "gfx.h"
+#include "global.h"
 #include "light.h"
-#include "vertex.h"
-#include "primitives.h"
 #include "point.h"
+#include "segment.h"
+#include "source.h"
+#include "vertex.h"
 
 light_scene_t* LIG_new_light_scene() {
     light_scene_t* scene = NULL;

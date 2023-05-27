@@ -1,5 +1,4 @@
 #include "global.h"
-#include "primitives.h"
 
 #ifndef SOURCE_H
 #define SOURCE_H
@@ -7,6 +6,8 @@
 #define MAX_WOBBLES       2
 #define MAX_LIGHTPOLYGON  10
 #define MAX_WOBBLE_LEN    100
+
+typedef short int direction_t;
 
 typedef struct lightpolygon { 
     int x;

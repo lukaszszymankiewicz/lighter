@@ -2,7 +2,6 @@
 
 #include "../src/animation.h"
 #include "../src/level.h"
-#include "../src/primitives.h"
 #include "../src/segment.h"
 
 #include "../src/data/library.h"

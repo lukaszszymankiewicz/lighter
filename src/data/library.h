@@ -5,6 +5,7 @@
 #include "../level.h"
 #include "../source.h"
 #include "../source.h"
+#include "../texture.h"
 #include "../tile.h"
 
 #ifndef LIBRARY_H

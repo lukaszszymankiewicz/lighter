@@ -5,6 +5,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#define GFX_INITIALIZERS_N 2 
+
 enum GRAPHIC_OPTION {
     GRAPHIC_OFF,
     GRAPHIC_ON
@@ -23,6 +25,6 @@ typedef struct game {
   entity_manager_t  *entity_manager;
 } game_t;
 
-int GAME_run(int level_id, int graphic_option, int max_frames);
+void GAME_run(int level_id, int graphic_option, int max_frames);
 
 #endif

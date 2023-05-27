@@ -5,11 +5,10 @@
 #include "game.h"
 #include "gfx.h"
 #include "global.h"
+#include "img.h"
 #include "level.h"
 #include "light.h"
 #include "timer.h"
-
-#define GFX_INITIALIZERS_N 2 
 
 int GAME_init_no_graphics(
 ) {
@@ -60,6 +59,7 @@ void GAME_close(
     free(game);
     GFX_free();
     SDL_Quit();
+    IMG_free_scene(scene);
 };
 
 void GAME_init_entities(
@@ -193,12 +193,11 @@ game_t* GAME_new(
     game_t* game      = NULL;
     game              = GAME_init(level_id, graphic_option, max_frames);
 
-    int gfx_init_success = 0;
-    gfx_init_success = GAME_init_graphics(game->draw_option);
-
-    if (!gfx_init_success) {
+    if(GAME_init_graphics(game->draw_option) == 0) {
         GAME_close(game); 
     }
+    
+    scene = IMG_new_scene();
 
     return game;
 }
@@ -216,12 +215,17 @@ void GAME_apply_logic(
     GAME_update_entities(game);
 }
 
+void GAME_draw_scene(
+    game_t* game
+) {
+    GFX_draw_scene(scene);
+}
+
 void GAME_draw_everything(
     game_t* game
 ) {
     GAME_clear_screen(game);
-    GAME_draw_level(game);
-    GAME_draw_entities(game);
+    GAME_draw_scene(game);
     GAME_render(game);
     // GAME_draw_light(game);
 }
@@ -257,7 +261,7 @@ void GAME_loop(
     }
 }
 
-int GAME_run(
+void GAME_run(
     int level_id,
     int graphic_option,
     int max_frames
@@ -266,6 +270,4 @@ int GAME_run(
     game         = GAME_new(level_id, graphic_option, max_frames);
     GAME_loop(game);
     GAME_close(game);
-
-    return 0;
 }

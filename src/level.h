@@ -1,5 +1,5 @@
 #include "global.h"
-#include "primitives.h"
+#include "segment.h"
 #include "tile.h"
 
 #ifndef LEVEL_H

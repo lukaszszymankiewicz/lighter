@@ -72,4 +72,8 @@
 // TILESET CONTANTS
 #define TILESET_TILE_PER_ROW  16
 
+enum direction { RIGHT, LEFT, UP, DOWN, NONE };
+enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };
+enum segtype { HOR, VER, UNKNOWN };
+
 #endif

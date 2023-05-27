@@ -16,7 +16,9 @@
 - [x] add library tests to check whether the files are read correctly
 - [x] add option to run game without making window and graphic
 - [x] test to run game (without graphic!)
-- [ ] add some struct to hold things to be draw (rather than using GFX function
+- [x] add some struct to hold things to be draw (rather than using GFX function
   in entity and level wtc).
+- [x] get rid of primitvies, please!
 - [ ] delete all print statements
+- [ ] clear all imports
 - [ ] add light shader

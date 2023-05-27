@@ -20,4 +20,6 @@ int main(
     }
 
     GAME_run(defult_level, graphic_option, defult_max_frames);
+
+    return 0;
 }
