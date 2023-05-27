@@ -1,10 +1,11 @@
 #include <stdbool.h>
 
 #include "../animation.h"
-#include "../source.h"
 #include "../global.h"
-#include "../source.h"
 #include "../level.h"
+#include "../source.h"
+#include "../source.h"
+#include "../tile.h"
 
 #ifndef LIBRARY_H
 #define LIBRARY_H
@@ -21,8 +22,6 @@ const static int ANIMATIABLE     = 1 << 7;  // this entity has any animation bes
 const static int NOT_DRAWABLE    = 1 << 8;  // this entity should not be drawn
 
 const static int ENTITY_NO       = -1;
-const static int SEP             = 69420;
-const static int END             = 5318008;
 
 enum ENITY_IDX {
     ENTITY_HERO,
@@ -81,6 +80,7 @@ enum SPRITE_IDX {
 
 enum LEVEL_IDX {
     LEVEL_SAMPLE,
+    LEVEL_TEST,
     LEVEL_ALL
 };
 
@@ -114,24 +114,32 @@ typedef struct texture_blueprint {
 
 typedef struct tile_blueprint {
     int   tileset_id;
-    float x1;
-    float y1;
-    float x2;
-    float y2;
+    float x1; float y1;
+    float x2; float y2;
     bool  obstacle;
 } tile_blueprint_t;
 
+typedef struct entity_fill {
+    int x; int y; int id;
+} entity_fill_t;
+
 typedef struct level_blueprint {
-    const char *data_path;
-    const char *texture_path;
+    int           id;
+    int           size_x;
+    int           size_y;
+    int           tiles[MAX_LEVEL_SIZE];
+    int           n_fills;
+    entity_fill_t entities[MAX_LEVEL_ENTITY_FILL];
 } level_blueprint_t;
 
 extern entity_blueprint_t *entity_library[ENTITY_ALL];
-extern wobble_t           *wobble_library[WOBBLE_ALL];
+extern level_blueprint_t  *levels_library[LEVEL_ALL];
+extern tile_blueprint_t   *tiles_library[TILE_ALL];
+
 extern lightsource_t      *lighsources_library[LIGHTSOURCE_ALL];
-extern level_t            *levels_library[LEVEL_ALL];
 extern texture_t          *sprites_library[SPRITE_ALL];
 extern texture_t          *tilesets_library[TILESET_ALL];
+extern wobble_t           *wobble_library[WOBBLE_ALL];
 
 void LIB_create_entity_library();
 void LIB_create_wobble_library();
@@ -139,10 +147,9 @@ void LIB_create_lightsources_library();
 void LIB_create_sprites_library();
 void LIB_create_levels_library();
 void LIB_create_tilesets_library();
-void LIB_create_tile_library()
+void LIB_create_tile_library();
 
 void LIB_create_all();
-bool LIB_validate();
 void LIB_free_all();
 
 #endif

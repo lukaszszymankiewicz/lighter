@@ -62,5 +62,14 @@
 #define DEFAULT_LIGHT_G          252                // default light G color
 #define DEFAULT_LIGHT_B          187                // default light B color
 #define DEFAULT_LIGHT_A          10                 // default light ALPHA channel
-                                                    //
+
+// LEVEL CONTANTS
+#define MAX_LEVEL_X_SIZE      20
+#define MAX_LEVEL_Y_SIZE      20
+#define MAX_LEVEL_ENTITY_FILL 10
+#define MAX_LEVEL_SIZE        MAX_LEVEL_X_SIZE * MAX_LEVEL_Y_SIZE
+
+// TILESET CONTANTS
+#define TILESET_TILE_PER_ROW  16
+
 #endif

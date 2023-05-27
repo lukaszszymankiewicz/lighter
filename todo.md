@@ -9,12 +9,14 @@
 - [x] delete assets.h and files. (?)
 - [x] textures should use blueprint
 - [x] move level to data
-- [ ] add light shader
-- [ ] delete all print statements
-- [ ] add option to run game without making window and graphic
-- [ ] test to run game (without graphic!)
-- [ ] validate if everything were read to library correctly
-- [ ] store levels on c file (like others)
+- [x] validate if everything were read to library correctly
+- [x] store levels on c file (like others)
 - [x] store tilesets on c files (like others)
 - [x] store tiles on c fles (like others)
-- [ ] add library tests to check whether the files are read correctly
+- [x] add library tests to check whether the files are read correctly
+- [x] add option to run game without making window and graphic
+- [x] test to run game (without graphic!)
+- [ ] add some struct to hold things to be draw (rather than using GFX function
+  in entity and level wtc).
+- [ ] delete all print statements
+- [ ] add light shader

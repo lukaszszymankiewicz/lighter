@@ -12,13 +12,13 @@
 
 
 typedef struct frame {
-    render_img_t  img;
-    SDL_Rect      rect;
-    SDL_Rect      hit_boxes[MAX_HITBOXES_PER_FRAME];
-    int           handle_x;
-    int           handle_y;
-    int           n_hit_box;
-    int           delay;
+    render_coord_t  img;
+    SDL_Rect        rect;
+    SDL_Rect        hit_boxes[MAX_HITBOXES_PER_FRAME];
+    int             handle_x;
+    int             handle_y;
+    int             n_hit_box;
+    int             delay;
 } frame_t;
 
 typedef struct animation {
@@ -35,8 +35,8 @@ typedef struct animation_sheet {
   animation_t  animations[MAX_ANIMATION];
 } animation_sheet_t;
 
-render_img_t ANIM_texture_coord(animation_t animation, int idx, int frame);
-render_img_t ANIM_texture_coord_full(animation_sheet_t animation);
+render_coord_t ANIM_texture_coord(animation_t animation, int idx, int frame);
+render_coord_t ANIM_texture_coord_full(animation_sheet_t animation);
 
 int ANIM_get_texture_width(animation_sheet_t animation);
 int ANIM_get_texture_height(animation_sheet_t animation);

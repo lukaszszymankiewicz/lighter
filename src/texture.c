@@ -119,7 +119,13 @@ texture_t* TXTR_read_from_file(
 void TXTR_free(
     texture_t* texture
 ) {
-    //TODO: TBU
-    return;
+    if (texture && texture->surface) {
+        SDL_FreeSurface(texture->surface);
+        texture->surface    = NULL;
+        GLuint TextureID    = texture->id;
+        glDeleteTextures(1, &TextureID);
+        free(texture);
+        texture = NULL;
+    }
 }
 

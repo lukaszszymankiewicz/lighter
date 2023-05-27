@@ -1,25 +1,15 @@
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_video.h>
 #include <SDL2/SDL_image.h>
 
-#include <math.h>
-#include <stdio.h>
-
-#include "global.h"
 #include "gfx.h"
 #include "texture.h"
-#include "primitives.h"
-#include "sorted_list.h"
-#include "geometry.h"
-#include "vertex.h"
-#include "segment.h"
-
 
 #define GRADIENT_COEF 3.0
 #define OPENGL_MAJOR_VERSION 3
@@ -35,14 +25,9 @@ float global_y_scale        = 1.0;
 
 bool gRenderQuad = true;
 
-SDL_GLContext gl_context;
-
+SDL_GLContext gl_context        = NULL;
 SDL_Window   *window            = NULL;
 SDL_Renderer *renderer          = NULL;
-SDL_Texture  *screen_texture    = NULL;
-
-uint32_t     *lightbuffer;
-uint32_t     *shadowbuffer;
 
 void GFX_print_program_log(
     GLuint program 
@@ -136,30 +121,30 @@ float GFX_lerp(
 // 	fragColor = mix(vec4(1.0, 1.0, 1.0, 1.0), vec4(0.0, 0.0, 0.0, 1.0), d);
 // }
 //
-void GFX_fill_lightbuffer(
-    uint32_t  color,
-    int       x,
-    int       y,
-    int       power,
-    int       x0,
-    int       y0
-) {
-    // TODO (LG-10): this should be a three (?) separate shaders in OpenGL!
-    int      shadow = 0;
-    int      old_shadow = 0;
-    int      pos    = x+y*SCREEN_WIDTH;
-    uint32_t dist   = (uint32_t)GFX_dist(x0, y0, x, y);
-
-    old_shadow = (shadowbuffer[pos] & 0xFF000000) >> 24;
-    shadow = (int)(GFX_lerp(255, old_shadow, (float)MIN(dist, 255)/255));
-    
-    if (shadow == 255) {
-        lightbuffer[pos] = color | ((lightbuffer[pos] & 0xFF) + power);
-    }
-
-    // add shadow with light gradient
-    shadowbuffer[pos] = (shadow << 24) | (shadow << 16) | (shadow << 8) | 255; 
-}
+// void GFX_fill_lightbuffer(
+//     uint32_t  color,
+//     int       x,
+//     int       y,
+//     int       power,
+//     int       x0,
+//     int       y0
+// ) {
+//     // TODO (LG-10): this should be a three (?) separate shaders in OpenGL!
+//     int      shadow = 0;
+//     int      old_shadow = 0;
+//     int      pos    = x+y*SCREEN_WIDTH;
+//     uint32_t dist   = (uint32_t)GFX_dist(x0, y0, x, y);
+// 
+//     old_shadow = (shadowbuffer[pos] & 0xFF000000) >> 24;
+//     shadow = (int)(GFX_lerp(255, old_shadow, (float)MIN(dist, 255)/255));
+//     
+//     if (shadow == 255) {
+//         lightbuffer[pos] = color | ((lightbuffer[pos] & 0xFF) + power);
+//     }
+// 
+//     // add shadow with light gradient
+//     shadowbuffer[pos] = (shadow << 24) | (shadow << 16) | (shadow << 8) | 255; 
+// }
 
 /*
  * END OPENGL SECTION
@@ -337,7 +322,6 @@ bool GFX_init_OpenGL_shaders(
 }
 
 int GFX_init_renderer() {
-    // Create context
     gl_context = SDL_GL_CreateContext(window);
 
     if(!gl_context) {
@@ -383,19 +367,6 @@ int GFX_init_png(
     return 1;
 };
 
-// every pixel specific graphic will be stored in this texture. Sprites are rendered in normal
-// fashion but pixel-sharp shapes needs to be put in the buffer first.
-void GFX_init_screen_buffer_texture(
-) {
-    screen_texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_RGBA8888,
-        SDL_TEXTUREACCESS_STREAMING,
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT
-    );
-}
-
 int GFX_init_graphics(
 ) {
 
@@ -414,6 +385,7 @@ int GFX_init_graphics(
         return 0;
     }
 
+    // TODO: check if this is needed
     if(!GFX_init_png()) {
         printf("Unable to initialize PNG images rendering\n");
         return 0;
@@ -427,24 +399,11 @@ int GFX_init_graphics(
     return 1;
 };
 
-void GFX_free_texture(
-    texture_t *texture
+void GFX_free(
 ) {
-    if (texture && texture->surface) {
-        SDL_FreeSurface(texture->surface);
-        texture->surface    = NULL;
-        GLuint TextureID    = texture->id;
-        glDeleteTextures(1, &TextureID);
-        free(texture);
-        texture = NULL;
+    if (gl_context) {
+        glDeleteProgram(opengl_program_id);
     }
-};
-
-void GFX_free() {
-    SDL_DestroyTexture(screen_texture);
-
-	// Deallocate program
-	glDeleteProgram(opengl_program_id);
 
     if (renderer) {
         SDL_DestroyRenderer(renderer);
@@ -482,49 +441,37 @@ void GFX_render_texture_part(
     float      render_y1,   // place on screen (OpenGL coords)
     float      render_x2,   // place on screen (OpenGL coords)
     float      render_y2,   // place on screen (OpenGL coords)
-    float      tex_x1,      // position on texture (OpenGL coords)
-    float      tex_y1,      // position on texture (OpenGL coords)
-    float      tex_x2,      // position on texture (OpenGL coords)
-    float      tex_y2,      // position on texture (OpenGL coords)
+    float      clip_x1,      // position on clipture (OpenGL coords)
+    float      clip_y1,      // position on clipture (OpenGL coords)
+    float      clip_x2,      // position on clipture (OpenGL coords)
+    float      clip_y2,      // position on clipture (OpenGL coords)
     bool       flip
 ) {
-    // printf("binded texture id: %d \n", texture->id);
-    // printf("texture name: %s \n", texture->filepath);
+    // printf("binded clipture id: %d \n", clipture->id);
+    // printf("clipture name: %s \n", clipture->filepath);
     glBindTexture(GL_TEXTURE_2D, texture->id);
 
-    // texture is always rendered 1:1 to achieve pixel perfect effect
-    // float texW = (float)TXTR_width(texture);
-    // float texH = (float)TXTR_height(texture);
+    // clipture is always rendered 1:1 to achieve pixel perfect effect
+    // float clipW = (float)TXTR_width(clipture);
+    // float clipH = (float)TXTR_height(clipture);
 
     // orient it in a way that OpenGL will digest it
     // render_x1 -= (float)SCREEN_WIDTH / 2.0;
     // render_y1 -= (float)SCREEN_HEIGHT / 2.0;
 
     // render_y1 *= -1;
-    // float render_y2 = (float)render_y1 - ((tex_y2 - tex_y1) * texH);
-    // float render_x2 = (float)render_x1 + ((tex_x2 - tex_x1) * texW);
+    // float render_y2 = (float)render_y1 - ((clip_y2 - clip_y1) * clipH);
+    // float render_x2 = (float)render_x1 + ((clip_x2 - clip_x1) * clipW);
     // float render_y2 = (float)render_y1 - (float)TILE_WIDTH;
     // float render_x2 = (float)render_x1 + (float)TILE_HEIGHT;
-
-    float tex_x1_good = (float)tex_x1;
-    float tex_x2_good = (float)tex_x2;
-    float tex_y1_good = (float)tex_y1;
-    float tex_y2_good = (float)tex_y2;
 
     float temp;
 
     if (flip) {
-        temp = tex_x1_good; 
-        tex_x1_good = tex_x2_good;
-        tex_x2_good = temp;
+        temp = clip_x1; 
+        clip_x1 = clip_x2;
+        clip_x2 = temp;
     }
-
-    printf("texture : %f, %f |  %f, %f \n",
-        tex_x1_good,
-        tex_x2_good,
-        tex_y1_good,
-        tex_y2_good
-    );
 
     printf("render on : %f, %f |  %f, %f \n",
         render_x1,
@@ -542,16 +489,16 @@ void GFX_render_texture_part(
     
     glBegin(GL_QUADS);
         // up right (1,1)
-        glTexCoord2f(tex_x2_good, tex_y1_good);
+        glTexCoord2f(clip_x2, clip_y1);
         glVertex2f(render_x2, render_y1);
         // up left (-1, 1)
-        glTexCoord2f(tex_x1_good, tex_y1_good);
+        glTexCoord2f(clip_x1, clip_y1);
         glVertex2f(render_x1, render_y1);
         // down left (-1, -1)
-        glTexCoord2f(tex_x1_good, tex_y2_good);
+        glTexCoord2f(clip_x1, clip_y2);
         glVertex2f(render_x1, render_y2);
         // down right (1, -1)
-        glTexCoord2f(tex_x2_good, tex_y2_good); 
+        glTexCoord2f(clip_x2, clip_y2); 
         glVertex2f(render_x2, render_y2);
     glEnd();
 };

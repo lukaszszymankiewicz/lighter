@@ -1,125 +1,105 @@
 #include <check.h>
-#include "../src/primitives.h"
-#include "../src/level.h"
-#include "../src/gfx.h"
-#include "../src/segment.h"
-#include "../src/animation.h"
 
+#include "../src/animation.h"
+#include "../src/level.h"
+#include "../src/primitives.h"
+#include "../src/segment.h"
+
+#include "../src/data/library.h"
+
+#define MAX_OBSTACLE_TILES 25
+
+int obstacle    = 2; // tile with such index is considered as obstacle
+int no_obstacle = 0; // tile with such index is considered as no obstacle
+
+void UNTIL_clear_tiles(
+    int id
+) {
+    int size_x = levels_library[LEVEL_TEST]->size_x;
+    int size_y = levels_library[LEVEL_TEST]->size_y;
+
+    for (int x=0; x<size_x; x++) {
+        for (int y=0; y<size_y; y++) {
+            levels_library[LEVEL_TEST]->tiles[y * size_x + x] = no_obstacle;
+        }
+    }
+}
 
 START_TEST (LVL_analyze_check)
 {
-    // GIVEN 
-    // lets put hero on the middle
-    const int size_x = 10; 
-    const int size_y = 10;
+    typedef struct testcase {
+          int expected_obstacles_num;
+          int obstacle_tiles_n;
+          int obstacle_tiles_idx[MAX_OBSTACLE_TILES];
+    } testcase_t;
 
-    int len = 0;  
-    int expected_obstacles_num;
-
-    level_t* test_level = NULL;
-    test_level = LVL_new();
-
-    test_level->size_y = size_y;
-    test_level->size_x = size_x;
-
-    // CASE A (single long platform)
-    // 4 screen borders
-    expected_obstacles_num = 4;
-    int obstacles_a[100] =  {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    int n_cases = 4;
+    testcase_t testcases[] = {
+         {4, 4, {80, 81, 82, 83, -1} }, // single long platform
+         {4, 4, {21, 31, 41, 51, -1} }, // single long platform
+         {4, 4, {21, 31, 41, 51, 81, 82, 83, 84, -1} }, // two platforms
+         {14, 20, { 35, 45, 55, 65, 21, 31, 41, 51, 61, 71, 72, 73, 74, 75, 76, 77, 78, 88, 68, 58, -1 } }
     };
-    test_level->obstacles = obstacles_a;
-    LVL_analyze(test_level);
-    len = SEG_len(test_level->obstacle_segments);
 
-    ck_assert_int_eq(len, expected_obstacles_num);
-    
-    // CASE B (single tall platform)
-    // 4 screen borders
-    expected_obstacles_num = 4;
-    int obstacles_b[100] =  {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    };
-    test_level->obstacles = obstacles_b;
-    LVL_analyze(test_level);
-    len = SEG_len(test_level->obstacle_segments);
+    for (int i=0; i<n_cases; i++) {
+        // prepare library
+        LIB_create_all();
+        UNTIL_clear_tiles(LEVEL_TEST);
 
-    ck_assert_int_eq(len, expected_obstacles_num);
+        // prepare level
+        for (int tile=0; tile<testcases[i].obstacle_tiles_n; tile++) {
+            int id = testcases[i].obstacle_tiles_idx[tile];
+            if (id  == -1) { break; }
+            levels_library[LEVEL_TEST]->tiles[id] = obstacle;
+        }
 
-    // CASE C (two separate platforms)
-    // 4 screen borders + 4 second obstacle boder
-    expected_obstacles_num = 4 + 4;
-    int obstacles_c[100] =  {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 1, 1, 1, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    };
-    test_level->obstacles = obstacles_c;
-    LVL_analyze(test_level);
-    len = SEG_len(test_level->obstacle_segments);
-
-    ck_assert_int_eq(len, expected_obstacles_num);
-
-    // CASE D (many platforms with some strange constructions)
-    // 14 platform borders
-    expected_obstacles_num = 14;
-    int obstacles_d[100] =  {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 1, 0, 0, 1, 0,
-        0, 1, 0, 0, 0, 1, 0, 0, 1, 0,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    };
-    test_level->obstacles = obstacles_d;
-    LVL_analyze(test_level);
-    len = SEG_len(test_level->obstacle_segments);
-
-    ck_assert_int_eq(len, expected_obstacles_num);
+        // run analyze function
+        level_t* test_level = NULL;
+        test_level          = LVL_new(LEVEL_TEST);
+        LVL_analyze(test_level);
+        
+        // assertions
+        int len = SEG_len(test_level->obstacle_segments);
+        ck_assert_int_eq(len, testcases[i].expected_obstacles_num);
+    }
 }
 END_TEST
 
 START_TEST (LVL_fill_structure_check)
 {
     // GIVEN
-    texture_t *tex   = NULL;
-    level_t   *level = NULL;
-    char *tex_filepath = "./tests/testfiles/testlevel/level.png";
+    typedef struct testcase {
+           int tile_type; bool res;
+    } testcase_t;
 
-    level = LVL_new();
-    tex   = TXTR_read_from_file(tex_filepath);
-    
-    level->tileset = tex;
-    LVL_set_size(level, 10, 10);
+    testcase_t testcases[] = {
+         {obstacle,    true  },
+         {no_obstacle, false }
+    };
+    int n_cases = 2;
+
+    for (int i=0; i<n_cases; i++) {
+        LIB_create_all();
+
+        levels_library[LEVEL_TEST]->tiles[0] = testcases[i].tile_type;
+        level_t* level                       = NULL;
+        level                                = LVL_new(LEVEL_TEST);
+
+        // WHEN
+        bool res = LVL_obstacle_on_pos(level, 0, 0);
+        
+        // THEN
+        ck_assert_int_eq(res, testcases[i].res);
+    }
+}
+END_TEST
+
+START_TEST (LVL_obstacle_on_pos_check)
+{
+    // GIVEN
+    LIB_create_all();
+    level_t* level = NULL;
+    level          = LVL_new(LEVEL_TEST);
 
     // WHEN
     LVL_fill_structure(level, 5, 5, 0);
@@ -136,26 +116,9 @@ START_TEST (LVL_fill_structure_check)
 
     ck_assert_float_eq(tile->img.x1, 0.0);
     ck_assert_float_eq(tile->img.y1, 0.0);
-    ck_assert_float_eq(tile->img.x2, 0.1);
-    ck_assert_float_eq(tile->img.y2, (32.0 / 224.0));
+    ck_assert_float_eq(tile->img.x2, (32.0 / 512.0));
+    ck_assert_float_eq(tile->img.y2, 1.0);
 
-}
-END_TEST
-
-START_TEST (LVL_add_entity_fill_check)
-{
-    // GIVEN
-    level_t* level = NULL;
-    level =  LVL_new();
-
-    // WHEN
-    LVL_add_entity_fill(level, 6, 9, 0);
-
-    // THEN
-    ck_assert_int_eq(level->n_fill, 1);
-    ck_assert_int_eq(level->entities_fill[0].x, 6);
-    ck_assert_int_eq(level->entities_fill[0].y, 9);
-    ck_assert_int_eq(level->entities_fill[0].id, 0);
 }
 
 Suite *level_suite(void)
@@ -170,7 +133,7 @@ Suite *level_suite(void)
 
     tcase_add_test(tc_core, LVL_analyze_check);
     tcase_add_test(tc_core, LVL_fill_structure_check);
-    tcase_add_test(tc_core, LVL_add_entity_fill_check);
+    tcase_add_test(tc_core, LVL_obstacle_on_pos_check);
 
     suite_add_tcase(s, tc_core);
 

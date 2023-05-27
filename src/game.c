@@ -1,20 +1,25 @@
-#include <SDL2/SDL_timer.h>
-
 #include "data/library.h"
 
-#include "global.h"
 #include "controller.h"
 #include "entity_manager.h"
 #include "game.h"
 #include "gfx.h"
-#include "timer.h"
-#include "source.h"
+#include "global.h"
 #include "level.h"
 #include "light.h"
-#include "animation.h"
-#include "texture.h"
+#include "timer.h"
 
-#define LEVEL LEVEL_SAMPLE
+#define GFX_INITIALIZERS_N 2 
+
+int GAME_init_no_graphics(
+) {
+    return 1;
+}
+
+int (*GFX_INITIALIZERS[GFX_INITIALIZERS_N])() = {
+    GAME_init_no_graphics,
+    GFX_init_graphics
+};
 
 void GAME_create_library(
 ) {
@@ -46,12 +51,12 @@ void GAME_update_events(
 void GAME_close(
     game_t *game
 ) {
+    GAME_free_all_files();
     CON_free(keyboard);
     TIMER_free(game->cap_timer);
     TIMER_free(game->fps_timer);
     ENTMAN_free(game->entity_manager);
     LVL_free(game->level);
-    GAME_free_all_files();
     free(game);
     GFX_free();
     SDL_Quit();
@@ -60,19 +65,27 @@ void GAME_close(
 void GAME_init_entities(
     game_t *game
 ) {
-    for (int i=0; i<game->level->n_fill; i++) {
-        int x  = game->level->entities_fill[i].x;
-        int y  = game->level->entities_fill[i].y;
-        int id = game->level->entities_fill[i].id;
+    int n_fills = LVL_n_entity_fills(game->level);
+
+    for (int i=0; i<n_fills; i++) {
+        int x = levels_library[game->level->blueprint_id]->entities[i].x;
+        int y = levels_library[game->level->blueprint_id]->entities[i].y;
+        int id = levels_library[game->level->blueprint_id]->entities[i].id;
+
         ENTMAN_add_entity(game->entity_manager, x, y, id);
     }
 }
 
 game_t* GAME_init(
-    int level_id
+    int level_id,
+    int graphic_option,
+    int max_frames
 ) {
     game_t* game         = NULL;
     game                 = (game_t*)malloc(sizeof(game_t));
+
+    game->draw_option    = graphic_option;
+    game->max_frames     = max_frames;
 
     keyboard             = CON_init();
 
@@ -80,7 +93,7 @@ game_t* GAME_init(
     game->entity_manager = ENTMAN_new();
 
     game->level          = NULL;
-    game->level          = levels_library[LEVEL_SAMPLE];
+    game->level          = LVL_new(level_id);
 
     GAME_init_entities(game);
 
@@ -152,8 +165,9 @@ void GAME_render(
 }
 
 int GAME_init_graphics(
+    int graphic_option
 ) {
-    return GFX_init_graphics();
+    return GFX_INITIALIZERS[graphic_option]();
 }
 
 void GAME_draw_light(
@@ -169,25 +183,22 @@ void GAME_draw_light(
     LIG_free_light_scene(scene);
 }
 
-// TODO: eveything should have success status enabled
 game_t* GAME_new(
-    int level_id
+    int level_id,
+    int graphic_option,
+    int max_frames
 ) {
-    game_t* game = NULL;
-
-    int gfx_init_success = 0;
-    gfx_init_success = GAME_init_graphics();
-
-    if (!gfx_init_success) { GAME_close(game); }
-
     GAME_create_library();
 
-    if (LIB_validate() == false ) {
-        printf("library not read properly! \n");
+    game_t* game      = NULL;
+    game              = GAME_init(level_id, graphic_option, max_frames);
+
+    int gfx_init_success = 0;
+    gfx_init_success = GAME_init_graphics(game->draw_option);
+
+    if (!gfx_init_success) {
         GAME_close(game); 
     }
-
-    game         = GAME_init(level_id);
 
     return game;
 }
@@ -205,7 +216,7 @@ void GAME_apply_logic(
     GAME_update_entities(game);
 }
 
-void GAME_draw(
+void GAME_draw_everything(
     game_t* game
 ) {
     GAME_clear_screen(game);
@@ -213,6 +224,18 @@ void GAME_draw(
     GAME_draw_entities(game);
     GAME_render(game);
     // GAME_draw_light(game);
+}
+
+void GAME_draw_nothing(
+    game_t* game
+) { }
+
+void (*DRAW_FUNCTIONS[GFX_INITIALIZERS_N])() = { GAME_draw_nothing, GAME_draw_everything };
+
+void GAME_draw(
+    game_t* game
+) {
+    DRAW_FUNCTIONS[game->draw_option](game);
 }
 
 void GAME_update_time(
@@ -226,7 +249,7 @@ void GAME_update_time(
 void GAME_loop(
     game_t* game
 ) {
-    while(game->loop) {
+    while(game->frame < game->max_frames) {
         GAME_start_time(game);
         GAME_apply_logic(game);
         GAME_draw(game);
@@ -234,10 +257,15 @@ void GAME_loop(
     }
 }
 
-void GAME_run(
+int GAME_run(
+    int level_id,
+    int graphic_option,
+    int max_frames
 ) {
     game_t* game = NULL;
-    game         = GAME_new(LEVEL);
+    game         = GAME_new(level_id, graphic_option, max_frames);
     GAME_loop(game);
     GAME_close(game);
+
+    return 0;
 }

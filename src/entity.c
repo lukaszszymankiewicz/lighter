@@ -643,7 +643,7 @@ bool ENT_render_with_flip(
 }
 
 // returns texture clip from tileset according to current frame and animation
-render_img_t ENT_texture_coord(
+render_coord_t ENT_texture_coord(
     entity_t *entity
 ) {
     if (ENT_has_not_flag(entity, ANIMATIABLE)) {
@@ -655,7 +655,7 @@ render_img_t ENT_texture_coord(
 // calculate where on screen entity texture should be rendered
 render_coord_t ENT_img_coord(
     entity_t       *entity,
-    render_img_t    texture_coord
+    render_coord_t    texture_coord
 ) {
     // texture is always rendered 1:1 to achieve pixel perfect effect
     float x1, y1, x2, y2;
@@ -693,7 +693,7 @@ void ENT_draw(
     }
 
     bool flip                  = ENT_render_with_flip(entity);
-    render_img_t texture_coord = ENT_texture_coord(entity);
+    render_coord_t texture_coord = ENT_texture_coord(entity);
     render_coord_t img_coord   = ENT_img_coord(entity, texture_coord);
 
     GFX_render_texture_part(

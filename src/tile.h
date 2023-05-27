@@ -1,4 +1,5 @@
-#include "texture.h"
+#include <stdbool.h>
+
 #include "img.h"
 
 #ifndef TILE_H
@@ -8,16 +9,18 @@
 #define HEIGHT_COEF (float)TILE_HEIGHT / (float) SCREEN_HEIGHT;
 
 typedef struct tile {
-  render_img_t   img;
+  render_coord_t img;
   render_coord_t coord;
+  int            blueprint_id;
   int            tileset_id;
-  bol            obstacle;
+  bool           obstacle;
 } tile_t;
 
 tile_t* TILE_new(
-    texture_t *texture,
-    int clip_x1, int clip_y1,
-    int clip_x2, int clip_y2,
+    int blueprint_id,
+    int tileset_id,
+    float clip_x1, float clip_y1,
+    float clip_x2, float clip_y2,
     int x,       int y
 );
 

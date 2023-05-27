@@ -19,7 +19,7 @@ int ANIM_get_texture_height(
     return animation.height;
 }
 
-// render_img_t ANIM_texture_coord(
+// render_coord_t ANIM_texture_coord(
 //     animation_t  animation,
 //     int          idx,
 //     int          n_frame
@@ -27,10 +27,10 @@ int ANIM_get_texture_height(
 //     return animation[idx].frames[n_frame].img;
 // }
 
-render_img_t ANIM_texture_coord_full(
+render_coord_t ANIM_texture_coord_full(
     animation_sheet_t animation
 ) {
-    render_img_t coord;
+    render_coord_t coord;
 
     coord.x1 = 0.0;
     coord.y1 = 0.0;

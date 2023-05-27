@@ -1,11 +1,16 @@
-#include "global.h"
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+#include "data/library.h"
+
 #include "gfx.h"
-#include "tile.h"
+#include "global.h"
 #include "level.h"
 #include "primitives.h"
 #include "segment.h"
-#include <math.h>
-#include <stdio.h>
+#include "texture.h"
+#include "tile.h"
 
 enum { W, S, A, D };
 
@@ -16,102 +21,99 @@ typedef struct cell {
 
 const static int EMPTY_CELL = -1;
 
+int LVL_size_x(
+    level_t *level
+) {
+    return levels_library[level->blueprint_id]->size_x;
+}
+
+int LVL_size_y(
+    level_t *level
+) {
+    return levels_library[level->blueprint_id]->size_y;
+}
+
+void LVL_set_tile(
+    level_t *level,
+    tile_t  *tile,
+    int x, int y
+) {
+    int size_x = LVL_size_x(level);
+    level->structure[y * size_x + x] = tile;
+}
+
+void LVL_clean_structure(
+    level_t *level
+) {
+    int size_x = LVL_size_x(level);
+    int size_y = LVL_size_y(level);
+
+    for (int x=0; x<size_x; x++) { 
+        for (int y=0; y<size_y; y++) { 
+            LVL_set_tile(level, NULL, x, y);
+        }
+    }
+}
+
 level_t* LVL_new(
+    int blueprint_id
 ) {
     level_t *new_level           = NULL;
     new_level                    = (level_t*)malloc(sizeof(level_t));
 
-    new_level->n_fill            = 0;
-    new_level->structure         = NULL;
-    new_level->obstacles         = NULL;
+    new_level->blueprint_id      = blueprint_id;
     new_level->obstacle_segments = NULL;
 
-    new_level->tileset           = NULL;
-    new_level->tileset           = (texture_t*)malloc(sizeof(texture_t));
+    LVL_clean_structure(new_level);
 
     return new_level;
 }
 
-void LVL_add_entity_fill(
+int LVL_tile_blueprint_on_pos(
     level_t *level,
-    int x, int y, int id
+    int      x,
+    int      y
 ) {
-    level->entities_fill[level->n_fill++] = (entity_fill_t) {x, y, id};
+    int size_x = LVL_size_x(level);
+
+    return levels_library[level->blueprint_id]->tiles[y * size_x + x];
 }
 
-// initialise level structure
-void LVL_clean_structure(
+int LVL_tile_blueprint_tileset_on_pos(
+    level_t *level,
+    int      x,
+    int      y
+) {
+    int id = LVL_tile_blueprint_on_pos(level, x, y);
+    return tiles_library[id]->tileset_id;
+}
+
+int LVL_n_entity_fills(
     level_t *level
 ) {
-    for (int x=0; x<level->size_x; x++) { 
-        for (int y=0; y<level->size_y; y++) { 
-            level->structure[y * level->size_x + x] = NULL;
-        }
-    }
+    return levels_library[level->blueprint_id]->n_fills;
 }
 
-void LVL_clean_obstacles(
-    level_t *level
-) {
-    for (int x=0; x<level->size_x; x++) { 
-        for (int y=0; y<level->size_y; y++) { 
-            level->obstacles[y * level->size_x + x] = 0;
-        }
-    }
-}
-
-// allocs proper memory to fit all tiles of level
-void LVL_set_size(
-    level_t *level,
-    int      size_x,
-    int      size_y
-) {
-    level->size_x    = size_x;
-    level->size_y    = size_y;
-
-    level->structure = malloc(sizeof (tile_t) * level->size_x * level->size_y);
-    LVL_clean_structure(level);
-
-    level->obstacles = malloc(sizeof (int)    * level->size_x * level->size_y);
-    LVL_clean_obstacles(level);
-}
-
-// fills level structure with one tile
 void LVL_fill_structure(
     level_t *level,
     int      x,
     int      y,
-    int      i
+    int      id
 ) {
-    int tileset_x;
-    int tileset_y;
     tile_t *tile    = NULL;
 
-    // determine place in the tileset
-    int tile_per_row = (int)((float)TXTR_width(level->tileset) / (float)TILE_WIDTH);
-    tileset_x = (i % tile_per_row) * TILE_WIDTH;
-    tileset_y = (i / tile_per_row) * TILE_HEIGHT;
-
     tile = TILE_new(
-        level->tileset,
-        tileset_x,
-        tileset_y,
-        tileset_x + TILE_WIDTH,
-        tileset_y + TILE_HEIGHT,
+        id,
+        tiles_library[id]->tileset_id,
+        tiles_library[id]->x1,
+        tiles_library[id]->y1,
+        tiles_library[id]->x2,
+        tiles_library[id]->y2,
         x * TILE_WIDTH,
         y * TILE_HEIGHT
     );
-    level->structure[y * level->size_x + x] = tile;
-}
 
-// fills level obstacles (1-obstacle, 0-no obstacle) with single value
-void LVL_fill_obstacle(
-    level_t *level,
-    int      x,
-    int      y,
-    int      i
-) {
-    level->obstacles[y * level->size_x + x] = i;
+    LVL_set_tile(level, tile, x, y);
 }
 
 tile_t* LVL_tile_on_pos(
@@ -119,41 +121,54 @@ tile_t* LVL_tile_on_pos(
     int      x,
     int      y
 ) {
-    if (x>0 && x<level->size_x && y>0 && y<level->size_y) {
-        return level->structure[y * level->size_x + x];
+    int size_x = LVL_size_x(level);
+    int size_y = LVL_size_y(level);
+
+    if (x>0 && x<size_x && y>0 && y<size_y) {
+        return level->structure[y * size_x + x];
     }
     return NULL;
 }
 
-int LVL_obstacle_on_pos(level_t* level, int x, int y) {
-    if (x<0 || x>level->size_x || y<0 || y>level->size_y) {
-        return 0;
+bool LVL_obstacle_on_pos(
+    level_t* level,
+    int x,
+    int y
+) {
+    int size_x = LVL_size_x(level);
+    int size_y = LVL_size_y(level);
+
+    if (x<0 || x>size_x || y<0 || y>size_y) {
+        return false;
     }
-    return level->obstacles[y * level->size_x + x];
+    int tile_id = LVL_tile_blueprint_on_pos(level, x, y);
+    return tiles_library[tile_id]->obstacle;
 }
 
-texture_t* LVL_get_tile_texture(
+void LVL_fill_tiles(
     level_t *level
 ) {
-    return level->tileset;
+
 }
 
 // fills level obstacle_segments.
 void LVL_analyze(
     level_t *level
 ) {
-
     // second analyze should erase old effect
     if (level->obstacle_segments) {
         free(level->obstacle_segments);
         level->obstacle_segments = NULL;
     }
 
-    segment_t *ptr           = NULL;
-    cell_t cells[level->size_x][level->size_y];
+    int size_x = LVL_size_x(level);
+    int size_y = LVL_size_y(level);
 
-    for (int yy = 0; yy < level->size_x; yy++) {
-        for (int xx = 0; xx < level->size_y; xx++) {
+    segment_t *ptr           = NULL;
+    cell_t cells[size_x][size_y];
+
+    for (int yy=0; yy<size_x; yy++) {
+        for (int xx=0; xx<size_y; xx++) {
             cells[yy][xx].edge[W] = EMPTY_CELL;
             cells[yy][xx].edge[S] = EMPTY_CELL;
             cells[yy][xx].edge[A] = EMPTY_CELL;
@@ -164,8 +179,9 @@ void LVL_analyze(
     int index        = EMPTY_CELL;
     int obstacle_num = 0;
 
-    for (int x=0; x<level->size_x; x++) {
-        for (int y=0; y<level->size_y; y++) {
+
+    for (int x=0; x<size_x; x++) {
+        for (int y=0; y<size_y; y++) {
 
             int tile_pos_x = TILE_WIDTH  * x;
             int tile_pos_y = TILE_HEIGHT * y;
@@ -300,18 +316,18 @@ void LVL_draw(
             tile_t    *tile    = NULL;
             texture_t *texture = NULL;
 
-            tile    = LVL_tile_on_pos(level, x, y);
-            texture = LVL_get_tile_texture(level);
+            tile        = LVL_tile_on_pos(level, x, y);
+            texture     = tilesets_library[tile->tileset_id];
             
             if (tile != NULL) {
 
-                printf(
-                    "am I correct? %f %f %f %f\n",
-                    tile->coord.x1 - x_diff,
-                    tile->coord.y1 + y_diff,
-                    tile->coord.x2 - x_diff,
-                    tile->coord.y2 + y_diff
-                ); 
+                // printf(
+                //     "am I correct? %f %f %f %f\n",
+                //     tile->coord.x1 - x_diff,
+                //     tile->coord.y1 + y_diff,
+                //     tile->coord.x2 - x_diff,
+                //     tile->coord.y2 + y_diff
+                // ); 
 
                 GFX_render_texture_part(
                     texture,
@@ -334,17 +350,20 @@ void LVL_draw(
 void LVL_free(
     level_t *level
 ) {
-    TXTR_free(level->tileset);
-    level->tileset = NULL;
 
-    free(level->structure);
-    level->structure = NULL;
+    int size_x = LVL_size_x(level);
+    int size_y = LVL_size_y(level);
 
-    free(level->obstacles);
-    level->obstacles = NULL;
+    for (int x=0; x<size_x; x++) {
+        for (int y=0; y<size_y; y++) {
+            TILE_free(level->structure[y * size_x + x]);
+        }
+    }
 
     SEG_free(level->obstacle_segments);
     level->obstacle_segments = NULL;
+
+    
 
     free(level);
     level = NULL;

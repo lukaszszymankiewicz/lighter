@@ -33,6 +33,7 @@ typedef struct vertex {
     float          dist;
 } vertex_t;
 
+// TODO: this to img!
 typedef struct lvertex {
     vertex_t* coords;
     int       x0;

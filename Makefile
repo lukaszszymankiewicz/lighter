@@ -32,66 +32,73 @@ $(BUILDDIR)/%.o:	$(TESTDIR)/%.c
 
 OBJS =                                     \
 	$(BUILDDIR)/$(DATADIR)/entities.o      \
-	$(BUILDDIR)/$(DATADIR)/wobbles.o       \
-	$(BUILDDIR)/$(DATADIR)/lightsources.o  \
-	$(BUILDDIR)/$(DATADIR)/sprites.o       \
 	$(BUILDDIR)/$(DATADIR)/levels.o        \
 	$(BUILDDIR)/$(DATADIR)/library.o       \
-	$(BUILDDIR)/game.o                     \
-	$(BUILDDIR)/gfx.o                      \
-    $(BUILDDIR)/img.o                      \
+	$(BUILDDIR)/$(DATADIR)/lightsources.o  \
+	$(BUILDDIR)/$(DATADIR)/sprites.o       \
+	$(BUILDDIR)/$(DATADIR)/tiles.o         \
+	$(BUILDDIR)/$(DATADIR)/tilesets.o     \
+	$(BUILDDIR)/$(DATADIR)/wobbles.o       \
+	$(BUILDDIR)/animation.o                \
 	$(BUILDDIR)/controller.o               \
 	$(BUILDDIR)/entity.o                   \
 	$(BUILDDIR)/entity_manager.o           \
-	$(BUILDDIR)/timer.o                    \
+	$(BUILDDIR)/game.o                     \
+	$(BUILDDIR)/geometry.o                 \
+	$(BUILDDIR)/gfx.o                      \
+	$(BUILDDIR)/level.o                    \
+	$(BUILDDIR)/light.o                    \
+	$(BUILDDIR)/point.o                    \
+	$(BUILDDIR)/segment.o                  \
+	$(BUILDDIR)/sorted_list.o              \
+	$(BUILDDIR)/source.o                   \
 	$(BUILDDIR)/texture.o                  \
 	$(BUILDDIR)/tile.o                     \
-	$(BUILDDIR)/level.o                    \
-	$(BUILDDIR)/geometry.o                 \
-	$(BUILDDIR)/sorted_list.o              \
-	$(BUILDDIR)/light.o                    \
+	$(BUILDDIR)/timer.o                    \
 	$(BUILDDIR)/vertex.o                   \
-	$(BUILDDIR)/source.o                   \
-	$(BUILDDIR)/segment.o                  \
-	$(BUILDDIR)/animation.o                \
-	$(BUILDDIR)/point.o                    \
+    $(BUILDDIR)/img.o                      \
 
 TESTOBJS =                                    \
 	$(BUILDDIR)/$(DATADIR)/entities.o         \
-	$(BUILDDIR)/$(DATADIR)/wobbles.o          \
-	$(BUILDDIR)/$(DATADIR)/lightsources.o     \
-	$(BUILDDIR)/$(DATADIR)/sprites.o          \
 	$(BUILDDIR)/$(DATADIR)/levels.o           \
 	$(BUILDDIR)/$(DATADIR)/library.o          \
-    $(BUILDDIR)/check_controller.o            \
-	$(BUILDDIR)/check_geometry.o              \
+	$(BUILDDIR)/$(DATADIR)/lightsources.o     \
+	$(BUILDDIR)/$(DATADIR)/sprites.o          \
+	$(BUILDDIR)/$(DATADIR)/tiles.o            \
+	$(BUILDDIR)/$(DATADIR)/tilesets.o         \
+	$(BUILDDIR)/$(DATADIR)/wobbles.o          \
 	$(BUILDDIR)/check_animation.o             \
 	$(BUILDDIR)/check_entity.o                \
 	$(BUILDDIR)/check_entity_manager.o        \
+	$(BUILDDIR)/check_geometry.o              \
+	$(BUILDDIR)/check_game.o                  \
+	$(BUILDDIR)/check_level.o                 \
+	$(BUILDDIR)/check_library.o               \
 	$(BUILDDIR)/check_light.o                 \
 	$(BUILDDIR)/check_point.o                 \
 	$(BUILDDIR)/check_segment.o               \
-	$(BUILDDIR)/check_source.o                \
 	$(BUILDDIR)/check_sorted_list.o           \
+	$(BUILDDIR)/check_source.o                \
 	$(BUILDDIR)/check_vertex.o                \
+    $(BUILDDIR)/check_controller.o            \
+	$(BUILDDIR)/animation.o                   \
 	$(BUILDDIR)/controller.o                  \
+	$(BUILDDIR)/entity.o                      \
+	$(BUILDDIR)/entity_manager.o              \
+	$(BUILDDIR)/game.o                        \
 	$(BUILDDIR)/geometry.o                    \
 	$(BUILDDIR)/gfx.o                         \
 	$(BUILDDIR)/img.o                         \
-	$(BUILDDIR)/entity.o                      \
-	$(BUILDDIR)/texture.o                     \
 	$(BUILDDIR)/level.o                       \
 	$(BUILDDIR)/light.o                       \
 	$(BUILDDIR)/point.o                       \
 	$(BUILDDIR)/segment.o                     \
-	$(BUILDDIR)/entity_manager.o              \
-	$(BUILDDIR)/animation.o                   \
-	$(BUILDDIR)/source.o                      \
 	$(BUILDDIR)/sorted_list.o                 \
-	$(BUILDDIR)/timer.o                       \
+	$(BUILDDIR)/source.o                      \
+	$(BUILDDIR)/texture.o                     \
 	$(BUILDDIR)/tile.o                        \
+	$(BUILDDIR)/timer.o                       \
 	$(BUILDDIR)/vertex.o                      \
-	$(BUILDDIR)/check_level.o                 \
 
 
 $(BUILDDIR)/lighter:	$(OBJS) $(BUILDDIR)/main.o

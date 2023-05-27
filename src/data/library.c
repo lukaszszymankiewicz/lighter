@@ -1,7 +1,4 @@
-#include <stdbool.h>
-
 #include "library.h"
-
 
 void LIB_create_all(
 ) {
@@ -11,29 +8,13 @@ void LIB_create_all(
     LIB_create_sprites_library();
     LIB_create_levels_library();
     LIB_create_tile_library();
+    LIB_create_tilesets_library();
 }
 
-// some iterations here?
 void LIB_free_all(
 ) {
-    // full objects
     TXTR_free(sprites_library[SPRITE_HERO]);
     TXTR_free(sprites_library[SPRITE_LIGHTER]);
     TXTR_free(sprites_library[SPRITE_WALLLIGHT]);
-    SRC_free_wobble(wobble_library[WOBBLE_NO]);
-    SRC_free_wobble(wobble_library[WOBBLE_STABLE]);
-    SRC_free_wobble(wobble_library[WOBBLE_WALKING]);
-    SRC_free_lightsource(lighsources_library[LIGHTSOURCE_LIGHTER]);
-    SRC_free_lightsource(lighsources_library[LIGHTSOURCE_WALLLIGHT]);
-    
-    // blueprints
-    LVL_free(levels_library[LEVEL_SAMPLE]);
-
-    free(entity_library[ENTITY_HERO]);
-    free(entity_library[ENTITY_LIGHTER]);
-    free(entity_library[ENTITY_WALLLIGHT]);
-
-    free(tiles_library[TILE_WALL]);
-    free(tiles_library[TILE_BROKEN_WALL]);
-    free(tiles_library[TILE_BLACK]);
+    TXTR_free(tilesets_library[TILESET_BASIC]);
 }

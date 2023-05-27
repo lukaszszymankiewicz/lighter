@@ -1,39 +1,57 @@
+#include <stdlib.h>
+
 #include "img.h"
-#include "texture.h"
 
-render_img_t IMG_new(
-    texture_t *texture,   // texture from which tile is clipped
-    int x1,               // x1 of texture clip (in pixels)
-    int y1,               // y1 of texture clip (in pixels)
-    int x2,               // x2 of texture clip (in pixels)
-    int y2                // y2 of texture clip (in pixels)
+void IMG_clear_scene(
+    scene_t* scene
 ) {
-
-    float texW = (float)TXTR_width(texture);
-    float texH = (float)TXTR_height(texture);
-
-    render_img_t new_img;
-
-    new_img.x1       = (float)x1/(float)texW;
-    new_img.y1       = (float)y1/(float)texH;
-    new_img.x2       = (float)x2/(float)texW;
-    new_img.y2       = (float)y2/(float)texH;
-
-    return new_img;
+    scene->n_tile   = 0;
+    scene->n_sprite = 0;
 }
 
-render_coord_t IMG_COORD_new(
-    float x1,                // x1 of render
-    float y1,                // y1 of render
-    float x2,                // x2 of render
-    float y2                 // y2 of render
+scene_t* IMG_new_scene(
 ) {
-    render_coord_t new_coords;
+    scene_t *new_scene   = NULL;
+    new_scene            = (scene_t*)malloc(sizeof(scene_t));
 
-    new_coords.x1 = x1;
-    new_coords.y1 = y1;
-    new_coords.x2 = x2;
-    new_coords.y2 = y2;
+    IMG_clear_scene(new_scene);
 
-    return new_coords;
+    return new_scene;
+}
+
+void IMG_add_tile_to_scene(
+    scene_t* scene,
+    int            id,
+    render_coord_t render,
+    render_coord_t clip
+) {
+    if (scene->n_tile >= MAX_TILES_ON_TILE_LAYER) { return; }
+
+    scene->tile_layer[scene->n_tile].id     = id;
+    scene->tile_layer[scene->n_tile].render = render;
+    scene->tile_layer[scene->n_tile].clip   = clip;
+
+    scene->n_tile++;
+}
+
+void IMG_add_sprite_to_scene(
+    scene_t* scene,
+    int            id,
+    render_coord_t render,
+    render_coord_t clip
+) {
+    if (scene->n_tile >= MAX_SPRITES_ON_SPRITES_LAYER) { return; }
+
+    scene->tile_layer[scene->n_sprite].id     = id;
+    scene->tile_layer[scene->n_sprite].render = render;
+    scene->tile_layer[scene->n_sprite].clip   = clip;
+
+    scene->n_sprite++;
+}
+
+void IMG_free_scene(
+    scene_t* scene
+) {
+    free(scene);      
+    scene = NULL;
 }

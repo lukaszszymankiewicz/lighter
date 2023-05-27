@@ -3,12 +3,10 @@
 #include "data/library.h"
 
 #include "animation.h"
-#include "animation.h"
 #include "global.h"
 #include "primitives.h"
 #include "source.h"
 #include "texture.h"
-
 
 #ifndef ENTITY_H
 #define ENTITY_H
