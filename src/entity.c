@@ -6,10 +6,11 @@
 #include "controller.h"
 #include "entity.h"
 #include "geometry.h"
+#include "gl_util.h"
 #include "global.h"
+#include "scene.h"
 #include "sorted_list.h"
 #include "source.h"
-#include "texture.h"
 
 int state_collisions[3][3] = {
     //  STANDING, WALKING, JUMPING
@@ -40,13 +41,6 @@ int ENT_lightsource_id(
     entity_t *entity
 ) {
     return entity_library[entity->id]->lightsource_id;
-}
-
-texture_t* ENT_texture(
-    entity_t *entity
-) {
-    int id = ENT_texture_id(entity);
-    return sprites_library[id];
 }
 
 char ENT_light_pt(
@@ -554,7 +548,7 @@ entity_t* ENT_init(
     // position 
     entity->x                = x;        
     entity->y                = y;
-    entity->direction        = RIGHT; // right is the default but I donw know why
+    entity->direction        = RIGHT; // this is the default but I donw know why
     entity->x_vel            = 0;
     entity->y_vel            = 0;
 
@@ -608,7 +602,8 @@ entity_t* ENT_init(
     }
     
     if (blueprint->hold_id != ENTITY_NO) {
-        entity->hold = ENT_generate(entity->x, entity->y, blueprint->hold_id);
+        entity->hold = ENT_generate(x, y, blueprint->hold_id);
+        ENT_update_hold(entity);
     }
 
     return entity;
@@ -653,7 +648,9 @@ render_coord_t ENT_texture_coord(
 // calculate where on screen entity texture should be rendered
 render_coord_t ENT_img_coord(
     entity_t       *entity,
-    render_coord_t    texture_coord
+    render_coord_t  texture_coord,
+    int             camera_x,
+    int             camera_y
 ) {
     // texture is always rendered 1:1 to achieve pixel perfect effect
     float x1, y1, x2, y2;
@@ -661,40 +658,53 @@ render_coord_t ENT_img_coord(
 
     float texW = (float) ENT_get_animation_sheet_width(entity);
     float texH = (float) ENT_get_animation_sheet_height(entity);
-
+    
+    // OLD
     // orient it in a way that OpenGL will digest it
-    x1 = (float)entity->x - (float)SCREEN_WIDTH / 2.0;
-    y1 = (float)entity->y - (float)SCREEN_HEIGHT / 2.0;
+    // x1 = (float)entity->x - (float)SCREEN_WIDTH / 2.0;
+    // y1 = (float)entity->y - (float)SCREEN_HEIGHT / 2.0;
+
+    x1 = (float)entity->x / (float)SCREEN_WIDTH;
+    y1 = (float)entity->y / (float)SCREEN_HEIGHT;
 
     y1 *= -1;
-    y2 = (float)y1 - ((texture_coord.y2 - texture_coord.y1) * texH);
-    x2 = (float)x1 + ((texture_coord.x2 - texture_coord.x1) * texW);
-    y2 = (float)y1 - (float)TILE_WIDTH;
-    x2 = (float)x1 + (float)TILE_HEIGHT;
 
-    coord.x1 = x1;
-    coord.y1 = y1;
-    coord.x2 = x2;
-    coord.y2 = y2;
+    x2 = (float)x1 + (((texture_coord.x2 - texture_coord.x1) * texW) / SCREEN_WIDTH);
+    y2 = (float)y1 - (((texture_coord.y2 - texture_coord.y1) * texH) / SCREEN_HEIGHT);
 
+    // x2 = (float)x1 + (texture_coord.x2 - texture_coord.x1);
+    // y2 = (float)y1 - (texture_coord.y2 - texture_coord.y1);
+
+    x1 *= global_x_scale;
+    y1 *= global_y_scale;
+    x2 *= global_x_scale;
+    y2 *= global_y_scale;
+
+    float x_diff = (((float)camera_x) / (float)SCREEN_WIDTH) * global_x_scale;
+    float y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT) * global_y_scale;
+
+    coord.x1 = x1 - x_diff;
+    coord.y1 = y1 + y_diff;
+    coord.x2 = x2 - x_diff;
+    coord.y2 = y2 + y_diff;
+ 
     return coord;
 }
 
-void ENT_draw(
+void ENT_add_to_scene(
     entity_t *entity,
-    int x,
-    int y
+    int camera_x, int camera_y
 ) {
-    if (ENT_has_not_flag(entity, NOT_DRAWABLE)) {
+    if (ENT_has_flag(entity, NOT_DRAWABLE)) {
         return;
     }
 
     bool           flip   = ENT_render_with_flip(entity);
     int            id     = ENT_texture_id(entity);
     render_coord_t clip   = ENT_texture_coord(entity);
-    render_coord_t render = ENT_img_coord(entity, clip);
+    render_coord_t render = ENT_img_coord(entity, clip, camera_x, camera_y);
 
-    IMG_add_sprite_to_scene(scene, id, render, clip, flip, false);
+    SCENE_add_sprite(scene, id, render, clip, flip, false);
 }
 
 void ENT_free(
@@ -882,11 +892,7 @@ entity_t* ENT_generate(
     int y,
     int id
 ) {
-    return ENT_init(
-        x * TILE_WIDTH,
-        y * TILE_HEIGHT,
-        entity_library[id]
-    );
+    return ENT_init(x, y, entity_library[id]);
 }
 
 // global corrd

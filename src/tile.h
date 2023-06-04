@@ -1,6 +1,6 @@
 #include <stdbool.h>
 
-#include "img.h"
+#include "gl_util.h"
 
 #ifndef TILE_H
 #define TILE_H

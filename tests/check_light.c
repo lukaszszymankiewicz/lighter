@@ -1,9 +1,31 @@
 #include <check.h>
+
 #include "../src/light.h"
 #include "../src/segment.h"
 #include "../src/vertex.h"
 #include "../src/geometry.h"
 #include "../src/point.h"
+
+
+bool VRTX_eq(
+    vertex_t *first,
+    vertex_t *second
+) {
+    if (VRTX_len(first) != VRTX_len(second)) {
+        return false;
+    }
+    vertex_t *ptr  = NULL;
+    vertex_t *ptr2  = NULL;
+
+    while(ptr) {
+        if ((ptr->y != ptr2->y) && (ptr->y != ptr2->y)) {
+            return false;
+        }
+        ptr = ptr->next;
+        ptr2 = ptr2->next;
+    }
+    return true;
+}
 
 // this test check only base_light_polygon, but to be absolutely sure its result is check against
 // full polygon check (for width equal to 0.0).

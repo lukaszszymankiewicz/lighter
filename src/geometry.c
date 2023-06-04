@@ -5,7 +5,6 @@
 #include "point.h"
 #include "segment.h"
 #include "sorted_list.h"
-#include "vertex.h"
 
 float GEO_angle_2pt(
     int ax,

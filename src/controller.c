@@ -1,10 +1,23 @@
 #include <SDL2/SDL.h>
+
 #include <stdbool.h>
 #include <stdlib.h>
 
 #include "controller.h"
 
 controller_t *keyboard = NULL;
+
+void CON_clean(
+    controller_t* con
+) {
+    for (int i=0; i<con->len; i++) {
+        con->old_state[i]   = con->state[i];
+    }
+
+    for (int i=0; i<con->len; i++) {
+        con->old_state[i]   = 0;
+    }
+}
 
 controller_t* CON_init(
 ) {
@@ -21,8 +34,10 @@ controller_t* CON_init(
     con->old_state   = NULL;
     con->counter     = 0;
 
-    con->state       = (Uint8*)calloc(con->len, sizeof(Uint8) * con->len);
-    con->old_state   = (Uint8*)calloc(con->len, sizeof(Uint8) * con->len);
+    con->state       = (Uint8*)malloc(sizeof(Uint8) * con->len);
+    con->old_state   = (Uint8*)malloc(sizeof(Uint8) * con->len);
+
+    CON_clean(con);
 
     return con;
 }
@@ -37,8 +52,9 @@ void CON_update(
             con->old_state[i]   = con->state[i];
         }
 
-        con->state       = NULL;
-        con->state       = (Uint8*)SDL_GetKeyboardState(NULL);
+        for (int i=0; i<con->len; i++) {
+            con->old_state[i]   = 0;
+        }
     }
 }
 

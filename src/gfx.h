@@ -1,7 +1,5 @@
 #include <SDL2/SDL.h>
 
-#include "img.h"
-
 #ifndef GFX_H
 #define GFX_H
 
@@ -15,7 +13,5 @@ int GFX_init_graphics();
 void GFX_free();
 void GFX_clear_screen();
 void GFX_update();
-
-void GFX_draw_scene(scene_t* scene);
 
 #endif

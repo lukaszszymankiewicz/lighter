@@ -106,12 +106,15 @@ int TXTR_height(
     }
 }
 
-// create texture_t from file image
 texture_t* TXTR_read_from_file(
     const char *filepath
 ) {
     SDL_Surface *surface        = NULL;
     surface                     = IMG_Load(filepath);
+
+    if (surface == NULL) {
+        printf("texture at (%s) cannot be read! \n", filepath);
+    }
      
     return TXTR_new(surface, GL_RGB, filepath);
 }
@@ -128,4 +131,3 @@ void TXTR_free(
         texture = NULL;
     }
 }
-

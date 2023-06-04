@@ -22,8 +22,8 @@ level_blueprint_t level_blueprint_sample = {
     },    
     2,
     {
-        (entity_fill_t) {23, 16, 0},
-        (entity_fill_t) {21, 13, 2}
+        (entity_fill_t) {6, 6, 0},
+        (entity_fill_t) {5, 5, 2}
     }
 };
 
@@ -48,6 +48,6 @@ level_blueprint_t level_blueprint_testing = {
 void LIB_create_levels_library(
 ) {
     levels_library[LEVEL_SAMPLE] = &level_blueprint_sample;
-    levels_library[LEVEL_TEST] = &level_blueprint_testing;
+    levels_library[LEVEL_TEST]   = &level_blueprint_testing;
 };
 

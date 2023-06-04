@@ -4,10 +4,9 @@
 
 #include "data/library.h"
 
-#include "gfx.h"
 #include "global.h"
-#include "img.h"
 #include "level.h"
+#include "scene.h"
 #include "segment.h"
 #include "texture.h"
 #include "tile.h"
@@ -53,20 +52,6 @@ void LVL_clean_structure(
             LVL_set_tile(level, NULL, x, y);
         }
     }
-}
-
-level_t* LVL_new(
-    int blueprint_id
-) {
-    level_t *new_level           = NULL;
-    new_level                    = (level_t*)malloc(sizeof(level_t));
-
-    new_level->blueprint_id      = blueprint_id;
-    new_level->obstacle_segments = NULL;
-
-    LVL_clean_structure(new_level);
-
-    return new_level;
 }
 
 int LVL_tile_blueprint_on_pos(
@@ -116,6 +101,37 @@ void LVL_fill_structure(
     LVL_set_tile(level, tile, x, y);
 }
 
+void LVL_fill(
+    level_t* level
+) {
+    LVL_clean_structure(level);
+
+    int size_x = LVL_size_x(level);
+    int size_y = LVL_size_y(level);
+    
+    for (int x=0; x<size_x; x++) {
+        for (int y=0; y<size_y; y++) {
+            int id = LVL_tile_blueprint_on_pos(level, x, y);
+
+            LVL_fill_structure(level, x, y, id);
+        }
+    }
+
+    LVL_tile_on_pos(level, 2, 1);
+}
+
+level_t* LVL_new(
+    int blueprint_id
+) {
+    level_t *new_level           = NULL;
+    new_level                    = (level_t*)malloc(sizeof(level_t));
+
+    new_level->blueprint_id      = blueprint_id;
+    new_level->obstacle_segments = NULL;
+
+    return new_level;
+}
+
 tile_t* LVL_tile_on_pos(
     level_t *level,
     int      x,
@@ -143,12 +159,6 @@ bool LVL_obstacle_on_pos(
     }
     int tile_id = LVL_tile_blueprint_on_pos(level, x, y);
     return tiles_library[tile_id]->obstacle;
-}
-
-void LVL_fill_tiles(
-    level_t *level
-) {
-
 }
 
 // fills level obstacle_segments.
@@ -293,7 +303,7 @@ void LVL_analyze(
     }
 }
 
-void LVL_draw(
+void LVL_put_on_scene(
     level_t *level,
     int      camera_x,
     int      camera_y
@@ -316,7 +326,7 @@ void LVL_draw(
             tile_t *tile = NULL;
             tile         = LVL_tile_on_pos(level, x, y);
             
-            if (tile) {
+            if (tile != NULL) {
 
                 // printf(
                 //     "am I correct? %f %f %f %f\n",
@@ -332,7 +342,7 @@ void LVL_draw(
                     tile->coord.y2 + y_diff
                 };
 
-                IMG_add_tile_to_scene(
+                SCENE_add_tile(
                     scene,
                     tile->tileset_id,
                     render,

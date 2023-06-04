@@ -1,6 +1,7 @@
 #include "library.h"
 
 #include "../animation.h"
+#include "../gl_util.h"
 
 entity_blueprint_t* entity_library[ENTITY_ALL] = {NULL};
 
@@ -15,7 +16,7 @@ entity_blueprint_t entity_blueprint_hero = {
     ENTITY_LIGHTER,  // hold id
     STANDING,  // starting_state
     {
-        SPRITE_HERO, 4, 27, 20,
+        SPRITE_HERO, 4, 27, 40,
         {
             { // WALKING
                 2, // len
@@ -29,7 +30,7 @@ entity_blueprint_t entity_blueprint_hero = {
                     },
                     {
                         (render_coord_t) { 9.0/27.0, 0.0, 9.0/27.0, 20.0/40.0 },
-                        (SDL_Rect)       { 9,         0,  9,        20 },
+                        (SDL_Rect)       { 9,        0,   9,        20        },
                         { (SDL_Rect) {0, 0, 9, 20} },
                         9, 10, 1, 20
                     },
@@ -60,7 +61,7 @@ entity_blueprint_t entity_blueprint_hero = {
                 {
                     {
                         (render_coord_t) { 18.0/27.0, 0, 9.0/27.0, 20.0/40.0},
-                        (SDL_Rect)     { 18,        0, 9,        20 },
+                        (SDL_Rect)       { 18,        0, 9,        20 },
                         { (SDL_Rect) {0, 0, 9, 20} },
                         9, 10, 1, 0
                     },
@@ -72,7 +73,7 @@ entity_blueprint_t entity_blueprint_hero = {
                 {
                     {
                         (render_coord_t) { 18.0/27.0, 20.0/40.0, 9.0/27.0, 20.0/40.0},
-                        (SDL_Rect)     { 18,        20,        9,        20 },
+                        (SDL_Rect)       { 18,        20,        9,        20       },
                         { (SDL_Rect) {0, 0, 9, 20} },
                         9, 10, 1, 0
                     },

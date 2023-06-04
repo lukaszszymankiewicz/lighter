@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "global.h"
-#include "geometry.h"
 #include "vertex.h"
 
 vertex_t* VRTX_new(
@@ -55,40 +54,6 @@ void VRTX_add_point(
     }
 }
 
-int VRTX_highest_y(
-    vertex_t* poly
-) {
-    vertex_t *ptr        = NULL;
-    int       highest_y  = 9999;
-
-    ptr = poly;
-
-    while(ptr) {
-        if (ptr->y < highest_y) {
-            highest_y = ptr->y;
-        }
-        ptr = ptr->next;
-    }
-    return highest_y;
-}
-
-int VRTX_lowest_y(
-    vertex_t* poly
-) {
-    vertex_t *ptr        = NULL;
-    int       lowest_y  = -9999;
-
-    ptr = poly;
-
-    while(ptr) {
-        if (ptr->y > lowest_y) {
-            lowest_y = ptr->y;
-        }
-        ptr = ptr->next;
-    }
-    return lowest_y;
-}
-
 int VRTX_len(
     vertex_t *head
 ) {
@@ -129,64 +94,6 @@ void VRTX_merge(
     }
 }
 
-bool VRTX_contains(
-    vertex_t *head,
-    int x,
-    int y
-) {
-    vertex_t* ptr = NULL;
-    ptr           = head;
-
-    while(ptr) {
-
-        if(ptr->x == x && ptr->y == y) {
-            return true; 
-        }
-
-        ptr=ptr->next;
-    }
-
-    return false;
-}
-
-void VRTX_merge_unique(
-    vertex_t **head,
-    vertex_t  *candidates
-) {
-    vertex_t *ptr  = NULL;
-    ptr            = candidates;
-
-    while(ptr) {
-        if (VRTX_contains((*head), ptr->x, ptr->y)) {
-            ptr=ptr->next;
-            continue;
-        }
-        
-        VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
-        ptr=ptr->next;
-    }
-}
-
-bool VRTX_eq(
-    vertex_t *first,
-    vertex_t *second
-) {
-    if (VRTX_len(first) != VRTX_len(second)) {
-        return false;
-    }
-    vertex_t *ptr  = NULL;
-    vertex_t *ptr2  = NULL;
-
-    while(ptr) {
-        if ((ptr->y != ptr2->y) && (ptr->y != ptr2->y)) {
-            return false;
-        }
-        ptr = ptr->next;
-        ptr2 = ptr2->next;
-    }
-    return true;
-}
-
 vertex_t* VRTX_transpose(
     vertex_t *vertex,
     int       x_corr,
@@ -213,32 +120,6 @@ int VRTX_max_y(
     else {
         return MAX(vertex->y, vertex->next->y);
     }
-}
-
-int VRTX_pop_y(
-    vertex_t* vertex
-) {
-    vertex_t *ptr = NULL;
-    ptr           = vertex;
-
-    while(ptr->next) {
-        ptr = ptr->next;
-    }
-
-    return ptr->y;
-}
-
-int VRTX_pop_x(
-    vertex_t* vertex
-) {
-    vertex_t *ptr = NULL;
-    ptr           = vertex;
-
-    while(ptr->next) {
-        ptr = ptr->next;
-    }
-
-    return ptr->x;
 }
 
 void VRTX_delete(
@@ -268,7 +149,6 @@ void VRTX_delete(
         ptr = ptr->next;
     }
 }
-
 
 void VRTX_debug(
     vertex_t *vertex

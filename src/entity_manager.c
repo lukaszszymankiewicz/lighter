@@ -1,10 +1,11 @@
+#include <stdio.h>
+
 #include "entity.h"
 #include "entity_manager.h"
 #include "geometry.h"
 #include "global.h"
 #include "light.h"
 #include "segment.h"
-#include "vertex.h"
 
 entity_manager_t* ENTMAN_new(
 ) {
@@ -25,12 +26,11 @@ void ENTMAN_add_entity(
     int               id
 ) {
     entity_t* entity = NULL;
-    entity           = ENT_generate(x_tile, y_tile, id);
+    entity           = ENT_generate(x_tile*TILE_WIDTH, y_tile*TILE_HEIGHT, id);
 
     for (int i=0; i<MAX_ENTITY; i++) {
         if (entity_manager->entities[i] == NULL) {
             entity_manager->entities[i] = entity;
-            entity->id                  = i;
             return;
         }
     }
@@ -255,13 +255,15 @@ void ENTMAN_calc_light(
             ENTMAN_calc_single_entity_light(entity_manager, entity, scene, obstacles);
             ENTMAN_calc_single_entity_light(entity_manager, entity->hold, scene, obstacles);
         }
-
     }
 }
 
-void ENTMAN_draw_entities(
+void ENTMAN_put_on_scene(
     entity_manager_t* entity_manager
 ) {
+    int camera_x = ENTMAN_hero_x(entity_manager);
+    int camera_y = ENTMAN_hero_y(entity_manager);
+
     for (int i=0; i<MAX_ENTITY; i++) {
 
         entity_t* entity = NULL;
@@ -270,18 +272,10 @@ void ENTMAN_draw_entities(
         if (!entity) { continue; }
 
         if (ENTMAN_entity_in_draw_range(entity_manager, entity)) {
-            ENT_draw(
-                entity,
-                ENTMAN_entity_draw_x(entity_manager, entity),
-                ENTMAN_entity_draw_y(entity_manager, entity)
-            );
+            ENT_add_to_scene(entity, camera_x, camera_y);
 
             if (entity->hold) {
-                ENT_draw(
-                    entity->hold,
-                    ENTMAN_entity_draw_x(entity_manager, entity->hold),
-                    ENTMAN_entity_draw_y(entity_manager, entity->hold)
-                );
+                ENT_add_to_scene(entity->hold, camera_x, camera_y);
             }
         }
     }

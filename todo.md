@@ -19,6 +19,7 @@
 - [x] add some struct to hold things to be draw (rather than using GFX function
   in entity and level wtc).
 - [x] get rid of primitvies, please!
+- [x] add entity rendering in OpenGL
 - [ ] delete all print statements
 - [ ] clear all imports
 - [ ] add light shader

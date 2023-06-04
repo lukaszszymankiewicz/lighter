@@ -1,4 +1,5 @@
 #include "library.h"
+
 #include "../texture.h"
 
 texture_t *sprites_library[SPRITE_ALL] = {NULL};

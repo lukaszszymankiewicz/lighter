@@ -4,7 +4,6 @@
 #include "../global.h"
 #include "../level.h"
 #include "../source.h"
-#include "../source.h"
 #include "../texture.h"
 #include "../tile.h"
 
@@ -91,6 +90,7 @@ enum TILESET_IDX {
 };
 
 enum TILE_IDX {
+    TILE_NOTHING,
     TILE_WALL,
     TILE_BROKEN_WALL,
     TILE_BLACK,

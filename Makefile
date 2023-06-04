@@ -37,26 +37,28 @@ OBJS =                                     \
 	$(BUILDDIR)/$(DATADIR)/lightsources.o  \
 	$(BUILDDIR)/$(DATADIR)/sprites.o       \
 	$(BUILDDIR)/$(DATADIR)/tiles.o         \
-	$(BUILDDIR)/$(DATADIR)/tilesets.o     \
+	$(BUILDDIR)/$(DATADIR)/tilesets.o      \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o       \
 	$(BUILDDIR)/animation.o                \
 	$(BUILDDIR)/controller.o               \
 	$(BUILDDIR)/entity.o                   \
 	$(BUILDDIR)/entity_manager.o           \
 	$(BUILDDIR)/game.o                     \
+	$(BUILDDIR)/gl_util.o                  \
 	$(BUILDDIR)/geometry.o                 \
 	$(BUILDDIR)/gfx.o                      \
 	$(BUILDDIR)/level.o                    \
 	$(BUILDDIR)/light.o                    \
+    $(BUILDDIR)/render.o                   \
 	$(BUILDDIR)/point.o                    \
 	$(BUILDDIR)/segment.o                  \
+	$(BUILDDIR)/scene.o                    \
 	$(BUILDDIR)/sorted_list.o              \
 	$(BUILDDIR)/source.o                   \
 	$(BUILDDIR)/texture.o                  \
 	$(BUILDDIR)/tile.o                     \
 	$(BUILDDIR)/timer.o                    \
 	$(BUILDDIR)/vertex.o                   \
-    $(BUILDDIR)/img.o                      \
 
 TESTOBJS =                                    \
 	$(BUILDDIR)/$(DATADIR)/entities.o         \
@@ -88,11 +90,13 @@ TESTOBJS =                                    \
 	$(BUILDDIR)/game.o                        \
 	$(BUILDDIR)/geometry.o                    \
 	$(BUILDDIR)/gfx.o                         \
-	$(BUILDDIR)/img.o                         \
+	$(BUILDDIR)/gl_util.o                     \
+	$(BUILDDIR)/render.o                      \
 	$(BUILDDIR)/level.o                       \
 	$(BUILDDIR)/light.o                       \
 	$(BUILDDIR)/point.o                       \
 	$(BUILDDIR)/segment.o                     \
+	$(BUILDDIR)/scene.o                       \
 	$(BUILDDIR)/sorted_list.o                 \
 	$(BUILDDIR)/source.o                      \
 	$(BUILDDIR)/texture.o                     \

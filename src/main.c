@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "game.h"
 
 int graphic_option    = GRAPHIC_ON;
@@ -12,7 +14,7 @@ int main(
     char* args[]
 ) {
     if ((argc > 1) && (strcmp(args[1], GRAPHIC_OFF_ARG) == 0)) {
-        graphic_option = 0;
+        graphic_option = GRAPHIC_OFF;
     }
 
     if ((argc > 2) && (strcmp(args[2], RUN_ONE_FRAME) == 0)) {

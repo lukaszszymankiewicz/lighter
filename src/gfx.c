@@ -5,13 +5,12 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-#include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "data/library.h"
-
 #include "gfx.h"
-#include "img.h"
+#include "gl_util.h"
+#include "render.h"
+
 
 #define GRADIENT_COEF 3.0
 #define OPENGL_MAJOR_VERSION 3
@@ -21,9 +20,6 @@ GLint  gVertexPos2DLocation = -1;
 GLuint opengl_program_id    = 0;
 GLuint gVBO                 = 0;
 GLuint gIBO                 = 0;
-
-float global_x_scale        = 1.0;
-float global_y_scale        = 1.0;
 
 bool gRenderQuad = true;
 
@@ -260,7 +256,8 @@ bool GFX_init_OpenGL_shaders(
 	return true;
 }
 
-int GFX_init_renderer() {
+int GFX_init_renderer(
+) {
     gl_context = SDL_GL_CreateContext(window);
 
     if(!gl_context) {
@@ -365,105 +362,3 @@ void GFX_update() {
     SDL_GL_SwapWindow(window);
     // SDL_UpdateWindowSurface(window);
 };
-
-void GFX_render_texture_part(
-    texture_t *texture,
-    float      render_x1,   // place on screen (OpenGL coords)
-    float      render_y1,   // place on screen (OpenGL coords)
-    float      render_x2,   // place on screen (OpenGL coords)
-    float      render_y2,   // place on screen (OpenGL coords)
-    float      clip_x1,      // position on clipture (OpenGL coords)
-    float      clip_y1,      // position on clipture (OpenGL coords)
-    float      clip_x2,      // position on clipture (OpenGL coords)
-    float      clip_y2,      // position on clipture (OpenGL coords)
-    bool       flip
-) {
-    // printf("binded clipture id: %d \n", clipture->id);
-    // printf("clipture name: %s \n", clipture->filepath);
-    glBindTexture(GL_TEXTURE_2D, texture->id);
-
-    // clipture is always rendered 1:1 to achieve pixel perfect effect
-    // float clipW = (float)TXTR_width(clipture);
-    // float clipH = (float)TXTR_height(clipture);
-
-    // orient it in a way that OpenGL will digest it
-    // render_x1 -= (float)SCREEN_WIDTH / 2.0;
-    // render_y1 -= (float)SCREEN_HEIGHT / 2.0;
-
-    // render_y1 *= -1;
-    // float render_y2 = (float)render_y1 - ((clip_y2 - clip_y1) * clipH);
-    // float render_x2 = (float)render_x1 + ((clip_x2 - clip_x1) * clipW);
-    // float render_y2 = (float)render_y1 - (float)TILE_WIDTH;
-    // float render_x2 = (float)render_x1 + (float)TILE_HEIGHT;
-
-    float temp;
-
-    if (flip) {
-        temp = clip_x1; 
-        clip_x1 = clip_x2;
-        clip_x2 = temp;
-    }
-
-    printf("render on : %f, %f |  %f, %f \n",
-        render_x1,
-        render_y1,
-        render_x2,
-        render_y2
-    );
-
-    // printf("this is correct: %f, %f | %f, %f \n",
-    //     global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
-    //     global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT,
-    //     global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
-    //     global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT
-    // );
-    
-    glBegin(GL_QUADS);
-        // up right (1,1)
-        glTexCoord2f(clip_x2, clip_y1);
-        glVertex2f(render_x2, render_y1);
-        // up left (-1, 1)
-        glTexCoord2f(clip_x1, clip_y1);
-        glVertex2f(render_x1, render_y1);
-        // down left (-1, -1)
-        glTexCoord2f(clip_x1, clip_y2);
-        glVertex2f(render_x1, render_y2);
-        // down right (1, -1)
-        glTexCoord2f(clip_x2, clip_y2); 
-        glVertex2f(render_x2, render_y2);
-    glEnd();
-};
-
-void GFX_draw_scene(
-    scene_t* scene 
-) {
-    for (int tile=0; tile<scene->n_tile; tile++) {
-        GFX_render_texture_part(
-            tilesets_library[scene->tile_layer[tile].id],
-            scene->tile_layer[tile].render.x1,
-            scene->tile_layer[tile].render.y1,
-            scene->tile_layer[tile].render.x2,
-            scene->tile_layer[tile].render.y2,
-            scene->tile_layer[tile].clip.x1,
-            scene->tile_layer[tile].clip.y1,
-            scene->tile_layer[tile].clip.x2,
-            scene->tile_layer[tile].clip.y2,
-            false
-        );
-    }
-
-    for (int sprite=0; sprite<scene->n_sprite; sprite++) {
-        GFX_render_texture_part(
-            sprites_library[scene->sprite_layer[sprite].id],
-            scene->sprite_layer[sprite].render.x1,
-            scene->sprite_layer[sprite].render.y1,
-            scene->sprite_layer[sprite].render.x2,
-            scene->sprite_layer[sprite].render.y2,
-            scene->sprite_layer[sprite].clip.x1,
-            scene->sprite_layer[sprite].clip.y1,
-            scene->sprite_layer[sprite].clip.x2,
-            scene->sprite_layer[sprite].clip.y2,
-            scene->sprite_layer[sprite].flip_w
-        );
-    }
-}

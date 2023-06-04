@@ -13,16 +13,19 @@ enum GRAPHIC_OPTION {
 };
 
 typedef struct game {
-  bool               loop;                // main game loop
-  int                frame;               // current number of game frame
-  int                frame_ticks;         // ticks passed
+  bool               loop;                  // main game loop
+  int                frame;                 // current number of game frame
+  int                frame_ticks;           // ticks passed
   int                max_frames; 
-  int                draw_option;
-  SDL_Event          event;               // SDL event (keyboard, mouse etc)
-  level_t           *level;               // level
-  game_timer_t      *fps_timer;           // FPS timer
-  game_timer_t      *cap_timer;           // capping timer (for equall length in-game frame)
+
+  void              (*draw_func)(struct game *g);
+
+  game_timer_t      *fps_timer;            // FPS timer
+  game_timer_t      *cap_timer;            // capping timer (for equall length in-game frame)
+
+  level_t           *level;                // level
   entity_manager_t  *entity_manager;
+  SDL_Event          event;                // SDL event (keyboard, mouse etc)
 } game_t;
 
 void GAME_run(int level_id, int graphic_option, int max_frames);
