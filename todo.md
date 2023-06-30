@@ -20,6 +20,19 @@
   in entity and level wtc).
 - [x] get rid of primitvies, please!
 - [x] add entity rendering in OpenGL
-- [ ] delete all print statements
-- [ ] clear all imports
+- [x] clear all imports
+- [x] check if collision is working
+- [x] check why failing down has not lowering the velocity to 0
+- [x] check why the jumping is not working!
+- [x] check why the holding item seems to lost its position for some frames
+- [x] check if animation is working
+- [x] code for normal->gl coords should be in some util module
+- [x] delete all print statements
+- [x] add error codes in all gfx initialization
 - [ ] add light shader
+  - [ ] made shader readable from file
+  - [ ] made one polygon shader with white color
+  - [ ] made multi-polygon shader
+- [ ] repair all unit-tests (once again!)
+- [ ] clear all memory leaks!
+- [ ] reading GFX (video, window) to the library module

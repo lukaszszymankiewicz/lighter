@@ -1,31 +1,33 @@
 #include <stdbool.h>
 
+#include "../gl_util.h"
+
 #include "library.h"
 
 tile_blueprint_t *tiles_library[TILE_ALL] = {NULL};
 
 tile_blueprint_t tile_blueprint_nothing = {
     TILESET_BASIC, 
-    0.0, 0.0, 32.0/512.0, 1.0,
-    false
+    (render_coord_t) { 0.0, 0.0, 32.0/512.0, 1.0 },
+    OBSTACLE_FALSE
 };
 
 tile_blueprint_t tile_blueprint_wall = {
     TILESET_BASIC, 
-    32.0/512.0, 0.0, 64.0/512.0, 1.0,
-    false
+    (render_coord_t) {32.0/512.0, 0.0, 64.0/512.0, 1.0},
+    OBSTACLE_FALSE
 };
 
 tile_blueprint_t tile_blueprint_broken_wall = {
     TILESET_BASIC,
-    64.0/512.0, 0.0, 96.0/512.0, 1.0,
-    false
+    (render_coord_t) {64.0/512.0, 0.0, 96.0/512.0, 1.0},
+    OBSTACLE_FALSE
 };
 
 tile_blueprint_t tile_blueprint_black_obstacle = {
     TILESET_BASIC,
-    96.0/512.0, 0.0, 128.0/512.0, 1.0,
-    true
+    (render_coord_t) {0.0, 0.0, 32.0/512.0, 1.0},
+    OBSTACLE_TRUE
 };
 
 void LIB_create_tile_library(

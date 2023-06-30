@@ -1,3 +1,5 @@
+#include <GL/glew.h>
+
 #include "data/library.h"
 
 #include <stdlib.h>
@@ -7,6 +9,9 @@
 #include "render.h"
 #include "scene.h"
 
+static const int TILE_LAYER_PROGRAM_ID   = 0;
+static const int SPRITE_LAYER_PROGRAM_ID = 0;
+
 scene_t *scene = NULL;
 
 void SCENE_clear(
@@ -14,6 +19,7 @@ void SCENE_clear(
 ) {
     scene->n_tile   = 0;
     scene->n_sprite = 0;
+    scene->n_shader = 0;
 }
 
 scene_t* SCENE_new(
@@ -60,6 +66,25 @@ void SCENE_add_sprite(
     scene->n_sprite++;
 }
 
+void SCENE_add_shader(
+    scene_t *scene,
+    int      id,
+    int      program_id,
+    int      len,
+    int      size,
+    GLfloat *vertices
+) {
+    if (scene->n_shader >= MAX_VERTEX_ON_SHADER_LAYER) { return; }
+
+    scene->shader_layer[scene->n_shader].id         = id;
+    scene->shader_layer[scene->n_shader].program_id = program_id;
+    scene->shader_layer[scene->n_shader].len        = len;
+    scene->shader_layer[scene->n_shader].size       = size;
+    scene->shader_layer[scene->n_shader].vertices   = vertices;
+
+    scene->n_shader++;
+}
+
 void SCENE_free(
     scene_t* scene
 ) {
@@ -70,9 +95,11 @@ void SCENE_free(
 void SCENE_draw(
     scene_t* scene 
 ) {
+
+    glUseProgram(TILE_LAYER_PROGRAM_ID);
     for (int tile=0; tile<scene->n_tile; tile++) {
          RENDER_texture(
-            tilesets_library[scene->tile_layer[tile].id],
+            tilesets_library[scene->tile_layer[tile].id]->id,
             scene->tile_layer[tile].render.x1,
             scene->tile_layer[tile].render.y1,
             scene->tile_layer[tile].render.x2,
@@ -85,9 +112,10 @@ void SCENE_draw(
         );
     }
 
+    glUseProgram(SPRITE_LAYER_PROGRAM_ID);
     for (int sprite=0; sprite<scene->n_sprite; sprite++) {
         RENDER_texture(
-            sprites_library[scene->sprite_layer[sprite].id],
+            sprites_library[scene->sprite_layer[sprite].id]->id,
             scene->sprite_layer[sprite].render.x1,
             scene->sprite_layer[sprite].render.y1,
             scene->sprite_layer[sprite].render.x2,
@@ -98,5 +126,15 @@ void SCENE_draw(
             scene->sprite_layer[sprite].clip.y2,
             scene->sprite_layer[sprite].flip_w
         );
+    }
+
+    for (int shader=0; shader<scene->n_shader; shader++) {
+        RENDER_shader(
+            scene->shader_layer[shader].vertices,
+            scene->shader_layer[shader].program_id,
+            scene->shader_layer[shader].len,
+            scene->shader_layer[shader].size
+        );
+
     }
 }

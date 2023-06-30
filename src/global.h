@@ -49,6 +49,8 @@
 #define ENTITY_UPDATE_LIGHT_Y_RANGE  SCREEN_HEIGHT * 2
 #define SCREEN_TILE_PER_X            10
 #define SCREEN_TILE_PER_Y            12
+#define MAX_SCREEN_TILE_PER_X        10;
+#define MAX_SCREEN_TILE_PER_Y        7;
 
 // TODO: after implementing OpenGL it should be deleted
 #define FULL_SCREEN_PIX_SIZE     SCREEN_WIDTH * (SCREEN_HEIGHT+40)

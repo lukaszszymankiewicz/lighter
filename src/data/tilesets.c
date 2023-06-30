@@ -1,4 +1,5 @@
 #include "library.h"
+#include "util.h"
 
 #include "../texture.h"
 

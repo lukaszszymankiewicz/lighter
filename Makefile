@@ -36,8 +36,10 @@ OBJS =                                     \
 	$(BUILDDIR)/$(DATADIR)/library.o       \
 	$(BUILDDIR)/$(DATADIR)/lightsources.o  \
 	$(BUILDDIR)/$(DATADIR)/sprites.o       \
+	$(BUILDDIR)/$(DATADIR)/shaders.o       \
 	$(BUILDDIR)/$(DATADIR)/tiles.o         \
 	$(BUILDDIR)/$(DATADIR)/tilesets.o      \
+	$(BUILDDIR)/$(DATADIR)/util.o          \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o       \
 	$(BUILDDIR)/animation.o                \
 	$(BUILDDIR)/controller.o               \
@@ -66,8 +68,10 @@ TESTOBJS =                                    \
 	$(BUILDDIR)/$(DATADIR)/library.o          \
 	$(BUILDDIR)/$(DATADIR)/lightsources.o     \
 	$(BUILDDIR)/$(DATADIR)/sprites.o          \
+	$(BUILDDIR)/$(DATADIR)/shaders.o          \
 	$(BUILDDIR)/$(DATADIR)/tiles.o            \
 	$(BUILDDIR)/$(DATADIR)/tilesets.o         \
+	$(BUILDDIR)/$(DATADIR)/util.o             \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o          \
 	$(BUILDDIR)/check_animation.o             \
 	$(BUILDDIR)/check_entity.o                \
@@ -141,4 +145,4 @@ all_tests:
 
 .PHONY: memory_check
 memory_check:
-	valgrind --leak-check=yes --log-file="memory_check.txt" --track-origins=yes ./lighter
+	valgrind --leak-check=yes --log-file="memory_check.txt" --track-origins=yes ./build/lighter gfx_off one_frame

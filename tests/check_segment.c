@@ -1,4 +1,6 @@
 #include <check.h>
+
+#include "../src/global.h"
 #include "../src/segment.h"
 
 

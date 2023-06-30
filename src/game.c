@@ -155,7 +155,7 @@ void GAME_render(
     GFX_update();
 }
 
-int GAME_init_graphics(
+GFX_STATUS GAME_init_graphics(
     int graphic_option
 ) {
     if (graphic_option == GRAPHIC_OFF) { 
@@ -169,14 +169,10 @@ int GAME_init_graphics(
 void GAME_draw_light(
     game_t* game
 ) {
-    light_scene_t* scene = NULL; 
-    scene                = LIG_new_light_scene();
-
-    ENTMAN_calc_light(game->entity_manager, scene, game->level->obstacle_segments);
-
-    LIG_compose_light_scene(scene);
-    LIG_draw_light_scene(scene);
-    LIG_free_light_scene(scene);
+    ENTMAN_calc_light(
+        game->entity_manager,
+        game->level->obstacle_segments
+    );
 }
 
 void GAME_start_time(
@@ -189,7 +185,7 @@ void GAME_apply_logic(
     game_t* game
 ) {
     GAME_update_events(game);
-    // GAME_update_entities(game);
+    GAME_update_entities(game);
 }
 
 void GAME_draw_scene(
@@ -212,7 +208,7 @@ void GAME_draw_everything(
     GAME_put_entities_on_scene(game);
     GAME_draw_scene(game);
     GAME_render(game);
-    // GAME_draw_light(game);
+    GAME_draw_light(game);
 }
 
 void GAME_draw_nothing(
@@ -224,11 +220,12 @@ game_t* GAME_new(
     int graphic_option,
     int max_frames
 ) {
-    game_t* game      = NULL;
+    game_t *game      = NULL;
     game              = GAME_init(level_id, max_frames);
 
-    if(GAME_init_graphics(graphic_option) == 0) {
-        GAME_close(game); 
+    int gfx_status = GAME_init_graphics(graphic_option); 
+    if(gfx_status != GFX_CORRECT) {
+        GAME_close(game); return NULL;
     }
 
     if(graphic_option == GRAPHIC_ON) {
@@ -238,10 +235,12 @@ game_t* GAME_new(
     }
 
     GAME_create_library();
+
     scene = SCENE_new();
 
     GAME_init_entities(game);
     LVL_fill(game->level);
+    LVL_analyze(game->level);
 
     return game;
 }

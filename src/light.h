@@ -21,26 +21,14 @@ typedef struct lvertex {
     int       blue;
 } lvertex_t;
 
-typedef struct light_scene {
-    lvertex_t   *components[MAX_LIGHT_ON_SCENE];
-    int          n;
-} light_scene_t;
-
-// SCENE
-light_scene_t* LIG_new_light_scene();
-
 void LIG_add_to_scene(
-    int x, int y, int i,
+    int x,      int y,
+    int x_corr, int y_corr,
+    int i,
     float angle, float coef,
     lightsource_t *light,
-    light_scene_t *scene,
     segment_t     *obstacles
 );
-
-void LIG_compose_light_scene(light_scene_t* scene);
-void LIG_fit_scene_on_screen(light_scene_t *scene, int i, int x_corr, int y_corr);
-void LIG_draw_light_scene(light_scene_t* scene);
-void LIG_free_light_scene(light_scene_t* scene);
 
 // TESTING
 vertex_t* LIG_get_base_light_polygon(int x, int y, segment_t *obstacles, point_t* hit_points);

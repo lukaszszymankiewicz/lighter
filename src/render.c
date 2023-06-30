@@ -1,14 +1,11 @@
 #include <GL/glew.h>
-// #include <GL/gl.h>
-// #include <GL/glu.h>
 
 #include <stdbool.h>
 
 #include "render.h"
-#include "texture.h"
 
 void RENDER_texture(
-    texture_t *texture,
+    int        gl_texture_id,
     float      render_x1,   // place on screen (OpenGL coords)
     float      render_y1,   // place on screen (OpenGL coords)
     float      render_x2,   // place on screen (OpenGL coords)
@@ -19,65 +16,43 @@ void RENDER_texture(
     float      clip_y2,      // position on clipture (OpenGL coords)
     bool       flip
 ) {
-    // printf("binded clipture id: %d \n", clipture->id);
-    // printf("clipture name: %s \n", clipture->filepath);
-    glBindTexture(GL_TEXTURE_2D, texture->id);
-
-    // clipture is always rendered 1:1 to achieve pixel perfect effect
-    // float clipW = (float)TXTR_width(clipture);
-    // float clipH = (float)TXTR_height(clipture);
-
-    // orient it in a way that OpenGL will digest it
-    // render_x1 -= (float)SCREEN_WIDTH / 2.0;
-    // render_y1 -= (float)SCREEN_HEIGHT / 2.0;
-
-    // render_y1 *= -1;
-    // float render_y2 = (float)render_y1 - ((clip_y2 - clip_y1) * clipH);
-    // float render_x2 = (float)render_x1 + ((clip_x2 - clip_x1) * clipW);
-    // float render_y2 = (float)render_y1 - (float)TILE_WIDTH;
-    // float render_x2 = (float)render_x1 + (float)TILE_HEIGHT;
-
-    float temp;
+    glBindTexture(GL_TEXTURE_2D, gl_texture_id);
 
     if (flip) {
-        temp = clip_x1; 
+        float temp;
+        temp    = clip_x1; 
         clip_x1 = clip_x2;
         clip_x2 = temp;
     }
-
-    printf("render on : %f, %f |  %f, %f \n",
-        render_x1,
-        render_y1,
-        render_x2,
-        render_y2
-    );
-
-    printf("clip on : %f, %f |  %f, %f \n",
-        clip_x1,
-        clip_y1,
-        clip_x2,
-        clip_y2
-    );
-
-    // printf("this is correct: %f, %f | %f, %f \n",
-    //     global_x_scale * (float)render_x1/(float)SCREEN_WIDTH,
-    //     global_y_scale * (float)render_y1/(float)SCREEN_HEIGHT,
-    //     global_x_scale * (float)render_x2/(float)SCREEN_WIDTH,
-    //     global_y_scale * (float)render_y2/(float)SCREEN_HEIGHT
-    // );
     
     glBegin(GL_QUADS);
-        // up right (1,1)
-        glTexCoord2f(clip_x2, clip_y1);
-        glVertex2f(render_x2, render_y1);
-        // up left (-1, 1)
-        glTexCoord2f(clip_x1, clip_y1);
-        glVertex2f(render_x1, render_y1);
-        // down left (-1, -1)
-        glTexCoord2f(clip_x1, clip_y2);
-        glVertex2f(render_x1, render_y2);
-        // down right (1, -1)
-        glTexCoord2f(clip_x2, clip_y2); 
-        glVertex2f(render_x2, render_y2);
+        glTexCoord2f(clip_x2, clip_y1); glVertex2f(render_x2, render_y1); // up right (1,1)
+        glTexCoord2f(clip_x1, clip_y1); glVertex2f(render_x1, render_y1); // up left (-1, 1)
+        glTexCoord2f(clip_x1, clip_y2); glVertex2f(render_x1, render_y2); // down left (-1, -1)
+        glTexCoord2f(clip_x2, clip_y2); glVertex2f(render_x2, render_y2); // down right (1, -1)
     glEnd();
 };
+
+void RENDER_shader(
+    GLfloat *vertices,
+    int program_id,
+    int n_vertices,
+    int size
+) { 
+
+    // TODO: this propably needs to be refactored, as glGetIntegerv is slow (and glUseProgram!)!
+    GLint current_program_id;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &current_program_id);
+    
+    if (current_program_id != program_id) {
+        glUseProgram(program_id);
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * n_vertices, vertices, GL_STATIC_DRAW);
+    GLint posAttrib = glGetAttribLocation(program_id, "position");
+    glEnableVertexAttribArray(posAttrib);
+    // glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(posAttrib, size, GL_FLOAT, GL_FALSE, 0, 0);
+    glDrawArrays(GL_TRIANGLES, 0, n_vertices);
+};
+

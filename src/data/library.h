@@ -97,6 +97,16 @@ enum TILE_IDX {
     TILE_ALL
 };
 
+enum SHADER_IDX {
+    SHADER_TEST,
+    SHADER_ALL
+};
+
+enum OBSTACLE_TYPE {
+    OBSTACLE_FALSE,
+    OBSTACLE_TRUE
+};
+
 typedef struct entity_blueprint {
     int  id;
     int  flags;
@@ -114,10 +124,9 @@ typedef struct texture_blueprint {
 } texture_blueprint_t;
 
 typedef struct tile_blueprint {
-    int   tileset_id;
-    float x1; float y1;
-    float x2; float y2;
-    bool  obstacle;
+    int            tileset_id;
+    render_coord_t clip;
+    bool           obstacle;
 } tile_blueprint_t;
 
 typedef struct entity_fill {
@@ -133,6 +142,19 @@ typedef struct level_blueprint {
     entity_fill_t entities[MAX_LEVEL_ENTITY_FILL];
 } level_blueprint_t;
 
+typedef struct shader {
+    int         id;
+    int         type;
+    const char *path;
+} shader_t;
+
+typedef struct shader_program {
+    int       id;
+    int       status;
+    shader_t  vertex;
+    shader_t  fragment;
+} shader_program_t;
+
 extern entity_blueprint_t *entity_library[ENTITY_ALL];
 extern level_blueprint_t  *levels_library[LEVEL_ALL];
 extern tile_blueprint_t   *tiles_library[TILE_ALL];
@@ -141,6 +163,7 @@ extern lightsource_t      *lighsources_library[LIGHTSOURCE_ALL];
 extern texture_t          *sprites_library[SPRITE_ALL];
 extern texture_t          *tilesets_library[TILESET_ALL];
 extern wobble_t           *wobble_library[WOBBLE_ALL];
+extern shader_program_t   *shader_library[SHADER_ALL];
 
 void LIB_create_entity_library();
 void LIB_create_wobble_library();
@@ -149,9 +172,9 @@ void LIB_create_sprites_library();
 void LIB_create_levels_library();
 void LIB_create_tilesets_library();
 void LIB_create_tile_library();
+void LIB_create_shaders_library();
 
 void LIB_create_all();
 void LIB_free_all();
 
 #endif
-

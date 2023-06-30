@@ -4,6 +4,7 @@
 
 #include "data/library.h"
 
+#include "gl_util.h"
 #include "global.h"
 #include "level.h"
 #include "scene.h"
@@ -90,10 +91,7 @@ void LVL_fill_structure(
     tile = TILE_new(
         id,
         tiles_library[id]->tileset_id,
-        tiles_library[id]->x1,
-        tiles_library[id]->y1,
-        tiles_library[id]->x2,
-        tiles_library[id]->y2,
+        tiles_library[id]->clip,
         x * TILE_WIDTH,
         y * TILE_HEIGHT
     );
@@ -112,12 +110,9 @@ void LVL_fill(
     for (int x=0; x<size_x; x++) {
         for (int y=0; y<size_y; y++) {
             int id = LVL_tile_blueprint_on_pos(level, x, y);
-
             LVL_fill_structure(level, x, y, id);
         }
     }
-
-    LVL_tile_on_pos(level, 2, 1);
 }
 
 level_t* LVL_new(
@@ -158,6 +153,7 @@ bool LVL_obstacle_on_pos(
         return false;
     }
     int tile_id = LVL_tile_blueprint_on_pos(level, x, y);
+
     return tiles_library[tile_id]->obstacle;
 }
 
@@ -188,7 +184,6 @@ void LVL_analyze(
 
     int index        = EMPTY_CELL;
     int obstacle_num = 0;
-
 
     for (int x=0; x<size_x; x++) {
         for (int y=0; y<size_y; y++) {
@@ -316,10 +311,6 @@ void LVL_put_on_scene(
     int end_tile_pos_x = st_tile_pos_x + SCREEN_TILE_PER_Y;
     int end_tile_pos_y = st_tile_pos_y + SCREEN_TILE_PER_X;
 
-    // camera to absolute orientation
-    float x_diff = (((float)camera_x) / (float)SCREEN_WIDTH) * global_x_scale;
-    float y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT) * global_y_scale;
-
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
 
@@ -328,19 +319,7 @@ void LVL_put_on_scene(
             
             if (tile != NULL) {
 
-                // printf(
-                //     "am I correct? %f %f %f %f\n",
-                //     tile->coord.x1 - x_diff,
-                //     tile->coord.y1 + y_diff,
-                //     tile->coord.x2 - x_diff,
-                //     tile->coord.y2 + y_diff
-                // ); 
-                render_coord_t render = { 
-                    tile->coord.x1 - x_diff,
-                    tile->coord.y1 + y_diff,
-                    tile->coord.x2 - x_diff,
-                    tile->coord.y2 + y_diff
-                };
+                render_coord_t render = GL_UTIL_gl_to_camera_gl(tile->coord, camera_x, camera_y);
 
                 SCENE_add_tile(
                     scene,

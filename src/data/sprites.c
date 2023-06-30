@@ -1,4 +1,5 @@
 #include "library.h"
+#include "util.h"
 
 #include "../texture.h"
 
@@ -22,4 +23,3 @@ void LIB_create_sprites_library(
     sprites_library[SPRITE_LIGHTER]    = TXTR_read_from_file(texture_blueprint_lighter.filepath);
     sprites_library[SPRITE_WALLLIGHT]  = TXTR_read_from_file(texture_blueprint_walllight.filepath);
 };
-

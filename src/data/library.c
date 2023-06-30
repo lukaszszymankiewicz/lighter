@@ -1,4 +1,5 @@
 #include "library.h"
+#include "util.h"
 
 void LIB_create_all(
 ) {
@@ -9,6 +10,7 @@ void LIB_create_all(
     LIB_create_levels_library();
     LIB_create_tile_library();
     LIB_create_tilesets_library();
+    LIB_create_shaders_library();
 }
 
 void LIB_free_all(

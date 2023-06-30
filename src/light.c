@@ -1,43 +1,15 @@
+#include "./data/library.h"
+
 #include "geometry.h"
+#include "gl_util.h"
 #include "gfx.h"
 #include "global.h"
 #include "light.h"
 #include "point.h"
 #include "segment.h"
 #include "source.h"
+#include "scene.h"
 #include "vertex.h"
-
-light_scene_t* LIG_new_light_scene() {
-    light_scene_t* scene = NULL;
-    scene                = (light_scene_t*)malloc(sizeof(light_scene_t));
-
-    scene->n           = 0;
-
-    for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
-        scene->components[i] = NULL;
-    }
-
-    return scene;
-}
-
-void LIG_free_light_scene(
-    light_scene_t* scene
-) {
-    for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
-        
-        if (scene->components[i] == NULL) {
-            continue;
-        }
-
-        VRTX_free(scene->components[i]->coords);
-        scene->components[i]->coords = NULL;
-
-        free(scene->components[i]);
-        scene->components[i] = NULL;
-    }
-
-    free(scene);
-}
 
 // TODO: replace it with function in geometry.h
 // checks if ray intersects with obstacle
@@ -657,58 +629,87 @@ vertex_t* LIG_single_add_light_polygon(
 
 };
 
-void LIG_add_to_scene(
+render_vertex_t LIG_calc_light_polygon(
     int              x,
     int              y,
+    int              corr_x,
+    int              corr_y,
     int              i,
     float            angle,
     float            coef,
     lightsource_t   *light,
-    light_scene_t   *scene,
     segment_t       *obstacles
 ) {
-    vertex_t* vertex = NULL;
+    vertex_t* vertex            = NULL;
+    vertex_t* ptr               = NULL;
+    vertex_t* transposed_vertex = NULL;
+    render_vertex_t gl_vertex; 
 
-    scene->components[scene->n] = (lvertex_t*)malloc(sizeof(lvertex_t));
+    // calculate in global coords
+    vertex            = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
 
-    vertex = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
+    int len = VRTX_len(vertex);
 
-    scene->components[scene->n]->coords = vertex;
-    scene->components[scene->n]->x0     = x;
-    scene->components[scene->n]->y0     = y;
-    scene->components[scene->n]->red    = light->light_polygons[i].red;
-    scene->components[scene->n]->green  = light->light_polygons[i].green;
-    scene->components[scene->n]->blue   = light->light_polygons[i].blue;
-    scene->components[scene->n]->power  = light->light_polygons[i].light_power;
+    // align it with camera
+    transposed_vertex = VRTX_transpose(vertex, corr_x, corr_y);
+    
+    int j = 0;
 
-    scene->n++;
-}
-
-void LIG_fit_scene_on_screen(
-    light_scene_t   *scene,
-    int              i,
-    int              x_corr,
-    int              y_corr
-) {
-    if (scene->components[i] == NULL) { return; }
-
-    scene->components[i]->coords  = VRTX_transpose(scene->components[i]->coords, x_corr, y_corr);
-    scene->components[i]->x0     += x_corr;
-    scene->components[i]->y0     += y_corr;
-}
-
-void LIG_compose_light_scene(
-    light_scene_t* scene
-) {
-    for (int i=scene->n-1; i>-1; i--) {
-        // GFX_fill_light();
+    // translate it to gl coords system
+    for (ptr=transposed_vertex; ptr; ptr=ptr->next) {
+        render_coord_t c = GL_UTIL_global_to_gl_coord_single(ptr->x, ptr->y, corr_x, corr_y);
+        gl_vertex.coefs[j] = c.x1;
+        gl_vertex.coefs[j+1] = c.y1;
+        j++; j++; 
     }
-};
 
-void LIG_draw_light_scene(
-    light_scene_t* scene 
-) {
-    // TODO: TBD
-    // GFX_draw_light();
-    // GFX_draw_darkness();
+    return gl_vertex;
 }
+
+void LIG_add_to_scene(
+    int              x,
+    int              y,
+    int              corr_x, // camera x
+    int              corr_y, // camera y 
+    int              i,
+    float            angle,
+    float            coef,
+    lightsource_t   *light,
+    segment_t       *obstacles
+) {
+    render_vertex_t ff = LIG_calc_light_polygon(
+        x, y,
+        corr_x, corr_y,
+        i, angle, coef, light, obstacles
+    );
+
+    SCENE_add_shader(
+        scene,
+        0, // SOME iterator here?
+        shader_library[SHADER_TEST]->id,
+        ff.len,
+        2, // TODO: ADD SOME CONSTANT!
+        ff.coefs 
+    );
+    
+    // TODO: this should propably be added as well to above function
+    // scene->components[scene->n]->coords = vertex;
+    // scene->components[scene->n]->x0     = x;
+    // scene->components[scene->n]->y0     = y;
+    // scene->components[scene->n]->red    = light->light_polygons[i].red;
+    // scene->components[scene->n]->green  = light->light_polygons[i].green;
+    // scene->components[scene->n]->blue   = light->light_polygons[i].blue;
+    // scene->components[scene->n]->power  = light->light_polygons[i].light_power;
+}
+
+// void LIG_fit_scene_on_screen(
+//     int              i,
+//     int              x_corr,
+//     int              y_corr
+// ) {
+//     if (scene->components[i] == NULL) { return; }
+// 
+//     scene->components[i]->coords  = VRTX_transpose(scene->components[i]->coords, x_corr, y_corr);
+//     scene->components[i]->x0     += x_corr;
+//     scene->components[i]->y0     += y_corr;
+// }

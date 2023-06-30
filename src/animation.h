@@ -11,6 +11,7 @@
 
 typedef struct frame {
     render_coord_t  img;
+    // TODO: check if relevant
     SDL_Rect        rect;
     SDL_Rect        hit_boxes[MAX_HITBOXES_PER_FRAME];
     int             handle_x;

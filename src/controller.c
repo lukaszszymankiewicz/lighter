@@ -1,6 +1,8 @@
 #include <SDL2/SDL.h>
 
+#include <SDL2/SDL_stdinc.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "controller.h"
@@ -46,14 +48,14 @@ void CON_update(
     controller_t* con
 ) {
     if (con->counter++ >= con->delay) {
-        con->counter     = 0;
+
+        con->counter          = 0;
+        Uint8* keyboard_state = NULL;
+        keyboard_state        = (Uint8*)SDL_GetKeyboardState(NULL);
 
         for (int i=0; i<con->len; i++) {
-            con->old_state[i]   = con->state[i];
-        }
-
-        for (int i=0; i<con->len; i++) {
-            con->old_state[i]   = 0;
+            con->old_state[i] = con->state[i];
+            con->state[i]     = keyboard_state[i];
         }
     }
 }

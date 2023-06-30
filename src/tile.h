@@ -17,11 +17,11 @@ typedef struct tile {
 } tile_t;
 
 tile_t* TILE_new(
-    int blueprint_id,
-    int tileset_id,
-    float clip_x1, float clip_y1,
-    float clip_x2, float clip_y2,
-    int x,       int y
+    int            blueprint_id,
+    int            tileset_id,
+    render_coord_t clip,
+    int x,
+    int y
 );
 
 void TILE_free(tile_t *tile);

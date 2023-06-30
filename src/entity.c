@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "data/library.h"
 
 #include "animation.h"
@@ -149,14 +147,13 @@ int ENT_current_frame_height(
         return ANIM_get_texture_height(ENT_get_animation_sheet(entity));
     }
 
-    return ENT_current_frame(entity).rect.w;
+    return ENT_current_frame(entity).rect.h;
 }
 
 int ENT_current_frame_handle_x(
     entity_t *entity
 ) {
     frame_t f = ENT_current_frame(entity);
-    
     return f.handle_x;
 }
 
@@ -321,11 +318,11 @@ void ENT_update_animation(
     int len = ENT_get_animation(entity, entity->state).len;
 
     if (entity->anim_frame_t >= del) {
-        entity->anim_frame_t =0;
+        entity->anim_frame_t = 0;
         entity->anim_frame++; 
 
         if (entity->anim_frame >= len) {
-            entity->anim_frame =0;
+            entity->anim_frame = 0;
         }
     }
 }
@@ -369,7 +366,7 @@ void ENT_direct_holdable_upwards(
 void ENT_direct_holdable_downwards(
     entity_t* entity
 ) {
-    if (!(entity)) {return ;}
+    if (!entity) {return ;}
 
     if (ENT_has_flag(entity, EMMIT_LIGHT)) {
         float new_angle = SRC_move_lightsource(DOWN, entity->direction);
@@ -548,7 +545,7 @@ entity_t* ENT_init(
     // position 
     entity->x                = x;        
     entity->y                = y;
-    entity->direction        = RIGHT; // this is the default but I donw know why
+    entity->direction        = LEFT; // this is the default but I donw know why
     entity->x_vel            = 0;
     entity->y_vel            = 0;
 
@@ -587,10 +584,10 @@ entity_t* ENT_init(
     if (flags & EMMIT_LIGHT) {
         entity->update_fun[entity->update_fun_t++] = ENT_update_wobble;
     }
-
+    
+    // resolutions
     if (flags & MOVABLE) {
         entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_velocity;
-        entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_hold;
     }
 
     if (flags & STATEABLE) {
@@ -602,6 +599,7 @@ entity_t* ENT_init(
     }
     
     if (blueprint->hold_id != ENTITY_NO) {
+        entity->resolution_fun[entity->resolution_fun_t++] = ENT_update_hold;
         entity->hold = ENT_generate(x, y, blueprint->hold_id);
         ENT_update_hold(entity);
     }
@@ -645,50 +643,25 @@ render_coord_t ENT_texture_coord(
     return ENT_current_frame(entity).img;
 }
 
-// calculate where on screen entity texture should be rendered
 render_coord_t ENT_img_coord(
     entity_t       *entity,
     render_coord_t  texture_coord,
     int             camera_x,
     int             camera_y
 ) {
-    // texture is always rendered 1:1 to achieve pixel perfect effect
-    float x1, y1, x2, y2;
-    render_coord_t coord;
-
     float texW = (float) ENT_get_animation_sheet_width(entity);
     float texH = (float) ENT_get_animation_sheet_height(entity);
-    
-    // OLD
-    // orient it in a way that OpenGL will digest it
-    // x1 = (float)entity->x - (float)SCREEN_WIDTH / 2.0;
-    // y1 = (float)entity->y - (float)SCREEN_HEIGHT / 2.0;
 
-    x1 = (float)entity->x / (float)SCREEN_WIDTH;
-    y1 = (float)entity->y / (float)SCREEN_HEIGHT;
+    render_coord_t render = GL_UTIL_global_to_gl_coord(
+        entity->x, entity->y,
+        texW, texH,
+        texture_coord.x1, texture_coord.y1,
+        texture_coord.x2, texture_coord.y2
+    );
 
-    y1 *= -1;
-
-    x2 = (float)x1 + (((texture_coord.x2 - texture_coord.x1) * texW) / SCREEN_WIDTH);
-    y2 = (float)y1 - (((texture_coord.y2 - texture_coord.y1) * texH) / SCREEN_HEIGHT);
-
-    // x2 = (float)x1 + (texture_coord.x2 - texture_coord.x1);
-    // y2 = (float)y1 - (texture_coord.y2 - texture_coord.y1);
-
-    x1 *= global_x_scale;
-    y1 *= global_y_scale;
-    x2 *= global_x_scale;
-    y2 *= global_y_scale;
-
-    float x_diff = (((float)camera_x) / (float)SCREEN_WIDTH) * global_x_scale;
-    float y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT) * global_y_scale;
-
-    coord.x1 = x1 - x_diff;
-    coord.y1 = y1 + y_diff;
-    coord.x2 = x2 - x_diff;
-    coord.y2 = y2 + y_diff;
+    render = GL_UTIL_gl_to_camera_gl(render, camera_x, camera_y);
  
-    return coord;
+    return render;
 }
 
 void ENT_add_to_scene(
@@ -703,7 +676,7 @@ void ENT_add_to_scene(
     int            id     = ENT_texture_id(entity);
     render_coord_t clip   = ENT_texture_coord(entity);
     render_coord_t render = ENT_img_coord(entity, clip, camera_x, camera_y);
-
+    
     SCENE_add_sprite(scene, id, render, clip, flip, false);
 }
 
@@ -812,7 +785,6 @@ void ENT_update_collision(
             entity->y = y_intersections->value - h;
             entity->state = STANDING;
         }
-
         entity->y_vel = 0;  //stop moving!
     }
 
