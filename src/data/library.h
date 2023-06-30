@@ -10,6 +10,8 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
+#define GRAPHIC_ERROR_SYMBOL 'G'
+
 const static int NOTHING_FLAG    = 0;
 const static int MOVABLE         = 1 << 0;  // velocity will affect entity 
 const static int APPLY_COLLISION = 1 << 1;  // entity will collide with obstacles
@@ -102,6 +104,23 @@ enum SHADER_IDX {
     SHADER_ALL
 };
 
+enum GFX_MODULE {
+    GFX_MODULE_SDL,
+    GFX_MODULE_SDL_GL,
+    GFX_MODULE_WINDOW,
+    GFX_MODULE_GLEW,
+    GFX_MODULE_VSYNC,
+    GFX_MODULE_GL_PARAMS,
+    GFX_MODULE_PNG,
+    GFX_MODULE_VIEWPORT,
+    GFX_MODULE_ALL
+};
+
+enum GFX_MODULE_STATUS {
+    GFX_MODULE_STATUS_ERROR,
+    GFX_MODULE_STATUS_OK
+};
+
 enum OBSTACLE_TYPE {
     OBSTACLE_FALSE,
     OBSTACLE_TRUE
@@ -155,6 +174,17 @@ typedef struct shader_program {
     shader_t  fragment;
 } shader_program_t;
 
+typedef struct gfx_module_blueprint {
+    bool       (*fun)();
+    const char *name;
+} gfx_module_blueprint_t;
+
+typedef struct gfx_module {
+    char        error_symbol;
+    bool        status;
+    const char *name;
+} gfx_module_t;
+
 extern entity_blueprint_t *entity_library[ENTITY_ALL];
 extern level_blueprint_t  *levels_library[LEVEL_ALL];
 extern tile_blueprint_t   *tiles_library[TILE_ALL];
@@ -165,6 +195,8 @@ extern texture_t          *tilesets_library[TILESET_ALL];
 extern wobble_t           *wobble_library[WOBBLE_ALL];
 extern shader_program_t   *shader_library[SHADER_ALL];
 
+extern gfx_module_t       *gfx_module_library[GFX_MODULE_ALL];
+
 void LIB_create_entity_library();
 void LIB_create_wobble_library();
 void LIB_create_lightsources_library();
@@ -173,6 +205,9 @@ void LIB_create_levels_library();
 void LIB_create_tilesets_library();
 void LIB_create_tile_library();
 void LIB_create_shaders_library();
+
+void LIB_init_all_modules();
+int LIB_check_modules();
 
 void LIB_create_all();
 void LIB_free_all();

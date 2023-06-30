@@ -24,6 +24,11 @@ void GAME_create_library(
     LIB_create_all();
 }
 
+void GAME_read_modules(
+) {
+    LIB_init_all_modules();
+}
+
 void GAME_free_all_files(
 ) {
     LIB_free_all();
@@ -88,7 +93,7 @@ game_t* GAME_init(
 
     game->loop           = true;
     game->entity_manager = ENTMAN_new();
-
+    
     game->level          = NULL;
     game->level          = LVL_new(level_id);
 
@@ -155,7 +160,7 @@ void GAME_render(
     GFX_update();
 }
 
-GFX_STATUS GAME_init_graphics(
+bool GAME_init_graphics(
     int graphic_option
 ) {
     if (graphic_option == GRAPHIC_OFF) { 
@@ -221,20 +226,24 @@ game_t* GAME_new(
     int max_frames
 ) {
     game_t *game      = NULL;
-    game              = GAME_init(level_id, max_frames);
 
-    int gfx_status = GAME_init_graphics(graphic_option); 
-    if(gfx_status != GFX_CORRECT) {
-        GAME_close(game); return NULL;
+    GAME_read_modules();
+    if(!(LIB_check_modules())) {
+        return game;
     }
+
+    GAME_create_library();
+
+    // TODO: TBD?
+    GAME_init_graphics(graphic_option); 
+
+    game              = GAME_init(level_id, max_frames);
 
     if(graphic_option == GRAPHIC_ON) {
         game->draw_func = &GAME_draw_everything; 
     } else {
         game->draw_func = &GAME_draw_nothing; 
     }
-
-    GAME_create_library();
 
     scene = SCENE_new();
 
@@ -262,6 +271,10 @@ void GAME_update_time(
 void GAME_loop(
     game_t* game
 ) {
+    if (!game) {
+        return;
+    }
+
     while((game->loop) && (game->frame != game->max_frames)) {
         GAME_start_time(game);
         GAME_apply_logic(game);
@@ -269,6 +282,8 @@ void GAME_loop(
         GAME_update_time(game);
         // game->loop = false;
     }
+
+    GAME_close(game);
 }
 
 void GAME_run(
@@ -279,5 +294,4 @@ void GAME_run(
     game_t* game = NULL;
     game         = GAME_new(level_id, graphic_option, max_frames);
     GAME_loop(game);
-    GAME_close(game);
 }

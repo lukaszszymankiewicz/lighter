@@ -31,6 +31,7 @@ $(BUILDDIR)/%.o:	$(TESTDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 OBJS =                                     \
+	$(BUILDDIR)/$(DATADIR)/gfx_modules.o   \
 	$(BUILDDIR)/$(DATADIR)/entities.o      \
 	$(BUILDDIR)/$(DATADIR)/levels.o        \
 	$(BUILDDIR)/$(DATADIR)/library.o       \
@@ -63,6 +64,7 @@ OBJS =                                     \
 	$(BUILDDIR)/vertex.o                   \
 
 TESTOBJS =                                    \
+	$(BUILDDIR)/$(DATADIR)/gfx_modules.o      \
 	$(BUILDDIR)/$(DATADIR)/entities.o         \
 	$(BUILDDIR)/$(DATADIR)/levels.o           \
 	$(BUILDDIR)/$(DATADIR)/library.o          \

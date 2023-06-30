@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+
 #include <GL/gl.h>
 
 #ifndef GFX_H
@@ -8,7 +9,16 @@ extern SDL_Window *window;
 
 GLuint GFX_generate_texture_ID();
 
-int GFX_init_graphics();
+bool GFX_init_graphics();
+
+bool GFX_init_png();
+bool GFX_set_viewport();
+bool GFX_init_gl_params();
+bool GFX_init_vsync();
+bool GFX_init_glew();
+bool GFX_init_window();
+bool GFX_init_sdl_with_gl();
+bool GFX_init_video();
 
 void GFX_free();
 void GFX_clear_screen();
@@ -22,17 +32,5 @@ int GFX_check_program_link_status(GLuint program);
 
 int GFX_compile_shader(GLenum type, const char* path);
 int GFX_link_shaders_to_program(GLuint vertex_id, GLuint fragment_id);
-
-// TODO: to be deleted
-typedef int GFX_STATUS;
-enum GFX_STATUS_TYPE {
-    GFX_CORRECT = 1,
-    GFX_WINDOW_CANNOT_BE_CREATED,
-    GFX_VIDEO_CANNOT_BE_INITIALIZED,
-    GFX_OPEN_GL_CONTEXT_CANNOT_BE_INITIALIED,
-    GFX_GLEW_CANNOT_BE_INITIALIED,
-    GFX_UNABLE_TO_SET_VSYNC,
-    GFX_SDL_IMAGE_COULD_NOT_BE_INITIALIZED
-};
 
 #endif

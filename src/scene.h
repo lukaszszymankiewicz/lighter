@@ -1,5 +1,7 @@
 #include <stdbool.h>
 
+#include <GL/gl.h>
+
 #include "gl_util.h"
 
 #ifndef SCENE_H

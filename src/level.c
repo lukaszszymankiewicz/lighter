@@ -336,20 +336,23 @@ void LVL_put_on_scene(
 void LVL_free(
     level_t *level
 ) {
+    if (levels_library[level->blueprint_id]) {
+        int size_x = LVL_size_x(level);
+        int size_y = LVL_size_y(level);
 
-    int size_x = LVL_size_x(level);
-    int size_y = LVL_size_y(level);
-
-    for (int x=0; x<size_x; x++) {
-        for (int y=0; y<size_y; y++) {
-            TILE_free(level->structure[y * size_x + x]);
+        for (int x=0; x<size_x; x++) {
+            for (int y=0; y<size_y; y++) {
+                TILE_free(level->structure[y * size_x + x]);
+            }
         }
     }
 
     SEG_free(level->obstacle_segments);
     level->obstacle_segments = NULL;
-
-    free(level);
+    
+    if (level) {
+        free(level);
+    }
     level = NULL;
 }
 

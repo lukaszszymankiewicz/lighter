@@ -201,7 +201,7 @@ void GFX_set_global_render_scale(
     global_y_scale = (float)TILE_HEIGHT / (max_screen_h / 2.0 / tile_per_y) * scale;
 }
 
-GFX_STATUS GFX_init_window() {
+bool GFX_init_window() {
     window = SDL_CreateWindow(
         GAME_NAME,
         SDL_WINDOWPOS_UNDEFINED,
@@ -212,39 +212,44 @@ GFX_STATUS GFX_init_window() {
     );
 
     if (!window) {
-        return GFX_WINDOW_CANNOT_BE_CREATED;
+        printf("Error: %s \n", SDL_GetError());
+        return false;
     }
 
     SDL_ShowCursor(SDL_DISABLE); // disable cursor on window
 
-    return GFX_CORRECT;
+    return true;
 };
 
-GFX_STATUS GFX_init_video(
+bool GFX_init_sdl_with_gl(
 ) {
-    int init_video = SDL_Init(SDL_INIT_VIDEO);
-    if(init_video) {
-        return GFX_VIDEO_CANNOT_BE_INITIALIZED;
-    };
-
     SDL_GL_SetAttribute(OPENGL_MAJOR_VERSION, OPENGL_MAJOR_VERSION);
     SDL_GL_SetAttribute(OPENGL_MINOR_VERSION, OPENGL_MINOR_VERSION);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    
-    return GFX_CORRECT;
+
+    return true;
+}
+
+bool GFX_init_video(
+) {
+    return (bool)SDL_Init(SDL_INIT_VIDEO);
 };
 
-GFX_STATUS GFX_init_renderer(
-) {
-    gl_context = SDL_GL_CreateContext(window);
-    if(!gl_context) { return GFX_OPEN_GL_CONTEXT_CANNOT_BE_INITIALIED; }
+bool GFX_create_gl_context() {
+    return (bool) SDL_GL_CreateContext(window);
+}
 
+bool GFX_init_glew() {
     GLenum glew_err = glewInit();
-    if(glew_err != GLEW_OK) { return GFX_GLEW_CANNOT_BE_INITIALIED; }
-    
-    int vsync_status = SDL_GL_SetSwapInterval(1);
-    if(vsync_status < 0) { return GFX_UNABLE_TO_SET_VSYNC; }
+    return (bool)(glew_err == GLEW_OK);
+}
 
+bool GFX_init_vsync(){
+    return (bool)(SDL_GL_SetSwapInterval(1) == 0);
+}
+
+bool GFX_init_gl_params(
+) {
     // Initialize OpenGL
     // if(!GFX_init_OpenGL_shaders()) {
     //     printf("Unable to initialize OpenGL!\n");
@@ -256,21 +261,19 @@ GFX_STATUS GFX_init_renderer(
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     GFX_set_global_render_scale();
 
-    return GFX_CORRECT;
+    return true;
 }
 
-GFX_STATUS GFX_init_png(
+bool GFX_init_png(
 ) {
-    int status = IMG_Init(IMG_INIT_PNG);
-    if(!status) { return GFX_SDL_IMAGE_COULD_NOT_BE_INITIALIZED; }
-
-    return GFX_CORRECT;
+    return (bool)IMG_Init(IMG_INIT_PNG);
 };
 
-void GFX_set_viewport(
+bool GFX_set_viewport(
 ) {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
+    return true;
 }
 
 GLuint GFX_init_vao(
@@ -311,27 +314,13 @@ void GFX_aa(
     };
 }
 
-GFX_STATUS GFX_init_graphics(
+bool GFX_init_graphics(
 ) {
-    GFX_STATUS status;
-
-    status = GFX_init_video();
-    if(status != GFX_CORRECT) { return status; }
-
-    status = GFX_init_window();
-    if(status != GFX_CORRECT) { return status; }
-    
-    status = GFX_init_renderer();
-    if(status != GFX_CORRECT) {  return status; }
-
-    status = GFX_init_png();
-    if(status != GFX_CORRECT) { return status; }
-
-    GFX_set_viewport();
+    // TODO: OK, this propably needs to be placed somewhere else
     GFX_init_vao();
     GFX_init_vbo();
 
-    return GFX_CORRECT;
+    return true;
 };
 
 void GFX_free(
