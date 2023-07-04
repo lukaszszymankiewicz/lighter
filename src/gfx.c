@@ -66,7 +66,7 @@ int GFX_check_program_link_status(
     if (linked == GL_FALSE) {
         char buffer[max_buffer_len];
         glGetProgramInfoLog(program, max_buffer_len, NULL, buffer);
-        printf("Shader compilation error: %s \n", buffer);
+        printf("Program link error: %s \n", buffer);
         return 0;
     }
     return 1;
@@ -101,14 +101,13 @@ int GFX_compile_shader(
     const char* path
 ) {
     const char* src = GFX_read_shader_from_file(path); 
-
     GLuint shader = glCreateShader(type);
 
     if(shader == 0) {
         printf("COULD NOT LOAD SHADER: %s!\n", path);
     }
 
-    glShaderSource(shader, 1, (const char**)&src, NULL);
+    glShaderSource(shader, 1, (const GLchar**)&src, NULL);
     glCompileShader(shader);
 
     return (int)shader;
@@ -232,33 +231,30 @@ bool GFX_init_sdl_with_gl(
 
 bool GFX_init_video(
 ) {
-    return (bool)SDL_Init(SDL_INIT_VIDEO);
+    return (SDL_Init(SDL_INIT_VIDEO) == 0);
 };
 
 bool GFX_create_gl_context() {
-    return (bool) SDL_GL_CreateContext(window);
+    gl_context = SDL_GL_CreateContext(window);
+    return (gl_context != NULL);
 }
 
 bool GFX_init_glew() {
-    GLenum glew_err = glewInit();
-    return (bool)(glew_err == GLEW_OK);
+    return (glewInit() == GLEW_OK);
 }
 
 bool GFX_init_vsync(){
-    return (bool)(SDL_GL_SetSwapInterval(1) == 0);
+    return (SDL_GL_SetSwapInterval(1) == 0);
 }
 
 bool GFX_init_gl_params(
 ) {
-    // Initialize OpenGL
-    // if(!GFX_init_OpenGL_shaders()) {
-    //     printf("Unable to initialize OpenGL!\n");
-    //     return 0;
-    // }
-
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // TODO: log error with
+    // error = glGetError();
+
     GFX_set_global_render_scale();
 
     return true;
@@ -323,6 +319,7 @@ bool GFX_init_graphics(
     return true;
 };
 
+// TODO: to modules teardown
 void GFX_free(
 ) {
     if (gl_context) {

@@ -108,6 +108,7 @@ enum GFX_MODULE {
     GFX_MODULE_SDL,
     GFX_MODULE_SDL_GL,
     GFX_MODULE_WINDOW,
+    GFX_MODULE_GL_CONTEXT,
     GFX_MODULE_GLEW,
     GFX_MODULE_VSYNC,
     GFX_MODULE_GL_PARAMS,
@@ -179,6 +180,7 @@ typedef struct gfx_module_blueprint {
     const char *name;
 } gfx_module_blueprint_t;
 
+// TODO: module should have a pointer to function to cleanup
 typedef struct gfx_module {
     char        error_symbol;
     bool        status;

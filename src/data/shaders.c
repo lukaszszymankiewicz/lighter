@@ -28,7 +28,7 @@ shader_program_t* LIB_create_shader(
 ) {
     int vertex, fragment, program;
 
-    vertex = GFX_compile_shader(blueprint->vertex.type, blueprint->vertex.path);
+    vertex   = GFX_compile_shader(blueprint->vertex.type, blueprint->vertex.path);
     fragment = GFX_compile_shader(blueprint->fragment.type, blueprint->fragment.path);
     
     if (GFX_check_shader_compile_status(vertex) == 0) {
@@ -40,9 +40,10 @@ shader_program_t* LIB_create_shader(
 
     program = GFX_link_shaders_to_program(vertex, fragment);
 
-    if (GFX_check_program_link_status(program) == 0) {;
+    if (GFX_check_program_link_status(program) == 0) {
         return NULL;
     }
+
 
     blueprint->vertex.id = (int)vertex;
     blueprint->fragment.id = (int)fragment;

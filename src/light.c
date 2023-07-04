@@ -629,69 +629,53 @@ vertex_t* LIG_single_add_light_polygon(
 
 };
 
-render_vertex_t LIG_calc_light_polygon(
+void LIG_add_to_scene(
     int              x,
     int              y,
-    int              corr_x,
-    int              corr_y,
+    int              camera_x, // camera x
+    int              camera_y, // camera y 
     int              i,
     float            angle,
     float            coef,
     lightsource_t   *light,
     segment_t       *obstacles
 ) {
-    vertex_t* vertex            = NULL;
-    vertex_t* ptr               = NULL;
-    vertex_t* transposed_vertex = NULL;
+    vertex_t        *vertex            = NULL;
+    vertex_t        *ptr               = NULL;
+    vertex_t        *transposed_vertex = NULL;
     render_vertex_t gl_vertex; 
 
     // calculate in global coords
     vertex            = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
-
+    
     int len = VRTX_len(vertex);
 
     // align it with camera
-    transposed_vertex = VRTX_transpose(vertex, corr_x, corr_y);
+    transposed_vertex = VRTX_transpose(vertex, camera_x, camera_y);
     
     int j = 0;
 
     // translate it to gl coords system
     for (ptr=transposed_vertex; ptr; ptr=ptr->next) {
-        render_coord_t c = GL_UTIL_global_to_gl_coord_single(ptr->x, ptr->y, corr_x, corr_y);
+        render_coord_t c = GL_UTIL_global_to_gl_coord_single(ptr->x, ptr->y, camera_x, camera_y);
         gl_vertex.coefs[j] = c.x1;
         gl_vertex.coefs[j+1] = c.y1;
+        gl_vertex.len++;
         j++; j++; 
     }
-
-    return gl_vertex;
-}
-
-void LIG_add_to_scene(
-    int              x,
-    int              y,
-    int              corr_x, // camera x
-    int              corr_y, // camera y 
-    int              i,
-    float            angle,
-    float            coef,
-    lightsource_t   *light,
-    segment_t       *obstacles
-) {
-    render_vertex_t ff = LIG_calc_light_polygon(
-        x, y,
-        corr_x, corr_y,
-        i, angle, coef, light, obstacles
-    );
 
     SCENE_add_shader(
         scene,
         0, // SOME iterator here?
         shader_library[SHADER_TEST]->id,
-        ff.len,
+        gl_vertex.len,
         2, // TODO: ADD SOME CONSTANT!
-        ff.coefs 
+        gl_vertex.coefs 
     );
     
+    // cleanup
+    VRTX_free(vertex);
+
     // TODO: this should propably be added as well to above function
     // scene->components[scene->n]->coords = vertex;
     // scene->components[scene->n]->x0     = x;

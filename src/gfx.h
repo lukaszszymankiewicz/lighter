@@ -1,6 +1,7 @@
+#include <GL/gl.h>
 #include <SDL2/SDL.h>
 
-#include <GL/gl.h>
+#include <stdbool.h>
 
 #ifndef GFX_H
 #define GFX_H
@@ -19,10 +20,12 @@ bool GFX_init_glew();
 bool GFX_init_window();
 bool GFX_init_sdl_with_gl();
 bool GFX_init_video();
+bool GFX_create_gl_context();
 
 void GFX_free();
 void GFX_clear_screen();
 void GFX_update();
+
 void GFX_set_interpolation_2d(int interpolation);
 void GFX_bind_texture(GLuint texture_id);
 void GFX_specify_texture(SDL_Surface *surface, int mode);
