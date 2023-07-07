@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#include "gl_util.h"
+
 #ifndef GFX_H
 #define GFX_H
 
@@ -33,7 +35,10 @@ void GFX_specify_texture(SDL_Surface *surface, int mode);
 int GFX_check_shader_compile_status(GLuint shader_id);
 int GFX_check_program_link_status(GLuint program);
 
-int GFX_compile_shader(GLenum type, const char* path);
-int GFX_link_shaders_to_program(GLuint vertex_id, GLuint fragment_id);
+shader_program_t *GFX_create_gl_program(
+    const char* vertex_shader_path,
+    const char* fragment_shader_path,
+    const char* geometry_shader_path
+);
 
 #endif

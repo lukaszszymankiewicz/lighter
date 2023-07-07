@@ -626,7 +626,6 @@ vertex_t* LIG_single_add_light_polygon(
     );
 
     return light_polygon;
-
 };
 
 void LIG_add_to_scene(
@@ -644,35 +643,31 @@ void LIG_add_to_scene(
     vertex_t        *ptr               = NULL;
     vertex_t        *transposed_vertex = NULL;
     render_vertex_t gl_vertex; 
-
+    
     // calculate in global coords
     vertex            = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
-    
-    int len = VRTX_len(vertex);
 
     // align it with camera
     transposed_vertex = VRTX_transpose(vertex, camera_x, camera_y);
     
-    int j = 0;
+    gl_vertex.len = 0;
 
     // translate it to gl coords system
     for (ptr=transposed_vertex; ptr; ptr=ptr->next) {
         render_coord_t c = GL_UTIL_global_to_gl_coord_single(ptr->x, ptr->y, camera_x, camera_y);
-        gl_vertex.coefs[j] = c.x1;
-        gl_vertex.coefs[j+1] = c.y1;
-        gl_vertex.len++;
-        j++; j++; 
+        gl_vertex.coefs[gl_vertex.len++] = c.x1;
+        gl_vertex.coefs[gl_vertex.len++] = c.y1;
     }
 
     SCENE_add_shader(
         scene,
         0, // SOME iterator here?
-        shader_library[SHADER_TEST]->id,
+        shader_library[SHADER_TEST]->program,
         gl_vertex.len,
         2, // TODO: ADD SOME CONSTANT!
         gl_vertex.coefs 
     );
-    
+
     // cleanup
     VRTX_free(vertex);
 

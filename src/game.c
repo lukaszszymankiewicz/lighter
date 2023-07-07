@@ -211,9 +211,9 @@ void GAME_draw_everything(
     GAME_clear_screen(game);
     GAME_put_level_on_scene(game);
     GAME_put_entities_on_scene(game);
+    GAME_draw_light(game);
     GAME_draw_scene(game);
     GAME_render(game);
-    GAME_draw_light(game);
 }
 
 void GAME_draw_nothing(

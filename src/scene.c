@@ -1,7 +1,9 @@
 #include <GL/glew.h>
+#include <GL/gl.h>
 
 #include "data/library.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -74,13 +76,16 @@ void SCENE_add_shader(
     int      size,
     GLfloat *vertices
 ) {
-    if (scene->n_shader >= MAX_VERTEX_ON_SHADER_LAYER) { return; }
+    if (scene->n_shader >= MAX_SHADER_ON_SHADER_LAYER) { return; }
 
     scene->shader_layer[scene->n_shader].id         = id;
     scene->shader_layer[scene->n_shader].program_id = program_id;
     scene->shader_layer[scene->n_shader].len        = len;
     scene->shader_layer[scene->n_shader].size       = size;
-    scene->shader_layer[scene->n_shader].vertices   = vertices;
+
+    for (int i=0; i<len; i++) {
+        scene->shader_layer[scene->n_shader].vertices[i] = vertices[i];
+    }
 
     scene->n_shader++;
 }
@@ -95,7 +100,6 @@ void SCENE_free(
 void SCENE_draw(
     scene_t* scene 
 ) {
-
     glUseProgram(TILE_LAYER_PROGRAM_ID);
     for (int tile=0; tile<scene->n_tile; tile++) {
          RENDER_texture(
@@ -128,7 +132,8 @@ void SCENE_draw(
         );
     }
 
-    for (int shader=0; shader<scene->n_shader; shader++) {
+    // for (int shader=0; shader<scene->n_shader; shader++) {
+    for (int shader=0; shader<1; shader++) {
         RENDER_shader(
             scene->shader_layer[shader].vertices,
             scene->shader_layer[shader].program_id,

@@ -48,25 +48,30 @@ render_coord_t GL_UTIL_global_to_gl_coord_single(
     int        x, int        y,
     int camera_x, int camera_y
 ) {
-    // float x1, y1;
+     float x1, y1;
+        
+     x1 = x - ((float)SCREEN_WIDTH)/2;
+     x1 = x1 / (float)SCREEN_WIDTH;
 
-    // x1 = (float)x / (float)SCREEN_WIDTH;
-    // y1 = (float)y / (float)SCREEN_HEIGHT;
+     y1 = y - ((float)SCREEN_HEIGHT)/2;
+     y1 = y1 / (float)SCREEN_HEIGHT;
+     // x1 = (float)x / (float)SCREEN_WIDTH;
+     // y1 = (float)y / (float)SCREEN_HEIGHT;
 
-    // y1 *= -1;
+     y1 *= -1;
 
-    // float camera_x_diff = (((float)camera_x) / (float)SCREEN_WIDTH) * global_x_scale;
-    // float camera_y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT) * global_y_scale;
+    x1 *= global_x_scale;
+    y1 *= global_y_scale;
 
-    // x1 -= camera_x_diff;
-    // y1 += camera_y_diff;
+     // float camera_x_diff = (((float)camera_x) / (float)SCREEN_WIDTH);
+     // float camera_y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT);
 
-    // x1 *= global_x_scale;
-    // y1 *= global_y_scale;
+     // x1 -= camera_x_diff;
+     // y1 += camera_y_diff;
 
-    // return (render_coord_t) {x1, y1, x1, y1};
+    return (render_coord_t) {x1, y1, x1, y1};
 
-    return GL_UTIL_global_to_gl_coord(
-        x, y, 1, 1, 0, 0, camera_x, camera_y
-    );
+    // return GL_UTIL_global_to_gl_coord(
+    //     x, y, 1, 1, 0, 0, camera_x, camera_y
+    // );
 }

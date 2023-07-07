@@ -1,5 +1,5 @@
 #include <GL/glew.h>
-
+#include <stdio.h>
 #include <stdbool.h>
 
 #include "render.h"
@@ -40,19 +40,29 @@ void RENDER_shader(
     int size
 ) { 
 
-    // TODO: this propably needs to be refactored, as glGetIntegerv is slow (and glUseProgram!)!
-    GLint current_program_id;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &current_program_id);
-    
-    if (current_program_id != program_id) {
-        glUseProgram(program_id);
+    printf("\n");
+    printf("vertex is rendered\n");
+    printf("n_vertices: %d \n", n_vertices);
+    for (int i=0; i<n_vertices; i++) {
+        printf("%f ", vertices[i]);
     }
+    printf("\n");
 
+    // TODO: this propably needs to be refactored, as glGetIntegerv is slow (and glUseProgram!)!
+    // GLint current_program_id;
+    // glGetIntegerv(GL_CURRENT_PROGRAM, &current_program_id);
+    
+    // if (current_program_id != program_id) {
+    // }
+    
+
+    glUseProgram(program_id);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * n_vertices, vertices, GL_STATIC_DRAW);
     GLint posAttrib = glGetAttribLocation(program_id, "position");
     glEnableVertexAttribArray(posAttrib);
-    // glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribPointer(posAttrib, size, GL_FLOAT, GL_FALSE, 0, 0);
-    glDrawArrays(GL_TRIANGLES, 0, n_vertices);
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    // glVertexAttribPointer(posAttrib, size, GL_FLOAT, GL_FALSE, 0, 0);
+    glDrawArrays(GL_POLYGON, 0, (int)(n_vertices/size));
+    // glDrawArrays(GL_POINTS, 0, n_vertices);
 };
 

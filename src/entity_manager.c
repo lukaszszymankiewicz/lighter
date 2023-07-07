@@ -6,6 +6,7 @@
 #include "global.h"
 #include "light.h"
 #include "segment.h"
+#include "scene.h"
 
 entity_manager_t* ENTMAN_new(
 ) {
@@ -216,8 +217,11 @@ void ENTMAN_calc_single_entity_light(
     int rel_y = CAMERA_Y - ENTMAN_hero_y(entity_manager);
     
     int n_poly = light->n_poly;
+    
+    if (entity->id != ENTITY_LIGHTER) { return; }
 
-    for (int i=0; i<n_poly; i++) {
+    // for (int i=0; i<n_poly; i++) {
+    for (int i=0; i<1; i++) {
         LIG_add_to_scene(
             emit_x, emit_y,
             rel_x,  rel_y,

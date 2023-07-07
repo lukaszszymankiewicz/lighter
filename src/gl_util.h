@@ -1,7 +1,7 @@
 #ifndef GL_UTIL_H
 #define GL_UTIL_H
 
-#define MAX_VERTEX_LEN 25
+#define MAX_VERTEX_LEN 50
 
 extern float global_x_scale;
 extern float global_y_scale;
@@ -17,6 +17,13 @@ typedef struct render_vertex {
     float         coefs[MAX_VERTEX_LEN];
     int           len;
 } render_vertex_t;
+
+typedef struct shader_program {
+    int       vertex_shader;
+    int       fragment_shader;
+    int       geomentry_shader;
+    int       program;
+} shader_program_t;
 
 render_coord_t GL_UTIL_global_to_gl_coord(
     int x, int y, int w, int h,

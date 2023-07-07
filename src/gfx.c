@@ -81,6 +81,7 @@ char* GFX_read_shader_from_file(
     
     fp = fopen(path, SHADER_CHECK_MODE);
     if(fp == NULL) {
+        printf("COULD NOT LOAD SHADER: %s!\n", path);
         return "";
     }
 
@@ -96,39 +97,44 @@ char* GFX_read_shader_from_file(
     return shader;
 }
 
-int GFX_compile_shader(
-    GLenum type,
-    const char* path
+shader_program_t* GFX_create_gl_program(
+    const char* vertex_shader_path,
+    const char* fragment_shader_path,
+    const char* geometry_shader_path // unused by now
 ) {
-    const char* src = GFX_read_shader_from_file(path); 
-    GLuint shader = glCreateShader(type);
+    shader_program_t* shader_program = NULL;
+    shader_program                   = (shader_program_t*)malloc(sizeof(shader_program_t));
 
-    if(shader == 0) {
-        printf("COULD NOT LOAD SHADER: %s!\n", path);
-    }
+    // vertex
+    const char* vertex_src = GFX_read_shader_from_file(vertex_shader_path); 
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, (const GLchar**)&vertex_src, NULL);
+    glCompileShader(vertex_shader);
+    
+    // fragment
+    const char* fragment_src = GFX_read_shader_from_file(fragment_shader_path); 
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, (const GLchar**)&fragment_src, NULL);
+    glCompileShader(fragment_shader);
 
-    glShaderSource(shader, 1, (const GLchar**)&src, NULL);
-    glCompileShader(shader);
-
-    return (int)shader;
-}
-
-int GFX_link_shaders_to_program(
-    GLuint vertex_id,
-    GLuint fragment_id
-) {
-    GLuint program_id = glCreateProgram();
-
-    glAttachShader(program_id, vertex_id);
-    glAttachShader(program_id, fragment_id);
+    // link 
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
     // glBindFragDataLocation(program_id, 0, "outColor"); // use for framebuffers
 
-    glLinkProgram(program_id);
+    glLinkProgram(program);
 
-    if(program_id == 0) {
-        printf("COULD NOT CREATE PROGRAM!\n");
-    }
-    return program_id;
+    // checks
+    if (GFX_check_shader_compile_status(vertex_shader) == 0) { return NULL; }
+    if (GFX_check_shader_compile_status(fragment_shader) == 0) { return NULL; }
+    if (GFX_check_program_link_status(program) == 0) { return NULL; }
+
+    shader_program->vertex_shader = vertex_shader;                   
+    shader_program->fragment_shader = fragment_shader;                   
+    shader_program->program = program;
+
+    return shader_program;
 }
 
 void GFX_set_interpolation_2d(
@@ -300,20 +306,10 @@ void GFX_update() {
     SDL_UpdateWindowSurface(window);
 };
 
-void GFX_aa(
-    int program_id
-) {
-    GLfloat vertices[] = {
-         0.0f,  0.5f,
-         0.5f, -0.5f,
-        -0.5f, -0.5f 
-    };
-}
-
 bool GFX_init_graphics(
 ) {
     // TODO: OK, this propably needs to be placed somewhere else
-    GFX_init_vao();
+    // GFX_init_vao();
     GFX_init_vbo();
 
     return true;

@@ -2,6 +2,7 @@
 
 #include "../animation.h"
 #include "../global.h"
+#include "../gl_util.h"
 #include "../level.h"
 #include "../source.h"
 #include "../texture.h"
@@ -162,18 +163,12 @@ typedef struct level_blueprint {
     entity_fill_t entities[MAX_LEVEL_ENTITY_FILL];
 } level_blueprint_t;
 
-typedef struct shader {
-    int         id;
-    int         type;
-    const char *path;
-} shader_t;
-
-typedef struct shader_program {
-    int       id;
-    int       status;
-    shader_t  vertex;
-    shader_t  fragment;
-} shader_program_t;
+typedef struct shader_program_blueprint {
+    int id;
+    const char *vertex_shader_path;
+    const char *fragment_shader_path;
+    const char *geomentry_shader_path;
+} shader_program_blueprint_t;
 
 typedef struct gfx_module_blueprint {
     bool       (*fun)();
