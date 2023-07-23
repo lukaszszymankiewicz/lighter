@@ -131,9 +131,9 @@ void SCENE_draw(
             scene->sprite_layer[sprite].flip_w
         );
     }
-
-    // for (int shader=0; shader<scene->n_shader; shader++) {
-    for (int shader=0; shader<1; shader++) {
+    printf("there is %d shaders to render! \n", scene->n_shader);
+    for (int shader=0; shader<scene->n_shader; shader++) {
+    // for (int shader=0; shader<1; shader++) {
         RENDER_shader(
             scene->shader_layer[shader].vertices,
             scene->shader_layer[shader].program_id,

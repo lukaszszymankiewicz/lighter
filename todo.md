@@ -29,10 +29,16 @@
 - [x] code for normal->gl coords should be in some util module
 - [x] delete all print statements
 - [x] add error codes in all gfx initialization
-- [ ] add light shader
-  - [ ] made shader readable from file
-  - [ ] made one polygon shader with white color
-  - [ ] made multi-polygon shader
+- [x] add light shader
+  - [x] made shader readable from file
+  - [x] made one polygon shader with white color
+  - [x] made multi-polygon shader
+  - [x] made multi-source shader
+  - [ ] add color to light shader
+  - [ ] put shader light effect to buffer
+  - [ ] add transparency to light effect shader
+  - [ ] made shader pixel-perfect
+  - [ ] add wobble
 - [ ] repair all unit-tests (once again!)
 - [ ] clear all memory leaks!
 - [ ] reading GFX (video, window) to the library module

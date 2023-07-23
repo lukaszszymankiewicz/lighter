@@ -11,7 +11,7 @@
 #define MAX_VERTEX_ON_TILE_LAYER      100
 #define MAX_VERTEX_ON_SHADER_LAYER    50
 #define MAX_SPRITES_ON_SPRITES_LAYER  10
-#define MAX_SHADER_ON_SHADER_LAYER    1
+#define MAX_SHADER_ON_SHADER_LAYER    10
 
 typedef struct drawable_texture {
     int            id;

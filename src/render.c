@@ -24,7 +24,7 @@ void RENDER_texture(
         clip_x1 = clip_x2;
         clip_x2 = temp;
     }
-    
+    // TODO: this to shader as well? 
     glBegin(GL_QUADS);
         glTexCoord2f(clip_x2, clip_y1); glVertex2f(render_x2, render_y1); // up right (1,1)
         glTexCoord2f(clip_x1, clip_y1); glVertex2f(render_x1, render_y1); // up left (-1, 1)
@@ -40,13 +40,13 @@ void RENDER_shader(
     int size
 ) { 
 
-    printf("\n");
-    printf("vertex is rendered\n");
-    printf("n_vertices: %d \n", n_vertices);
-    for (int i=0; i<n_vertices; i++) {
-        printf("%f ", vertices[i]);
-    }
-    printf("\n");
+    // printf("\n");
+    // printf("vertex is rendered\n");
+    // printf("n_vertices: %d \n", n_vertices);
+    // for (int i=0; i<n_vertices; i++) {
+    //     printf("%f ", vertices[i]);
+    // }
+    // printf("\n");
 
     // TODO: this propably needs to be refactored, as glGetIntegerv is slow (and glUseProgram!)!
     // GLint current_program_id;
@@ -55,7 +55,6 @@ void RENDER_shader(
     // if (current_program_id != program_id) {
     // }
     
-
     glUseProgram(program_id);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * n_vertices, vertices, GL_STATIC_DRAW);
     GLint posAttrib = glGetAttribLocation(program_id, "position");

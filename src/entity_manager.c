@@ -201,27 +201,26 @@ void ENTMAN_calc_single_entity_light(
         return; 
     }
 
-    segment_t* obs = NULL;
-    obs            = ENTMAN_light_obstacles(entity, obstacles);
+    segment_t* obs       = NULL;
+    obs                  = ENTMAN_light_obstacles(entity, obstacles);
         
     lightsource_t* light = NULL;
     light                = ENT_get_light(entity);
 
-    int emit_x = ENT_light_emit_x(entity);
-    int emit_y = ENT_light_emit_y(entity);
+    int emit_x           = ENT_light_emit_x(entity);
+    int emit_y           = ENT_light_emit_y(entity);
 
-    float angle       = ENT_light_angle(entity);
-    float wobble_corr = ENT_wobble_coef( entity);
+    float angle          = ENT_light_angle(entity);
+    float wobble_corr    = ENT_wobble_coef(entity);
 
-    int rel_x = CAMERA_X - ENTMAN_hero_x(entity_manager);
-    int rel_y = CAMERA_Y - ENTMAN_hero_y(entity_manager);
+    int rel_x            = CAMERA_X - ENTMAN_hero_x(entity_manager);
+    int rel_y            = CAMERA_Y - ENTMAN_hero_y(entity_manager);
     
     int n_poly = light->n_poly;
     
-    if (entity->id != ENTITY_LIGHTER) { return; }
+    printf("rendering %d light polygons for entitty with id %d \n", n_poly, entity->id);
 
-    // for (int i=0; i<n_poly; i++) {
-    for (int i=0; i<1; i++) {
+    for (int i=0; i<n_poly; i++) {
         LIG_add_to_scene(
             emit_x, emit_y,
             rel_x,  rel_y,
