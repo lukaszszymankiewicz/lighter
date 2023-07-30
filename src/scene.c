@@ -11,8 +11,10 @@
 #include "render.h"
 #include "scene.h"
 
+// TODO: maybe introduce 'layer' struct to keep all this things?
 static const int TILE_LAYER_PROGRAM_ID   = 0;
 static const int SPRITE_LAYER_PROGRAM_ID = 0;
+static const int SHADER_LAYER_PROGRAM_ID = 0;
 
 scene_t *scene = NULL;
 
@@ -35,23 +37,23 @@ scene_t* SCENE_new(
 }
 
 void SCENE_add_tile(
-    scene_t* scene,
-    int            id,
+    scene_t       *scene,
+    int            texture_id,
     render_coord_t render,
     render_coord_t clip
 ) {
     if (scene->n_tile >= MAX_TILES_ON_TILE_LAYER) { return; }
 
-    scene->tile_layer[scene->n_tile].id     = id;
-    scene->tile_layer[scene->n_tile].render = render;
-    scene->tile_layer[scene->n_tile].clip   = clip;
+    scene->tile_layer[scene->n_tile].texture_id = texture_id;
+    scene->tile_layer[scene->n_tile].render     = render;
+    scene->tile_layer[scene->n_tile].clip       = clip;
 
     scene->n_tile++;
 }
 
 void SCENE_add_sprite(
-    scene_t* scene,
-    int            id,
+    scene_t       *scene,
+    int            texture_id,
     render_coord_t render,
     render_coord_t clip,
     bool           flip_w,
@@ -59,34 +61,51 @@ void SCENE_add_sprite(
 ) {
     if (scene->n_sprite >= MAX_SPRITES_ON_SPRITES_LAYER) { return; }
 
-    scene->sprite_layer[scene->n_sprite].id     = id;
-    scene->sprite_layer[scene->n_sprite].render = render;
-    scene->sprite_layer[scene->n_sprite].clip   = clip;
-    scene->sprite_layer[scene->n_sprite].flip_w = flip_w;
-    scene->sprite_layer[scene->n_sprite].flip_h = flip_h;
+    scene->sprite_layer[scene->n_sprite].texture_id = texture_id;
+    scene->sprite_layer[scene->n_sprite].render     = render;
+    scene->sprite_layer[scene->n_sprite].clip       = clip;
+    scene->sprite_layer[scene->n_sprite].flip_w     = flip_w;
+    scene->sprite_layer[scene->n_sprite].flip_h     = flip_h;
 
     scene->n_sprite++;
 }
 
 void SCENE_add_shader(
-    scene_t *scene,
-    int      id,
-    int      program_id,
-    int      len,
-    int      size,
-    GLfloat *vertices
+    scene_t    *scene,
+    int         program_id,
+    int         len,
+    int         size,
+    GLfloat    *vertices,
+    float      *v_uniform,
+    float      *f_uniform,
+    float      *g_uniform
 ) {
+    int i=0;
+
     if (scene->n_shader >= MAX_SHADER_ON_SHADER_LAYER) { return; }
 
-    scene->shader_layer[scene->n_shader].id         = id;
     scene->shader_layer[scene->n_shader].program_id = program_id;
     scene->shader_layer[scene->n_shader].len        = len;
     scene->shader_layer[scene->n_shader].size       = size;
-
-    for (int i=0; i<len; i++) {
+    
+    for (i=0; i<len; i++) {
         scene->shader_layer[scene->n_shader].vertices[i] = vertices[i];
     }
-
+    if (v_uniform) {
+        for (i=0; i<MAX_SHADER_FLOAT_VALS; i++) {
+            scene->shader_layer[scene->n_shader].v_uniform[i] = v_uniform[i];
+        }
+    }
+    if (f_uniform) {
+        for (i=0; i<MAX_SHADER_FLOAT_VALS; i++) {
+            scene->shader_layer[scene->n_shader].f_uniform[i] = f_uniform[i];
+        }
+    }
+    if (g_uniform) {
+        for (i=0; i<MAX_SHADER_FLOAT_VALS; i++) {
+            scene->shader_layer[scene->n_shader].g_uniform[i] = g_uniform[i];
+        }
+    }
     scene->n_shader++;
 }
 
@@ -103,7 +122,7 @@ void SCENE_draw(
     glUseProgram(TILE_LAYER_PROGRAM_ID);
     for (int tile=0; tile<scene->n_tile; tile++) {
          RENDER_texture(
-            tilesets_library[scene->tile_layer[tile].id]->id,
+            tilesets_library[scene->tile_layer[tile].texture_id]->id,
             scene->tile_layer[tile].render.x1,
             scene->tile_layer[tile].render.y1,
             scene->tile_layer[tile].render.x2,
@@ -119,7 +138,7 @@ void SCENE_draw(
     glUseProgram(SPRITE_LAYER_PROGRAM_ID);
     for (int sprite=0; sprite<scene->n_sprite; sprite++) {
         RENDER_texture(
-            sprites_library[scene->sprite_layer[sprite].id]->id,
+            sprites_library[scene->sprite_layer[sprite].texture_id]->id,
             scene->sprite_layer[sprite].render.x1,
             scene->sprite_layer[sprite].render.y1,
             scene->sprite_layer[sprite].render.x2,
@@ -131,15 +150,16 @@ void SCENE_draw(
             scene->sprite_layer[sprite].flip_w
         );
     }
-    printf("there is %d shaders to render! \n", scene->n_shader);
-    for (int shader=0; shader<scene->n_shader; shader++) {
-    // for (int shader=0; shader<1; shader++) {
-        RENDER_shader(
-            scene->shader_layer[shader].vertices,
-            scene->shader_layer[shader].program_id,
-            scene->shader_layer[shader].len,
-            scene->shader_layer[shader].size
-        );
 
+    for (int shader=0; shader<scene->n_shader; shader++) {
+        RENDER_shader(
+            scene->shader_layer[shader].program_id,
+            scene->shader_layer[shader].vertices,
+            scene->shader_layer[shader].len,
+            scene->shader_layer[shader].size,
+            scene->shader_layer[shader].v_uniform,
+            scene->shader_layer[shader].f_uniform,
+            scene->shader_layer[shader].g_uniform
+        );
     }
 }

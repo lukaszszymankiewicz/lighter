@@ -1,7 +1,17 @@
 #ifndef GL_UTIL_H
 #define GL_UTIL_H
 
-#define MAX_VERTEX_LEN 50
+#define MAX_VERTEX_LEN          50
+#define MAX_SHADER_UNIFORMS     1
+#define MAX_SHADER_UNIFORM_ARGS 4
+#define MAX_SHADER_FLOAT_VALS   MAX_SHADER_UNIFORMS*MAX_SHADER_UNIFORM_ARGS 
+
+enum UNIFORM_TYPE {
+    UNIFORM_VERTEX,
+    UNIFORM_FRAGMENT,
+    UNIFORM_GEOMETRY,
+    UNIFORM_TYPE_ALL
+};
 
 extern float global_x_scale;
 extern float global_y_scale;
@@ -18,10 +28,23 @@ typedef struct render_vertex {
     int           len;
 } render_vertex_t;
 
+typedef struct shader {
+    int          id;
+    int          n_uniforms;
+    int          uniform_ids[MAX_SHADER_UNIFORMS];
+    const char  *uniforms_names[MAX_SHADER_UNIFORMS];
+} shader_t;
+
+typedef struct uniform_values{
+    float       v_uniform[MAX_SHADER_UNIFORM_ARGS * MAX_SHADER_UNIFORMS];
+    float       f_uniform[MAX_SHADER_UNIFORM_ARGS * MAX_SHADER_UNIFORMS];
+    float       g_uniform[MAX_SHADER_UNIFORM_ARGS * MAX_SHADER_UNIFORMS];
+} uniform_values_t;
+
 typedef struct shader_program {
-    int       vertex_shader;
-    int       fragment_shader;
-    int       geomentry_shader;
+    shader_t  vertex_shader;
+    shader_t  fragment_shader;
+    shader_t  geomentry_shader;
     int       program;
 } shader_program_t;
 

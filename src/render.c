@@ -1,3 +1,5 @@
+#include "./data/library.h"
+
 #include <GL/glew.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -34,34 +36,52 @@ void RENDER_texture(
 };
 
 void RENDER_shader(
+    int      shader,
     GLfloat *vertices,
-    int program_id,
-    int n_vertices,
-    int size
+    int      n_vertices,
+    int      size,
+    float   *v_uniform,
+    float   *f_uniform,
+    float   *g_uniform
 ) { 
-
-    // printf("\n");
-    // printf("vertex is rendered\n");
-    // printf("n_vertices: %d \n", n_vertices);
-    // for (int i=0; i<n_vertices; i++) {
-    //     printf("%f ", vertices[i]);
-    // }
-    // printf("\n");
-
-    // TODO: this propably needs to be refactored, as glGetIntegerv is slow (and glUseProgram!)!
-    // GLint current_program_id;
-    // glGetIntegerv(GL_CURRENT_PROGRAM, &current_program_id);
-    
     // if (current_program_id != program_id) {
     // }
-    
-    glUseProgram(program_id);
+
+    // TODO: this cannot be called once per frame!
+    // TODO: to separate GFX function?
+    glUseProgram(shader_library[shader]->program);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * n_vertices, vertices, GL_STATIC_DRAW);
-    GLint posAttrib = glGetAttribLocation(program_id, "position");
+    
+    // TODO: to some GFX function?
+    int i=0;
+    for (int u=0; u<shader_library[shader]->vertex_shader.n_uniforms; u++) { 
+        int uniform_id = shader_library[shader]->vertex_shader.uniform_ids[u];
+        // glUniform4f(uniform_id, v_uniform[i], v_uniform[i+1], v_uniform[i+2], v_uniform[i+3]);
+        i+=MAX_SHADER_UNIFORM_ARGS;
+    }
+
+    i=0;
+    for (int u=0; u<shader_library[shader]->fragment_shader.n_uniforms; u++) { 
+        int uniform_id = shader_library[shader]->fragment_shader.uniform_ids[u];
+        glUniform4f(uniform_id, f_uniform[i], f_uniform[i+1], f_uniform[i+2], f_uniform[i+3]);
+        printf("uniform id :%d ", uniform_id);
+        printf("uniforms: %f %f %f %f \n", f_uniform[i], f_uniform[i+1], f_uniform[i+2], f_uniform[i+3]);
+        i+=MAX_SHADER_UNIFORM_ARGS;
+    }
+
+    i=0;
+    for (int u=0; u<shader_library[shader]->geomentry_shader.n_uniforms; u++) { 
+        int uniform_id = shader_library[shader]->geomentry_shader.uniform_ids[u];
+        // glUniform4f(uniform_id, g_uniform[i], g_uniform[i+1], g_uniform[i+2], g_uniform[i+3]);
+        i+=MAX_SHADER_UNIFORM_ARGS;
+    }
+
+    // TODO: this cannot be called once per frame!
+    // TODO: shader struct should have `position` in it !
+    // TODO: To separate GFX function!
+    GLint posAttrib = glGetAttribLocation(shader_library[shader]->program, "position");
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    // glVertexAttribPointer(posAttrib, size, GL_FLOAT, GL_FALSE, 0, 0);
     glDrawArrays(GL_POLYGON, 0, (int)(n_vertices/size));
-    // glDrawArrays(GL_POINTS, 0, n_vertices);
 };
 

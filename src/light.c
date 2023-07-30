@@ -11,6 +11,10 @@
 #include "scene.h"
 #include "vertex.h"
 
+#define ARGS_PER_LIGHT 3
+#define COEFS_PER_LIGHT_VERTEX 2
+
+
 // TODO: replace it with function in geometry.h
 // checks if ray intersects with obstacle
 bool LIG_ray_intersect(
@@ -644,14 +648,15 @@ void LIG_add_to_scene(
     vertex_t        *transposed_vertex = NULL;
     render_vertex_t gl_vertex; 
     
+    gl_vertex.len = 0;
+
     // calculate in global coords
     vertex            = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
 
     // align it with camera
     transposed_vertex = VRTX_transpose(vertex, camera_x, camera_y);
     
-    gl_vertex.len = 0;
-
+    // TODO: some better function?
     // translate it to gl coords system
     for (ptr=transposed_vertex; ptr; ptr=ptr->next) {
         render_coord_t c = GL_UTIL_global_to_gl_coord_single(ptr->x, ptr->y, camera_x, camera_y);
@@ -659,36 +664,24 @@ void LIG_add_to_scene(
         gl_vertex.coefs[gl_vertex.len++] = c.y1;
     }
 
+    // scene->components[scene->n]->power  = light->light_polygons[i].light_power;
+    
+    // TODO: maybe colors should be stored as floats?
+    float f_uniform[MAX_SHADER_UNIFORM_ARGS] = {
+        256.0 / light->light_polygons[i].red,
+        256.0 / light->light_polygons[i].green,
+        256.0 / light->light_polygons[i].blue,
+        1.0
+    };
+
     SCENE_add_shader(
         scene,
-        0, // SOME iterator here?
-        shader_library[SHADER_TEST]->program,
-        gl_vertex.len,
-        2, // TODO: ADD SOME CONSTANT!
-        gl_vertex.coefs 
+        SHADER_TEST,
+        gl_vertex.len, COEFS_PER_LIGHT_VERTEX, gl_vertex.coefs,
+        NULL, f_uniform, NULL
     );
 
     // cleanup
     VRTX_free(vertex);
 
-    // TODO: this should propably be added as well to above function
-    // scene->components[scene->n]->coords = vertex;
-    // scene->components[scene->n]->x0     = x;
-    // scene->components[scene->n]->y0     = y;
-    // scene->components[scene->n]->red    = light->light_polygons[i].red;
-    // scene->components[scene->n]->green  = light->light_polygons[i].green;
-    // scene->components[scene->n]->blue   = light->light_polygons[i].blue;
-    // scene->components[scene->n]->power  = light->light_polygons[i].light_power;
 }
-
-// void LIG_fit_scene_on_screen(
-//     int              i,
-//     int              x_corr,
-//     int              y_corr
-// ) {
-//     if (scene->components[i] == NULL) { return; }
-// 
-//     scene->components[i]->coords  = VRTX_transpose(scene->components[i]->coords, x_corr, y_corr);
-//     scene->components[i]->x0     += x_corr;
-//     scene->components[i]->y0     += y_corr;
-// }

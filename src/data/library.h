@@ -11,7 +11,7 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
-#define GRAPHIC_ERROR_SYMBOL 'G'
+#define MAX_SHADER_UNIFORM_INT_ARGS 1
 
 const static int NOTHING_FLAG    = 0;
 const static int MOVABLE         = 1 << 0;  // velocity will affect entity 
@@ -165,6 +165,12 @@ typedef struct level_blueprint {
 
 typedef struct shader_program_blueprint {
     int id;
+    int n_uniforms_vertex;
+    int n_uniforms_fragment;
+    int n_uniforms_geometry;
+    const char *shader_uniforms[MAX_SHADER_UNIFORMS];
+    const char *fragment_uniforms[MAX_SHADER_UNIFORMS];
+    const char *geometry_uniforms[MAX_SHADER_UNIFORMS];
     const char *vertex_shader_path;
     const char *fragment_shader_path;
     const char *geomentry_shader_path;

@@ -2,6 +2,8 @@
 
 #include "../gfx.h"
 
+#define GRAPHIC_ERROR_SYMBOL 'G'
+
 gfx_module_t* gfx_module_library[GFX_MODULE_ALL] = { NULL };
 
 gfx_module_blueprint_t init_sdl = (gfx_module_blueprint_t){ GFX_init_video, "SDL GFX library" };

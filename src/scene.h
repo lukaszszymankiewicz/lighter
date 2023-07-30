@@ -12,9 +12,10 @@
 #define MAX_VERTEX_ON_SHADER_LAYER    50
 #define MAX_SPRITES_ON_SPRITES_LAYER  10
 #define MAX_SHADER_ON_SHADER_LAYER    10
+#define MAX_SHADER_INT_ARGS           3
 
 typedef struct drawable_texture {
-    int            id;
+    int            texture_id;
     render_coord_t render;
     render_coord_t clip;
     bool           flip_h;
@@ -22,11 +23,13 @@ typedef struct drawable_texture {
 } drawable_texture_t;
 
 typedef struct drawable_shader {
-    int            id;
-    int            len;
-    int            program_id;
-    int            size;
-    GLfloat        vertices[MAX_VERTEX_ON_SHADER_LAYER];    
+    int         program_id;
+    int         len;
+    int         size;
+    GLfloat     vertices[MAX_VERTEX_ON_SHADER_LAYER];    
+    float       v_uniform[MAX_SHADER_FLOAT_VALS];
+    float       f_uniform[MAX_SHADER_FLOAT_VALS];
+    float       g_uniform[MAX_SHADER_FLOAT_VALS];
 } drawable_shader_t;
 
 typedef struct scene {
@@ -44,15 +47,15 @@ scene_t* SCENE_new();
 
 void SCENE_clear(scene_t* scene);
 void SCENE_add_tile(
-    scene_t* scene,
-    int id,
+    scene_t        *scene,
+    int             texture_id,
     render_coord_t render,
     render_coord_t clip
 );
 
 void SCENE_add_sprite(
     scene_t* scene,
-    int            id,
+    int            texture_id,
     render_coord_t render,
     render_coord_t clip,
     bool           flip_w,
@@ -60,12 +63,14 @@ void SCENE_add_sprite(
 );
 
 void SCENE_add_shader(
-    scene_t *scene,
-    int      id,
-    int      program_id,
-    int      len,
-    int      size,
-    GLfloat *vertices
+    scene_t    *scene,
+    int         program_id,
+    int         len,
+    int         size,
+    GLfloat    *vertices,
+    float      *v_uniform,
+    float      *f_uniform,
+    float      *g_uniform
 );
 
 void SCENE_free(scene_t* scene);

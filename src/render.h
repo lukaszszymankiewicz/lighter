@@ -12,6 +12,14 @@ void RENDER_texture(
     bool       flip
 );
 
-void RENDER_shader(GLfloat *vertices, int program_id, int n_vertices, int size);
+void RENDER_shader(
+    int      program_id,
+    GLfloat *vertices,
+    int      n_vertices,
+    int      size,
+    float   *v_uniform,
+    float   *f_uniform,
+    float   *g_uniform
+);
 
 #endif

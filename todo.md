@@ -41,4 +41,4 @@
   - [ ] add wobble
 - [ ] repair all unit-tests (once again!)
 - [ ] clear all memory leaks!
-- [ ] reading GFX (video, window) to the library module
+- [x] reading GFX (video, window) to the library module

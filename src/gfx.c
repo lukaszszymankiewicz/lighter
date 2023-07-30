@@ -100,39 +100,67 @@ char* GFX_read_shader_from_file(
 shader_program_t* GFX_create_gl_program(
     const char* vertex_shader_path,
     const char* fragment_shader_path,
-    const char* geometry_shader_path // unused by now
+    const char* geometry_shader_path,
+    int n_uniforms_vertex,
+    int n_uniforms_fragment,
+    int n_uniforms_geometry,
+    const char *vertex_uniforms[MAX_SHADER_UNIFORMS],
+    const char *fragment_uniforms[MAX_SHADER_UNIFORMS],
+    const char *geometry_uniforms[MAX_SHADER_UNIFORMS]
 ) {
     shader_program_t* shader_program = NULL;
     shader_program                   = (shader_program_t*)malloc(sizeof(shader_program_t));
 
     // vertex
     const char* vertex_src = GFX_read_shader_from_file(vertex_shader_path); 
-    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, (const GLchar**)&vertex_src, NULL);
-    glCompileShader(vertex_shader);
-    
+    GLuint vertex_shader_id= glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader_id, 1, (const GLchar**)&vertex_src, NULL);
+    glCompileShader(vertex_shader_id);
+    if (GFX_check_shader_compile_status(vertex_shader_id) == 0) { return NULL; }
+
     // fragment
-    const char* fragment_src = GFX_read_shader_from_file(fragment_shader_path); 
-    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, (const GLchar**)&fragment_src, NULL);
-    glCompileShader(fragment_shader);
+    const char* fragment_src  = GFX_read_shader_from_file(fragment_shader_path); 
+    GLuint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader_id, 1, (const GLchar**)&fragment_src, NULL);
+    glCompileShader(fragment_shader_id);
+    if (GFX_check_shader_compile_status(fragment_shader_id) == 0) { return NULL; }
 
     // link 
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    // glBindFragDataLocation(program_id, 0, "outColor"); // use for framebuffers
+    GLuint program_id = glCreateProgram();
+    glAttachShader(program_id, vertex_shader_id);
+    glAttachShader(program_id, fragment_shader_id);
 
-    glLinkProgram(program);
+    glLinkProgram(program_id);
+    if (GFX_check_program_link_status(program_id) == 0) { return NULL; }
+    
+    // put everything in place
+    shader_program->vertex_shader    = (shader_t){vertex_shader_id, n_uniforms_vertex};
+    shader_program->fragment_shader  = (shader_t){fragment_shader_id, n_uniforms_fragment};                   
+    shader_program->geomentry_shader = (shader_t){-1, n_uniforms_geometry};                   
+    shader_program->program          = program_id;
 
-    // checks
-    if (GFX_check_shader_compile_status(vertex_shader) == 0) { return NULL; }
-    if (GFX_check_shader_compile_status(fragment_shader) == 0) { return NULL; }
-    if (GFX_check_program_link_status(program) == 0) { return NULL; }
+    // bind uniform arguments
+    GLint uniform_arg;
 
-    shader_program->vertex_shader = vertex_shader;                   
-    shader_program->fragment_shader = fragment_shader;                   
-    shader_program->program = program;
+    for (int i=0; i<n_uniforms_vertex; i++) {
+        uniform_arg = glGetUniformLocation(program_id, vertex_uniforms[i]);
+        shader_program->vertex_shader.uniform_ids[i]    = uniform_arg;
+        shader_program->vertex_shader.uniforms_names[i] = vertex_uniforms[i];
+    }
+    
+    for (int i=0; i<n_uniforms_fragment; i++) {
+        uniform_arg = glGetUniformLocation(program_id, fragment_uniforms[i]);
+        printf("read uniform id: %d \n", uniform_arg);
+        printf("uniform name: %s \n", fragment_uniforms[i]);
+        shader_program->fragment_shader.uniform_ids[i]    = uniform_arg;
+        shader_program->fragment_shader.uniforms_names[i] = fragment_uniforms[i];
+    }
+
+    for (int i=0; i<n_uniforms_geometry; i++) {
+        uniform_arg = glGetUniformLocation(program_id, geometry_uniforms[i]);
+        shader_program->geomentry_shader.uniform_ids[i]    = uniform_arg;
+        shader_program->geomentry_shader.uniforms_names[i] = geometry_uniforms[i];
+    }
 
     return shader_program;
 }
@@ -181,6 +209,7 @@ void GFX_specify_texture(
         );
     }
 }
+
 // sets global rendering scale which must be a positive integer. Scale tries to fit best tile_per_x 
 // and tile_per_y. This is needed to achieve pixel-perfect rendering (which can be done only if each
 // pixel in every drawing routine is multiplied by some scale).

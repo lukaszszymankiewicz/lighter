@@ -217,8 +217,6 @@ void ENTMAN_calc_single_entity_light(
     int rel_y            = CAMERA_Y - ENTMAN_hero_y(entity_manager);
     
     int n_poly = light->n_poly;
-    
-    printf("rendering %d light polygons for entitty with id %d \n", n_poly, entity->id);
 
     for (int i=0; i<n_poly; i++) {
         LIG_add_to_scene(
