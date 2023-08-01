@@ -101,7 +101,7 @@ enum TILE_IDX {
 };
 
 enum SHADER_IDX {
-    SHADER_TEST,
+    SHADER_LIGHT,
     SHADER_ALL
 };
 
@@ -164,13 +164,6 @@ typedef struct level_blueprint {
 } level_blueprint_t;
 
 typedef struct shader_program_blueprint {
-    int id;
-    int n_uniforms_vertex;
-    int n_uniforms_fragment;
-    int n_uniforms_geometry;
-    const char *shader_uniforms[MAX_SHADER_UNIFORMS];
-    const char *fragment_uniforms[MAX_SHADER_UNIFORMS];
-    const char *geometry_uniforms[MAX_SHADER_UNIFORMS];
     const char *vertex_shader_path;
     const char *fragment_shader_path;
     const char *geomentry_shader_path;

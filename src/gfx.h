@@ -38,13 +38,7 @@ int GFX_check_program_link_status(GLuint program);
 shader_program_t* GFX_create_gl_program(
     const char* vertex_shader_path,
     const char* fragment_shader_path,
-    const char* geometry_shader_path,
-    int n_uniforms_shader,
-    int n_uniforms_fragment,
-    int n_uniforms_geometry,
-    const char *shader_uniforms[MAX_SHADER_UNIFORMS],
-    const char *fragment_uniforms[MAX_SHADER_UNIFORMS],
-    const char *geometry_uniforms[MAX_SHADER_UNIFORMS]
+    const char* geometry_shader_path
 );
 
 #endif

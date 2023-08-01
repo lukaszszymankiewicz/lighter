@@ -27,9 +27,7 @@ typedef struct drawable_shader {
     int         len;
     int         size;
     GLfloat     vertices[MAX_VERTEX_ON_SHADER_LAYER];    
-    float       v_uniform[MAX_SHADER_FLOAT_VALS];
-    float       f_uniform[MAX_SHADER_FLOAT_VALS];
-    float       g_uniform[MAX_SHADER_FLOAT_VALS];
+    float       uniforms[MAX_SHADER_UNIFORMS_ARGS];
 } drawable_shader_t;
 
 typedef struct scene {
@@ -68,9 +66,7 @@ void SCENE_add_shader(
     int         len,
     int         size,
     GLfloat    *vertices,
-    float      *v_uniform,
-    float      *f_uniform,
-    float      *g_uniform
+    float      *uniforms
 );
 
 void SCENE_free(scene_t* scene);

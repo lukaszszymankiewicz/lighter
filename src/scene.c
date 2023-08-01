@@ -76,9 +76,7 @@ void SCENE_add_shader(
     int         len,
     int         size,
     GLfloat    *vertices,
-    float      *v_uniform,
-    float      *f_uniform,
-    float      *g_uniform
+    float      *uniforms
 ) {
     int i=0;
 
@@ -91,21 +89,12 @@ void SCENE_add_shader(
     for (i=0; i<len; i++) {
         scene->shader_layer[scene->n_shader].vertices[i] = vertices[i];
     }
-    if (v_uniform) {
-        for (i=0; i<MAX_SHADER_FLOAT_VALS; i++) {
-            scene->shader_layer[scene->n_shader].v_uniform[i] = v_uniform[i];
+    if (uniforms) {
+        for (i=0; i<MAX_SHADER_UNIFORMS_ARGS; i++) {
+            scene->shader_layer[scene->n_shader].uniforms[i] = uniforms[i];
         }
     }
-    if (f_uniform) {
-        for (i=0; i<MAX_SHADER_FLOAT_VALS; i++) {
-            scene->shader_layer[scene->n_shader].f_uniform[i] = f_uniform[i];
-        }
-    }
-    if (g_uniform) {
-        for (i=0; i<MAX_SHADER_FLOAT_VALS; i++) {
-            scene->shader_layer[scene->n_shader].g_uniform[i] = g_uniform[i];
-        }
-    }
+
     scene->n_shader++;
 }
 

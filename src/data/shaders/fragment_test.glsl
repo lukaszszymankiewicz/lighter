@@ -1,6 +1,6 @@
 #version 330 core
 
-uniform vec4 lightPolygonColor;
+uniform vec4 inColor;
 out vec4 outColor;
 
 void main()

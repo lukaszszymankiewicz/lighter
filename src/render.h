@@ -17,9 +17,7 @@ void RENDER_shader(
     GLfloat *vertices,
     int      n_vertices,
     int      size,
-    float   *v_uniform,
-    float   *f_uniform,
-    float   *g_uniform
+    float   *uniforms
 );
 
 #endif

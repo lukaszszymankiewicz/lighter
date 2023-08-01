@@ -8,12 +8,7 @@
 shader_program_t* shader_library[SHADER_ALL] = { NULL };
 
 
-shader_program_blueprint_t shader_test = {
-    SHADER_TEST,
-    0, 1, 0,  // uniforms number
-    {},
-    {"lightPolygonColor"},
-    {},
+shader_program_blueprint_t shader_light = {
     "./src/data/shaders/vertex_test.glsl",
     "./src/data/shaders/fragment_test.glsl",
     "",
@@ -36,15 +31,9 @@ void LIB_free_program(
 
 void LIB_create_shaders_library(
 ) {
-    shader_library[SHADER_TEST] = GFX_create_gl_program(
-        shader_test.vertex_shader_path,
-        shader_test.fragment_shader_path,
-        shader_test.geomentry_shader_path,
-        shader_test.n_uniforms_vertex,
-        shader_test.n_uniforms_fragment,
-        shader_test.n_uniforms_geometry,
-        shader_test.shader_uniforms,
-        shader_test.fragment_uniforms,
-        shader_test.geometry_uniforms
+    shader_library[SHADER_LIGHT] = GFX_create_gl_program(
+        shader_light.vertex_shader_path,
+        shader_light.fragment_shader_path,
+        shader_light.geomentry_shader_path
     );
 };

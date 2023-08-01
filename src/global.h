@@ -60,10 +60,11 @@
 #define CAMERA_X                 (int)SCREEN_WIDTH / 2
 #define CAMERA_Y                 (int)SCREEN_HEIGHT / 2
 
-#define DEFAULT_LIGHT_R          255                // default light R color
-#define DEFAULT_LIGHT_G          252                // default light G color
-#define DEFAULT_LIGHT_B          187                // default light B color
-#define DEFAULT_LIGHT_A          10                 // default light ALPHA channel
+#define MAX_LIGHT_LEVEL          255
+#define DEFAULT_LIGHT_R          MAX_LIGHT_LEVEL / 255  // default light R color
+#define DEFAULT_LIGHT_G          MAX_LIGHT_LEVEL / 252  // default light G color
+#define DEFAULT_LIGHT_B          MAX_LIGHT_LEVEL / 187  // default light B color
+#define DEFAULT_LIGHT_A          MAX_LIGHT_LEVEL / 10   // default light ALPHA channel
 
 // LEVEL CONTANTS
 #define MAX_LEVEL_X_SIZE      20

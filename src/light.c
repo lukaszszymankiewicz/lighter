@@ -667,18 +667,20 @@ void LIG_add_to_scene(
     // scene->components[scene->n]->power  = light->light_polygons[i].light_power;
     
     // TODO: maybe colors should be stored as floats?
-    float f_uniform[MAX_SHADER_UNIFORM_ARGS] = {
-        256.0 / light->light_polygons[i].red,
-        256.0 / light->light_polygons[i].green,
-        256.0 / light->light_polygons[i].blue,
+    float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = {
+        light->light_polygons[i].red,
+        light->light_polygons[i].green,
+        light->light_polygons[i].blue,
         1.0
     };
 
     SCENE_add_shader(
         scene,
-        SHADER_TEST,
-        gl_vertex.len, COEFS_PER_LIGHT_VERTEX, gl_vertex.coefs,
-        NULL, f_uniform, NULL
+        SHADER_LIGHT,
+        gl_vertex.len,
+        COEFS_PER_LIGHT_VERTEX,
+        gl_vertex.coefs,
+        uniforms
     );
 
     // cleanup

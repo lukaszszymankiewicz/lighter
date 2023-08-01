@@ -40,11 +40,10 @@ void RENDER_shader(
     GLfloat *vertices,
     int      n_vertices,
     int      size,
-    float   *v_uniform,
-    float   *f_uniform,
-    float   *g_uniform
+    float   *uniforms
 ) { 
     // if (current_program_id != program_id) {
+
     // }
 
     // TODO: this cannot be called once per frame!
@@ -52,27 +51,12 @@ void RENDER_shader(
     glUseProgram(shader_library[shader]->program);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * n_vertices, vertices, GL_STATIC_DRAW);
     
-    // TODO: to some GFX function?
-    int i=0;
-    for (int u=0; u<shader_library[shader]->vertex_shader.n_uniforms; u++) { 
-        int uniform_id = shader_library[shader]->vertex_shader.uniform_ids[u];
-        // glUniform4f(uniform_id, v_uniform[i], v_uniform[i+1], v_uniform[i+2], v_uniform[i+3]);
-        i+=MAX_SHADER_UNIFORM_ARGS;
-    }
-
     i=0;
-    for (int u=0; u<shader_library[shader]->fragment_shader.n_uniforms; u++) { 
-        int uniform_id = shader_library[shader]->fragment_shader.uniform_ids[u];
-        glUniform4f(uniform_id, f_uniform[i], f_uniform[i+1], f_uniform[i+2], f_uniform[i+3]);
+    for (int u=0; u<shader_library[shader].n_uniforms; u++) { 
+        int uniform_id = shader_library[shader].uniform_ids[u];
+        glUniform4f(uniform_id, uniforms[i], uniforms[i+1], uniforms[i+2], uniforms[i+3]);
         printf("uniform id :%d ", uniform_id);
-        printf("uniforms: %f %f %f %f \n", f_uniform[i], f_uniform[i+1], f_uniform[i+2], f_uniform[i+3]);
-        i+=MAX_SHADER_UNIFORM_ARGS;
-    }
-
-    i=0;
-    for (int u=0; u<shader_library[shader]->geomentry_shader.n_uniforms; u++) { 
-        int uniform_id = shader_library[shader]->geomentry_shader.uniform_ids[u];
-        // glUniform4f(uniform_id, g_uniform[i], g_uniform[i+1], g_uniform[i+2], g_uniform[i+3]);
+        printf("uniforms: %f %f %f %f \n", uniforms[i], uniforms[i+1], uniforms[i+2], uniforms[i+3]);
         i+=MAX_SHADER_UNIFORM_ARGS;
     }
 

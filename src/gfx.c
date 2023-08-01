@@ -23,6 +23,11 @@
 #define SHADER_CHECK_MODE    "rb"
 #define SHADER_READ_MODE     "r"
 
+// TODO: make array from allowed types
+#define ALLOWED_UNIFORM_TYPE_N   1
+#define ALLOWED_UNIFORM_TYPE     (GLuint[ALLOWED_UNIFORM_TYPE_N]){ GL_FLOAT_VEC4 }
+#define ALLOWED_UNIFORM_NAME_LEN 16
+
 GLint  gVertexPos2DLocation = -1;
 GLuint gVBO                 = 0;
 GLuint gIBO                 = 0;
@@ -97,69 +102,79 @@ char* GFX_read_shader_from_file(
     return shader;
 }
 
+int GFX_compile_shader(
+    const char* path
+) {
+    const char* src   = GFX_read_shader_from_file(path); 
+    GLuint id         = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(id, 1, (const GLchar**)&src, NULL);
+    glCompileShader(id);
+
+    if (!GFX_check_shader_compile_status(id)) {
+        return -1; 
+    }
+    return (int)id;
+}
+
 shader_program_t* GFX_create_gl_program(
     const char* vertex_shader_path,
     const char* fragment_shader_path,
-    const char* geometry_shader_path,
-    int n_uniforms_vertex,
-    int n_uniforms_fragment,
-    int n_uniforms_geometry,
-    const char *vertex_uniforms[MAX_SHADER_UNIFORMS],
-    const char *fragment_uniforms[MAX_SHADER_UNIFORMS],
-    const char *geometry_uniforms[MAX_SHADER_UNIFORMS]
+    const char* geometry_shader_path
 ) {
     shader_program_t* shader_program = NULL;
     shader_program                   = (shader_program_t*)malloc(sizeof(shader_program_t));
 
-    // vertex
-    const char* vertex_src = GFX_read_shader_from_file(vertex_shader_path); 
-    GLuint vertex_shader_id= glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader_id, 1, (const GLchar**)&vertex_src, NULL);
-    glCompileShader(vertex_shader_id);
-    if (GFX_check_shader_compile_status(vertex_shader_id) == 0) { return NULL; }
+    int vertex_shader_id = GFX_compile_shader(vertex_shader_path);
+    if (vertex_shader_id == -1) { return NULL; }
 
-    // fragment
-    const char* fragment_src  = GFX_read_shader_from_file(fragment_shader_path); 
-    GLuint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader_id, 1, (const GLchar**)&fragment_src, NULL);
-    glCompileShader(fragment_shader_id);
-    if (GFX_check_shader_compile_status(fragment_shader_id) == 0) { return NULL; }
+    int fragment_shader_id = GFX_compile_shader(fragment_shader_path);
+    if (fragment_shader_id == -1) { return NULL; }
+    
+    // geometry TBD
+    // glAttachShader(program_id, geometry_shader_id);
 
     // link 
     GLuint program_id = glCreateProgram();
     glAttachShader(program_id, vertex_shader_id);
     glAttachShader(program_id, fragment_shader_id);
-
     glLinkProgram(program_id);
     if (GFX_check_program_link_status(program_id) == 0) { return NULL; }
     
     // put everything in place
-    shader_program->vertex_shader    = (shader_t){vertex_shader_id, n_uniforms_vertex};
-    shader_program->fragment_shader  = (shader_t){fragment_shader_id, n_uniforms_fragment};                   
-    shader_program->geomentry_shader = (shader_t){-1, n_uniforms_geometry};                   
-    shader_program->program          = program_id;
+    shader_program->vertex_shader_id   = vertex_shader_id;
+    shader_program->fragment_shader_id = fragment_shader_id;                   
+    shader_program->geometry_shader_id = -1; // TDB
+    shader_program->program            = program_id;
 
     // bind uniform arguments
-    GLint uniform_arg;
+    GLint i; GLint n_uniforms; GLint size; 
+    GLenum type; 
+    GLchar name[ALLOWED_UNIFORM_NAME_LEN];
+    GLsizei length;
 
-    for (int i=0; i<n_uniforms_vertex; i++) {
-        uniform_arg = glGetUniformLocation(program_id, vertex_uniforms[i]);
-        shader_program->vertex_shader.uniform_ids[i]    = uniform_arg;
-        shader_program->vertex_shader.uniforms_names[i] = vertex_uniforms[i];
-    }
+    // get uniforms
+    glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_uniforms);
+    printf("Active Uniforms: %d\n", n_uniforms);
     
-    for (int i=0; i<n_uniforms_fragment; i++) {
-        uniform_arg = glGetUniformLocation(program_id, fragment_uniforms[i]);
-        printf("read uniform id: %d \n", uniform_arg);
-        printf("uniform name: %s \n", fragment_uniforms[i]);
-        shader_program->fragment_shader.uniform_ids[i]    = uniform_arg;
-        shader_program->fragment_shader.uniforms_names[i] = fragment_uniforms[i];
-    }
+    shader_program->n_uniforms = n_uniforms;
 
-    for (int i=0; i<n_uniforms_geometry; i++) {
-        uniform_arg = glGetUniformLocation(program_id, geometry_uniforms[i]);
-        shader_program->geomentry_shader.uniform_ids[i]    = uniform_arg;
-        shader_program->geomentry_shader.uniforms_names[i] = geometry_uniforms[i];
+    for (i=0; i<n_uniforms; i++) {
+        glGetActiveUniform(program_id, (GLuint)i, ALLOWED_UNIFORM_NAME_LEN, &length, &size, &type, name);
+        printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
+
+        for (int j=0; j<ALLOWED_UNIFORM_TYPE_N; j++) {
+            if (type != ALLOWED_UNIFORM_TYPE[j]) {
+                printf("invalid uniform type! \n");
+                return NULL;
+            }
+            if (length > ALLOWED_UNIFORM_TYPE_N) {
+                printf("uniform name is too long! \n");
+                return NULL;
+            }
+
+            shader_program->uniform_ids[i]   = glGetUniformLocation(program_id, name);
+            strcpy(shader_program->uniform_names[i], name);
+        }
     }
 
     return shader_program;
