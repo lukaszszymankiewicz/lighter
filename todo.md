@@ -34,7 +34,8 @@
   - [x] made one polygon shader with white color
   - [x] made multi-polygon shader
   - [x] made multi-source shader
-  - [ ] add color to light shader
+  - [x] add color to light shader
+  - [ ] add stencil buffer
   - [ ] put shader light effect to buffer
   - [ ] add transparency to light effect shader
   - [ ] made shader pixel-perfect
@@ -42,3 +43,4 @@
 - [ ] repair all unit-tests (once again!)
 - [ ] clear all memory leaks!
 - [x] reading GFX (video, window) to the library module
+- [ ] repair light vertex calculations

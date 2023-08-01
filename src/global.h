@@ -31,10 +31,6 @@
 #define GAME_NAME                    "Lighter"          // game windom nape
 #define TILE_HEIGHT                  32                 // single tile height (in px)
 #define TILE_WIDTH                   32                 // single tile width (in px)
-#define N_COLOR_CHANNELS             4                  // number of color channels for each pixel
-#define EMPTY_TILE                   0                  // index of empty tile in default tileset
-#define BLANK_COLOR                  0x00000000         // this color is fully transparent
-#define BLACK_COLOR                  0xFFFFFFFF         // this color is blackes black
 #define MAX_LIGHT_ON_SCENE           20                 // maximum number of rendered polygon
 #define MAX_ENTITY                   32
 #define ENTITY_DRAW_X_RANGE          SCREEN_WIDTH / 2 
@@ -52,28 +48,20 @@
 #define MAX_SCREEN_TILE_PER_X        10;
 #define MAX_SCREEN_TILE_PER_Y        7;
 
-// TODO: after implementing OpenGL it should be deleted
-#define FULL_SCREEN_PIX_SIZE     SCREEN_WIDTH * (SCREEN_HEIGHT+40)
-#define FULL_SCREEN_BYTE_SIZE    SCREEN_WIDTH * SCREEN_HEIGHT * N_COLOR_CHANNELS
-#define PIX_PER_SCREEN_ROW       SCREEN_WIDTH * N_COLOR_CHANNELS
-
 #define CAMERA_X                 (int)SCREEN_WIDTH / 2
 #define CAMERA_Y                 (int)SCREEN_HEIGHT / 2
 
-#define MAX_LIGHT_LEVEL          255
-#define DEFAULT_LIGHT_R          MAX_LIGHT_LEVEL / 255  // default light R color
-#define DEFAULT_LIGHT_G          MAX_LIGHT_LEVEL / 252  // default light G color
-#define DEFAULT_LIGHT_B          MAX_LIGHT_LEVEL / 187  // default light B color
-#define DEFAULT_LIGHT_A          MAX_LIGHT_LEVEL / 10   // default light ALPHA channel
+#define MAX_LIGHT_LEVEL          255.0
+#define DEFAULT_LIGHT_R          238.0 / MAX_LIGHT_LEVEL   // default light R color
+#define DEFAULT_LIGHT_G          220.0 / MAX_LIGHT_LEVEL   // default light G color
+#define DEFAULT_LIGHT_B          91.0  / MAX_LIGHT_LEVEL    // default light B color
+#define DEFAULT_LIGHT_A          10.0  / MAX_LIGHT_LEVEL   // default light ALPHA channel
 
 // LEVEL CONTANTS
 #define MAX_LEVEL_X_SIZE      20
 #define MAX_LEVEL_Y_SIZE      20
 #define MAX_LEVEL_ENTITY_FILL 10
 #define MAX_LEVEL_SIZE        MAX_LEVEL_X_SIZE * MAX_LEVEL_Y_SIZE
-
-// TILESET CONTANTS
-#define TILESET_TILE_PER_ROW  16
 
 enum direction { RIGHT, LEFT, UP, DOWN, NONE };
 enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };

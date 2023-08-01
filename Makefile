@@ -119,6 +119,7 @@ $(BUILDDIR)/test_suite:	$(TESTOBJS) $(BUILDDIR)/check_tests.o
 
 clean:
 	rm -f $(BUILDDIR)/*.o
+	rm -f $(BUILDDIR)/$(DATADIR)/*.o
 	rm -f $(BUILDDIR)/$(FINAL_OBJ)
 	rm -f $(BUILDDIR)/$(FINAL_TEST_OBJ)
 	rm $(LEVELLOG)

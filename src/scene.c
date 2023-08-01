@@ -146,9 +146,7 @@ void SCENE_draw(
             scene->shader_layer[shader].vertices,
             scene->shader_layer[shader].len,
             scene->shader_layer[shader].size,
-            scene->shader_layer[shader].v_uniform,
-            scene->shader_layer[shader].f_uniform,
-            scene->shader_layer[shader].g_uniform
+            scene->shader_layer[shader].uniforms
         );
     }
 }

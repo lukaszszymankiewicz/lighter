@@ -51,13 +51,14 @@ void RENDER_shader(
     glUseProgram(shader_library[shader]->program);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * n_vertices, vertices, GL_STATIC_DRAW);
     
-    i=0;
-    for (int u=0; u<shader_library[shader].n_uniforms; u++) { 
-        int uniform_id = shader_library[shader].uniform_ids[u];
+    int i=0;
+
+    for (int u=0; u<shader_library[shader]->n_uniforms; u++) { 
+        int uniform_id = shader_library[shader]->uniform_ids[u];
         glUniform4f(uniform_id, uniforms[i], uniforms[i+1], uniforms[i+2], uniforms[i+3]);
         printf("uniform id :%d ", uniform_id);
         printf("uniforms: %f %f %f %f \n", uniforms[i], uniforms[i+1], uniforms[i+2], uniforms[i+3]);
-        i+=MAX_SHADER_UNIFORM_ARGS;
+        i+=MAX_SHADER_UNIFORMS_ARGS;
     }
 
     // TODO: this cannot be called once per frame!

@@ -1,6 +1,7 @@
 #include "library.h"
 #include "../source.h"
 #include "../global.h"
+#include <stdio.h>
 
 lightsource_t* lighsources_library[LIGHTSOURCE_ALL] = {NULL};
 
@@ -32,6 +33,8 @@ lightsource_t lighsource_no = {
 
 void LIB_create_lightsources_library(
 ) {
+    printf("%f \n", DEFAULT_LIGHT_R);
+    printf("%f \n", DEFAULT_LIGHT_G);
     lighsources_library[LIGHTSOURCE_LIGHTER]   = &lighsource_lighter;
     lighsources_library[LIGHTSOURCE_WALLLIGHT] = &lighsource_wallight;
     lighsources_library[LIGHTSOURCE_NO]        = &lighsource_no;

@@ -23,7 +23,6 @@
 #define SHADER_CHECK_MODE    "rb"
 #define SHADER_READ_MODE     "r"
 
-// TODO: make array from allowed types
 #define ALLOWED_UNIFORM_TYPE_N   1
 #define ALLOWED_UNIFORM_TYPE     (GLuint[ALLOWED_UNIFORM_TYPE_N]){ GL_FLOAT_VEC4 }
 #define ALLOWED_UNIFORM_NAME_LEN 16
@@ -33,7 +32,7 @@ GLuint gVBO                 = 0;
 GLuint gIBO                 = 0;
 
 // TODO: check if relevent
-bool gRenderQuad = true;
+// bool gRenderQuad = true;
 
 SDL_GLContext gl_context        = NULL;
 SDL_Window   *window            = NULL;
@@ -103,10 +102,12 @@ char* GFX_read_shader_from_file(
 }
 
 int GFX_compile_shader(
-    const char* path
+    const char *path,
+    GLenum      type
 ) {
     const char* src   = GFX_read_shader_from_file(path); 
-    GLuint id         = glCreateShader(GL_VERTEX_SHADER);
+    GLuint id         = glCreateShader(type);
+    
     glShaderSource(id, 1, (const GLchar**)&src, NULL);
     glCompileShader(id);
 
@@ -124,10 +125,10 @@ shader_program_t* GFX_create_gl_program(
     shader_program_t* shader_program = NULL;
     shader_program                   = (shader_program_t*)malloc(sizeof(shader_program_t));
 
-    int vertex_shader_id = GFX_compile_shader(vertex_shader_path);
+    int vertex_shader_id = GFX_compile_shader(vertex_shader_path, GL_VERTEX_SHADER);
     if (vertex_shader_id == -1) { return NULL; }
 
-    int fragment_shader_id = GFX_compile_shader(fragment_shader_path);
+    int fragment_shader_id = GFX_compile_shader(fragment_shader_path, GL_FRAGMENT_SHADER);
     if (fragment_shader_id == -1) { return NULL; }
     
     // geometry TBD
@@ -154,21 +155,19 @@ shader_program_t* GFX_create_gl_program(
 
     // get uniforms
     glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_uniforms);
-    printf("Active Uniforms: %d\n", n_uniforms);
-    
     shader_program->n_uniforms = n_uniforms;
 
     for (i=0; i<n_uniforms; i++) {
         glGetActiveUniform(program_id, (GLuint)i, ALLOWED_UNIFORM_NAME_LEN, &length, &size, &type, name);
-        printf("Uniform #%d Type: %u Name: %s\n", i, type, name);
 
         for (int j=0; j<ALLOWED_UNIFORM_TYPE_N; j++) {
             if (type != ALLOWED_UNIFORM_TYPE[j]) {
-                printf("invalid uniform type! \n");
+                printf("Invalid uniform type! \n");
                 return NULL;
             }
-            if (length > ALLOWED_UNIFORM_TYPE_N) {
-                printf("uniform name is too long! \n");
+
+            if (length > ALLOWED_UNIFORM_NAME_LEN) {
+                printf("Uniform name is too long! \n");
                 return NULL;
             }
 

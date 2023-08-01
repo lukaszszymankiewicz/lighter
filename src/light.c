@@ -665,8 +665,12 @@ void LIG_add_to_scene(
     }
 
     // scene->components[scene->n]->power  = light->light_polygons[i].light_power;
-    
-    // TODO: maybe colors should be stored as floats?
+        
+    printf("light: %f %f %f \n",
+        light->light_polygons[i].red,
+        light->light_polygons[i].green,
+        light->light_polygons[i].blue
+    );
     float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = {
         light->light_polygons[i].red,
         light->light_polygons[i].green,
