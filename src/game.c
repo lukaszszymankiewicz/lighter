@@ -241,7 +241,7 @@ game_t* GAME_new(
         game->draw_func = &GAME_draw_nothing; 
     }
 
-    scene = SCENE_new(LAYER_TEXTURE_N, LAYER_TYPE_SHADER_N);
+    scene = SCENE_new(LAYER_ALL );
 
     GAME_init_entities(game);
     LVL_fill(game->level);

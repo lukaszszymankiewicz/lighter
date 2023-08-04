@@ -38,7 +38,7 @@ typedef struct scene {
 
 extern scene_t *scene;
 
-scene_t* SCENE_new(n_layers);
+scene_t* SCENE_new(int n_layers);
 
 void SCENE_clear(scene_t* scene);
 
