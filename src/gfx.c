@@ -188,6 +188,8 @@ shader_program_t* GFX_create_gl_program(
     // get attribs
     glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_attribs);
     shader_program->n_attribs = n_attribs;
+    
+    int attrib_size = 0;
 
     for (i=0; i<n_attribs; i++) {
         glGetActiveAttrib(program_id, (GLuint)i, ALLOWED_ATTRIB_NAME_LEN, &length, &size, &type, name);
@@ -203,8 +205,23 @@ shader_program_t* GFX_create_gl_program(
             printf("Attrib name is too long! \n");
             return NULL;
         }
-
+        
+        switch (type) {
+            case GL_FLOAT_VEC4:
+                shader_program->attrib_shift[i] = 4;
+                attrib_size+=4;
+                break;
+            case GL_FLOAT_VEC3:
+                shader_program->attrib_shift[i] = 3;
+                attrib_size+=3;
+                break;
+            case GL_FLOAT_VEC2:
+                shader_program->attrib_shift[i] = 2;
+                attrib_size+=2;
+                break;
+        }
     }
+    shader_program->attrib_size = attrib_size;
 
     return shader_program;
 }
@@ -232,6 +249,7 @@ void GFX_specify_texture(
     if(surface && surface->format->BytesPerPixel == 4) {
         mode = GL_RGBA; 
     }
+    // TODO: leftoverw
     // RGBA8888 
     // color key 0x80 0xFF 0xFF
     // There’s not much to do to use the alpha channel. Just make a PNG with transparency, load the

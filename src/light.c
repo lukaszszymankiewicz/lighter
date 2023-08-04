@@ -11,8 +11,6 @@
 #include "scene.h"
 #include "vertex.h"
 
-#define COEFS_PER_LIGHT_VERTEX 2
-
 
 // TODO: replace it with function in geometry.h
 // checks if ray intersects with obstacle
@@ -682,7 +680,6 @@ void LIG_add_to_scene(
         LAYER_SHADER,
         SHADER_LIGHT,
         gl_vertex.len,
-        COEFS_PER_LIGHT_VERTEX,
         gl_vertex.coefs,
         uniforms
     );

@@ -102,6 +102,7 @@ enum TILE_IDX {
 
 enum SHADER_IDX {
     SHADER_LIGHT,
+    SHADER_TEXTURE,
     SHADER_ALL
 };
 

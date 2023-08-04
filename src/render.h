@@ -13,10 +13,9 @@ void RENDER_texture(
 );
 
 void RENDER_shader(
-    int      program_id,
+    int      shader,
     GLfloat *vertices,
     int      n_vertices,
-    int      size,
     float   *uniforms
 );
 

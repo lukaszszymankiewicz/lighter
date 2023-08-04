@@ -18,8 +18,26 @@ void RENDER_texture(
     float      clip_y2,      // position on clipture (OpenGL coords)
     bool       flip
 ) {
-    glBindTexture(GL_TEXTURE_2D, gl_texture_id);
+    float vertices[] = {
+    //  Position      Texcoords
+        -0.3f,  0.3f, 0.0f, 0.0f, // Top-left
+         0.3f,  0.3f, 1.0f, 0.0f, // Top-right
+         0.3f, -0.3f, 1.0f, 1.0f, // Bottom-right
+        -0.3f, -0.3f, 0.0f, 1.0f  // Bottom-left
+    };
 
+    // glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
+    // GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
+    // glEnableVertexAttribArray(texAttrib);
+    // glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
+    
+    /// 
+    // for (int i=0; i<shader_library[shader]->n_attribs; i++) {
+    //     GLint attrib = shader_library[shader]->attrib[i];
+    //     glEnableVertexAttribArray(attrib);
+    //     glVertexAttribPointer(attrib, size, GL_FLOAT, GL_FALSE, 0, 0);
+    // }
+    ///
     if (flip) {
         float temp;
         temp    = clip_x1; 
@@ -39,7 +57,6 @@ void RENDER_shader(
     int      shader,
     GLfloat *vertices,
     int      n_vertices,
-    int      size,
     float   *uniforms
 ) { 
     // if (current_program_id != program_id) {
@@ -48,11 +65,11 @@ void RENDER_shader(
 
     // TODO: this cannot be called once per frame!
     // TODO: to separate GFX function?
-    glUseProgram(shader_library[shader]->program);
+    // glUseProgram(shader_library[shader]->program);
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * n_vertices, vertices, GL_STATIC_DRAW);
     
     int i=0;
-
     for (int u=0; u<shader_library[shader]->n_uniforms; u++) { 
         int uniform_id = shader_library[shader]->uniform_ids[u];
         glUniform4f(uniform_id, uniforms[i], uniforms[i+1], uniforms[i+2], uniforms[i+3]);
@@ -61,13 +78,23 @@ void RENDER_shader(
         i+=MAX_SHADER_UNIFORMS_ARGS;
     }
 
-    // TODO: this cannot be called once per frame!
-    // TODO: shader struct should have `position` in it !
-    // TODO: To separate GFX function!
+    int cur_shift = 0;
+    int size      = shader_library[shader]->attrib_size;
+
     for (int i=0; i<shader_library[shader]->n_attribs; i++) {
         GLint attrib = shader_library[shader]->attrib[i];
         glEnableVertexAttribArray(attrib);
-        glVertexAttribPointer(attrib, size, GL_FLOAT, GL_FALSE, 0, 0);
+
+        glVertexAttribPointer(
+            attrib,
+            shader_library[shader]->attrib_shift[i],
+            GL_FLOAT,
+            GL_FALSE,
+            (size*sizeof(float)),
+            (void*)(cur_shift*sizeof(float))
+        );
+
+        cur_shift+=shader_library[shader]->attrib_shift[i];
     }
 
     glDrawArrays(GL_POLYGON, 0, (int)(n_vertices/size));

@@ -81,7 +81,6 @@ void SCENE_add_shader(
     int         layer,
     int         program_id,
     int         len,
-    int         size,
     GLfloat    *vertices,
     float      *uniforms
 ) {
@@ -92,7 +91,6 @@ void SCENE_add_shader(
 
     scene->layers[layer].objs[j].shader.program_id = program_id;
     scene->layers[layer].objs[j].shader.len        = len;
-    scene->layers[layer].objs[j].shader.size       = size;
 
     for (i=0; i<len; i++) {
         scene->layers[layer].objs[j].shader.vertices[i] = vertices[i];
@@ -141,7 +139,6 @@ void SCENE_draw(
                     scene->layers[layer].objs[i].shader.program_id,
                     scene->layers[layer].objs[i].shader.vertices,
                     scene->layers[layer].objs[i].shader.len,
-                    scene->layers[layer].objs[i].shader.size,
                     scene->layers[layer].objs[i].shader.uniforms
                 );
             }

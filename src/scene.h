@@ -33,7 +33,6 @@ typedef struct drawable_texture {
 typedef struct drawable_shader {
     int         program_id;
     int         len;
-    int         size;
     GLfloat     vertices[MAX_VERTEX_ON_SHADER_LAYER];    
     float       uniforms[MAX_SHADER_UNIFORMS_ARGS];
 } drawable_shader_t;
@@ -80,7 +79,6 @@ void SCENE_add_shader(
     int         layer,
     int         program_id,
     int         len,
-    int         size,
     GLfloat    *vertices,
     float      *uniforms
 );
