@@ -64,12 +64,14 @@
 #define MAX_LEVEL_SIZE        MAX_LEVEL_X_SIZE * MAX_LEVEL_Y_SIZE
 
 // LAYERS
-#define LAYER_TEXTURE_N      2
-#define LAYER_TYPE_SHADER_N  1
+#define LAYER_N  3
+
+// TEXTURE
+#define NO_TEXTURE -1
 
 enum direction { RIGHT, LEFT, UP, DOWN, NONE };
 enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };
 enum segtype { HOR, VER, UNKNOWN };
-enum layers { LAYER_TILE, LAYER_SPRITE, LAYER_SHADER, LAYER_ALL };
+enum layers { LAYER_TILE, LAYER_SPRITE, LAYER_LIGHT, LAYER_ALL };
 
 #endif

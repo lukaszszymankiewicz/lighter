@@ -663,11 +663,6 @@ void LIG_add_to_scene(
 
     // scene->components[scene->n]->power  = light->light_polygons[i].light_power;
         
-    printf("light: %f %f %f \n",
-        light->light_polygons[i].red,
-        light->light_polygons[i].green,
-        light->light_polygons[i].blue
-    );
     float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = {
         light->light_polygons[i].red,
         light->light_polygons[i].green,
@@ -677,7 +672,8 @@ void LIG_add_to_scene(
 
     SCENE_add_shader(
         scene,
-        LAYER_SHADER,
+        LAYER_LIGHT,
+        NO_TEXTURE,
         SHADER_LIGHT,
         gl_vertex.len,
         gl_vertex.coefs,
@@ -686,5 +682,4 @@ void LIG_add_to_scene(
 
     // cleanup
     VRTX_free(vertex);
-
 }

@@ -10,6 +10,8 @@
 #include "sorted_list.h"
 #include "source.h"
 
+#define SPRITE_VERTEX_N 16
+
 int state_collisions[3][3] = {
     //  STANDING, WALKING, JUMPING
     {1,            1,         1    },
@@ -672,12 +674,29 @@ void ENT_add_to_scene(
         return;
     }
 
-    bool           flip   = ENT_render_with_flip(entity);
-    int            id     = ENT_texture_id(entity);
-    render_coord_t clip   = ENT_texture_coord(entity);
-    render_coord_t render = ENT_img_coord(entity, clip, camera_x, camera_y);
+    bool           flip       = ENT_render_with_flip(entity);
+    int            texture_id = ENT_texture_id(entity);
+    render_coord_t clip       = ENT_texture_coord(entity);
+    render_coord_t render     = ENT_img_coord(entity, clip, camera_x, camera_y);
     
-    SCENE_add_texture(scene, LAYER_SPRITE, id, render, clip, flip, false);
+    // TODO: uglyy (power up the render_coord_t)!!
+    float vertices[] = {
+    //  Position      Texcoords
+        render.x1, render.y1, 0.0f, 0.0f, // Top-left
+        render.x2, render.y1, 1.0f, 0.0f, // Top-right
+        render.x2, render.y2, 1.0f, 1.0f, // Bottom-right
+        render.x1, render.y1, 0.0f, 1.0f  // Bottom-left
+    };
+
+    SCENE_add_shader(
+        scene,
+        LAYER_SPRITE,
+        texture_id,
+        SHADER_TEXTURE,
+        SPRITE_VERTEX_N ,
+        vertices,
+        NULL
+    );
 }
 
 void ENT_free(

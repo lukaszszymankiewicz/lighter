@@ -12,6 +12,8 @@
 #include "texture.h"
 #include "tile.h"
 
+#define TILE_VERTEX_N 16
+
 enum { W, S, A, D };
 
 // this stores temporary tile data to determine if tile is an obstacle
@@ -318,21 +320,29 @@ void LVL_put_on_scene(
             tile         = LVL_tile_on_pos(level, x, y);
             
             if (tile != NULL) {
-
+    
                 render_coord_t render = GL_UTIL_gl_to_camera_gl(tile->coord, camera_x, camera_y);
-
-                SCENE_add_texture(
+                
+                // TODO: uglyy (power up the render_coord_t)!!
+                float vertices[] = {
+                //  Position      Texcoords
+                    render.x1, render.y1, 0.0f, 0.0f, // Top-left
+                    render.x2, render.y1, 1.0f, 0.0f, // Top-right
+                    render.x2, render.y2, 1.0f, 1.0f, // Bottom-right
+                    render.x1, render.y1, 0.0f, 1.0f  // Bottom-left
+                };
+                
+                SCENE_add_shader(
                     scene,
                     LAYER_TILE,
                     tile->tileset_id,
-                    render,
-                    tile->img,
-                    false,
-                    false
+                    SHADER_TEXTURE,
+                    TILE_VERTEX_N,
+                    vertices,
+                    NULL
                 );
             }
         }
-
     }
 }
 
