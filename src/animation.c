@@ -22,5 +22,5 @@ int ANIM_get_texture_height(
 render_coord_t ANIM_texture_coord_full(
     animation_sheet_t animation
 ) {
-    return (render_coord_t) { 0.0, 0.0, 1.0, 1.0}; 
+    return (render_coord_t) { 0.0, 0.0, 1.0, 1.0 }; 
 }

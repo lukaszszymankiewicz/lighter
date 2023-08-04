@@ -171,14 +171,10 @@ typedef struct shader_program_blueprint {
 
 typedef struct gfx_module_blueprint {
     bool       (*fun)();
-    const char *name;
 } gfx_module_blueprint_t;
 
-// TODO: module should have a pointer to function to cleanup
 typedef struct gfx_module {
-    char        error_symbol;
     bool        status;
-    const char *name;
 } gfx_module_t;
 
 extern entity_blueprint_t *entity_library[ENTITY_ALL];

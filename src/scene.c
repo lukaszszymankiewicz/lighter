@@ -11,91 +11,99 @@
 #include "render.h"
 #include "scene.h"
 
-// TODO: maybe introduce 'layer' struct to keep all this things?
-static const int TILE_LAYER_PROGRAM_ID   = 0;
-static const int SPRITE_LAYER_PROGRAM_ID = 0;
-static const int SHADER_LAYER_PROGRAM_ID = 0;
-
 scene_t *scene = NULL;
 
 void SCENE_clear(
     scene_t* scene
 ) {
-    scene->n_tile   = 0;
-    scene->n_sprite = 0;
-    scene->n_shader = 0;
+    scene->n_layers=0;
+
+    for (int i=0; i<MAX_LAYERS_ON_SCENE; i++) {
+        scene->layers[i].on         = false;
+        scene->layers[i].n_objs     = 0;
+        scene->layers[i].program_id = 0;
+    }
+}
+
+void SCENE_add_layer(
+    scene_t *scene,
+    int      type
+) {
+    scene->layers[scene->n_layers].on   = true;
+    scene->layers[scene->n_layers].type = type;
+    scene->n_layers++;
 }
 
 scene_t* SCENE_new(
+    int n_tile_layers,
+    int n_shader_layers
 ) {
-    scene_t *new_scene   = NULL;
-    new_scene            = (scene_t*)malloc(sizeof(scene_t));
+    scene_t *scene   = NULL;
+    scene            = (scene_t*)malloc(sizeof(scene_t));
 
-    SCENE_clear(new_scene);
+    SCENE_clear(scene);
 
-    return new_scene;
+    for(int l=0; l<n_tile_layers; l++) {
+         SCENE_add_layer(scene, LAYER_TYPE_TEXTURE);
+    }
+
+    for(int l=0; l<n_shader_layers; l++) {
+         SCENE_add_layer(scene, LAYER_TYPE_SHADER);
+    }
+
+    return scene;
 }
 
-void SCENE_add_tile(
+void SCENE_add_texture(
     scene_t       *scene,
-    int            texture_id,
-    render_coord_t render,
-    render_coord_t clip
-) {
-    if (scene->n_tile >= MAX_TILES_ON_TILE_LAYER) { return; }
-
-    scene->tile_layer[scene->n_tile].texture_id = texture_id;
-    scene->tile_layer[scene->n_tile].render     = render;
-    scene->tile_layer[scene->n_tile].clip       = clip;
-
-    scene->n_tile++;
-}
-
-void SCENE_add_sprite(
-    scene_t       *scene,
+    int            layer,
     int            texture_id,
     render_coord_t render,
     render_coord_t clip,
     bool           flip_w,
     bool           flip_h
 ) {
-    if (scene->n_sprite >= MAX_SPRITES_ON_SPRITES_LAYER) { return; }
+    int idx = scene->layers[layer].n_objs;
 
-    scene->sprite_layer[scene->n_sprite].texture_id = texture_id;
-    scene->sprite_layer[scene->n_sprite].render     = render;
-    scene->sprite_layer[scene->n_sprite].clip       = clip;
-    scene->sprite_layer[scene->n_sprite].flip_w     = flip_w;
-    scene->sprite_layer[scene->n_sprite].flip_h     = flip_h;
+    if (idx >= MAX_SPRITES_ON_SPRITES_LAYER) { return; }
 
-    scene->n_sprite++;
+    scene->layers[layer].objs[idx].texture.texture_id = texture_id;
+    scene->layers[layer].objs[idx].texture.render     = render;
+    scene->layers[layer].objs[idx].texture.clip       = clip;
+    scene->layers[layer].objs[idx].texture.flip_w     = flip_w;
+    scene->layers[layer].objs[idx].texture.flip_h     = flip_w;
+
+    scene->layers[layer].n_objs++;
 }
 
 void SCENE_add_shader(
     scene_t    *scene,
+    int         layer,
     int         program_id,
     int         len,
     int         size,
     GLfloat    *vertices,
     float      *uniforms
 ) {
-    int i=0;
+    int i;
+    int j=scene->layers[layer].n_objs;
 
-    if (scene->n_shader >= MAX_SHADER_ON_SHADER_LAYER) { return; }
+    if (j>=MAX_SHADER_ON_SHADER_LAYER) { return; }
 
-    scene->shader_layer[scene->n_shader].program_id = program_id;
-    scene->shader_layer[scene->n_shader].len        = len;
-    scene->shader_layer[scene->n_shader].size       = size;
-    
+    scene->layers[layer].objs[j].shader.program_id = program_id;
+    scene->layers[layer].objs[j].shader.len        = len;
+    scene->layers[layer].objs[j].shader.size       = size;
+
     for (i=0; i<len; i++) {
-        scene->shader_layer[scene->n_shader].vertices[i] = vertices[i];
+        scene->layers[layer].objs[j].shader.vertices[i] = vertices[i];
     }
     if (uniforms) {
         for (i=0; i<MAX_SHADER_UNIFORMS_ARGS; i++) {
-            scene->shader_layer[scene->n_shader].uniforms[i] = uniforms[i];
+            scene->layers[layer].objs[j].shader.uniforms[i] = uniforms[i];
         }
     }
 
-    scene->n_shader++;
+    scene->layers[layer].n_objs++;
 }
 
 void SCENE_free(
@@ -108,45 +116,35 @@ void SCENE_free(
 void SCENE_draw(
     scene_t* scene 
 ) {
-    glUseProgram(TILE_LAYER_PROGRAM_ID);
-    for (int tile=0; tile<scene->n_tile; tile++) {
-         RENDER_texture(
-            tilesets_library[scene->tile_layer[tile].texture_id]->id,
-            scene->tile_layer[tile].render.x1,
-            scene->tile_layer[tile].render.y1,
-            scene->tile_layer[tile].render.x2,
-            scene->tile_layer[tile].render.y2,
-            scene->tile_layer[tile].clip.x1,
-            scene->tile_layer[tile].clip.y1,
-            scene->tile_layer[tile].clip.x2,
-            scene->tile_layer[tile].clip.y2,
-            false
-        );
-    }
+    for (int layer=0; layer<scene->n_layers; layer++) {
+        glUseProgram(scene->layers[layer].program_id);
+        
+        if (scene->layers[layer].type == LAYER_TYPE_TEXTURE) {
+            for (int i=0; i<scene->layers[layer].n_objs; i++) {
+                RENDER_texture(
+                    tilesets_library[scene->layers[layer].objs[i].texture.texture_id]->id,
+                    scene->layers[layer].objs[i].texture.render.x1,
+                    scene->layers[layer].objs[i].texture.render.y1,
+                    scene->layers[layer].objs[i].texture.render.x2,
+                    scene->layers[layer].objs[i].texture.render.y2,
+                    scene->layers[layer].objs[i].texture.clip.x1,
+                    scene->layers[layer].objs[i].texture.clip.y1,
+                    scene->layers[layer].objs[i].texture.clip.x2,
+                    scene->layers[layer].objs[i].texture.clip.y2,
+                    scene->layers[layer].objs[i].texture.flip_w
+                );
+            }
 
-    glUseProgram(SPRITE_LAYER_PROGRAM_ID);
-    for (int sprite=0; sprite<scene->n_sprite; sprite++) {
-        RENDER_texture(
-            sprites_library[scene->sprite_layer[sprite].texture_id]->id,
-            scene->sprite_layer[sprite].render.x1,
-            scene->sprite_layer[sprite].render.y1,
-            scene->sprite_layer[sprite].render.x2,
-            scene->sprite_layer[sprite].render.y2,
-            scene->sprite_layer[sprite].clip.x1,
-            scene->sprite_layer[sprite].clip.y1,
-            scene->sprite_layer[sprite].clip.x2,
-            scene->sprite_layer[sprite].clip.y2,
-            scene->sprite_layer[sprite].flip_w
-        );
-    }
-
-    for (int shader=0; shader<scene->n_shader; shader++) {
-        RENDER_shader(
-            scene->shader_layer[shader].program_id,
-            scene->shader_layer[shader].vertices,
-            scene->shader_layer[shader].len,
-            scene->shader_layer[shader].size,
-            scene->shader_layer[shader].uniforms
-        );
+        } else {
+            for (int i=0; i<scene->layers[layer].n_objs; i++) {
+                RENDER_shader(
+                    scene->layers[layer].objs[i].shader.program_id,
+                    scene->layers[layer].objs[i].shader.vertices,
+                    scene->layers[layer].objs[i].shader.len,
+                    scene->layers[layer].objs[i].shader.size,
+                    scene->layers[layer].objs[i].shader.uniforms
+                );
+            }
+        }
     }
 }

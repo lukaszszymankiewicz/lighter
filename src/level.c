@@ -321,11 +321,14 @@ void LVL_put_on_scene(
 
                 render_coord_t render = GL_UTIL_gl_to_camera_gl(tile->coord, camera_x, camera_y);
 
-                SCENE_add_tile(
+                SCENE_add_texture(
                     scene,
+                    LAYER_TILE,
                     tile->tileset_id,
                     render,
-                    tile->img
+                    tile->img,
+                    false,
+                    false
                 );
             }
         }

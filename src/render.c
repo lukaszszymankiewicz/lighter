@@ -64,9 +64,12 @@ void RENDER_shader(
     // TODO: this cannot be called once per frame!
     // TODO: shader struct should have `position` in it !
     // TODO: To separate GFX function!
-    GLint posAttrib = glGetAttribLocation(shader_library[shader]->program, "position");
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    for (int i=0; i<shader_library[shader]->n_attribs; i++) {
+        GLint attrib = shader_library[shader]->attrib[i];
+        glEnableVertexAttribArray(attrib);
+        glVertexAttribPointer(attrib, size, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
     glDrawArrays(GL_POLYGON, 0, (int)(n_vertices/size));
 };
 

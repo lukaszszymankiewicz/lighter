@@ -27,6 +27,10 @@
 #define ALLOWED_UNIFORM_TYPE     (GLuint[ALLOWED_UNIFORM_TYPE_N]){ GL_FLOAT_VEC4 }
 #define ALLOWED_UNIFORM_NAME_LEN 16
 
+#define ALLOWED_ATTIRB_TYPE_N   3
+#define ALLOWED_ATTIRB_TYPE     (GLuint[ALLOWED_ATTIRB_TYPE_N]){ GL_FLOAT_VEC4, GL_FLOAT_VEC3, GL_FLOAT_VEC2 }
+#define ALLOWED_ATTRIB_NAME_LEN  16
+
 GLint  gVertexPos2DLocation = -1;
 GLuint gVBO                 = 0;
 GLuint gIBO                 = 0;
@@ -122,7 +126,16 @@ shader_program_t* GFX_create_gl_program(
     const char* fragment_shader_path,
     const char* geometry_shader_path
 ) {
+    GLint i;
+    GLint n_uniforms, n_attribs;
+    GLint size; 
+
+    GLenum  type; 
+    GLchar  name[ALLOWED_UNIFORM_NAME_LEN];
+    GLsizei length;
+
     shader_program_t* shader_program = NULL;
+
     shader_program                   = (shader_program_t*)malloc(sizeof(shader_program_t));
 
     int vertex_shader_id = GFX_compile_shader(vertex_shader_path, GL_VERTEX_SHADER);
@@ -148,10 +161,6 @@ shader_program_t* GFX_create_gl_program(
     shader_program->program            = program_id;
 
     // bind uniform arguments
-    GLint i; GLint n_uniforms; GLint size; 
-    GLenum type; 
-    GLchar name[ALLOWED_UNIFORM_NAME_LEN];
-    GLsizei length;
 
     // get uniforms
     glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_uniforms);
@@ -165,15 +174,36 @@ shader_program_t* GFX_create_gl_program(
                 printf("Invalid uniform type! \n");
                 return NULL;
             }
+        }
 
-            if (length > ALLOWED_UNIFORM_NAME_LEN) {
-                printf("Uniform name is too long! \n");
+        if (length > ALLOWED_UNIFORM_NAME_LEN) {
+            printf("Uniform name is too long! \n");
+            return NULL;
+        }
+
+        shader_program->uniform_ids[i]   = glGetUniformLocation(program_id, name);
+        strcpy(shader_program->uniform_names[i], name);
+    }
+    
+    // get attribs
+    glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_attribs);
+    shader_program->n_attribs = n_attribs;
+
+    for (i=0; i<n_attribs; i++) {
+        glGetActiveAttrib(program_id, (GLuint)i, ALLOWED_ATTRIB_NAME_LEN, &length, &size, &type, name);
+
+        for (int j=0; j<ALLOWED_ATTIRB_TYPE_N; j++) {
+            if (type != ALLOWED_ATTIRB_TYPE[j]) {
+                printf("Invalid attrib type! \n");
                 return NULL;
             }
-
-            shader_program->uniform_ids[i]   = glGetUniformLocation(program_id, name);
-            strcpy(shader_program->uniform_names[i], name);
         }
+
+        if (length > ALLOWED_ATTRIB_NAME_LEN) {
+            printf("Attrib name is too long! \n");
+            return NULL;
+        }
+
     }
 
     return shader_program;

@@ -29,18 +29,22 @@
 - [x] code for normal->gl coords should be in some util module
 - [x] delete all print statements
 - [x] add error codes in all gfx initialization
+- [x] reading GFX (video, window) to the library module
 - [x] add light shader
   - [x] made shader readable from file
   - [x] made one polygon shader with white color
   - [x] made multi-polygon shader
   - [x] made multi-source shader
   - [x] add color to light shader
+  - [ ] make texture a typical openGl shader for consistency
   - [ ] add stencil buffer
+  - [ ] add differ effect
   - [ ] put shader light effect to buffer
   - [ ] add transparency to light effect shader
   - [ ] made shader pixel-perfect
   - [ ] add wobble
 - [ ] repair all unit-tests (once again!)
 - [ ] clear all memory leaks!
-- [x] reading GFX (video, window) to the library module
 - [ ] repair light vertex calculations
+- [x] remove error codes
+- [ ] make tile render as as separate shader

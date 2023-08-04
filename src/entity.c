@@ -677,7 +677,7 @@ void ENT_add_to_scene(
     render_coord_t clip   = ENT_texture_coord(entity);
     render_coord_t render = ENT_img_coord(entity, clip, camera_x, camera_y);
     
-    SCENE_add_sprite(scene, id, render, clip, flip, false);
+    SCENE_add_texture(scene, LAYER_SPRITE, id, render, clip, flip, false);
 }
 
 void ENT_free(

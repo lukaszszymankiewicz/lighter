@@ -2,6 +2,7 @@
 #define GL_UTIL_H
 
 #define MAX_VERTEX_LEN                50
+#define MAX_SHADER_ATTRIBS            1
 #define MAX_SHADER_UNIFORMS_ARGS      4
 #define MAX_SHADER_UNIFORMS           1
 #define MAX_SHADER_UNIFORMS_ARGS_LEN  MAX_SHADER_UNIFORMS_ARGS * MAX_SHADER_UNIFORMS           
@@ -24,11 +25,14 @@ typedef struct render_vertex {
 typedef struct shader_program {
     int    program;
     int    n_uniforms;
-    int    uniform_ids[MAX_SHADER_UNIFORMS];
-    char  *uniform_names[MAX_SHADER_UNIFORMS];
+    int    n_attribs;
     int    vertex_shader_id;
     int    fragment_shader_id;
     int    geometry_shader_id;
+    int    uniform_ids[MAX_SHADER_UNIFORMS];
+    char  *uniform_names[MAX_SHADER_UNIFORMS];
+    int    attrib[MAX_SHADER_ATTRIBS];
+    char  *attrib_names[MAX_SHADER_ATTRIBS];
 } shader_program_t;
 
 render_coord_t GL_UTIL_global_to_gl_coord(

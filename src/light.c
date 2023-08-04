@@ -11,7 +11,6 @@
 #include "scene.h"
 #include "vertex.h"
 
-#define ARGS_PER_LIGHT 3
 #define COEFS_PER_LIGHT_VERTEX 2
 
 
@@ -680,6 +679,7 @@ void LIG_add_to_scene(
 
     SCENE_add_shader(
         scene,
+        LAYER_SHADER,
         SHADER_LIGHT,
         gl_vertex.len,
         COEFS_PER_LIGHT_VERTEX,

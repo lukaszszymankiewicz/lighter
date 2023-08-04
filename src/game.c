@@ -228,13 +228,9 @@ game_t* GAME_new(
     game_t *game      = NULL;
 
     GAME_read_modules();
-    if(!(LIB_check_modules())) {
-        return game;
-    }
-
     GAME_create_library();
 
-    // TODO: TBD?
+    // TODO: TBD in game init??
     GAME_init_graphics(graphic_option); 
 
     game              = GAME_init(level_id, max_frames);
@@ -245,7 +241,7 @@ game_t* GAME_new(
         game->draw_func = &GAME_draw_nothing; 
     }
 
-    scene = SCENE_new();
+    scene = SCENE_new(LAYER_TEXTURE_N, LAYER_TYPE_SHADER_N);
 
     GAME_init_entities(game);
     LVL_fill(game->level);
