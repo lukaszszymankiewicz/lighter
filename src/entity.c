@@ -688,11 +688,10 @@ void ENT_add_to_scene(
         render.x1, render.y1, 0.0f, 1.0f  // Bottom-left
     };
 
-    SCENE_add_shader(
+    SCENE_add(
         scene,
         LAYER_SPRITE,
         texture_id,
-        SHADER_TEXTURE,
         SPRITE_VERTEX_N ,
         vertices,
         NULL

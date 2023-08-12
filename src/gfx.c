@@ -23,8 +23,8 @@
 #define SHADER_CHECK_MODE    "rb"
 #define SHADER_READ_MODE     "r"
 
-#define ALLOWED_UNIFORM_TYPE_N   1
-#define ALLOWED_UNIFORM_TYPE     (GLuint[ALLOWED_UNIFORM_TYPE_N]){ GL_FLOAT_VEC4 }
+#define ALLOWED_UNIFORM_TYPE_N   2
+#define ALLOWED_UNIFORM_TYPE     (GLuint[ALLOWED_UNIFORM_TYPE_N]){ GL_FLOAT_VEC4, GL_SAMPLER_2D }
 #define ALLOWED_UNIFORM_NAME_LEN 16
 
 #define ALLOWED_ATTIRB_TYPE_N   3
@@ -59,7 +59,7 @@ int GFX_check_shader_compile_status(
     if (status == GL_FALSE) {
         char buffer[max_buffer_len];
         glGetShaderInfoLog(shader_id, max_buffer_len, NULL, buffer);
-        printf("Shader compilation error: %s \n", buffer);
+        printf("Shader compilation error: %s", buffer);
         return 0;
     }
     return 1;
@@ -116,6 +116,7 @@ int GFX_compile_shader(
     glCompileShader(id);
 
     if (!GFX_check_shader_compile_status(id)) {
+        printf("Shader %s failed to compiled!\n", path);
         return -1; 
     }
     return (int)id;
@@ -129,6 +130,7 @@ shader_program_t* GFX_create_gl_program(
     GLint i;
     GLint n_uniforms, n_attribs;
     GLint size; 
+    GLint arr_size; 
 
     GLenum  type; 
     GLchar  name[ALLOWED_UNIFORM_NAME_LEN];
@@ -168,60 +170,74 @@ shader_program_t* GFX_create_gl_program(
 
     for (i=0; i<n_uniforms; i++) {
         glGetActiveUniform(program_id, (GLuint)i, ALLOWED_UNIFORM_NAME_LEN, &length, &size, &type, name);
+        
+        bool res = false;
 
         for (int j=0; j<ALLOWED_UNIFORM_TYPE_N; j++) {
-            if (type != ALLOWED_UNIFORM_TYPE[j]) {
-                printf("Invalid uniform type! \n");
-                return NULL;
+            if (type == ALLOWED_UNIFORM_TYPE[j]) {
+                res = true;
             }
+        }
+        if (!res) {
+            printf("Invalid uniform type: (%s) \n", name); return NULL;
         }
 
         if (length > ALLOWED_UNIFORM_NAME_LEN) {
-            printf("Uniform name is too long! \n");
-            return NULL;
+            printf("Uniform name is too long: (%s) \n", name); return NULL;
         }
 
-        shader_program->uniform_ids[i]   = glGetUniformLocation(program_id, name);
-        strcpy(shader_program->uniform_names[i], name);
+        shader_program->uniform_ids[i] = glGetUniformLocation(program_id, name);
+        printf("read uniform location: %d \n",shader_program->uniform_ids[i]); 
+        printf("for uniform %s \n", name); 
+        // strcpy(shader_program->uniform_names[i], name);
     }
-    
-    // get attribs
-    glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_attribs);
-    shader_program->n_attribs = n_attribs;
-    
-    int attrib_size = 0;
+    // 
+    // // get attribs
+    // n_attribs = (GLuint)0; 
+    // glGetProgramiv(program_id, GL_ACTIVE_ATTRIBUTES, &n_attribs);
+    // printf("program read: %d\n", program_id);
 
-    for (i=0; i<n_attribs; i++) {
-        glGetActiveAttrib(program_id, (GLuint)i, ALLOWED_ATTRIB_NAME_LEN, &length, &size, &type, name);
+    // int attrib_size = 0;
 
-        for (int j=0; j<ALLOWED_ATTIRB_TYPE_N; j++) {
-            if (type != ALLOWED_ATTIRB_TYPE[j]) {
-                printf("Invalid attrib type! \n");
-                return NULL;
-            }
-        }
+    // for (i=0; i<n_attribs; i++) {
+    //     length = 0;
+    //     size = 0;
+    //     type = 0;
+    //     // glGetActiveAttrib(program_id, (GLuint)i, ALLOWED_ATTRIB_NAME_LEN, &length, &size, &type, name);
 
-        if (length > ALLOWED_ATTRIB_NAME_LEN) {
-            printf("Attrib name is too long! \n");
-            return NULL;
-        }
-        
-        switch (type) {
-            case GL_FLOAT_VEC4:
-                shader_program->attrib_shift[i] = 4;
-                attrib_size+=4;
-                break;
-            case GL_FLOAT_VEC3:
-                shader_program->attrib_shift[i] = 3;
-                attrib_size+=3;
-                break;
-            case GL_FLOAT_VEC2:
-                shader_program->attrib_shift[i] = 2;
-                attrib_size+=2;
-                break;
-        }
-    }
-    shader_program->attrib_size = attrib_size;
+    //     // bool res = false;
+
+    //     // for (int j=0; j<ALLOWED_ATTIRB_TYPE_N; j++) {
+    //     //     if (type == ALLOWED_ATTIRB_TYPE[j]) {
+    //     //         res = true;
+    //     //     }
+    //     // }
+    //     // if(!res) {
+    //     //     return NULL;
+    //     // }
+
+    //     // if (length > ALLOWED_ATTRIB_NAME_LEN) {
+    //     //     printf("Attrib name is too long: (%s) \n", name);
+    //     //     return NULL;
+    //     // }
+    //     
+    //     // switch (type) {
+    //     //     case GL_FLOAT_VEC4:
+    //     //         shader_program->attrib_shift[i] = 4;
+    //     //         attrib_size+=4;
+    //     //         break;
+    //     //     case GL_FLOAT_VEC3:
+    //     //         shader_program->attrib_shift[i] = 3;
+    //     //         attrib_size+=3;
+    //     //         break;
+    //     //     case GL_FLOAT_VEC2:
+    //     //         shader_program->attrib_shift[i] = 2;
+    //     //         attrib_size+=2;
+    //     //         break;
+    //     // }
+    //     // shader_program->attrib[i] = (int)glGetAttribLocation(program_id, name);
+    // }
+    // shader_program->attrib_size = attrib_size;
 
     return shader_program;
 }
@@ -236,8 +252,7 @@ void GFX_set_interpolation_2d(
 void GFX_bind_texture(
     GLuint texture_id
 ) {
-    // glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glGenTextures(1, &texture_id);
 }
 
 // specify texture in OpenGL
@@ -388,11 +403,13 @@ GLuint GFX_init_vbo(
 }
 
 void GFX_clear_screen() {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 };
 
 void GFX_update() {
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     SDL_GL_SwapWindow(window);
     SDL_UpdateWindowSurface(window);
 };
@@ -401,7 +418,7 @@ bool GFX_init_graphics(
 ) {
     // TODO: OK, this propably needs to be placed somewhere else
     // GFX_init_vao();
-    GFX_init_vbo();
+    // GFX_init_vbo();
 
     return true;
 };

@@ -5,6 +5,7 @@ float global_x_scale        = 1.0;
 float global_y_scale        = 1.0;
 
 
+// TODO: to be deleted!
 render_coord_t GL_UTIL_global_to_gl_coord(
     int        x,       int        y,
     int        w,       int        h,
@@ -29,6 +30,7 @@ render_coord_t GL_UTIL_global_to_gl_coord(
     return (render_coord_t) {x1, y1, x2, y2};
 }
 
+// TODO: to be deleted!
 render_coord_t GL_UTIL_gl_to_camera_gl(
     render_coord_t render,
     int camera_x, int camera_y

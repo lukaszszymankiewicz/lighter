@@ -16,13 +16,13 @@ texture_t* TXTR_read_from_file(
     GLuint texture_id                       = GFX_generate_texture_ID();
     GFX_bind_texture(texture_id);
     GFX_set_interpolation_2d(GL_NEAREST);
-    GFX_specify_texture(surface, TEXTURE_MODE );
+    GFX_specify_texture(surface, TEXTURE_MODE);
 
     texture_t* tex = malloc(sizeof(texture_t));
     tex->surface   = surface;
     tex->id        = texture_id;
     // tex->filepath  = filepath;
-
+    printf("texture %s read and has id %d\n", filepath, texture_id);
     return tex;
 }
 

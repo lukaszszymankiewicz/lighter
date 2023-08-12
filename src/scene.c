@@ -16,19 +16,9 @@ scene_t *scene = NULL;
 void SCENE_clear(
     scene_t* scene
 ) {
-    scene->n_layers=0;
-
     for (int i=0; i<MAX_LAYERS_ON_SCENE; i++) {
-        scene->layers[i].on         = false;
         scene->layers[i].n_objs     = 0;
-        scene->layers[i].program_id = 0;
     }
-}
-
-void SCENE_add_layer(
-    scene_t *scene
-) {
-    scene->layers[scene->n_layers++].on   = true;
 }
 
 scene_t* SCENE_new(
@@ -36,21 +26,60 @@ scene_t* SCENE_new(
 ) {
     scene_t *scene   = NULL;
     scene            = (scene_t*)malloc(sizeof(scene_t));
+    scene->n_layers  = 0;
 
     SCENE_clear(scene);
 
     for(int l=0; l<n_layers; l++) {
-         SCENE_add_layer(scene);
+         scene->n_layers++;
     }
 
     return scene;
 }
 
-void SCENE_add_shader(
+void SCENE_attach_shader(
+    int layer, int shader_id
+) {
+    scene->layers[layer].on        = true;
+    scene->layers[layer].shader_id = shader_id;
+}
+
+void SCENE_set_uniforms(
+    scene_t    *scene,
+    int         layer,
+    float      *uniforms
+) {
+    int j = scene->layers[layer].n_objs;
+
+    if (uniforms) {
+        for (int i=0; i<MAX_SHADER_UNIFORMS_ARGS; i++) {
+            scene->layers[layer].objs[j].uniforms[i] = uniforms[i];
+        }
+    }
+}
+
+void SCENE_append_vertices(
+    scene_t    *scene,
+    int         layer,
+    int         len,
+    GLfloat    *vertices
+) {
+    int j=scene->layers[layer].n_objs;
+    int cur_len = scene->layers[layer].objs[j].len;
+
+    scene->layers[layer].objs[j].len += len;
+
+    if (vertices) {
+        for (int i=0; i<len; i++) {
+            scene->layers[layer].objs[j].vertices[cur_len+i] = vertices[i];
+        }
+    }
+}
+
+void SCENE_add(
     scene_t    *scene,
     int         layer,
     int         texture,
-    int         shader_id,
     int         len,
     GLfloat    *vertices,
     float      *uniforms
@@ -60,12 +89,13 @@ void SCENE_add_shader(
 
     if (j>=MAX_SHADER_ON_SHADER_LAYER) { return; }
 
-    scene->layers[layer].objs[j].program_id = shader_id;
     scene->layers[layer].objs[j].len        = len;
     scene->layers[layer].objs[j].texture    = texture;
 
-    for (i=0; i<len; i++) {
-        scene->layers[layer].objs[j].vertices[i] = vertices[i];
+    if (vertices) {
+        for (i=0; i<len; i++) {
+            scene->layers[layer].objs[j].vertices[i] = vertices[i];
+        }
     }
     if (uniforms) {
         for (i=0; i<MAX_SHADER_UNIFORMS_ARGS; i++) {
@@ -83,15 +113,24 @@ void SCENE_free(
     scene = NULL;
 }
 
+void SCENE_use_program(
+    int layer
+) {
+    glUseProgram(shader_library[scene->layers[layer].shader_id]->program);
+}
+
 void SCENE_draw(
     scene_t* scene 
 ) {
     for (int layer=0; layer<scene->n_layers; layer++) {
-        glUseProgram(scene->layers[layer].program_id);
-        
+        if (!(scene->layers[layer].on)) {
+            continue;
+        }
+        SCENE_use_program(layer);
+
         for (int i=0; i<scene->layers[layer].n_objs; i++) {
-            RENDER_shader(
-                scene->layers[layer].objs[i].program_id,
+            RENDER_shader_texture(
+                scene->layers[layer].shader_id,
                 scene->layers[layer].objs[i].texture,
                 scene->layers[layer].objs[i].vertices,
                 scene->layers[layer].objs[i].len,

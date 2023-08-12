@@ -1,11 +1,51 @@
 #include "./data/library.h"
 
 #include <GL/glew.h>
+#include <GL/gl.h>
 #include <stdio.h>
 
 #include "render.h"
 
-void RENDER_shader(
+void RENDER_shader_texture(
+    int      shader,
+    int      texture,
+    GLfloat *vertices,
+    int      n_vertices,
+    float   *uniforms
+) { 
+    unsigned int VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * n_vertices, vertices, GL_STATIC_DRAW);
+
+    // pos
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // tex
+    // GLint texAttrib = shader_library[shader]->attrib[2];
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // TODO: this can be important but i cannot tell by now :C
+    // texture
+    GLint uniform_id = shader_library[shader]->uniform_ids[0];
+    glUniform4f(uniform_id, uniforms[0], uniforms[1], uniforms[2], uniforms[3]);
+
+    // GLint uniform_loc = shader_library[shader]->n_uniforms;
+    // printf("number of uniforms: %d \n", uniform_loc);
+    // glUniform1i(uniform_loc, texture);
+    // glBindTexture(GL_TEXTURE_2D, texture);
+
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_POLYGON, 0, 4);
+}
+
+// TODO: each shader should have its own small function to render it
+void RENDER_shader_light(
     int      shader,
     int      texture,
     GLfloat *vertices,

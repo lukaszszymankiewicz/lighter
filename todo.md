@@ -36,7 +36,10 @@
   - [x] made multi-polygon shader
   - [x] made multi-source shader
   - [x] add color to light shader
-  - [ ] make texture a typical openGl shader for consistency
+  - [x] make texture a typical openGl shader for consistency
+  - [x] camera projection to shader!
+    - [ ] make one draw call to draw tiles
+- [ ] global scale can be propably easily deleted
   - [ ] add stencil buffer
   - [ ] add differ effect
   - [ ] put shader light effect to buffer
@@ -48,3 +51,4 @@
 - [ ] repair light vertex calculations
 - [x] remove error codes
 - [ ] make tile render as as separate shader
+- [ ] game options to some global config

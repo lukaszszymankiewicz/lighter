@@ -134,13 +134,6 @@ void GAME_start_cap_time(
     TIMER_start(game->cap_timer);
 }
 
-void GAME_clear_screen(
-    game_t *game
-) {
-    SCENE_clear(scene);
-    GFX_clear_screen();
-}
-
 void GAME_update_entities(
     game_t *game
 ) {
@@ -152,12 +145,6 @@ void GAME_put_level_on_scene(
 ) {
     // TODO: add shorten up version of it
     LVL_put_on_scene(game->level, ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
-}
-
-void GAME_render(
-    game_t *game
-) {
-    GFX_update();
 }
 
 bool GAME_init_graphics(
@@ -193,11 +180,6 @@ void GAME_apply_logic(
     GAME_update_entities(game);
 }
 
-void GAME_draw_scene(
-    game_t* game
-) {
-    SCENE_draw(scene);
-}
 
 void GAME_put_entities_on_scene(
     game_t *game
@@ -208,12 +190,13 @@ void GAME_put_entities_on_scene(
 void GAME_draw_everything(
     game_t* game
 ) {
-    GAME_clear_screen(game);
+    SCENE_clear(scene);
+    GFX_clear_screen();
     GAME_put_level_on_scene(game);
-    GAME_put_entities_on_scene(game);
-    GAME_draw_light(game);
-    GAME_draw_scene(game);
-    GAME_render(game);
+    // GAME_put_entities_on_scene(game);
+    // GAME_draw_light(game);
+    SCENE_draw(scene);
+    GFX_update();
 }
 
 void GAME_draw_nothing(
@@ -234,14 +217,18 @@ game_t* GAME_new(
     GAME_init_graphics(graphic_option); 
 
     game              = GAME_init(level_id, max_frames);
-
+    
+    // TODO: config should do this, also be not afraid of one more `if` for each frame
     if(graphic_option == GRAPHIC_ON) {
         game->draw_func = &GAME_draw_everything; 
     } else {
         game->draw_func = &GAME_draw_nothing; 
     }
 
-    scene = SCENE_new(LAYER_ALL );
+    scene = SCENE_new(LAYER_ALL);
+    SCENE_attach_shader(LAYER_TILE, SHADER_TEXTURE);
+    // SCENE_attach_shader(LAYER_SPRITE, shader_library[SHADER_TEXTURE]->program);
+    // SCENE_attach_shader(LAYER_LIGHT, shader_library[SHADER_LIGHT]->program);
 
     GAME_init_entities(game);
     LVL_fill(game->level);
@@ -279,7 +266,7 @@ void GAME_loop(
         // game->loop = false;
     }
 
-    GAME_close(game);
+    return;
 }
 
 void GAME_run(
@@ -290,4 +277,5 @@ void GAME_run(
     game_t* game = NULL;
     game         = GAME_new(level_id, graphic_option, max_frames);
     GAME_loop(game);
+    GAME_close(game);
 }

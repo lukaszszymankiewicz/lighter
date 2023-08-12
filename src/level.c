@@ -313,6 +313,10 @@ void LVL_put_on_scene(
     int end_tile_pos_x = st_tile_pos_x + SCREEN_TILE_PER_Y;
     int end_tile_pos_y = st_tile_pos_y + SCREEN_TILE_PER_X;
 
+    float camera_x_diff = (((float)camera_x) / (float)SCREEN_WIDTH) * global_x_scale;
+    float camera_y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT) * global_y_scale;
+    float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { camera_x_diff, camera_y_diff, 0.0, 0.0 };
+
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
 
@@ -321,25 +325,21 @@ void LVL_put_on_scene(
             
             if (tile != NULL) {
     
-                render_coord_t render = GL_UTIL_gl_to_camera_gl(tile->coord, camera_x, camera_y);
-                
-                // TODO: uglyy (power up the render_coord_t)!!
                 float vertices[] = {
-                //  Position      Texcoords
-                    render.x1, render.y1, 0.0f, 0.0f, // Top-left
-                    render.x2, render.y1, 1.0f, 0.0f, // Top-right
-                    render.x2, render.y2, 1.0f, 1.0f, // Bottom-right
-                    render.x1, render.y1, 0.0f, 1.0f  // Bottom-left
+                 // Position                       Texcoords
+                   tile->coord.x1, tile->coord.y2, tile->img.x1, tile->img.y2, // Top-left
+                   tile->coord.x2, tile->coord.y2, tile->img.x2, tile->img.y2, // Top-right
+                   tile->coord.x2, tile->coord.y1, tile->img.x2, tile->img.y1, // Bottom-right
+                   tile->coord.x1, tile->coord.y1, tile->img.x1, tile->img.y1, // Bottom-left
                 };
-                
-                SCENE_add_shader(
+
+                SCENE_add(
                     scene,
                     LAYER_TILE,
                     tile->tileset_id,
-                    SHADER_TEXTURE,
                     TILE_VERTEX_N,
                     vertices,
-                    NULL
+                    uniforms
                 );
             }
         }

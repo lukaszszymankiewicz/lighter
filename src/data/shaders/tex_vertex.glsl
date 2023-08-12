@@ -1,10 +1,14 @@
 #version 330 core
 
-in vec2 texcoord;
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec2 aTexCoord;
 
-out vec2 Texcoord;
+uniform vec4 aCamera;
+
+out vec2 TexCoord;
 
 void main()
 {
-    Texcoord = texcoord;
+    gl_Position = vec4(aPos.x-aCamera.x, aPos.y+aCamera.y, 0.0, 1.0);
+    TexCoord = aTexCoord;
 }

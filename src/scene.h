@@ -11,9 +11,9 @@
 #define MAX_DRAWBLE_OBJECTS_ON_LAYER  100
 #define MAX_TILES_ON_TILE_LAYER       100
 #define MAX_VERTEX_ON_TILE_LAYER      100
-#define MAX_VERTEX_ON_SHADER_LAYER    50
+#define MAX_VERTEX_ON_SHADER_LAYER    400
 #define MAX_SPRITES_ON_SPRITES_LAYER  10
-#define MAX_SHADER_ON_SHADER_LAYER    10
+#define MAX_SHADER_ON_SHADER_LAYER    100
 #define MAX_SHADER_INT_ARGS           3
 
 typedef struct drawable_shader {
@@ -27,7 +27,7 @@ typedef struct drawable_shader {
 typedef struct layer {
     bool              on;
     int               n_objs;
-    int               program_id;
+    int               shader_id;
     drawable_shader_t objs[MAX_DRAWBLE_OBJECTS_ON_LAYER];
 } layer_t; 
 
@@ -41,15 +41,28 @@ extern scene_t *scene;
 scene_t* SCENE_new(int n_layers);
 
 void SCENE_clear(scene_t* scene);
+void SCENE_attach_shader(int layer, int shader_id);
 
-void SCENE_add_shader(
+void SCENE_add(
     scene_t    *scene,
     int         layer,
     int         texture,
-    int         shader_program_id,
     int         len,
     GLfloat    *vertices,
     float      *uniforms
+);
+
+void SCENE_set_uniforms(
+    scene_t    *scene,
+    int         layer,
+    float      *uniforms
+);
+
+void SCENE_append_vertices(
+    scene_t    *scene,
+    int         layer,
+    int         len,
+    GLfloat    *vertices
 );
 
 void SCENE_free(scene_t* scene);

@@ -670,11 +670,10 @@ void LIG_add_to_scene(
         1.0
     };
 
-    SCENE_add_shader(
+    SCENE_add(
         scene,
         LAYER_LIGHT,
         NO_TEXTURE,
-        SHADER_LIGHT,
         gl_vertex.len,
         gl_vertex.coefs,
         uniforms

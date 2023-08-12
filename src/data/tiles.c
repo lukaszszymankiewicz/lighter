@@ -6,6 +6,7 @@
 
 tile_blueprint_t *tiles_library[TILE_ALL] = {NULL};
 
+// TODO; as this is already a blueprint, maybe some row/col system to read tiles from there?
 tile_blueprint_t tile_blueprint_nothing = {
     TILESET_BASIC, 
     (render_coord_t) { 0.0, 0.0, 32.0/512.0, 1.0 },

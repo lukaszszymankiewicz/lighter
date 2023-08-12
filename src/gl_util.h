@@ -2,9 +2,9 @@
 #define GL_UTIL_H
 
 #define MAX_VERTEX_LEN                50
-#define MAX_SHADER_ATTRIBS            1
+#define MAX_SHADER_ATTRIBS            3
 #define MAX_SHADER_UNIFORMS_ARGS      4
-#define MAX_SHADER_UNIFORMS           1
+#define MAX_SHADER_UNIFORMS           2
 #define MAX_SHADER_UNIFORMS_ARGS_LEN  MAX_SHADER_UNIFORMS_ARGS * MAX_SHADER_UNIFORMS           
 
 extern float global_x_scale;
