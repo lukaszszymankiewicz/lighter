@@ -157,6 +157,7 @@ typedef struct entity_fill {
 
 typedef struct level_blueprint {
     int           id;
+    int           tileset_id;
     int           size_x;
     int           size_y;
     int           tiles[MAX_LEVEL_SIZE];

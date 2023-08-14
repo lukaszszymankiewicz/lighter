@@ -17,7 +17,18 @@ void SCENE_clear(
     scene_t* scene
 ) {
     for (int i=0; i<MAX_LAYERS_ON_SCENE; i++) {
-        scene->layers[i].n_objs     = 0;
+        int n_objs = scene->layers[i].n_objs;
+
+        for (int j=0; j<n_objs; j++) {
+            scene->layers[i].objs[j].len        = 0;
+            scene->layers[i].objs[j].texture    = -1;
+            scene->layers[i].objs[j].program_id = -1;
+            memset(scene->layers[i].objs[j].uniforms, 0.0, MAX_SHADER_UNIFORMS_ARGS);
+
+            free(scene->layers[i].objs[j].vertices);
+            scene->layers[i].objs[j].vertices   = NULL;
+        }
+        scene->layers[i].n_objs      = 0;
     }
 }
 
@@ -44,38 +55,6 @@ void SCENE_attach_shader(
     scene->layers[layer].shader_id = shader_id;
 }
 
-void SCENE_set_uniforms(
-    scene_t    *scene,
-    int         layer,
-    float      *uniforms
-) {
-    int j = scene->layers[layer].n_objs;
-
-    if (uniforms) {
-        for (int i=0; i<MAX_SHADER_UNIFORMS_ARGS; i++) {
-            scene->layers[layer].objs[j].uniforms[i] = uniforms[i];
-        }
-    }
-}
-
-void SCENE_append_vertices(
-    scene_t    *scene,
-    int         layer,
-    int         len,
-    GLfloat    *vertices
-) {
-    int j=scene->layers[layer].n_objs;
-    int cur_len = scene->layers[layer].objs[j].len;
-
-    scene->layers[layer].objs[j].len += len;
-
-    if (vertices) {
-        for (int i=0; i<len; i++) {
-            scene->layers[layer].objs[j].vertices[cur_len+i] = vertices[i];
-        }
-    }
-}
-
 void SCENE_add(
     scene_t    *scene,
     int         layer,
@@ -93,9 +72,7 @@ void SCENE_add(
     scene->layers[layer].objs[j].texture    = texture;
 
     if (vertices) {
-        for (i=0; i<len; i++) {
-            scene->layers[layer].objs[j].vertices[i] = vertices[i];
-        }
+        scene->layers[layer].objs[j].vertices = vertices;
     }
     if (uniforms) {
         for (i=0; i<MAX_SHADER_UNIFORMS_ARGS; i++) {
@@ -109,6 +86,14 @@ void SCENE_add(
 void SCENE_free(
     scene_t* scene
 ) {
+    for (int i=0; i<MAX_LAYERS_ON_SCENE; i++) {
+        int n_objs = scene->layers[i].n_objs;
+
+        for (int j=0; j<n_objs; j++) {
+            free(scene->layers[i].objs[j].vertices);
+            scene->layers[i].objs[j].vertices   = NULL;
+        }
+    }
     free(scene);      
     scene = NULL;
 }

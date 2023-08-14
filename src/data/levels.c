@@ -6,6 +6,7 @@ level_blueprint_t* levels_library[LEVEL_ALL] = {NULL};
 
 level_blueprint_t level_blueprint_sample = {
     0,
+    TILESET_BASIC,
     11, 11,
     {
         0,0,0,0,0,0,0,0,0,0,0,
@@ -29,6 +30,7 @@ level_blueprint_t level_blueprint_sample = {
 
 level_blueprint_t level_blueprint_testing = {
     0,
+    TILESET_BASIC,
     10, 10,
     {
         0,0,0,0,0,0,0,0,0,0,

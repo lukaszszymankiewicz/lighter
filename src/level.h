@@ -19,6 +19,7 @@ void LVL_fill_structure(level_t *level, int x, int y, int i);
 void LVL_fill(level_t* level);
 void LVL_free(level_t* level);
 
+int LVL_tileset_id(level_t *level);
 int LVL_n_entity_fills(level_t *level);
 
 bool LVL_obstacle_on_pos(level_t* level, int x, int y);

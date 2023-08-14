@@ -13,6 +13,7 @@ void RENDER_shader_texture(
     int      n_vertices,
     float   *uniforms
 ) { 
+    printf("floats provided: %d \n", n_vertices);
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -40,8 +41,12 @@ void RENDER_shader_texture(
     // glUniform1i(uniform_loc, texture);
     // glBindTexture(GL_TEXTURE_2D, texture);
 
+    printf("triangles to render: %d \n", (int)(n_vertices/12) );
     glBindVertexArray(VAO);
-    glDrawArrays(GL_POLYGON, 0, 4);
+    // glDrawElements(GL_TRIANGLES, (int)(n_vertices/12), GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, (int)(n_vertices/4));
+    // glDrawElements(GL_TRIANGLES, n_vertices, GL_UNSIGNED_INT, 0);
+    // glDrawArrays(GL_POLYGON, 0, n_vertices);
 }
 
 // TODO: each shader should have its own small function to render it
