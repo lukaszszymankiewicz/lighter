@@ -13,7 +13,7 @@ void RENDER_shader_texture(
     int      n_vertices,
     float   *uniforms
 ) { 
-    printf("floats provided: %d \n", n_vertices);
+    // TODO: VBO and VAO to shader_program class
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -21,7 +21,15 @@ void RENDER_shader_texture(
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * n_vertices, vertices, GL_STATIC_DRAW);
+    
+    for (int i=0; i<n_vertices; i++) {
+        if ((i%4) == 0) {
+            printf("\n");
+        }
+        printf("%f ", vertices[i]);
+    }
 
+    printf("\n");
     // pos
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -33,20 +41,20 @@ void RENDER_shader_texture(
     
     // TODO: this can be important but i cannot tell by now :C
     // texture
-    GLint uniform_id = shader_library[shader]->uniform_ids[0];
-    glUniform4f(uniform_id, uniforms[0], uniforms[1], uniforms[2], uniforms[3]);
+    // GLint uniform_id = shader_library[shader]->uniform_ids[0];
+    // glUniform4f(uniform_id, uniforms[0], uniforms[1], uniforms[2], uniforms[3]);
 
-    // GLint uniform_loc = shader_library[shader]->n_uniforms;
     // printf("number of uniforms: %d \n", uniform_loc);
-    // glUniform1i(uniform_loc, texture);
-    // glBindTexture(GL_TEXTURE_2D, texture);
+    GLint uniform_loc = shader_library[shader]->n_uniforms;
+    glActiveTexture(GL_TEXTURE0);
+    printf("active texture: %d \n", texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glUniform1i(uniform_loc, texture);
 
-    printf("triangles to render: %d \n", (int)(n_vertices/12) );
     glBindVertexArray(VAO);
-    // glDrawElements(GL_TRIANGLES, (int)(n_vertices/12), GL_UNSIGNED_INT, 0);
+    // TODO: type to shader?
+    printf("drawing %d vertices \n", (int)(n_vertices/4));
     glDrawArrays(GL_TRIANGLES, 0, (int)(n_vertices/4));
-    // glDrawElements(GL_TRIANGLES, n_vertices, GL_UNSIGNED_INT, 0);
-    // glDrawArrays(GL_POLYGON, 0, n_vertices);
 }
 
 // TODO: each shader should have its own small function to render it

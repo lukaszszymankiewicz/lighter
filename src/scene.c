@@ -20,12 +20,14 @@ void SCENE_clear(
         int n_objs = scene->layers[i].n_objs;
 
         for (int j=0; j<n_objs; j++) {
-            scene->layers[i].objs[j].len        = 0;
+            scene->layers[i].objs[j].len        =  0;
             scene->layers[i].objs[j].texture    = -1;
             scene->layers[i].objs[j].program_id = -1;
             memset(scene->layers[i].objs[j].uniforms, 0.0, MAX_SHADER_UNIFORMS_ARGS);
-
-            free(scene->layers[i].objs[j].vertices);
+            
+            if (scene->layers[i].objs[j].vertices != NULL) {
+                free(scene->layers[i].objs[j].vertices);
+            }
             scene->layers[i].objs[j].vertices   = NULL;
         }
         scene->layers[i].n_objs      = 0;
@@ -104,11 +106,25 @@ void SCENE_use_program(
     glUseProgram(shader_library[scene->layers[layer].shader_id]->program);
 }
 
+bool SCENE_layer_is_on(
+    scene_t *scene,
+    int      layer
+) {
+    return scene->layers[layer].on;
+}
+
+bool SCENE_layer_is_off(
+    scene_t *scene,
+    int      layer
+) {
+    return !(SCENE_layer_is_on(scene, layer));
+}
+
 void SCENE_draw(
     scene_t* scene 
 ) {
     for (int layer=0; layer<scene->n_layers; layer++) {
-        if (!(scene->layers[layer].on)) {
+        if (SCENE_layer_is_off(scene, layer)) {
             continue;
         }
         SCENE_use_program(layer);

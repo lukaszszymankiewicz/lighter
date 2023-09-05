@@ -10,7 +10,9 @@
 #include "sorted_list.h"
 #include "source.h"
 
-#define SPRITE_VERTEX_N 16
+#define MAX_SPRITES 20
+#define VERTICES_PER_SINGLE_SPRITE 24
+#define SPRITES_VERTICES_FOR_SCENE MAX_SPRITES*VERTICES_PER_SINGLE_SPRITE
 
 int state_collisions[3][3] = {
     //  STANDING, WALKING, JUMPING
@@ -28,7 +30,8 @@ char ENT_flags(
 int ENT_texture_id(
     entity_t *entity
 ) {
-    return entity_library[entity->id]->texture_id;
+    int id = entity_library[entity->id]->texture_id;
+    return sprites_library[id]->id;
 }
 
 float ENT_light_angle(
@@ -666,6 +669,7 @@ render_coord_t ENT_img_coord(
     return render;
 }
 
+//TODO: to manager!
 void ENT_add_to_scene(
     entity_t *entity,
     int camera_x, int camera_y
@@ -678,24 +682,20 @@ void ENT_add_to_scene(
     int            texture_id = ENT_texture_id(entity);
     render_coord_t clip       = ENT_texture_coord(entity);
     render_coord_t render     = ENT_img_coord(entity, clip, camera_x, camera_y);
-    
-    // TODO: uglyy (power up the render_coord_t)!!
-    float vertices[] = {
-    //  Position      Texcoords
-        render.x1, render.y1, 0.0f, 0.0f, // Top-left
-        render.x2, render.y1, 1.0f, 0.0f, // Top-right
-        render.x2, render.y2, 1.0f, 1.0f, // Bottom-right
-        render.x1, render.y1, 0.0f, 1.0f  // Bottom-left
-    };
+    int            i          = 0; 
+    float         *v          = NULL;
 
-    SCENE_add(
-        scene,
-        LAYER_SPRITE,
-        texture_id,
-        SPRITE_VERTEX_N ,
-        vertices,
-        NULL
-    );
+    v = (float*)malloc(sizeof(float) * SPRITES_VERTICES_FOR_SCENE);
+
+    // Position                         Texcoords
+    v[i++]=render.x1; v[i++]=render.y1; v[i++]=clip.x1; v[i++]=clip.y1; // Top-left
+    v[i++]=render.x2; v[i++]=render.y1; v[i++]=clip.x2; v[i++]=clip.y1; // Top-right
+    v[i++]=render.x2; v[i++]=render.y2; v[i++]=clip.x2; v[i++]=clip.y2; // Bottom-right
+    v[i++]=render.x1; v[i++]=render.y1; v[i++]=clip.x1; v[i++]=clip.y1; // Top-left
+    v[i++]=render.x2; v[i++]=render.y2; v[i++]=clip.x2; v[i++]=clip.y2; // Bottom-right
+    v[i++]=render.x1; v[i++]=render.y2; v[i++]=clip.x1; v[i++]=clip.y2; // Bottom-left
+
+    SCENE_add(scene, LAYER_SPRITE, texture_id, i, v, NULL);
 }
 
 void ENT_free(

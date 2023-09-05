@@ -38,8 +38,10 @@
   - [x] add color to light shader
   - [x] make texture a typical openGl shader for consistency
   - [x] camera projection to shader!
-    - [ ] make one draw call to draw tiles
+    - [x] make one draw call to draw tiles
 - [ ] global scale can be propably easily deleted
+  - [x] sprites to separate shader
+  - [ ] try to join two render functions
   - [ ] add stencil buffer
   - [ ] add differ effect
   - [ ] put shader light effect to buffer
@@ -52,3 +54,6 @@
 - [x] remove error codes
 - [ ] make tile render as as separate shader
 - [ ] game options to some global config
+
+UTIL:
+ - [ ] create a namesystem for ids: gl_texture ids should be reconizable from library ids

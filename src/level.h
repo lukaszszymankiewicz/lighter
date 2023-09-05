@@ -7,6 +7,7 @@
 
 typedef struct level {
     int           blueprint_id;
+    int           tileset_id;
     tile_t        *structure[MAX_LEVEL_SIZE];  // matrix of tiles
     segment_t     *obstacle_segments;  // obstacle segments
 } level_t;

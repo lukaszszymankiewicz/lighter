@@ -140,13 +140,6 @@ void GAME_update_entities(
     ENTMAT_update(game->entity_manager, game->level->obstacle_segments);
 }
 
-void GAME_put_level_on_scene(
-    game_t *game
-) {
-    // TODO: add shorten up version of it
-    LVL_put_on_scene(game->level, ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
-}
-
 bool GAME_init_graphics(
     int graphic_option
 ) {
@@ -180,20 +173,13 @@ void GAME_apply_logic(
     GAME_update_entities(game);
 }
 
-
-void GAME_put_entities_on_scene(
-    game_t *game
-) {
-    ENTMAN_put_on_scene(game->entity_manager);
-}
-
 void GAME_draw_everything(
     game_t* game
 ) {
     SCENE_clear(scene);
     GFX_clear_screen();
-    GAME_put_level_on_scene(game);
-    // GAME_put_entities_on_scene(game);
+    // LVL_put_on_scene(game->level, ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
+    ENTMAN_put_on_scene(game->entity_manager);
     // GAME_draw_light(game);
     SCENE_draw(scene);
     GFX_update();
@@ -225,9 +211,10 @@ game_t* GAME_new(
         game->draw_func = &GAME_draw_nothing; 
     }
 
+    // TODO: to some create_scene function?
     scene = SCENE_new(LAYER_ALL);
     SCENE_attach_shader(LAYER_TILE, SHADER_TEXTURE);
-    // SCENE_attach_shader(LAYER_SPRITE, shader_library[SHADER_TEXTURE]->program);
+    SCENE_attach_shader(LAYER_SPRITE, SHADER_TEXTURE);
     // SCENE_attach_shader(LAYER_LIGHT, shader_library[SHADER_LIGHT]->program);
 
     GAME_init_entities(game);
@@ -263,7 +250,6 @@ void GAME_loop(
         GAME_apply_logic(game);
         GAME_draw(game);
         GAME_update_time(game);
-        // game->loop = false;
     }
 
     return;

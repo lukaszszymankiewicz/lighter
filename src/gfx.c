@@ -253,6 +253,7 @@ void GFX_bind_texture(
     GLuint texture_id
 ) {
     glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
 }
 
 // specify texture in OpenGL

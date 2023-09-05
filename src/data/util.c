@@ -23,6 +23,8 @@ texture_t* TXTR_read_from_file(
     tex->id        = texture_id;
     // tex->filepath  = filepath;
     printf("texture %s read and has id %d\n", filepath, texture_id);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     return tex;
 }
 

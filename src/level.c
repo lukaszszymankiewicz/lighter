@@ -67,15 +67,6 @@ int LVL_tile_blueprint_on_pos(
     return levels_library[level->blueprint_id]->tiles[y * size_x + x];
 }
 
-int LVL_tile_blueprint_tileset_on_pos(
-    level_t *level,
-    int      x,
-    int      y
-) {
-    int id = LVL_tile_blueprint_on_pos(level, x, y);
-    return tiles_library[id]->tileset_id;
-}
-
 int LVL_n_entity_fills(
     level_t *level
 ) {
@@ -85,7 +76,8 @@ int LVL_n_entity_fills(
 int LVL_tileset_id(
     level_t *level
 ) {
-    return levels_library[level->blueprint_id]->tileset_id;
+    int id = levels_library[level->blueprint_id]->tileset_id; 
+    return tilesets_library[id]->id;
 }
 
 void LVL_fill_structure(
@@ -131,6 +123,9 @@ level_t* LVL_new(
 
     new_level->blueprint_id      = blueprint_id;
     new_level->obstacle_segments = NULL;
+
+    int tileset_id = levels_library[blueprint_id]->tileset_id;
+    new_level->tileset_id        = tilesets_library[tileset_id]->id;
 
     return new_level;
 }
@@ -312,14 +307,14 @@ int LVL_put_tile_on_scene(
     tile_t *tile,
     int     i
 ) {
-   // Position                                       Texcoords
+   // Position                                   Texcoords
    v[i++]=tile->coord.x1; v[i++]=tile->coord.y2; v[i++]=tile->img.x1; v[i++]=tile->img.y2; // Top-left
    v[i++]=tile->coord.x2; v[i++]=tile->coord.y2; v[i++]=tile->img.x2; v[i++]=tile->img.y2; // Top-right
    v[i++]=tile->coord.x2; v[i++]=tile->coord.y1; v[i++]=tile->img.x2; v[i++]=tile->img.y1; // Bottom-right
    v[i++]=tile->coord.x1; v[i++]=tile->coord.y2; v[i++]=tile->img.x1; v[i++]=tile->img.y2; // Top-left
    v[i++]=tile->coord.x2; v[i++]=tile->coord.y1; v[i++]=tile->img.x2; v[i++]=tile->img.y1; // Bottom-right
    v[i++]=tile->coord.x1; v[i++]=tile->coord.y1; v[i++]=tile->img.x1; v[i++]=tile->img.y1; // Bottom-left
-                                                                                           //
+
    return i;
 }
 
@@ -340,8 +335,8 @@ void LVL_put_on_scene(
     float camera_y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT) * global_y_scale;
     float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { camera_x_diff, camera_y_diff, 0.0, 0.0 };
 
-    float *vertices = (float*)malloc(sizeof(float) *LEVEL_VERTICES_FOR_SCENE);
     int i = 0;
+    float *vertices = (float*)malloc(sizeof(float) *LEVEL_VERTICES_FOR_SCENE);
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
@@ -355,7 +350,7 @@ void LVL_put_on_scene(
 
         }
     }
-
+    printf("imma using texture id: %d for tiles \n", LVL_tileset_id(level));
     SCENE_add(
         scene, 
         LAYER_TILE,
