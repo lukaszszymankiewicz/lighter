@@ -250,6 +250,7 @@ void GAME_loop(
         GAME_apply_logic(game);
         GAME_draw(game);
         GAME_update_time(game);
+        game->loop = false;
     }
 
     return;

@@ -41,6 +41,7 @@
     - [x] make one draw call to draw tiles
 - [ ] global scale can be propably easily deleted
   - [x] sprites to separate shader
+  - [ ] VAO and VBO to shader program struct
   - [ ] try to join two render functions
   - [ ] add stencil buffer
   - [ ] add differ effect

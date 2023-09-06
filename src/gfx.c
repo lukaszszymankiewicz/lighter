@@ -192,52 +192,56 @@ shader_program_t* GFX_create_gl_program(
         // strcpy(shader_program->uniform_names[i], name);
     }
     // 
-    // // get attribs
-    // n_attribs = (GLuint)0; 
-    // glGetProgramiv(program_id, GL_ACTIVE_ATTRIBUTES, &n_attribs);
-    // printf("program read: %d\n", program_id);
+    // get attribs
+    n_attribs = (GLuint)0; 
+    glGetProgramiv(program_id, GL_ACTIVE_ATTRIBUTES, &n_attribs);
+    printf("program read: %d\n", program_id);
 
-    // int attrib_size = 0;
+    int attrib_size = 0;
 
-    // for (i=0; i<n_attribs; i++) {
-    //     length = 0;
-    //     size = 0;
-    //     type = 0;
-    //     // glGetActiveAttrib(program_id, (GLuint)i, ALLOWED_ATTRIB_NAME_LEN, &length, &size, &type, name);
+    printf("n attribs: %d\n", n_attribs);
+    for (i=0; i<n_attribs; i++) {
+        length = 0;
+        size = 0;
+        type = 0;
+        glGetActiveAttrib(program_id, (GLuint)i, ALLOWED_ATTRIB_NAME_LEN, &length, &size, &type, name);
 
-    //     // bool res = false;
+        bool res = false;
 
-    //     // for (int j=0; j<ALLOWED_ATTIRB_TYPE_N; j++) {
-    //     //     if (type == ALLOWED_ATTIRB_TYPE[j]) {
-    //     //         res = true;
-    //     //     }
-    //     // }
-    //     // if(!res) {
-    //     //     return NULL;
-    //     // }
+        for (int j=0; j<ALLOWED_ATTIRB_TYPE_N; j++) {
+            if (type == ALLOWED_ATTIRB_TYPE[j]) {
+                res = true;
+            }
+        }
+        if(!res) {
+            return NULL;
+        }
 
-    //     // if (length > ALLOWED_ATTRIB_NAME_LEN) {
-    //     //     printf("Attrib name is too long: (%s) \n", name);
-    //     //     return NULL;
-    //     // }
-    //     
-    //     // switch (type) {
-    //     //     case GL_FLOAT_VEC4:
-    //     //         shader_program->attrib_shift[i] = 4;
-    //     //         attrib_size+=4;
-    //     //         break;
-    //     //     case GL_FLOAT_VEC3:
-    //     //         shader_program->attrib_shift[i] = 3;
-    //     //         attrib_size+=3;
-    //     //         break;
-    //     //     case GL_FLOAT_VEC2:
-    //     //         shader_program->attrib_shift[i] = 2;
-    //     //         attrib_size+=2;
-    //     //         break;
-    //     // }
-    //     // shader_program->attrib[i] = (int)glGetAttribLocation(program_id, name);
-    // }
-    // shader_program->attrib_size = attrib_size;
+        if (length > ALLOWED_ATTRIB_NAME_LEN) {
+            printf("Attrib name is too long: (%s) \n", name);
+            return NULL;
+        }
+        
+        switch (type) {
+            case GL_FLOAT_VEC4:
+                shader_program->attrib_shift[i] = 4;
+                attrib_size+=4;
+                break;
+            case GL_FLOAT_VEC3:
+                shader_program->attrib_shift[i] = 3;
+                attrib_size+=3;
+                break;
+            case GL_FLOAT_VEC2:
+                shader_program->attrib_shift[i] = 2;
+                attrib_size+=2;
+                break;
+
+        printf("shift read: %d \n", shader_program->attrib_shift[i]);
+
+        }
+        shader_program->attrib[i] = (int)glGetAttribLocation(program_id, name);
+    }
+    shader_program->attrib_size = attrib_size;
 
     return shader_program;
 }
