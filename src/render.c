@@ -13,31 +13,21 @@ void RENDER_shader_texture(
     int      n_vertices,
     float   *uniforms
 ) { 
-    // TODO: VBO and VAO to shader_program class
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * n_vertices, vertices, GL_STATIC_DRAW);
     
-    for (int i=0; i<n_vertices; i++) {
-        if ((i%4) == 0) {
-            printf("\n");
-        }
-        printf("%f ", vertices[i]);
-    }
+    glBindVertexArray(shader_library[shader]->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, shader_library[shader]->vbo);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * n_vertices, vertices, GL_STATIC_DRAW);
 
     printf("\n");
     // pos
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
+    // glEnableVertexAttribArray(0);
     
     // tex
     // GLint texAttrib = shader_library[shader]->attrib[2];
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
-    glEnableVertexAttribArray(1);
+    // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
+    // glEnableVertexAttribArray(1);
     
     // TODO: this can be important but i cannot tell by now :C
     // texture
@@ -51,10 +41,13 @@ void RENDER_shader_texture(
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(uniform_loc, texture);
 
-    glBindVertexArray(VAO);
+    // glBindVertexArray(VAO);
     // TODO: type to shader?
     printf("drawing %d vertices \n", (int)(n_vertices/4));
     glDrawArrays(GL_TRIANGLES, 0, (int)(n_vertices/4));
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 // TODO: each shader should have its own small function to render it

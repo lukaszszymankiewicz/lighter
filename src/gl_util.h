@@ -28,13 +28,13 @@ typedef struct shader_program {
     int    fragment_shader_id;
     int    geometry_shader_id;
     int    n_uniforms;
-    int    uniform_ids[MAX_SHADER_UNIFORMS];
-    char  *uniform_names[MAX_SHADER_UNIFORMS];
+    int    uniform_loc[MAX_SHADER_UNIFORMS];
     int    n_attribs;
     int    attrib_size; // calosc
-    int    attrib[MAX_SHADER_ATTRIBS];
-    char  *attrib_names[MAX_SHADER_ATTRIBS];
-    int    attrib_shift[MAX_SHADER_ATTRIBS];
+    int    attrib_loc[MAX_SHADER_ATTRIBS];
+    int    attrib_stride[MAX_SHADER_ATTRIBS];
+    int    vao;
+    int    vbo;
 } shader_program_t;
 
 render_coord_t GL_UTIL_global_to_gl_coord(
