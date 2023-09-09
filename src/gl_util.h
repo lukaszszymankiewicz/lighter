@@ -23,18 +23,18 @@ typedef struct render_vertex {
 } render_vertex_t;
 
 typedef struct shader_program {
-    int    program;
-    int    vertex_shader_id;
-    int    fragment_shader_id;
-    int    geometry_shader_id;
-    int    n_uniforms;
-    int    uniform_loc[MAX_SHADER_UNIFORMS];
-    int    n_attribs;
-    int    attrib_size; // calosc
-    int    attrib_loc[MAX_SHADER_ATTRIBS];
-    int    attrib_stride[MAX_SHADER_ATTRIBS];
-    int    vao;
-    int    vbo;
+    int           program;
+    int           vertex_shader_id;
+    int           fragment_shader_id;
+    int           geometry_shader_id;
+    int           n_uniforms;
+    int           uniform_loc[MAX_SHADER_UNIFORMS];
+    // int           n_attribs;
+    // int           attrib_size; // calosc
+    // int           attrib_loc[MAX_SHADER_ATTRIBS];
+    // int           attrib_stride[MAX_SHADER_ATTRIBS];
+    unsigned int  vao;
+    unsigned int  vbo;
 } shader_program_t;
 
 render_coord_t GL_UTIL_global_to_gl_coord(

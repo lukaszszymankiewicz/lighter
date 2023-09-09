@@ -26,13 +26,12 @@
 #define ALLOWED_UNIFORM_TYPE_N   2
 #define ALLOWED_UNIFORM_TYPE     (GLuint[ALLOWED_UNIFORM_TYPE_N]){ GL_FLOAT_VEC4, GL_SAMPLER_2D }
 #define ALLOWED_UNIFORM_NAME_LEN 16
+#define ALLOWED_ATTRIB_NAME_LEN 16
 
+// TODO: check if relevant
 GLint  gVertexPos2DLocation = -1;
 GLuint gVBO                 = 0;
 GLuint gIBO                 = 0;
-
-// TODO: check if relevent
-// bool gRenderQuad = true;
 
 SDL_GLContext gl_context        = NULL;
 SDL_Window   *window            = NULL;
@@ -118,6 +117,30 @@ int GFX_compile_shader(
     return (int)id;
 }
 
+int GFX_attrib_size(
+    GLenum type
+) {
+    int size = 0;
+
+    switch (type)
+    {
+        case GL_FLOAT_VEC2:
+            size = 2;
+            break;
+        case GL_FLOAT_VEC3:
+            size = 3;
+            break;
+        case GL_FLOAT_VEC4:
+            size = 4;
+            break;
+        default:
+            size = -1;
+            break;
+    }
+
+    return size;
+}
+
 shader_program_t* GFX_create_gl_program(
     const char* vertex_shader_path,
     const char* fragment_shader_path,
@@ -133,7 +156,6 @@ shader_program_t* GFX_create_gl_program(
     GLsizei length;
 
     shader_program_t* shader_program = NULL;
-
     shader_program                   = (shader_program_t*)malloc(sizeof(shader_program_t));
 
     int vertex_shader_id = GFX_compile_shader(vertex_shader_path, GL_VERTEX_SHADER);
@@ -147,6 +169,8 @@ shader_program_t* GFX_create_gl_program(
 
     // link 
     GLuint program_id = glCreateProgram();
+    printf("program read: %d\n", program_id);
+
     glAttachShader(program_id, vertex_shader_id);
     glAttachShader(program_id, fragment_shader_id);
     glLinkProgram(program_id);
@@ -164,12 +188,13 @@ shader_program_t* GFX_create_gl_program(
     glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_uniforms);
     shader_program->n_uniforms = n_uniforms;
 
+    printf("\nn uniforms: %d \n", n_uniforms);
     for (i=0; i<n_uniforms; i++) {
         glGetActiveUniform(program_id, (GLuint)i, ALLOWED_UNIFORM_NAME_LEN, &length, &size, &type, name);
         shader_program->uniform_loc[i] = glGetUniformLocation(program_id, name);
 
-        printf("read uniform location: %d \n", shader_program->uniform_loc[i]); 
-        printf("for uniform %s \n", name); 
+        printf("read uniform location: %d ", shader_program->uniform_loc[i]); 
+        printf("for uniform (%s) \n", name); 
     }
     
     // create VBO
@@ -181,38 +206,43 @@ shader_program_t* GFX_create_gl_program(
     glBindVertexArray(shader_program->vao);
 
     // get attribs
-    shader_program->n_attribs = (GLuint)0;
-    glGetProgramiv(program_id, GL_ACTIVE_ATTRIBUTES, &shader_program->n_attribs);
-    printf("program read: %d\n", program_id);
+    n_attribs = (GLuint)0;
+    glGetProgramiv(program_id, GL_ACTIVE_ATTRIBUTES, &n_attribs);
 
-    int stride = 0;
+    printf("\nn attribs: %d\n", n_attribs);
+    
+    int    locs[n_attribs]; 
+    int    vec_sizes[n_attribs]; 
+    int    stride = 0;
 
-    printf("n attribs: %d\n", shader_program->n_attribs);
+    for (i=0; i<n_attribs; i++) {
+        GLenum type; int loc; 
 
-    for (i=0; i<shader_program->n_attribs; i++) {
-        length = 0; size = 0; type = 0;
-        glGetActiveAttrib(program_id, (GLuint)i, ALLOWED_ATTRIB_NAME_LEN, &length, &size, &type, name);
+        glGetActiveAttrib(program_id, (GLuint)i, ALLOWED_ATTRIB_NAME_LEN, NULL, NULL, &type, name);
+        loc      = (int)glGetAttribLocation(program_id, name);
+        locs[i]  = loc;
 
-        glEnableVertexAttribArray(i);
-        glVertexAttribPointer(
-            i,
-            size,
-            GL_FLOAT,
-            GL_FALSE,
-            4*sizeof(float),
-            (void*)(0*sizeof(float))
-        );
+        vec_sizes[i]  = GFX_attrib_size(type);
+        stride       += vec_sizes[i];
 
-        printf("size read: %d \n", size);
-        printf("location read: %d \n", shader_program->attrib[i]);
-        printf("actual stride : %d \n", stride);
-
-        shader_program->attrib_stride[i] = stride;
-        shader_program->attrib_loc[i]    = (int)glGetAttribLocation(program_id, name);
-        stride                          += size;
+        printf("attrib: (%s) on loc (%d) sized: (%d) with stride: (%d) \n", name, loc, vec_sizes[i], stride);
     }
 
-    shader_program->attrib_size = stride;
+    int    atrb_size = 0;
+
+    for (i=0; i<n_attribs; i++) {
+        glEnableVertexAttribArray(locs[i]);
+        glVertexAttribPointer(
+            locs[i],
+            vec_sizes[i],
+            GL_FLOAT,
+            GL_FALSE,
+            stride*sizeof(float),
+            (void*)(atrb_size*sizeof(float))
+        );
+
+        atrb_size += vec_sizes[i];
+    }
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
