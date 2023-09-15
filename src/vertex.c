@@ -94,23 +94,6 @@ void VRTX_merge(
     }
 }
 
-vertex_t* VRTX_transpose(
-    vertex_t *vertex,
-    int       x_corr,
-    int       y_corr
-) {
-    vertex_t *ptr  = NULL;
-    ptr            = vertex;
-
-    while(ptr) {
-        ptr->x = ptr->x + x_corr;
-        ptr->y = ptr->y + y_corr;
-        ptr = ptr->next;
-    }
-
-    return vertex;
-}
-
 int VRTX_max_y(
     vertex_t* vertex
 ) {

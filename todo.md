@@ -39,10 +39,18 @@
   - [x] make texture a typical openGl shader for consistency
   - [x] camera projection to shader!
     - [x] make one draw call to draw tiles
-- [ ] global scale can be propably easily deleted
+  - [x] add camera uniforma to entity rendering
   - [x] sprites to separate shader
-  - [ ] VAO and VBO to shader program struct
+  - [x] VAO and VBO to shader program struct
+  - [x] use proper uniform function where needed
+  - [x] clean up gl util module, use atomizd function (rename camera functions to someting)
+  - [ ] remove this ugly render coord from entity blueprints
+  - [ ] remove global scale, use ortho matrix instead
+  - [ ] remove camera uniforms, use projection matrix instead
   - [ ] try to join two render functions
+  - [ ] add entity filp
+  - [ ] framebuffer for each layer (maybe, scalling can be omitted then?)
+  - [ ] add global scale can be propably easily deleted
   - [ ] add stencil buffer
   - [ ] add differ effect
   - [ ] put shader light effect to buffer
@@ -58,3 +66,7 @@
 
 UTIL:
  - [ ] create a namesystem for ids: gl_texture ids should be reconizable from library ids
+ - [ ] consistent types - use float everywher
+ - [ ] check for unused constants/functions
+ - [ ] cleanup Makefile
+ - [ ] point/geometry etc to some 'core' module

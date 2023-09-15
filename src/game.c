@@ -14,11 +14,6 @@
 #include "timer.h"
 #include "scene.h"
 
-int GAME_init_no_graphics(
-) {
-    return 1;
-}
-
 void GAME_create_library(
 ) {
     LIB_create_all();
@@ -140,17 +135,6 @@ void GAME_update_entities(
     ENTMAT_update(game->entity_manager, game->level->obstacle_segments);
 }
 
-bool GAME_init_graphics(
-    int graphic_option
-) {
-    if (graphic_option == GRAPHIC_OFF) { 
-        return GAME_init_no_graphics();
-    }
-    else {
-        return GFX_init_graphics();
-    }
-}
-
 void GAME_draw_light(
     game_t* game
 ) {
@@ -178,9 +162,9 @@ void GAME_draw_everything(
 ) {
     SCENE_clear(scene);
     GFX_clear_screen();
-    // LVL_put_on_scene(game->level, ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
+    LVL_put_on_scene(game->level, ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
     ENTMAN_put_on_scene(game->entity_manager);
-    // GAME_draw_light(game);
+    GAME_draw_light(game);
     SCENE_draw(scene);
     GFX_update();
 }
@@ -199,9 +183,6 @@ game_t* GAME_new(
     GAME_read_modules();
     GAME_create_library();
 
-    // TODO: TBD in game init??
-    GAME_init_graphics(graphic_option); 
-
     game              = GAME_init(level_id, max_frames);
     
     // TODO: config should do this, also be not afraid of one more `if` for each frame
@@ -213,9 +194,9 @@ game_t* GAME_new(
 
     // TODO: to some create_scene function?
     scene = SCENE_new(LAYER_ALL);
-    SCENE_attach_shader(LAYER_TILE, SHADER_TEXTURE);
-    SCENE_attach_shader(LAYER_SPRITE, SHADER_TEXTURE);
-    // SCENE_attach_shader(LAYER_LIGHT, shader_library[SHADER_LIGHT]->program);
+    SCENE_attach_shader(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
+    SCENE_attach_shader(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
+    SCENE_attach_shader(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
 
     GAME_init_entities(game);
     LVL_fill(game->level);
@@ -250,7 +231,7 @@ void GAME_loop(
         GAME_apply_logic(game);
         GAME_draw(game);
         GAME_update_time(game);
-        game->loop = false;
+        // game->loop = false;
     }
 
     return;

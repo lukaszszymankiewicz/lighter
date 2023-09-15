@@ -67,7 +67,7 @@
 #define LAYER_N  3
 
 // TEXTURE
-#define NO_TEXTURE -1
+#define NO_TEXTURE 0
 
 enum direction { RIGHT, LEFT, UP, DOWN, NONE };
 enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };

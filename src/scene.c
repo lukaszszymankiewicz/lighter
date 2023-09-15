@@ -22,8 +22,8 @@ void SCENE_clear(
         for (int j=0; j<n_objs; j++) {
             scene->layers[i].objs[j].len        =  0;
             scene->layers[i].objs[j].texture    = -1;
-            scene->layers[i].objs[j].program_id = -1;
-            memset(scene->layers[i].objs[j].uniforms, 0.0, MAX_SHADER_UNIFORMS_ARGS);
+            scene->layers[i].objs[j].count      =  0;
+            memset(scene->layers[i].objs[j].uniforms, 0.0, sizeof(float)*MAX_SHADER_UNIFORMS_ARGS_LEN);
             
             if (scene->layers[i].objs[j].vertices != NULL) {
                 free(scene->layers[i].objs[j].vertices);
@@ -34,6 +34,17 @@ void SCENE_clear(
     }
 }
 
+void SCENE_add_layer(
+    scene_t* scene,
+    int      i
+) {
+    for (int j=0; j<MAX_DRAWBLE_OBJECTS_ON_LAYER; j++) {
+        scene->layers[i].objs[j].vertices   = NULL;
+    }
+    scene->layers[i].on          = true;
+    scene->layers[i].n_objs      = 0;
+}
+
 scene_t* SCENE_new(
     int n_layers
 ) {
@@ -41,20 +52,21 @@ scene_t* SCENE_new(
     scene            = (scene_t*)malloc(sizeof(scene_t));
     scene->n_layers  = 0;
 
-    SCENE_clear(scene);
-
     for(int l=0; l<n_layers; l++) {
-         scene->n_layers++;
+        SCENE_add_layer(scene, scene->n_layers++);
     }
+
+    SCENE_clear(scene);
 
     return scene;
 }
 
 void SCENE_attach_shader(
-    int layer, int shader_id
+    int layer, int shader_id, GLenum mode
 ) {
     scene->layers[layer].on        = true;
     scene->layers[layer].shader_id = shader_id;
+    scene->layers[layer].mode      = mode;
 }
 
 void SCENE_add(
@@ -63,24 +75,26 @@ void SCENE_add(
     int         texture,
     int         len,
     GLfloat    *vertices,
-    float      *uniforms
+    float      *uniforms,
+    int         count
 ) {
     int i;
     int j=scene->layers[layer].n_objs;
 
     if (j>=MAX_SHADER_ON_SHADER_LAYER) { return; }
 
-    scene->layers[layer].objs[j].len        = len;
-    scene->layers[layer].objs[j].texture    = texture;
-
     if (vertices) {
         scene->layers[layer].objs[j].vertices = vertices;
     }
     if (uniforms) {
-        for (i=0; i<MAX_SHADER_UNIFORMS_ARGS; i++) {
+        for (i=0; i<MAX_SHADER_UNIFORMS_ARGS_LEN; i++) {
             scene->layers[layer].objs[j].uniforms[i] = uniforms[i];
         }
     }
+
+    scene->layers[layer].objs[j].len     = len;
+    scene->layers[layer].objs[j].texture = texture;
+    scene->layers[layer].objs[j].count   = count;
 
     scene->layers[layer].n_objs++;
 }
@@ -130,12 +144,14 @@ void SCENE_draw(
         SCENE_use_program(layer);
 
         for (int i=0; i<scene->layers[layer].n_objs; i++) {
-            RENDER_shader_texture(
+            RENDER_shader(
                 scene->layers[layer].shader_id,
                 scene->layers[layer].objs[i].texture,
                 scene->layers[layer].objs[i].vertices,
                 scene->layers[layer].objs[i].len,
-                scene->layers[layer].objs[i].uniforms
+                scene->layers[layer].objs[i].uniforms,
+                scene->layers[layer].objs[i].count,
+                scene->layers[layer].mode
             );
         }
     }

@@ -14,7 +14,7 @@ tile_t* TILE_new(
     tile_t *new_tile       = NULL;
     new_tile               = (tile_t*)malloc(sizeof(tile_t));
     
-    render_coord_t render = GL_UTIL_global_to_gl_coord(x, y, 1, 1, 0, 0, TILE_WIDTH, TILE_HEIGHT);
+    render_coord_t render  = GL_UTIL_rect(x, y, TILE_WIDTH, TILE_HEIGHT);
 
     new_tile->blueprint_id = blueprint_id;
     new_tile->tileset_id   = tileset_id;

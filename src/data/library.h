@@ -11,8 +11,6 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
-#define MAX_SHADER_UNIFORM_INT_ARGS 1
-
 const static int NOTHING_FLAG    = 0;
 const static int MOVABLE         = 1 << 0;  // velocity will affect entity 
 const static int APPLY_COLLISION = 1 << 1;  // entity will collide with obstacles

@@ -12,8 +12,6 @@ extern SDL_Window *window;
 
 GLuint GFX_generate_texture_ID();
 
-bool GFX_init_graphics();
-
 bool GFX_init_png();
 bool GFX_set_viewport();
 bool GFX_init_gl_params();
@@ -32,8 +30,7 @@ void GFX_set_interpolation_2d(int interpolation);
 void GFX_bind_texture(GLuint texture_id);
 void GFX_specify_texture(SDL_Surface *surface, int mode);
 
-int GFX_check_shader_compile_status(GLuint shader_id);
-int GFX_check_program_link_status(GLuint program);
+int GFX_type_size(GLenum type);
 
 shader_program_t* GFX_create_gl_program(
     const char* vertex_shader_path,

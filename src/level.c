@@ -12,6 +12,7 @@
 #include "texture.h"
 #include "tile.h"
 
+#define ENTITY_RENDER_COUNT      4
 #define LEVEL_VERTICES_FOR_SCENE 2500
 
 enum { W, S, A, D };
@@ -35,23 +36,27 @@ int LVL_size_y(
     return levels_library[level->blueprint_id]->size_y;
 }
 
+int LVL_pos(
+    level_t *level,
+    int x,
+    int y
+) {
+    return y * LVL_size_x(level) + x;
+}
+
 void LVL_set_tile(
     level_t *level,
     tile_t  *tile,
     int x, int y
 ) {
-    int size_x = LVL_size_x(level);
-    level->structure[y * size_x + x] = tile;
+    level->structure[LVL_pos(level, x, y)] = tile;
 }
 
 void LVL_clean_structure(
     level_t *level
 ) {
-    int size_x = LVL_size_x(level);
-    int size_y = LVL_size_y(level);
-
-    for (int x=0; x<size_x; x++) { 
-        for (int y=0; y<size_y; y++) { 
+    for (int x=0; x<LVL_size_x(level); x++) { 
+        for (int y=0; y<LVL_size_y(level); y++) { 
             LVL_set_tile(level, NULL, x, y);
         }
     }
@@ -62,9 +67,7 @@ int LVL_tile_blueprint_on_pos(
     int      x,
     int      y
 ) {
-    int size_x = LVL_size_x(level);
-
-    return levels_library[level->blueprint_id]->tiles[y * size_x + x];
+    return levels_library[level->blueprint_id]->tiles[LVL_pos(level, x, y)];
 }
 
 int LVL_n_entity_fills(
@@ -104,11 +107,8 @@ void LVL_fill(
 ) {
     LVL_clean_structure(level);
 
-    int size_x = LVL_size_x(level);
-    int size_y = LVL_size_y(level);
-    
-    for (int x=0; x<size_x; x++) {
-        for (int y=0; y<size_y; y++) {
+    for (int x=0; x<LVL_size_x(level); x++) {
+        for (int y=0; y<LVL_size_y(level); y++) {
             int id = LVL_tile_blueprint_on_pos(level, x, y);
             LVL_fill_structure(level, x, y, id);
         }
@@ -135,11 +135,8 @@ tile_t* LVL_tile_on_pos(
     int      x,
     int      y
 ) {
-    int size_x = LVL_size_x(level);
-    int size_y = LVL_size_y(level);
-
-    if (x>0 && x<size_x && y>0 && y<size_y) {
-        return level->structure[y * size_x + x];
+    if (x>0 && x<LVL_size_x(level) && y>0 && y<LVL_size_y(level)) {
+        return level->structure[LVL_pos(level, x, y)];
     }
     return NULL;
 }
@@ -149,10 +146,7 @@ bool LVL_obstacle_on_pos(
     int x,
     int y
 ) {
-    int size_x = LVL_size_x(level);
-    int size_y = LVL_size_y(level);
-
-    if (x<0 || x>size_x || y<0 || y>size_y) {
+    if (x<0 || x>LVL_size_x(level) || y<0 || y>LVL_size_y(level)) {
         return false;
     }
     int tile_id = LVL_tile_blueprint_on_pos(level, x, y);
@@ -331,12 +325,12 @@ void LVL_put_on_scene(
     int end_tile_pos_x = st_tile_pos_x + SCREEN_TILE_PER_Y;
     int end_tile_pos_y = st_tile_pos_y + SCREEN_TILE_PER_X;
 
-    float camera_x_diff = (((float)camera_x) / (float)SCREEN_WIDTH) * global_x_scale;
-    float camera_y_diff = (((float)camera_y) / (float)SCREEN_HEIGHT) * global_y_scale;
-    float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { camera_x_diff, camera_y_diff, 0.0, 0.0 };
+    int level_tileset = LVL_tileset_id(level);
+    
+    float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { GL_UTIL_x(camera_x), GL_UTIL_y(camera_y) };
 
     int i = 0;
-    float *vertices = (float*)malloc(sizeof(float) *LEVEL_VERTICES_FOR_SCENE);
+    float *vertices = (float*)malloc(sizeof(float) * LEVEL_VERTICES_FOR_SCENE);
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
@@ -345,19 +339,20 @@ void LVL_put_on_scene(
             tile         = LVL_tile_on_pos(level, x, y);
             
             if (tile) {
-                int z = LVL_put_tile_on_scene(vertices, tile, i); i = z;
+                int z = LVL_put_tile_on_scene(vertices, tile, i);
+                i = z;
             }
-
         }
     }
-    printf("imma using texture id: %d for tiles \n", LVL_tileset_id(level));
+
     SCENE_add(
         scene, 
         LAYER_TILE,
-        LVL_tileset_id(level),
+        level_tileset,
         i,
         vertices,
-        uniforms
+        uniforms,
+        ENTITY_RENDER_COUNT
     );
 }
 
@@ -365,12 +360,9 @@ void LVL_free(
     level_t *level
 ) {
     if (levels_library[level->blueprint_id]) {
-        int size_x = LVL_size_x(level);
-        int size_y = LVL_size_y(level);
-
-        for (int x=0; x<size_x; x++) {
-            for (int y=0; y<size_y; y++) {
-                TILE_free(level->structure[y * size_x + x]);
+        for (int x=0; x<LVL_size_x(level); x++) {
+            for (int y=0; y<LVL_size_y(level); y++) {
+                TILE_free(level->structure[LVL_pos(level, x, y)]);
             }
         }
     }

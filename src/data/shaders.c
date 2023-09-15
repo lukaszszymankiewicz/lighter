@@ -37,11 +37,11 @@ void LIB_free_program(
 
 void LIB_create_shaders_library(
 ) {
-    // shader_library[SHADER_LIGHT] = GFX_create_gl_program(
-    //     shader_light.vertex_shader_path,
-    //     shader_light.fragment_shader_path,
-    //     shader_light.geomentry_shader_path
-    // );
+    shader_library[SHADER_LIGHT] = GFX_create_gl_program(
+        shader_light.vertex_shader_path,
+        shader_light.fragment_shader_path,
+        shader_light.geomentry_shader_path
+    );
 
     shader_library[SHADER_TEXTURE] = GFX_create_gl_program(
         shader_texture.vertex_shader_path,

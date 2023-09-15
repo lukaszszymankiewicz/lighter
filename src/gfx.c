@@ -1,21 +1,17 @@
-// TODO: check if relevent
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+
+#include <SDL2/SDL_image.h>
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-
-// TODO: check if releveant
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_image.h>
-
 #include "gfx.h"
-#include "global.h"
 #include "gl_util.h"
+#include "global.h"
 
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
@@ -24,20 +20,16 @@
 #define SHADER_READ_MODE     "r"
 
 #define ALLOWED_UNIFORM_TYPE_N   2
-#define ALLOWED_UNIFORM_TYPE     (GLuint[ALLOWED_UNIFORM_TYPE_N]){ GL_FLOAT_VEC4, GL_SAMPLER_2D }
 #define ALLOWED_UNIFORM_NAME_LEN 16
-#define ALLOWED_ATTRIB_NAME_LEN 16
+#define ALLOWED_ATTRIB_NAME_LEN  16
 
-// TODO: check if relevant
-GLint  gVertexPos2DLocation = -1;
-GLuint gVBO                 = 0;
-GLuint gIBO                 = 0;
+#define UNUSED_SHADER_PROGRAM_ID -1
 
 SDL_GLContext gl_context        = NULL;
 SDL_Window   *window            = NULL;
 
-int texture_id_counter = 0;
-int max_buffer_len     = 512;
+int texture_id_counter                   = 0;
+int max_buffer_len                       = 512;
 
 GLuint GFX_generate_texture_ID(
 ) {
@@ -117,28 +109,22 @@ int GFX_compile_shader(
     return (int)id;
 }
 
-int GFX_attrib_size(
+int GFX_type_size(
     GLenum type
 ) {
-    int size = 0;
-
     switch (type)
     {
         case GL_FLOAT_VEC2:
-            size = 2;
-            break;
+            return 2;
         case GL_FLOAT_VEC3:
-            size = 3;
-            break;
+            return 3;
         case GL_FLOAT_VEC4:
-            size = 4;
-            break;
+            return 4;
+        case GL_SAMPLER_2D:
+            return 1;
         default:
-            size = -1;
-            break;
+            return -1;
     }
-
-    return size;
 }
 
 shader_program_t* GFX_create_gl_program(
@@ -148,8 +134,6 @@ shader_program_t* GFX_create_gl_program(
 ) {
     GLint i;
     GLint n_uniforms, n_attribs;
-    GLint size; 
-    GLint arr_size; 
 
     GLenum  type; 
     GLchar  name[ALLOWED_UNIFORM_NAME_LEN];
@@ -169,7 +153,7 @@ shader_program_t* GFX_create_gl_program(
 
     // link 
     GLuint program_id = glCreateProgram();
-    printf("program read: %d\n", program_id);
+    printf("\nSHADER program read: %d\n", program_id);
 
     glAttachShader(program_id, vertex_shader_id);
     glAttachShader(program_id, fragment_shader_id);
@@ -179,10 +163,8 @@ shader_program_t* GFX_create_gl_program(
     // put everything in place
     shader_program->vertex_shader_id   = vertex_shader_id;
     shader_program->fragment_shader_id = fragment_shader_id;                   
-    shader_program->geometry_shader_id = -1; // TDB
+    shader_program->geometry_shader_id = UNUSED_SHADER_PROGRAM_ID;
     shader_program->program            = program_id;
-
-    // bind uniform arguments
 
     // get uniforms
     glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_uniforms);
@@ -190,11 +172,13 @@ shader_program_t* GFX_create_gl_program(
 
     printf("\nn uniforms: %d \n", n_uniforms);
     for (i=0; i<n_uniforms; i++) {
-        glGetActiveUniform(program_id, (GLuint)i, ALLOWED_UNIFORM_NAME_LEN, &length, &size, &type, name);
-        shader_program->uniform_loc[i] = glGetUniformLocation(program_id, name);
+        int loc;
+        glGetActiveUniform(program_id, (GLuint)i, ALLOWED_UNIFORM_NAME_LEN, &length, NULL, &type, name);
+        loc                              = glGetUniformLocation(program_id, name);
+        shader_program->uniform_loc[i]   = loc;
+        shader_program->uniform_types[i] = type;
 
-        printf("read uniform location: %d ", shader_program->uniform_loc[i]); 
-        printf("for uniform (%s) \n", name); 
+        printf("uniform: (%s) on loc (%d) and type (%d) \n", name, loc, type);
     }
     
     // create VBO
@@ -222,7 +206,7 @@ shader_program_t* GFX_create_gl_program(
         loc      = (int)glGetAttribLocation(program_id, name);
         locs[i]  = loc;
 
-        vec_sizes[i]  = GFX_attrib_size(type);
+        vec_sizes[i]  = GFX_type_size(type);
         stride       += vec_sizes[i];
 
         printf("attrib: (%s) on loc (%d) sized: (%d) with stride: (%d) \n", name, loc, vec_sizes[i], stride);
@@ -421,15 +405,6 @@ void GFX_update() {
     glDrawArrays(GL_TRIANGLES, 0, 3);
     SDL_GL_SwapWindow(window);
     SDL_UpdateWindowSurface(window);
-};
-
-bool GFX_init_graphics(
-) {
-    // TODO: OK, this propably needs to be placed somewhere else
-    // GFX_init_vao();
-    // GFX_init_vbo();
-
-    return true;
 };
 
 // TODO: to modules teardown

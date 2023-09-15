@@ -5,12 +5,14 @@
 #include "entity.h"
 #include "geometry.h"
 #include "gl_util.h"
+#include "gl_util.h"
 #include "global.h"
 #include "scene.h"
 #include "sorted_list.h"
 #include "source.h"
 
-#define MAX_SPRITES 20
+#define ENTITY_RENDER_COUNT        4
+#define MAX_SPRITES                20
 #define VERTICES_PER_SINGLE_SPRITE 24
 #define SPRITES_VERTICES_FOR_SCENE MAX_SPRITES*VERTICES_PER_SINGLE_SPRITE
 
@@ -649,24 +651,14 @@ render_coord_t ENT_texture_coord(
 }
 
 render_coord_t ENT_img_coord(
-    entity_t       *entity,
-    render_coord_t  texture_coord,
-    int             camera_x,
-    int             camera_y
+    entity_t       *entity
 ) {
-    float texW = (float) ENT_get_animation_sheet_width(entity);
-    float texH = (float) ENT_get_animation_sheet_height(entity);
-
-    render_coord_t render = GL_UTIL_global_to_gl_coord(
-        entity->x, entity->y,
-        texW, texH,
-        texture_coord.x1, texture_coord.y1,
-        texture_coord.x2, texture_coord.y2
+    return  GL_UTIL_rect(
+        entity->x,
+        entity->y,
+        ENT_current_frame_width(entity),
+        ENT_current_frame_height(entity)
     );
-
-    render = GL_UTIL_gl_to_camera_gl(render, camera_x, camera_y);
- 
-    return render;
 }
 
 //TODO: to manager!
@@ -681,11 +673,14 @@ void ENT_add_to_scene(
     bool           flip       = ENT_render_with_flip(entity);
     int            texture_id = ENT_texture_id(entity);
     render_coord_t clip       = ENT_texture_coord(entity);
-    render_coord_t render     = ENT_img_coord(entity, clip, camera_x, camera_y);
+    render_coord_t render     = ENT_img_coord(entity);
     int            i          = 0; 
     float         *v          = NULL;
 
     v = (float*)malloc(sizeof(float) * SPRITES_VERTICES_FOR_SCENE);
+
+    printf("entity camera x: %d, camera_y: %d \n", camera_x, camera_y); 
+    float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { GL_UTIL_x(camera_x), GL_UTIL_y(camera_y) };
 
     // Position                         Texcoords
     v[i++]=render.x1; v[i++]=render.y1; v[i++]=clip.x1; v[i++]=clip.y1; // Top-left
@@ -695,7 +690,7 @@ void ENT_add_to_scene(
     v[i++]=render.x2; v[i++]=render.y2; v[i++]=clip.x2; v[i++]=clip.y2; // Bottom-right
     v[i++]=render.x1; v[i++]=render.y2; v[i++]=clip.x1; v[i++]=clip.y2; // Bottom-left
 
-    SCENE_add(scene, LAYER_SPRITE, texture_id, i, v, NULL);
+    SCENE_add(scene, LAYER_SPRITE, texture_id, i, v, uniforms, ENTITY_RENDER_COUNT);
 }
 
 void ENT_free(

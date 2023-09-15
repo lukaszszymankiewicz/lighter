@@ -10,7 +10,9 @@
 #include "source.h"
 #include "scene.h"
 #include "vertex.h"
+#include <stdio.h>
 
+#define LIGHT_RENDER_COUNT        2
 
 // TODO: replace it with function in geometry.h
 // checks if ray intersects with obstacle
@@ -632,52 +634,46 @@ vertex_t* LIG_single_add_light_polygon(
 void LIG_add_to_scene(
     int              x,
     int              y,
-    int              camera_x, // camera x
-    int              camera_y, // camera y 
+    int              camera_x,
+    int              camera_y,
     int              i,
     float            angle,
     float            coef,
     lightsource_t   *light,
     segment_t       *obstacles
 ) {
-    vertex_t        *vertex            = NULL;
-    vertex_t        *ptr               = NULL;
-    vertex_t        *transposed_vertex = NULL;
-    render_vertex_t gl_vertex; 
-    
-    gl_vertex.len = 0;
+    vertex_t        *vertex  = NULL;
+    vertex_t        *ptr     = NULL;
+    float           *v       = NULL;
+    int              j       = 0;
 
     // calculate in global coords
-    vertex            = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
+    vertex   = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
+    int len  = VRTX_len(vertex) * LIGHT_RENDER_COUNT;
 
-    // align it with camera
-    transposed_vertex = VRTX_transpose(vertex, camera_x, camera_y);
-    
+    v        = (float*)malloc(sizeof(float) * len);
+
     // TODO: some better function?
     // translate it to gl coords system
-    for (ptr=transposed_vertex; ptr; ptr=ptr->next) {
-        render_coord_t c = GL_UTIL_global_to_gl_coord_single(ptr->x, ptr->y, camera_x, camera_y);
-        gl_vertex.coefs[gl_vertex.len++] = c.x1;
-        gl_vertex.coefs[gl_vertex.len++] = c.y1;
+    for (ptr=vertex; ptr; ptr=ptr->next) {
+        v[j++] = GL_UTIL_x(ptr->x);
+        v[j++] = GL_UTIL_y(ptr->y);
     }
 
+    // TODO: decide if relevant
     // scene->components[scene->n]->power  = light->light_polygons[i].light_power;
-        
+    printf("light camera x: %d, camera_y: %d \n", camera_x, camera_y); 
+
     float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = {
+        GL_UTIL_x(camera_x),
+        GL_UTIL_y(camera_y),
         light->light_polygons[i].red,
         light->light_polygons[i].green,
         light->light_polygons[i].blue,
         1.0
     };
 
-    SCENE_add(
-        scene,
-        LAYER_LIGHT,
-        NO_TEXTURE,
-        gl_vertex.len,
-        gl_vertex.coefs,
-        uniforms
-    );
+    SCENE_add(scene, LAYER_LIGHT, NO_TEXTURE, len, v, uniforms, LIGHT_RENDER_COUNT);
 
     // cleanup
     VRTX_free(vertex);

@@ -213,15 +213,16 @@ void ENTMAN_calc_single_entity_light(
     float angle          = ENT_light_angle(entity);
     float wobble_corr    = ENT_wobble_coef(entity);
 
-    int rel_x            = CAMERA_X - ENTMAN_hero_x(entity_manager);
-    int rel_y            = CAMERA_Y - ENTMAN_hero_y(entity_manager);
+    int camera_x         =  ENTMAN_hero_x(entity_manager);
+    int camera_y         =  ENTMAN_hero_y(entity_manager);
     
     int n_poly = light->n_poly;
 
-    for (int i=0; i<n_poly; i++) {
+    // for (int i=0; i<n_poly; i++) {
+    for (int i=0; i<1; i++) {
         LIG_add_to_scene(
             emit_x, emit_y,
-            rel_x,  rel_y,
+            camera_x,  camera_y,
             i, angle, wobble_corr, light, obs
         );
     }
@@ -233,7 +234,8 @@ void ENTMAN_calc_light(
     entity_manager_t* entity_manager,
     segment_t*        obstacles
 ) {
-    for (int i=0; i<MAX_ENTITY; i++) {
+    // for (int i=0; i<MAX_ENTITY; i++) {
+    for (int i=0; i<1; i++) {
         entity_t* entity = NULL;
         entity           = entity_manager->entities[i];
 

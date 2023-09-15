@@ -10,7 +10,6 @@ typedef struct vertex {
 } vertex_t;
 
 vertex_t* VRTX_new(int x, int y, float angle);
-vertex_t* VRTX_transpose(vertex_t *vertex, int x_corr, int y_corr);
 
 int VRTX_len(vertex_t *head);
 
