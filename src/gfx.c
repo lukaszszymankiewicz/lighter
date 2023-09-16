@@ -31,6 +31,17 @@ SDL_Window   *window            = NULL;
 int texture_id_counter                   = 0;
 int max_buffer_len                       = 512;
 
+void GFX_use_shader_program(
+    int id
+) {
+    glUseProgram(id);
+}
+
+void GFX_turn_off_shaders(
+) {
+    GFX_use_shader_program(0);
+}
+
 GLuint GFX_generate_texture_ID(
 ) {
     texture_id_counter++;
@@ -283,7 +294,7 @@ void GFX_specify_texture(
 // sets global rendering scale which must be a positive integer. Scale tries to fit best tile_per_x 
 // and tile_per_y. This is needed to achieve pixel-perfect rendering (which can be done only if each
 // pixel in every drawing routine is multiplied by some scale).
-void GFX_set_global_render_scale(
+bool GFX_set_global_render_scale(
 ) {
     float tile_per_x = (float)MAX_SCREEN_TILE_PER_X;
     float tile_per_y = (float)MAX_SCREEN_TILE_PER_Y;        ;
@@ -303,6 +314,8 @@ void GFX_set_global_render_scale(
     // global scale is calculated and set
     global_x_scale = (float)TILE_WIDTH / (max_screen_w / 2.0 / tile_per_x) * scale;
     global_y_scale = (float)TILE_HEIGHT / (max_screen_h / 2.0 / tile_per_y) * scale;
+
+    return true;
 }
 
 bool GFX_init_window() {
@@ -339,16 +352,19 @@ bool GFX_init_video(
     return (SDL_Init(SDL_INIT_VIDEO) == 0);
 };
 
-bool GFX_create_gl_context() {
+bool GFX_create_gl_context(
+) {
     gl_context = SDL_GL_CreateContext(window);
     return (gl_context != NULL);
 }
 
-bool GFX_init_glew() {
+bool GFX_init_glew(
+) {
     return (glewInit() == GLEW_OK);
 }
 
-bool GFX_init_vsync(){
+bool GFX_init_vsync(
+){
     return (SDL_GL_SetSwapInterval(1) == 0);
 }
 
@@ -357,10 +373,6 @@ bool GFX_init_gl_params(
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // TODO: log error with
-    // error = glGetError();
-
-    GFX_set_global_render_scale();
 
     return true;
 }
@@ -370,39 +382,12 @@ bool GFX_init_png(
     return (bool)IMG_Init(IMG_INIT_PNG);
 };
 
-bool GFX_set_viewport(
-) {
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
-    return true;
-}
-
-GLuint GFX_init_vao(
-) {
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    return vao;
-}
-
-GLuint GFX_init_vbo(
-) {
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    return vbo;
-}
-
 void GFX_clear_screen() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
 };
 
 void GFX_update() {
-    glDrawArrays(GL_TRIANGLES, 0, 3);
     SDL_GL_SwapWindow(window);
     SDL_UpdateWindowSurface(window);
 };
@@ -413,7 +398,7 @@ void GFX_free(
     if (gl_context) {
         // TODO: some cleaning here?
         // glDeleteProgram(opengl_program_id);
-        glUseProgram(0);
+        GFX_turn_off_shaders();
     }
 
     if (window) {
@@ -423,3 +408,33 @@ void GFX_free(
     IMG_Quit();
 };
 
+int GFX_create_framebuffer(
+) {
+    GLuint buffer;
+    glGenFramebuffers(1, &buffer);
+
+    GLuint colorBuffer;
+    glGenTextures(1, &colorBuffer);
+    glBindTexture(GL_TEXTURE_2D, colorBuffer);
+
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    return buffer;
+}
+
+void GFX_bind_framebuffer(
+    GLuint id
+) {
+    glBindFramebuffer(GL_FRAMEBUFFER, id);
+}
+
+void GFX_destroy_framebuffer(
+    GLuint id
+) {
+    glDeleteFramebuffers(1, &id);
+}

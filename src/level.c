@@ -85,20 +85,17 @@ int LVL_tileset_id(
 
 void LVL_fill_structure(
     level_t *level,
-    int      x,
-    int      y,
-    int      id
+    int      id,
+    int      row, int      col,
+    int      x,   int      y
 ) {
     tile_t *tile    = NULL;
 
-    tile = TILE_new(
-        id,
-        tiles_library[id]->tileset_id,
-        tiles_library[id]->clip,
-        x * TILE_WIDTH,
-        y * TILE_HEIGHT
-    );
+    int tileset_id  = tiles_library[id]->tileset_id;  
+    int pos_x       = x * TILE_WIDTH;  
+    int pos_y       = y * TILE_HEIGHT;  
 
+    tile = TILE_new(id, tileset_id, row, col, pos_x, pos_y);
     LVL_set_tile(level, tile, x, y);
 }
 
@@ -109,8 +106,12 @@ void LVL_fill(
 
     for (int x=0; x<LVL_size_x(level); x++) {
         for (int y=0; y<LVL_size_y(level); y++) {
-            int id = LVL_tile_blueprint_on_pos(level, x, y);
-            LVL_fill_structure(level, x, y, id);
+
+            int id  = LVL_tile_blueprint_on_pos(level, x, y);
+            int row = tiles_library[id]->row;
+            int col = tiles_library[id]->col;
+
+            LVL_fill_structure(level, id, row, col, x, y);
         }
     }
 }
@@ -301,13 +302,13 @@ int LVL_put_tile_on_scene(
     tile_t *tile,
     int     i
 ) {
-   // Position                                   Texcoords
-   v[i++]=tile->coord.x1; v[i++]=tile->coord.y2; v[i++]=tile->img.x1; v[i++]=tile->img.y2; // Top-left
-   v[i++]=tile->coord.x2; v[i++]=tile->coord.y2; v[i++]=tile->img.x2; v[i++]=tile->img.y2; // Top-right
-   v[i++]=tile->coord.x2; v[i++]=tile->coord.y1; v[i++]=tile->img.x2; v[i++]=tile->img.y1; // Bottom-right
-   v[i++]=tile->coord.x1; v[i++]=tile->coord.y2; v[i++]=tile->img.x1; v[i++]=tile->img.y2; // Top-left
-   v[i++]=tile->coord.x2; v[i++]=tile->coord.y1; v[i++]=tile->img.x2; v[i++]=tile->img.y1; // Bottom-right
-   v[i++]=tile->coord.x1; v[i++]=tile->coord.y1; v[i++]=tile->img.x1; v[i++]=tile->img.y1; // Bottom-left
+   // Position                                     Texclip
+   v[i++]=tile->render.x1; v[i++]=tile->render.y2; v[i++]=tile->clip.x1; v[i++]=tile->clip.y2; // Top-left
+   v[i++]=tile->render.x2; v[i++]=tile->render.y2; v[i++]=tile->clip.x2; v[i++]=tile->clip.y2; // Top-right
+   v[i++]=tile->render.x2; v[i++]=tile->render.y1; v[i++]=tile->clip.x2; v[i++]=tile->clip.y1; // Bottom-right
+   v[i++]=tile->render.x1; v[i++]=tile->render.y2; v[i++]=tile->clip.x1; v[i++]=tile->clip.y2; // Top-left
+   v[i++]=tile->render.x2; v[i++]=tile->render.y1; v[i++]=tile->clip.x2; v[i++]=tile->clip.y1; // Bottom-right
+   v[i++]=tile->render.x1; v[i++]=tile->render.y1; v[i++]=tile->clip.x1; v[i++]=tile->clip.y1; // Bottom-left
 
    return i;
 }

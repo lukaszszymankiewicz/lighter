@@ -44,10 +44,10 @@
   - [x] VAO and VBO to shader program struct
   - [x] use proper uniform function where needed
   - [x] clean up gl util module, use atomizd function (rename camera functions to someting)
-  - [ ] remove this ugly render coord from entity blueprints
+  - [x] remove this ugly render coord from entity blueprints
+  - [x] try to join two render functions
   - [ ] remove global scale, use ortho matrix instead
   - [ ] remove camera uniforms, use projection matrix instead
-  - [ ] try to join two render functions
   - [ ] add entity filp
   - [ ] framebuffer for each layer (maybe, scalling can be omitted then?)
   - [ ] add global scale can be propably easily deleted

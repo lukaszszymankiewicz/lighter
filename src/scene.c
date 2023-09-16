@@ -1,13 +1,10 @@
-#include <GL/glew.h>
-#include <GL/gl.h>
-
 #include "data/library.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "gl_util.h"
+#include "gfx.h"
 #include "render.h"
 #include "scene.h"
 
@@ -45,12 +42,19 @@ void SCENE_add_layer(
     scene->layers[i].n_objs      = 0;
 }
 
+void SCENE_add_buffer(
+    scene_t* scene
+) {
+    // scene->buffer = GFX_create_framebuffer();
+}
+
 scene_t* SCENE_new(
     int n_layers
 ) {
     scene_t *scene   = NULL;
     scene            = (scene_t*)malloc(sizeof(scene_t));
     scene->n_layers  = 0;
+    scene->buffer    = 0;
 
     for(int l=0; l<n_layers; l++) {
         SCENE_add_layer(scene, scene->n_layers++);
@@ -102,6 +106,8 @@ void SCENE_add(
 void SCENE_free(
     scene_t* scene
 ) {
+    GFX_destroy_framebuffer(scene->buffer);
+
     for (int i=0; i<MAX_LAYERS_ON_SCENE; i++) {
         int n_objs = scene->layers[i].n_objs;
 
@@ -117,7 +123,8 @@ void SCENE_free(
 void SCENE_use_program(
     int layer
 ) {
-    glUseProgram(shader_library[scene->layers[layer].shader_id]->program);
+    int id = shader_library[scene->layers[layer].shader_id]->program;
+    GFX_use_shader_program(id);
 }
 
 bool SCENE_layer_is_on(
@@ -137,6 +144,13 @@ bool SCENE_layer_is_off(
 void SCENE_draw(
     scene_t* scene 
 ) {
+    // no buffer to render to!
+    if (!(scene->buffer)) {
+        // return;
+    }
+    
+    GFX_bind_framebuffer(scene->buffer);
+
     for (int layer=0; layer<scene->n_layers; layer++) {
         if (SCENE_layer_is_off(scene, layer)) {
             continue;

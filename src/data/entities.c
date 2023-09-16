@@ -23,14 +23,12 @@ entity_blueprint_t entity_blueprint_hero = {
                 WOBBLE_WALKING,
                 {
                     {
-                        (render_coord_t) { 0.0, 0.0, 9.0/27.0, 20.0/40.0 },
                         (SDL_Rect)       { 0,   0,   9,        20        },
                         { (SDL_Rect)     { 0,   0,   9,        20        } },
                         9, 10, 1, 20
                     },
                     {
-                        (render_coord_t) { 9.0/27.0, 0.0, 18.0/27.0, 20.0/40.0 },
-                        (SDL_Rect)       { 0,        0,   9,         20        },
+                        (SDL_Rect)       { 9,        0,   9,         20        },
                         { (SDL_Rect)     { 0,        0,   9,         20        } },
                         9, 10, 1, 20
                     },
@@ -41,14 +39,12 @@ entity_blueprint_t entity_blueprint_hero = {
                 WOBBLE_STABLE,
                 {
                     {
-                        (render_coord_t) { 0.0, 20.0/40.0, 9.0/27.0, 40.0/40.0 },
-                        (SDL_Rect)       { 0,   0,         9,        20        },
+                        (SDL_Rect)       { 0,   20,        9,        20        },
                         { (SDL_Rect)     { 0,   0,         9,        20        } },
                         9, 10, 1, 5
                     },
                     {
-                        (render_coord_t) { 9.0/27.0, 20.0/40.0, 18.0/27.0, 40.0/40.0 },
-                        (SDL_Rect)       { 0,        0,         9,         20        },
+                        (SDL_Rect)       { 9,        20,        9,         20        },
                         { (SDL_Rect)     { 0,        0,         9,         20        } },
                         9, 10, 1, 5
                     },
@@ -59,8 +55,7 @@ entity_blueprint_t entity_blueprint_hero = {
                 WOBBLE_NO,
                 {
                     {
-                        (render_coord_t) { 9.0/27.0, 20.0/40.0, 18.0/27.0, 40.0/40.0 },
-                        (SDL_Rect)       { 0,        0,         9,         20        },
+                        (SDL_Rect)       { 9,        20,        9,         20        },
                         { (SDL_Rect)     { 0,        0,         9,         20        } },
                         9, 10, 1, 0
                     },
@@ -71,8 +66,7 @@ entity_blueprint_t entity_blueprint_hero = {
                 WOBBLE_NO,
                 {
                     {
-                        (render_coord_t) { 18.0/27.0, 20.0/40.0, 27.0/27.0, 40.0/40.0 },
-                        (SDL_Rect)       { 0,         0,         9,         20        },
+                        (SDL_Rect)       { 18,        20,         9,         20        },
                         { (SDL_Rect)     { 0,         0,         9,         20        } },
                         9, 10, 1, 0
                     },

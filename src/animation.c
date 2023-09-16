@@ -19,7 +19,7 @@ int ANIM_get_texture_height(
     return animation.height;
 }
 
-render_coord_t ANIM_texture_coord_full(
+render_coord_t ANIM_full_clip(
     animation_sheet_t animation
 ) {
     return (render_coord_t) { 0.0, 0.0, 1.0, 1.0 }; 

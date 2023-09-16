@@ -10,7 +10,6 @@
 #define MAX_FRAMES_PER_ANIMATION   4
 
 typedef struct frame {
-    render_coord_t  img;
     SDL_Rect        rect;
     SDL_Rect        hit_boxes[MAX_HITBOXES_PER_FRAME];
     int             handle_x;
@@ -33,8 +32,7 @@ typedef struct animation_sheet {
   animation_t  animations[MAX_ANIMATION];
 } animation_sheet_t;
 
-render_coord_t ANIM_texture_coord(animation_t animation, int idx, int frame);
-render_coord_t ANIM_texture_coord_full(animation_sheet_t animation);
+render_coord_t ANIM_full_clip(animation_sheet_t animation);
 
 int ANIM_get_texture_width(animation_sheet_t animation);
 int ANIM_get_texture_height(animation_sheet_t animation);

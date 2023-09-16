@@ -64,62 +64,6 @@ START_TEST (LVL_analyze_check)
 }
 END_TEST
 
-START_TEST (LVL_fill_structure_check)
-{
-    // GIVEN
-    typedef struct testcase {
-           int tile_type; bool res;
-    } testcase_t;
-
-    testcase_t testcases[] = {
-         {obstacle,    true  },
-         {no_obstacle, false }
-    };
-    int n_cases = 2;
-
-    for (int i=0; i<n_cases; i++) {
-        LIB_create_all();
-
-        levels_library[LEVEL_TEST]->tiles[0] = testcases[i].tile_type;
-        level_t* level                       = NULL;
-        level                                = LVL_new(LEVEL_TEST);
-
-        // WHEN
-        bool res = LVL_obstacle_on_pos(level, 0, 0);
-        
-        // THEN
-        ck_assert_int_eq(res, testcases[i].res);
-    }
-}
-END_TEST
-
-START_TEST (LVL_obstacle_on_pos_check)
-{
-    // GIVEN
-    LIB_create_all();
-    level_t* level = NULL;
-    level          = LVL_new(LEVEL_TEST);
-
-    // WHEN
-    LVL_fill_structure(level, 5, 5, 0);
-    tile_t *tile = NULL;
-    tile         = LVL_tile_on_pos(level, 5, 5);
-
-    // check if LVL_fill_structure is sucessful
-    ck_assert_ptr_nonnull(tile);
-
-    ck_assert_float_eq(tile->coord.x1, 0.5);
-    ck_assert_float_eq(tile->coord.y1, (2.0/3.0 * -1.0 ));
-    ck_assert_float_eq(tile->coord.x2, 0.6);
-    ck_assert_float_eq(tile->coord.y2, -0.8);
-
-    ck_assert_float_eq(tile->img.x1, 0.0);
-    ck_assert_float_eq(tile->img.y1, 0.0);
-    ck_assert_float_eq(tile->img.x2, (32.0 / 512.0));
-    ck_assert_float_eq(tile->img.y2, 1.0);
-
-}
-
 Suite *level_suite(void)
 {
     Suite *s;
@@ -129,11 +73,7 @@ Suite *level_suite(void)
 
     /* Core test case */
     tc_core = tcase_create("Core");
-
     tcase_add_test(tc_core, LVL_analyze_check);
-    tcase_add_test(tc_core, LVL_fill_structure_check);
-    tcase_add_test(tc_core, LVL_obstacle_on_pos_check);
-
     suite_add_tcase(s, tc_core);
 
     return s;

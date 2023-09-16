@@ -113,7 +113,7 @@ enum GFX_MODULE {
     GFX_MODULE_VSYNC,
     GFX_MODULE_GL_PARAMS,
     GFX_MODULE_PNG,
-    GFX_MODULE_VIEWPORT,
+    GFX_MODULE_SCALE,
     GFX_MODULE_ALL
 };
 
@@ -145,7 +145,8 @@ typedef struct texture_blueprint {
 
 typedef struct tile_blueprint {
     int            tileset_id;
-    render_coord_t clip;
+    int            row;
+    int            col;
     bool           obstacle;
 } tile_blueprint_t;
 

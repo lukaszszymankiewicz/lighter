@@ -640,20 +640,29 @@ bool ENT_render_with_flip(
     return entity->direction == LEFT;
 }
 
-// returns texture clip from tileset according to current frame and animation
-render_coord_t ENT_texture_coord(
+render_coord_t ENT_frame_clip(
+    entity_t *entity
+) {
+    int      w = ANIM_get_texture_width(ENT_get_animation_sheet(entity));
+    int      h = ANIM_get_texture_height(ENT_get_animation_sheet(entity));
+    SDL_Rect r = ENT_current_frame(entity).rect;
+
+    return GL_UTIL_clip(r.x, r.y, r.x+r.w, r.y+r.h, w, h);
+}
+
+render_coord_t ENT_clip(
     entity_t *entity
 ) {
     if (ENT_has_not_flag(entity, ANIMATIABLE)) {
-        return ANIM_texture_coord_full(ENT_get_animation_sheet(entity));
+        return ANIM_full_clip(ENT_get_animation_sheet(entity));
     }
-    return ENT_current_frame(entity).img;
+    return ENT_frame_clip(entity);
 }
 
-render_coord_t ENT_img_coord(
+render_coord_t ENT_render(
     entity_t       *entity
 ) {
-    return  GL_UTIL_rect(
+    return GL_UTIL_rect(
         entity->x,
         entity->y,
         ENT_current_frame_width(entity),
@@ -672,8 +681,8 @@ void ENT_add_to_scene(
 
     bool           flip       = ENT_render_with_flip(entity);
     int            texture_id = ENT_texture_id(entity);
-    render_coord_t clip       = ENT_texture_coord(entity);
-    render_coord_t render     = ENT_img_coord(entity);
+    render_coord_t clip       = ENT_clip(entity);
+    render_coord_t render     = ENT_render(entity);
     int            i          = 0; 
     float         *v          = NULL;
 

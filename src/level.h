@@ -16,7 +16,6 @@ level_t* LVL_new();
 
 void LVL_analyze(level_t *level);
 void LVL_put_on_scene(level_t *level, int camera_x, int camera_y);
-void LVL_fill_structure(level_t *level, int x, int y, int i);
 void LVL_fill(level_t* level);
 void LVL_free(level_t* level);
 

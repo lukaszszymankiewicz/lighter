@@ -9,8 +9,8 @@
 #define HEIGHT_COEF (float)TILE_HEIGHT / (float) SCREEN_HEIGHT;
 
 typedef struct tile {
-  render_coord_t img;
-  render_coord_t coord;
+  render_coord_t clip;
+  render_coord_t render;
   int            blueprint_id;
   int            tileset_id;
   bool           obstacle;
@@ -19,9 +19,10 @@ typedef struct tile {
 tile_t* TILE_new(
     int            blueprint_id,
     int            tileset_id,
-    render_coord_t clip,
-    int x,
-    int y
+    int            row,
+    int            col,
+    int            x,
+    int            y
 );
 
 void TILE_free(tile_t *tile);

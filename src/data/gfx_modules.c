@@ -12,7 +12,7 @@ gfx_module_blueprint_t init_glew       = (gfx_module_blueprint_t){ GFX_init_glew
 gfx_module_blueprint_t init_vsync      = (gfx_module_blueprint_t){ GFX_init_vsync };
 gfx_module_blueprint_t init_gl_params  = (gfx_module_blueprint_t){ GFX_init_gl_params };
 gfx_module_blueprint_t init_png        = (gfx_module_blueprint_t){ GFX_init_png };
-gfx_module_blueprint_t init_viewport   = (gfx_module_blueprint_t){ GFX_set_viewport };
+gfx_module_blueprint_t init_scale      = (gfx_module_blueprint_t){ GFX_set_global_render_scale };
 
 gfx_module_t* LIB_init_gfx_module(
     bool       (*fun)()
@@ -35,7 +35,7 @@ void LIB_init_gfx_modules(
     gfx_module_library[GFX_MODULE_VSYNC]      = LIB_init_gfx_module(init_vsync.fun);
     gfx_module_library[GFX_MODULE_GL_PARAMS]  = LIB_init_gfx_module(init_gl_params.fun);
     gfx_module_library[GFX_MODULE_PNG]        = LIB_init_gfx_module(init_png.fun);
-    gfx_module_library[GFX_MODULE_VIEWPORT]   = LIB_init_gfx_module(init_viewport.fun);
+    gfx_module_library[GFX_MODULE_SCALE]      = LIB_init_gfx_module(init_scale.fun);
 }
 
 void LIB_init_all_modules(

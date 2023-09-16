@@ -30,6 +30,8 @@ typedef struct layer {
 typedef struct scene {
     int                n_layers;
     layer_t            layers[MAX_LAYERS_ON_SCENE];
+    int                buffer;
+    // post-processing effects here?
 } scene_t; 
 
 extern scene_t *scene;
