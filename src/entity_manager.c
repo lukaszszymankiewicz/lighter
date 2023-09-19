@@ -147,32 +147,6 @@ void ENTMAT_update(
     }
 }
 
-int ENTMAN_camera_corr_by_hero_pos_x(
-    entity_manager_t* entity_manager
-) {
-    return CAMERA_X - ENTMAN_hero_x(entity_manager);
-}
-
-int ENTMAN_camera_corr_by_hero_pos_y(
-    entity_manager_t* entity_manager
-) {
-    return CAMERA_Y - ENTMAN_hero_y(entity_manager);
-}
-
-int ENTMAN_entity_draw_x(
-    entity_manager_t* entity_manager,
-    entity_t*         entity
-) {
-    return CAMERA_X - (ENTMAN_hero_x(entity_manager) - entity->x);
-}
-
-int ENTMAN_entity_draw_y(
-    entity_manager_t* entity_manager,
-    entity_t*         entity
-) {
-    return CAMERA_Y - (ENTMAN_hero_y(entity_manager) - entity->y);
-}
-
 segment_t* ENTMAN_light_obstacles(
     entity_t*  entity,
     segment_t* obstacles
