@@ -47,6 +47,7 @@
   - [x] remove this ugly render coord from entity blueprints
   - [x] try to join two render functions
   - [ ] remove global scale, use ortho matrix instead
+  - [x] some kind of global camera/scale matrix/vector?
   - [ ] remove camera uniforms, use projection matrix instead
   - [ ] add entity filp
   - [ ] framebuffer for each layer (maybe, scalling can be omitted then?)

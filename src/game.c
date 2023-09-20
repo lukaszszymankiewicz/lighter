@@ -7,12 +7,13 @@
 #include "entity_manager.h"
 #include "game.h"
 #include "gfx.h"
+#include "gl_util.h"
 #include "global.h"
-#include "render.h"
 #include "level.h"
 #include "light.h"
-#include "timer.h"
+#include "render.h"
 #include "scene.h"
+#include "timer.h"
 
 void GAME_create_library(
 ) {
@@ -157,14 +158,22 @@ void GAME_apply_logic(
     GAME_update_entities(game);
 }
 
+void GAME_set_camera(
+    game_t* game
+) {
+    camera_x = GL_UTIL_x(ENTMAN_hero_x(game->entity_manager));
+    camera_y = GL_UTIL_y(ENTMAN_hero_y(game->entity_manager));
+}
+
 void GAME_draw_everything(
     game_t* game
 ) {
     SCENE_clear(scene);
     GFX_clear_screen();
+    GAME_set_camera(game);
     LVL_put_on_scene(game->level, ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
-    ENTMAN_put_on_scene(game->entity_manager);
-    GAME_draw_light(game);
+    // ENTMAN_put_on_scene(game->entity_manager);
+    // GAME_draw_light(game);
     SCENE_draw(scene);
     GFX_update();
 }
@@ -197,6 +206,9 @@ game_t* GAME_new(
     SCENE_attach_shader(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
     SCENE_attach_shader(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
     SCENE_attach_shader(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
+
+    scene->layers[LAYER_SPRITE].on        = false;
+    scene->layers[LAYER_LIGHT].on         = false;
 
     GAME_init_entities(game);
     LVL_fill(game->level);
@@ -231,7 +243,7 @@ void GAME_loop(
         GAME_apply_logic(game);
         GAME_draw(game);
         GAME_update_time(game);
-        // game->loop = false;
+        //game->loop = false;
     }
 
     return;

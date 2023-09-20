@@ -315,11 +315,11 @@ int LVL_put_tile_on_scene(
 
 void LVL_put_on_scene(
     level_t *level,
-    int      camera_x,
-    int      camera_y
+    int x0,
+    int y0
 ) {
-    int st_x           = camera_x - ENTITY_DRAW_X_RANGE;
-    int st_y           = camera_y - ENTITY_DRAW_Y_RANGE;
+    int st_x           = x0 - ENTITY_DRAW_X_RANGE;
+    int st_y           = y0 - ENTITY_DRAW_Y_RANGE;
 
     int st_tile_pos_x  = st_x / TILE_WIDTH;
     int st_tile_pos_y  = st_y / TILE_HEIGHT;
@@ -328,9 +328,8 @@ void LVL_put_on_scene(
 
     int level_tileset = LVL_tileset_id(level);
     
-    float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { GL_UTIL_x(camera_x), GL_UTIL_y(camera_y) };
 
-    int i = 0;
+    int len = 0;
     float *vertices = (float*)malloc(sizeof(float) * LEVEL_VERTICES_FOR_SCENE);
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
@@ -340,21 +339,18 @@ void LVL_put_on_scene(
             tile         = LVL_tile_on_pos(level, x, y);
             
             if (tile) {
-                int z = LVL_put_tile_on_scene(vertices, tile, i);
-                i = z;
+                int z = LVL_put_tile_on_scene(vertices, tile, len);
+                len = z;
             }
         }
     }
 
-    SCENE_add(
-        scene, 
-        LAYER_TILE,
-        level_tileset,
-        i,
-        vertices,
-        uniforms,
-        ENTITY_RENDER_COUNT
-    );
+    SCENE_activate_layer(scene, LAYER_TILE);
+    SCENE_add_new_drawable_object(scene);
+    SCENE_add_uniform(scene, GL_UTIL_camera());
+    // SCENE_add_uniform(scene, GL_UTIL_scale());
+    SCENE_set_texture(scene, GL_UTIL_id(level_tileset));
+    SCENE_add_vertices(scene, len, vertices, ENTITY_RENDER_COUNT);
 }
 
 void LVL_free(

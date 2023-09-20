@@ -19,7 +19,6 @@
 #define SHADER_CHECK_MODE    "rb"
 #define SHADER_READ_MODE     "r"
 
-#define ALLOWED_UNIFORM_TYPE_N   2
 #define ALLOWED_UNIFORM_NAME_LEN 16
 #define ALLOWED_ATTRIB_NAME_LEN  16
 
@@ -133,6 +132,8 @@ int GFX_type_size(
             return 4;
         case GL_SAMPLER_2D:
             return 1;
+        case GL_FLOAT_MAT2:
+            return 4;
         default:
             return -1;
     }
@@ -164,7 +165,7 @@ shader_program_t* GFX_create_gl_program(
 
     // link 
     GLuint program_id = glCreateProgram();
-    printf("\nSHADER program read: %d\n", program_id);
+    printf("\nSHADER program read: %d ---------- \n", program_id);
 
     glAttachShader(program_id, vertex_shader_id);
     glAttachShader(program_id, fragment_shader_id);
@@ -188,6 +189,9 @@ shader_program_t* GFX_create_gl_program(
         loc                              = glGetUniformLocation(program_id, name);
         shader_program->uniform_loc[i]   = loc;
         shader_program->uniform_types[i] = type;
+        shader_program->uniform_names[i] = NULL;
+        shader_program->uniform_names[i] = (char*)malloc(sizeof(char) * strlen(name) + 1);
+        strcpy(shader_program->uniform_names[i], name);
 
         printf("uniform: (%s) on loc (%d) and type (%d) \n", name, loc, type);
     }
@@ -223,6 +227,7 @@ shader_program_t* GFX_create_gl_program(
         printf("attrib: (%s) on loc (%d) sized: (%d) with stride: (%d) \n", name, loc, vec_sizes[i], stride);
     }
 
+    printf("\n");
     int    atrb_size = 0;
 
     for (i=0; i<n_attribs; i++) {
@@ -312,8 +317,8 @@ bool GFX_set_global_render_scale(
     int scale = MAX(closestSclaleX, closestSclaleY);
     
     // global scale is calculated and set
-    global_x_scale = (float)TILE_WIDTH / (max_screen_w / 2.0 / tile_per_x) * scale;
-    global_y_scale = (float)TILE_HEIGHT / (max_screen_h / 2.0 / tile_per_y) * scale;
+    scale_x = (float)TILE_WIDTH / (max_screen_w / 2.0 / tile_per_x) * scale;
+    scale_y = (float)TILE_HEIGHT / (max_screen_h / 2.0 / tile_per_y) * scale;
 
     return true;
 }

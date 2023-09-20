@@ -62,7 +62,7 @@ void ENT_update(entity_t* entity);
 void ENT_update_collision(entity_t *entity, segment_t *obstacles);
 void ENT_resolve(entity_t* entity);
 
-void ENT_add_to_scene(entity_t *entity, int x, int y);
+void ENT_add_to_scene(entity_t *entity);
 void ENT_free(entity_t *entity);
 void ENT_update_hold(entity_t *entity);
 

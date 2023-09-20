@@ -1,16 +1,33 @@
 #include "gl_util.h"
 #include "global.h"
+#include "mat.h"
 
-float global_x_scale        = 1.0;
-float global_y_scale        = 1.0;
+float camera_x       = 0;
+float camera_y       = 0;
+float scale_x        = 1.0;
+float scale_y        = 1.0;
+
+float* GL_UTIL_id(
+    int id
+) {
+    return MAT_scalar_new((float)id);
+}
+
+float* GL_UTIL_scale(
+) {
+    return MAT_imat2_new(scale_x, scale_y);
+}
+
+float* GL_UTIL_camera(
+) {
+    return MAT_vec2_new(camera_x, camera_y);
+}
 
 float GL_UTIL_x(int x) {
-    // return (((float)x) / (float)SCREEN_WIDTH) * global_x_scale;
     return (((float)x) / (float)SCREEN_WIDTH);
 }
 
 float GL_UTIL_y(int y) {
-    // return (((float)y) / (float)SCREEN_HEIGHT) * global_y_scale * -1;
     return (((float)y) / (float)SCREEN_HEIGHT);
 }
 

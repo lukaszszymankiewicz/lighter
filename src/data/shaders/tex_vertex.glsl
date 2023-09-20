@@ -9,6 +9,6 @@ out vec2 TexCoord;
 
 void main()
 {
-    gl_Position = vec4(aPos.x-aCamera.x, aPos.y-aCamera.y, 0.0, 1.0);
+    gl_Position = vec4((aPos - aCamera), 0.0, 1.0);
     TexCoord = aTexCoord;
 }

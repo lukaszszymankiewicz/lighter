@@ -673,7 +673,7 @@ void LIG_add_to_scene(
         1.0
     };
 
-    SCENE_add(scene, LAYER_LIGHT, NO_TEXTURE, len, v, uniforms, LIGHT_RENDER_COUNT);
+    // SCENE_add(scene, LAYER_LIGHT, NO_TEXTURE, len, v, uniforms, LIGHT_RENDER_COUNT);
 
     // cleanup
     VRTX_free(vertex);

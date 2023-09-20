@@ -1,3 +1,5 @@
+#include "gl_util.h"
+
 #include <stdbool.h>
 
 #ifndef RENDER_H
@@ -8,7 +10,7 @@ void RENDER_shader(
     int      texture,
     GLfloat *vertices,
     int      n_vertices,
-    float   *uniforms,
+    float   *uniforms[MAX_SHADER_UNIFORMS],
     int      count,
     GLenum   mode
 );

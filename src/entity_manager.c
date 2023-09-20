@@ -186,9 +186,10 @@ void ENTMAN_calc_single_entity_light(
 
     float angle          = ENT_light_angle(entity);
     float wobble_corr    = ENT_wobble_coef(entity);
-
-    int camera_x         =  ENTMAN_hero_x(entity_manager);
-    int camera_y         =  ENTMAN_hero_y(entity_manager);
+    
+    // TODO: should be deleted
+    int camera_x         = ENTMAN_hero_x(entity_manager);
+    int camera_y         = ENTMAN_hero_y(entity_manager);
     
     int n_poly = light->n_poly;
 
@@ -225,9 +226,6 @@ void ENTMAN_calc_light(
 void ENTMAN_put_on_scene(
     entity_manager_t* entity_manager
 ) {
-    int camera_x = ENTMAN_hero_x(entity_manager);
-    int camera_y = ENTMAN_hero_y(entity_manager);
-
     for (int i=0; i<MAX_ENTITY; i++) {
 
         entity_t* entity = NULL;
@@ -236,10 +234,10 @@ void ENTMAN_put_on_scene(
         if (!entity) { continue; }
 
         if (ENTMAN_entity_in_draw_range(entity_manager, entity)) {
-            ENT_add_to_scene(entity, camera_x, camera_y);
+            ENT_add_to_scene(entity);
 
             if (entity->hold) {
-                ENT_add_to_scene(entity->hold, camera_x, camera_y);
+                ENT_add_to_scene(entity->hold);
             }
         }
     }

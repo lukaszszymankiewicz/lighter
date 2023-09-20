@@ -672,15 +672,14 @@ render_coord_t ENT_render(
 
 //TODO: to manager!
 void ENT_add_to_scene(
-    entity_t *entity,
-    int camera_x, int camera_y
+    entity_t *entity
 ) {
     if (ENT_has_flag(entity, NOT_DRAWABLE)) {
         return;
     }
 
     bool           flip       = ENT_render_with_flip(entity);
-    int            texture_id = ENT_texture_id(entity);
+    // int            texture_id = ENT_texture_id(entity);
     render_coord_t clip       = ENT_clip(entity);
     render_coord_t render     = ENT_render(entity);
     int            i          = 0; 
@@ -688,8 +687,8 @@ void ENT_add_to_scene(
 
     v = (float*)malloc(sizeof(float) * SPRITES_VERTICES_FOR_SCENE);
 
-    printf("entity camera x: %d, camera_y: %d \n", camera_x, camera_y); 
-    float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { GL_UTIL_x(camera_x), GL_UTIL_y(camera_y) };
+    // printf("entity camera x: %d, camera_y: %d \n", camera_x, camera_y); 
+    // float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { GL_UTIL_x(camera_x), GL_UTIL_y(camera_y) };
 
     // Position                         Texcoords
     v[i++]=render.x1; v[i++]=render.y1; v[i++]=clip.x1; v[i++]=clip.y1; // Top-left
@@ -699,7 +698,7 @@ void ENT_add_to_scene(
     v[i++]=render.x2; v[i++]=render.y2; v[i++]=clip.x2; v[i++]=clip.y2; // Bottom-right
     v[i++]=render.x1; v[i++]=render.y2; v[i++]=clip.x1; v[i++]=clip.y2; // Bottom-left
 
-    SCENE_add(scene, LAYER_SPRITE, texture_id, i, v, uniforms, ENTITY_RENDER_COUNT);
+    // SCENE_add(scene, LAYER_SPRITE, texture_id, i, v, uniforms, ENTITY_RENDER_COUNT);
 }
 
 void ENT_free(

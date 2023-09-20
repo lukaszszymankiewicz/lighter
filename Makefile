@@ -52,6 +52,7 @@ OBJS =                                     \
 	$(BUILDDIR)/gfx.o                      \
 	$(BUILDDIR)/level.o                    \
 	$(BUILDDIR)/light.o                    \
+	$(BUILDDIR)/mat.o                      \
     $(BUILDDIR)/render.o                   \
 	$(BUILDDIR)/point.o                    \
 	$(BUILDDIR)/segment.o                  \
@@ -100,6 +101,7 @@ TESTOBJS =                                    \
 	$(BUILDDIR)/render.o                      \
 	$(BUILDDIR)/level.o                       \
 	$(BUILDDIR)/light.o                       \
+	$(BUILDDIR)/mat.o                         \
 	$(BUILDDIR)/point.o                       \
 	$(BUILDDIR)/segment.o                     \
 	$(BUILDDIR)/scene.o                       \
