@@ -327,7 +327,6 @@ void LVL_put_on_scene(
     int end_tile_pos_y = st_tile_pos_y + SCREEN_TILE_PER_X;
 
     int level_tileset = LVL_tileset_id(level);
-    
 
     int len = 0;
     float *vertices = (float*)malloc(sizeof(float) * LEVEL_VERTICES_FOR_SCENE);

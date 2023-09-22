@@ -10,6 +10,10 @@
 // TODO: TBD?
 #define MAX_SHADER_UNIFORMS_ARGS_LEN  MAX_SHADER_UNIFORMS_ARGS * MAX_SHADER_UNIFORMS           
 
+// to properl swich axes from normal coords to NDC
+#define Y_AXIS_DIR -1.0
+#define X_AXIS_DIR  1.0
+
 extern float scale_x;
 extern float scale_y;
 
@@ -33,6 +37,11 @@ typedef struct shader_program {
     unsigned int  vao;
     unsigned int  vbo;
 } shader_program_t;
+
+typedef struct framebuffer {
+    unsigned int id;
+    unsigned int texture;
+} framebuffer_t;
 
 float GL_UTIL_x(int x);
 float GL_UTIL_y(int y);

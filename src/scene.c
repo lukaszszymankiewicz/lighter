@@ -1,5 +1,10 @@
 #include "data/library.h"
 
+// TO BE DELETD
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -55,14 +60,23 @@ void SCENE_add_layer(
         }
     }
 
-    scene->layers[i].on          = true;
-    scene->layers[i].n_objs      = -1;
+    scene->layers[i].on              = true;
+    scene->layers[i].n_objs          = -1;
+    scene->layers[i].framebuffer     = NULL;
+    scene->layers[i].framebuffer     = (framebuffer_t*)malloc(sizeof(framebuffer_t));
+
+    scene->layers[i].framebuffer->id      = 0;
+    scene->layers[i].framebuffer->texture = 0;
 }
 
-void SCENE_add_buffer(
-    scene_t* scene
+void SCENE_add_buffer_layer(
+    scene_t* scene,
+    int      i
 ) {
-    // scene->buffer = GFX_create_framebuffer();
+    SCENE_add_layer(scene, i);
+    free(scene->layers[i].framebuffer);
+    scene->layers[i].framebuffer = NULL;
+    scene->layers[i].framebuffer = GFX_create_framebuffer();
 }
 
 scene_t* SCENE_new(
@@ -71,7 +85,6 @@ scene_t* SCENE_new(
     scene_t *scene   = NULL;
     scene            = (scene_t*)malloc(sizeof(scene_t));
     scene->n_layers  = 0;
-    scene->buffer    = 0;
     scene->cur_layer = -1;
 
     for(int l=0; l<n_layers; l++) {
@@ -164,7 +177,6 @@ void SCENE_add_vertices(
 void SCENE_free(
     scene_t* scene
 ) {
-    GFX_destroy_framebuffer(scene->buffer);
 
     for (int i=0; i<MAX_LAYERS_ON_SCENE; i++) {
         int n_objs = scene->layers[i].n_objs;
@@ -173,7 +185,13 @@ void SCENE_free(
             free(scene->layers[i].objs[j].vertices);
             scene->layers[i].objs[j].vertices   = NULL;
         }
+
+        if (scene->layers[i].framebuffer != NULL) {
+            GFX_destroy_framebuffer(scene->layers[i].framebuffer->id);
+            scene->layers[i].framebuffer = NULL;
+        }
     }
+
     free(scene);      
     scene = NULL;
 }
@@ -202,17 +220,13 @@ bool SCENE_layer_is_off(
 void SCENE_draw(
     scene_t* scene 
 ) {
-    // no buffer to render to!
-    if (!(scene->buffer)) {
-        // return;
-    }
     
-    // GFX_bind_framebuffer(scene->buffer);
-
     for (int layer=0; layer<scene->n_layers; layer++) {
         if (SCENE_layer_is_off(scene, layer)) {
             continue;
         }
+
+        GFX_bind_framebuffer(scene->layers[layer].framebuffer->id);
         SCENE_use_program(layer);
 
         for (int i=0; i<scene->layers[layer].n_objs + 1; i++) {
@@ -227,4 +241,15 @@ void SCENE_draw(
             );
         }
     }
+
+    // GLuint vaoCube, vaoQuad;
+    // glGenVertexArrays(1, &vaoQuad);
+    // glBindVertexArray(vaoQuad);
+
+    // SCENE_use_program(0);
+
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+
+    // glDrawArrays(GL_TRIANGLES, 0, 6);
 }

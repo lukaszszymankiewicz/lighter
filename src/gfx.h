@@ -34,7 +34,6 @@ int GFX_type_size(GLenum type);
 
 void GFX_use_shader_program(int id);
 
-int GFX_create_framebuffer();
 void GFX_bind_framebuffer(GLuint id);
 void GFX_destroy_framebuffer(GLuint id);
 
@@ -43,5 +42,7 @@ shader_program_t* GFX_create_gl_program(
     const char* fragment_shader_path,
     const char* geometry_shader_path
 );
+
+framebuffer_t* GFX_create_framebuffer();
 
 #endif

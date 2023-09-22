@@ -26,4 +26,3 @@ float* MAT_imat2_new(
 
     return mat;
 }
-

@@ -413,14 +413,17 @@ void GFX_free(
     IMG_Quit();
 };
 
-int GFX_create_framebuffer(
+framebuffer_t* GFX_create_framebuffer(
 ) {
-    GLuint buffer;
-    glGenFramebuffers(1, &buffer);
+    framebuffer_t* framebuffer = NULL;
+    framebuffer                = (framebuffer_t*)malloc(sizeof(framebuffer_t));
 
-    GLuint colorBuffer;
-    glGenTextures(1, &colorBuffer);
-    glBindTexture(GL_TEXTURE_2D, colorBuffer);
+    GLuint id;
+    glGenFramebuffers(1, &id);
+
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
 
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL
@@ -429,7 +432,19 @@ int GFX_create_framebuffer(
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    return buffer;
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0
+    );
+    
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        printf("Framebuffer cannot be created! \n");
+        return NULL;
+    }
+    
+    framebuffer->id      = id;
+    framebuffer->texture = tex;
+
+    return framebuffer;
 }
 
 void GFX_bind_framebuffer(

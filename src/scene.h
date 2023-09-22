@@ -24,6 +24,7 @@ typedef struct layer {
     bool              on;
     int               n_objs;
     int               shader_id;
+    framebuffer_t    *framebuffer;
     GLenum            mode;
     drawable_shader_t objs[MAX_DRAWBLE_OBJECTS_ON_LAYER];
 } layer_t; 
@@ -32,7 +33,6 @@ typedef struct scene {
     int                n_layers;
     int                cur_layer;
     layer_t            layers[MAX_LAYERS_ON_SCENE];
-    int                buffer;
 } scene_t; 
 
 extern scene_t *scene;

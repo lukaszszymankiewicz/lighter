@@ -24,11 +24,11 @@ float* GL_UTIL_camera(
 }
 
 float GL_UTIL_x(int x) {
-    return (((float)x) / (float)SCREEN_WIDTH);
+    return (((float)x) / (float)SCREEN_WIDTH) * X_AXIS_DIR;
 }
 
 float GL_UTIL_y(int y) {
-    return (((float)y) / (float)SCREEN_HEIGHT);
+    return (((float)y) / (float)SCREEN_HEIGHT) * Y_AXIS_DIR;
 }
 
 render_coord_t GL_UTIL_rect(
