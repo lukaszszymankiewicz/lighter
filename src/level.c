@@ -296,27 +296,11 @@ void LVL_analyze(
     }
 }
 
-// gratest function of all time
-int LVL_put_tile_on_scene(
-    float  *v,
-    tile_t *tile,
-    int     i
-) {
-   // Position                                     Texclip
-   v[i++]=tile->render.x1; v[i++]=tile->render.y2; v[i++]=tile->clip.x1; v[i++]=tile->clip.y2; // Top-left
-   v[i++]=tile->render.x2; v[i++]=tile->render.y2; v[i++]=tile->clip.x2; v[i++]=tile->clip.y2; // Top-right
-   v[i++]=tile->render.x2; v[i++]=tile->render.y1; v[i++]=tile->clip.x2; v[i++]=tile->clip.y1; // Bottom-right
-   v[i++]=tile->render.x1; v[i++]=tile->render.y2; v[i++]=tile->clip.x1; v[i++]=tile->clip.y2; // Top-left
-   v[i++]=tile->render.x2; v[i++]=tile->render.y1; v[i++]=tile->clip.x2; v[i++]=tile->clip.y1; // Bottom-right
-   v[i++]=tile->render.x1; v[i++]=tile->render.y1; v[i++]=tile->clip.x1; v[i++]=tile->clip.y1; // Bottom-left
-
-   return i;
-}
-
-void LVL_put_on_scene(
+float* LVL_tiles_vertices(
     level_t *level,
-    int x0,
-    int y0
+    int      x0,
+    int      y0,
+    int     *i
 ) {
     int st_x           = x0 - ENTITY_DRAW_X_RANGE;
     int st_y           = y0 - ENTITY_DRAW_Y_RANGE;
@@ -326,10 +310,7 @@ void LVL_put_on_scene(
     int end_tile_pos_x = st_tile_pos_x + SCREEN_TILE_PER_Y;
     int end_tile_pos_y = st_tile_pos_y + SCREEN_TILE_PER_X;
 
-    int level_tileset = LVL_tileset_id(level);
-
-    int len = 0;
-    float *vertices = (float*)malloc(sizeof(float) * LEVEL_VERTICES_FOR_SCENE);
+    float *v = (float*)malloc(sizeof(float) * LEVEL_VERTICES_FOR_SCENE);
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
@@ -337,19 +318,49 @@ void LVL_put_on_scene(
             tile_t *tile = NULL;
             tile         = LVL_tile_on_pos(level, x, y);
             
+            // TODO: this and method in the ENT_vertices can be commonized
             if (tile) {
-                int z = LVL_put_tile_on_scene(vertices, tile, len);
-                len = z;
+                   // Top-left
+                   v[(*i)++]=tile->render.x1; v[(*i)++]=tile->render.y2;
+                   v[(*i)++]=tile->clip.x1;   v[(*i)++]=tile->clip.y2;
+                   // Top-right
+                   v[(*i)++]=tile->render.x2; v[(*i)++]=tile->render.y2;
+                   v[(*i)++]=tile->clip.x2;   v[(*i)++]=tile->clip.y2; 
+                   // Bottom-right
+                   v[(*i)++]=tile->render.x2; v[(*i)++]=tile->render.y1;
+                   v[(*i)++]=tile->clip.x2;   v[(*i)++]=tile->clip.y1;
+                   // Top-left
+                   v[(*i)++]=tile->render.x1; v[(*i)++]=tile->render.y2;
+                   v[(*i)++]=tile->clip.x1;   v[(*i)++]=tile->clip.y2;
+                   // Bottom-right
+                   v[(*i)++]=tile->render.x2; v[(*i)++]=tile->render.y1;
+                   v[(*i)++]=tile->clip.x2;   v[(*i)++]=tile->clip.y1;
+                   // Bottom-left
+                   v[(*i)++]=tile->render.x1; v[(*i)++]=tile->render.y1;
+                   v[(*i)++]=tile->clip.x1;   v[(*i)++]=tile->clip.y1;
             }
         }
-    }
 
-    SCENE_activate_layer(scene, LAYER_TILE);
-    SCENE_add_new_drawable_object(scene);
-    SCENE_add_uniform(scene, GL_UTIL_camera());
+    }
+    return v;
+}
+
+void LVL_put_on_scene(
+    level_t *level,
+    int x0,
+    int y0
+) {
+    int len         = 0;
+    float *vertices = NULL;
+    float *vertices = LVL_tiles_vertices(level, x0, y0, &len);
+    int tileset     = LVL_tileset_id(level);
+
+    SCENE_activate_layer(LAYER_TILE);
+    SCENE_add_new_drawable_object();
+    SCENE_add_uniform(GL_UTIL_camera());
     // SCENE_add_uniform(scene, GL_UTIL_scale());
-    SCENE_set_texture(scene, GL_UTIL_id(level_tileset));
-    SCENE_add_vertices(scene, len, vertices, ENTITY_RENDER_COUNT);
+    SCENE_set_texture(GL_UTIL_id(tileset));
+    SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }
 
 void LVL_free(

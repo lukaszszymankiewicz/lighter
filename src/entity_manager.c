@@ -197,8 +197,8 @@ void ENTMAN_calc_single_entity_light(
     for (int i=0; i<1; i++) {
         LIG_add_to_scene(
             emit_x, emit_y,
-            camera_x,  camera_y,
-            i, angle, wobble_corr, light, obs
+            i,
+            angle, wobble_corr, light, obs
         );
     }
 

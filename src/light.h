@@ -11,19 +11,8 @@
 #define R                               2000
 #define RAY_THRESHOLD                   2
 
-typedef struct lvertex {
-    vertex_t* coords;
-    int       x0;
-    int       y0;
-    int       power;
-    int       red;
-    int       green;
-    int       blue;
-} lvertex_t;
-
 void LIG_add_to_scene(
     int x,      int y,
-    int x_corr, int y_corr,
     int i,
     float angle, float coef,
     lightsource_t *light,

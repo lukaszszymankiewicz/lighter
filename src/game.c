@@ -168,12 +168,18 @@ void GAME_set_camera(
 void GAME_draw_everything(
     game_t* game
 ) {
-    SCENE_clear(scene);
+    SCENE_clear();
     GFX_clear_screen();
     GAME_set_camera(game);
+
+    // TODO: put_on_scene -> draw
     LVL_put_on_scene(game->level, ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
+
+    // TODO: put_on_scene -> draw
     // ENTMAN_put_on_scene(game->entity_manager);
+
     // GAME_draw_light(game);
+    // POST_draw_posteffect(game);
     SCENE_draw(scene);
     GFX_update();
 }
@@ -182,13 +188,36 @@ void GAME_draw_nothing(
     game_t* game
 ) { }
 
+void GAME_init_scene(
+) {
+    SCENE_new();
+
+    SCENE_add_layer(LAYER_TILE);
+    SCENE_add_layer(LAYER_SPRITE);
+    SCENE_add_layer(LAYER_LIGHT);
+    SCENE_add_buffer_layer(LAYER_BUFFER);
+
+    SCENE_attach_shader(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
+    SCENE_attach_shader(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
+    SCENE_attach_shader(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
+    SCENE_attach_shader(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
+}
+
+void GAME_init_level(
+    game_t game
+) {
+    LVL_fill(game->level);
+    LVL_analyze(game->level);
+}
+
 game_t* GAME_new(
     int level_id,
     int graphic_option,
     int max_frames
 ) {
     game_t *game      = NULL;
-
+    
+    // TODO: read-> init, create ->init
     GAME_read_modules();
     GAME_create_library();
 
@@ -201,18 +230,9 @@ game_t* GAME_new(
         game->draw_func = &GAME_draw_nothing; 
     }
 
-    // TODO: to some create_scene function?
-    scene = SCENE_new(LAYER_ALL);
-    SCENE_attach_shader(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
-    SCENE_attach_shader(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
-    SCENE_attach_shader(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
-
-    scene->layers[LAYER_SPRITE].on        = false;
-    scene->layers[LAYER_LIGHT].on         = false;
-
+    GAME_init_scene();
     GAME_init_entities(game);
-    LVL_fill(game->level);
-    LVL_analyze(game->level);
+    GAME_init_level(game);
 
     return game;
 }

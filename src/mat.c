@@ -18,6 +18,16 @@ float* MAT_vec2_new(
     return vec;
 }
 
+float* MAT_vec4_new(
+    float a1, float a2, float a3, float a4
+) {
+    float* vec  = (float*)malloc(sizeof(float) * 4);
+    vec[0] = a1; vec[1] = a2;
+    vec[2] = a3; vec[3] = a4;
+
+    return vec;
+}
+
 float* MAT_imat2_new(
     float a1, float a2
 ) {

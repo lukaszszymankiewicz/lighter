@@ -6,10 +6,12 @@
 #include "global.h"
 #include "light.h"
 #include "point.h"
+#include "mat.h"
 #include "segment.h"
 #include "source.h"
 #include "scene.h"
 #include "vertex.h"
+
 #include <stdio.h>
 
 #define LIGHT_RENDER_COUNT        2
@@ -634,8 +636,6 @@ vertex_t* LIG_single_add_light_polygon(
 void LIG_add_to_scene(
     int              x,
     int              y,
-    int              camera_x,
-    int              camera_y,
     int              i,
     float            angle,
     float            coef,
@@ -653,27 +653,21 @@ void LIG_add_to_scene(
 
     v        = (float*)malloc(sizeof(float) * len);
 
-    // TODO: some better function?
-    // translate it to gl coords system
+    // TODO: some better function? translate it to gl coords system
     for (ptr=vertex; ptr; ptr=ptr->next) {
         v[j++] = GL_UTIL_x(ptr->x);
         v[j++] = GL_UTIL_y(ptr->y);
     }
 
-    // TODO: decide if relevant
-    // scene->components[scene->n]->power  = light->light_polygons[i].light_power;
-    printf("light camera x: %d, camera_y: %d \n", camera_x, camera_y); 
+    float r = light->light_polygons[i].red,
+    float g = light->light_polygons[i].green,
+    float b = light->light_polygons[i].blue,
 
-    float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = {
-        GL_UTIL_x(camera_x),
-        GL_UTIL_y(camera_y),
-        light->light_polygons[i].red,
-        light->light_polygons[i].green,
-        light->light_polygons[i].blue,
-        1.0
-    };
-
-    // SCENE_add(scene, LAYER_LIGHT, NO_TEXTURE, len, v, uniforms, LIGHT_RENDER_COUNT);
+    SCENE_activate_layer(LAYER_LIGHT);
+    SCENE_add_new_drawable_object();
+    SCENE_add_uniform(GL_UTIL_camera());
+    SCENE_add_uniform(MAT_vec4_new(r, g, b, 1.0));
+    SCENE_add_vertices(len, v, LIGHT_RENDER_COUNT);
 
     // cleanup
     VRTX_free(vertex);

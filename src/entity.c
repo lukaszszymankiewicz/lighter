@@ -670,6 +670,28 @@ render_coord_t ENT_render(
     );
 }
 
+float* ENT_vertices(
+    entity_t *entity,
+    int      *i
+) {
+    bool           flip       = ENT_render_with_flip(entity);
+    render_coord_t clip       = ENT_clip(entity);
+    render_coord_t render     = ENT_render(entity);
+    float         *v          = NULL;
+
+    v = (float*)malloc(sizeof(float) * SPRITES_VERTICES_FOR_SCENE);
+
+    // Position                               Texcoords
+    v[(i*)++]=render.x1; v[(i*)++]=render.y1; v[(i*)++]=clip.x1; v[(i*)++]=clip.y1; // Top-left
+    v[(i*)++]=render.x2; v[(i*)++]=render.y1; v[(i*)++]=clip.x2; v[(i*)++]=clip.y1; // Top-right
+    v[(i*)++]=render.x2; v[(i*)++]=render.y2; v[(i*)++]=clip.x2; v[(i*)++]=clip.y2; // Bottom-right
+    v[(i*)++]=render.x1; v[(i*)++]=render.y1; v[(i*)++]=clip.x1; v[(i*)++]=clip.y1; // Top-left
+    v[(i*)++]=render.x2; v[(i*)++]=render.y2; v[(i*)++]=clip.x2; v[(i*)++]=clip.y2; // Bottom-right
+    v[(i*)++]=render.x1; v[(i*)++]=render.y2; v[(i*)++]=clip.x1; v[(i*)++]=clip.y2; // Bottom-left
+
+    return v;
+}
+
 //TODO: to manager!
 void ENT_add_to_scene(
     entity_t *entity
@@ -678,27 +700,18 @@ void ENT_add_to_scene(
         return;
     }
 
-    bool           flip       = ENT_render_with_flip(entity);
-    // int            texture_id = ENT_texture_id(entity);
-    render_coord_t clip       = ENT_clip(entity);
-    render_coord_t render     = ENT_render(entity);
-    int            i          = 0; 
-    float         *v          = NULL;
+    int    texture  = ENT_texture_id(entity);
+    float *vertices = NULL;
+    int    len      = 0;
 
-    v = (float*)malloc(sizeof(float) * SPRITES_VERTICES_FOR_SCENE);
+    vertices        = ENT_vertices(entity, &len):
 
-    // printf("entity camera x: %d, camera_y: %d \n", camera_x, camera_y); 
-    // float uniforms[MAX_SHADER_UNIFORMS_ARGS_LEN] = { GL_UTIL_x(camera_x), GL_UTIL_y(camera_y) };
-
-    // Position                         Texcoords
-    v[i++]=render.x1; v[i++]=render.y1; v[i++]=clip.x1; v[i++]=clip.y1; // Top-left
-    v[i++]=render.x2; v[i++]=render.y1; v[i++]=clip.x2; v[i++]=clip.y1; // Top-right
-    v[i++]=render.x2; v[i++]=render.y2; v[i++]=clip.x2; v[i++]=clip.y2; // Bottom-right
-    v[i++]=render.x1; v[i++]=render.y1; v[i++]=clip.x1; v[i++]=clip.y1; // Top-left
-    v[i++]=render.x2; v[i++]=render.y2; v[i++]=clip.x2; v[i++]=clip.y2; // Bottom-right
-    v[i++]=render.x1; v[i++]=render.y2; v[i++]=clip.x1; v[i++]=clip.y2; // Bottom-left
-
-    // SCENE_add(scene, LAYER_SPRITE, texture_id, i, v, uniforms, ENTITY_RENDER_COUNT);
+    SCENE_activate_layer(LAYER_SPRITE);
+    SCENE_add_new_drawable_object();
+    SCENE_add_uniform(GL_UTIL_camera());
+    // SCENE_add_uniform(scene, GL_UTIL_scale());
+    SCENE_set_texture(GL_UTIL_id(texture));
+    SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }
 
 void ENT_free(
