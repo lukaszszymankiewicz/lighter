@@ -43,6 +43,10 @@ void SCENE_clear(
 void SCENE_add_layer(
     int      i
 ) {
+    if (i>MAX_LAYERS_ON_SCENE) { 
+        printf("Requested layer exceeds maximum number! \n");
+        return;
+    }
     for (int j=0; j<MAX_DRAWBLE_OBJECTS_ON_LAYER; j++) {
         scene->layers[i].objs[j].vertices      = NULL;
         scene->layers[i].objs[j].uniform_count = 0;
@@ -57,14 +61,16 @@ void SCENE_add_layer(
     scene->layers[i].framebuffer     = NULL;
     scene->layers[i].framebuffer     = (framebuffer_t*)malloc(sizeof(framebuffer_t));
 
-    scene->layers[i].framebuffer->id      = 0;
-    scene->layers[i].framebuffer->texture = 0;
+    scene->layers[i].framebuffer->id      = DEFAULT_FRAMEBUFFER;
+    scene->layers[i].framebuffer->texture = NO_TEXTURE;
+
+    scene->n_layers++;
 }
 
 void SCENE_add_buffer_layer(
     int      i
 ) {
-    SCENE_add_layer(scene, i);
+    SCENE_add_layer(i);
     // delete previous framebuffer data
     free(scene->layers[i].framebuffer);
 
@@ -78,6 +84,7 @@ void SCENE_add_buffer_layer(
     for (int l=0; l<i; l++) {
         scene->layers[l].framebuffer->id = new_id;
     }
+    scene->layers[i].framebuffer->id = DEFAULT_FRAMEBUFFER;
 }
 
 void SCENE_new(
@@ -109,8 +116,8 @@ int SCENE_cur_obj(
 
 int SCENE_cur_uniform(
 ) {
-    int obj = SCENE_cur_obj(scene);
-    int cur_uniform =  scene->layers[scene->cur_layer].objs[obj].uniform_count;
+    int obj         = SCENE_cur_obj();
+    int cur_uniform = scene->layers[scene->cur_layer].objs[obj].uniform_count;
 
     return cur_uniform;
 }
@@ -118,8 +125,8 @@ int SCENE_cur_uniform(
 void SCENE_add_uniform(
     float      *value
 ) {
-    int obj         = SCENE_cur_obj(scene);
-    int cur_uniform = SCENE_cur_uniform(scene);
+    int obj         = SCENE_cur_obj();
+    int cur_uniform = SCENE_cur_uniform();
 
     scene->layers[scene->cur_layer].objs[obj].uniforms[cur_uniform] = value;
     scene->layers[scene->cur_layer].objs[obj].uniform_count++;
@@ -133,10 +140,10 @@ void SCENE_add_new_drawable_object(
 void SCENE_set_texture(
     float      *texture
 ) {
-    int obj = SCENE_cur_obj(scene);
+    int obj = SCENE_cur_obj();
 
     scene->layers[scene->cur_layer].objs[obj].texture = (int)(texture[0]);
-    SCENE_add_uniform(scene, texture);
+    SCENE_add_uniform(texture);
 }
 
 void SCENE_add_vertices(
@@ -151,35 +158,26 @@ void SCENE_add_vertices(
     }
 
     scene->layers[scene->cur_layer].objs[j].len     = len;
-    scene->layers[scene->cur_layer].objs[j].count   = count;
+    scene->layers[scene->cur_layer].objs[j].count   = val_per_vertex;
 }
 
 void SCENE_free(
 ) {
+    SCENE_clear();
+
     for (int i=0; i<MAX_LAYERS_ON_SCENE; i++) {
-        int n_objs = scene->layers[i].n_objs;
-
-        for (int j=0; j<n_objs; j++) {
-            free(scene->layers[i].objs[j].vertices);
-            scene->layers[i].objs[j].vertices   = NULL;
-        }
-
-        if (scene->layers[i].framebuffer != NULL) {
-            GFX_destroy_framebuffer(scene->layers[i].framebuffer->id);
-            scene->layers[i].framebuffer = NULL;
-        }
+        
+        // TODO: invent a way to safely destroy framebuffers
+        // if (scene->layers[i].framebuffer != NULL) {
+        //     GFX_destroy_framebuffer(scene->layers[i].framebuffer->id);
+        //     scene->layers[i].framebuffer = NULL;
+        // }
     }
 
     free(scene);      
     scene = NULL;
 }
 
-void SCENE_use_program(
-    int layer
-) {
-    int id = shader_library[scene->layers[layer].shader_id]->program;
-    GFX_use_shader_program(id);
-}
 
 bool SCENE_layer_is_on(
     int      layer
@@ -190,14 +188,13 @@ bool SCENE_layer_is_on(
 bool SCENE_layer_is_off(
     int      layer
 ) {
-    return !(SCENE_layer_is_on(scene, layer));
+    return !(SCENE_layer_is_on(layer));
 }
 
-void SCENE_use_buffer(
+int SCENE_get_layer_buffer_tex(
     int layer
 ) {
-    int id = scene->layers[layer].framebuffer->id;
-    GFX_bind_framebuffer(id);
+    return scene->layers[layer].framebuffer->texture;
 }
 
 void SCENE_draw(
@@ -206,11 +203,12 @@ void SCENE_draw(
         if (SCENE_layer_is_off(layer)) {
             continue;
         }
-
-        SCENE_use_buffer(layer);
-        SCENE_use_program(layer);
+        printf("\nLAYER: %d ~~~~~~~~~~~~~~~~\n", layer);
+        printf("objects to render: %d\n", scene->layers[layer].n_objs+1);
 
         for (int i=0; i<scene->layers[layer].n_objs+1; i++) {
+            printf("OBJECT %d \n", i);
+            printf("vertices to render: %d\n", scene->layers[layer].objs[i].len);
             RENDER_shader(
                 scene->layers[layer].shader_id,
                 scene->layers[layer].objs[i].texture,
@@ -218,19 +216,9 @@ void SCENE_draw(
                 scene->layers[layer].objs[i].len,
                 scene->layers[layer].objs[i].uniforms,
                 scene->layers[layer].objs[i].count,
-                scene->layers[layer].mode
+                scene->layers[layer].mode,
+                scene->layers[layer].framebuffer->id
             );
         }
     }
-
-    // GLuint vaoCube, vaoQuad;
-    // glGenVertexArrays(1, &vaoQuad);
-    // glBindVertexArray(vaoQuad);
-
-    // SCENE_use_program(0);
-
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
 }

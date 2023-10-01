@@ -40,7 +40,6 @@ OBJS =                                     \
 	$(BUILDDIR)/$(DATADIR)/shaders.o       \
 	$(BUILDDIR)/$(DATADIR)/tiles.o         \
 	$(BUILDDIR)/$(DATADIR)/tilesets.o      \
-	$(BUILDDIR)/$(DATADIR)/util.o          \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o       \
 	$(BUILDDIR)/animation.o                \
 	$(BUILDDIR)/controller.o               \
@@ -55,11 +54,11 @@ OBJS =                                     \
 	$(BUILDDIR)/mat.o                      \
     $(BUILDDIR)/render.o                   \
 	$(BUILDDIR)/point.o                    \
+	$(BUILDDIR)/post.o                     \
 	$(BUILDDIR)/segment.o                  \
 	$(BUILDDIR)/scene.o                    \
 	$(BUILDDIR)/sorted_list.o              \
 	$(BUILDDIR)/source.o                   \
-	$(BUILDDIR)/texture.o                  \
 	$(BUILDDIR)/tile.o                     \
 	$(BUILDDIR)/timer.o                    \
 	$(BUILDDIR)/vertex.o                   \
@@ -74,7 +73,6 @@ TESTOBJS =                                    \
 	$(BUILDDIR)/$(DATADIR)/shaders.o          \
 	$(BUILDDIR)/$(DATADIR)/tiles.o            \
 	$(BUILDDIR)/$(DATADIR)/tilesets.o         \
-	$(BUILDDIR)/$(DATADIR)/util.o             \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o          \
 	$(BUILDDIR)/check_animation.o             \
 	$(BUILDDIR)/check_entity.o                \
@@ -107,7 +105,6 @@ TESTOBJS =                                    \
 	$(BUILDDIR)/scene.o                       \
 	$(BUILDDIR)/sorted_list.o                 \
 	$(BUILDDIR)/source.o                      \
-	$(BUILDDIR)/texture.o                     \
 	$(BUILDDIR)/tile.o                        \
 	$(BUILDDIR)/timer.o                       \
 	$(BUILDDIR)/vertex.o                      \

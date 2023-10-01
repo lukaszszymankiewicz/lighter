@@ -2,8 +2,12 @@
 #include "global.h"
 #include "mat.h"
 
+#include <stdio.h>
+
 float camera_x       = 0;
 float camera_y       = 0;
+float framebuffer_w  = 0;
+float framebuffer_h  = 0;
 float scale_x        = 1.0;
 float scale_y        = 1.0;
 
@@ -23,21 +27,38 @@ float* GL_UTIL_camera(
     return MAT_vec2_new(camera_x, camera_y);
 }
 
-float GL_UTIL_x(int x) {
-    return (((float)x) / (float)SCREEN_WIDTH) * X_AXIS_DIR;
+float GL_UTIL_x(
+    int x
+) {
+    // return (((float)x) / (float)SCREEN_WIDTH) * X_AXIS_DIR;
+    // return ((((float)x) - 683.0) / 1366.0) * X_AXIS_DIR * 2;
+    // return ((((float)x * 2.0) / framebuffer_w) - 1.0) * X_AXIS_DIR;
+    // return ((((float)x * 2.0) / framebuffer_w) - 1.0) * X_AXIS_DIR;
+    return ((float)x - (1.0/x)) * X_AXIS_DIR;
 }
 
-float GL_UTIL_y(int y) {
-    return (((float)y) / (float)SCREEN_HEIGHT) * Y_AXIS_DIR;
+float GL_UTIL_y(
+    int y
+) {
+    //return (((float)y) / (float)SCREEN_HEIGHT) * Y_AXIS_DIR;
+    //return ((((float)y) - 384.0) / 768.0) * Y_AXIS_DIR;
+    // return (((float)y * 2.0) / 768.0) * Y_AXIS_DIR;
+    // return ((((float)y * 2.0) / framebuffer_h) - 1.0) * Y_AXIS_DIR;
+    return ((float)y - (1.0/y)) * Y_AXIS_DIR;
 }
 
 render_coord_t GL_UTIL_rect(
-    int x, int y,
-    int w, int h
+    int x,
+    int y,
+    int w,
+    int h
 ) {
+
     return (render_coord_t) {
-        GL_UTIL_x(x),     GL_UTIL_y(y),
-        GL_UTIL_x(x + w), GL_UTIL_y(y + h)
+        GL_UTIL_x(x),
+        GL_UTIL_y(y),
+        GL_UTIL_x(x + w),
+        GL_UTIL_y(y + h)
     };
 }
 

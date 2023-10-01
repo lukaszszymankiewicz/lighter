@@ -1,7 +1,6 @@
 #include "library.h"
-#include "util.h"
 
-#include "../texture.h"
+#include "../gfx.h"
 
 texture_t *tilesets_library[TILESET_ALL] = { NULL };
 
@@ -11,6 +10,6 @@ texture_blueprint_t texture_blueprint_basic = {
 
 void LIB_create_tilesets_library(
 ) {
-    tilesets_library[TILESET_BASIC] = TXTR_read_from_file(texture_blueprint_basic.filepath);
+    tilesets_library[TILESET_BASIC] = GFX_read_texture(texture_blueprint_basic.filepath);
 };
 

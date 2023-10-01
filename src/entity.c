@@ -5,8 +5,8 @@
 #include "entity.h"
 #include "geometry.h"
 #include "gl_util.h"
-#include "gl_util.h"
 #include "global.h"
+#include "mat.h"
 #include "scene.h"
 #include "sorted_list.h"
 #include "source.h"
@@ -662,6 +662,13 @@ render_coord_t ENT_clip(
 render_coord_t ENT_render(
     entity_t       *entity
 ) {
+    render_coord_t r  =GL_UTIL_rect(
+        entity->x,
+        entity->y,
+        ENT_current_frame_width(entity),
+        ENT_current_frame_height(entity)
+    );
+ 
     return GL_UTIL_rect(
         entity->x,
         entity->y,
@@ -682,12 +689,12 @@ float* ENT_vertices(
     v = (float*)malloc(sizeof(float) * SPRITES_VERTICES_FOR_SCENE);
 
     // Position                               Texcoords
-    v[(i*)++]=render.x1; v[(i*)++]=render.y1; v[(i*)++]=clip.x1; v[(i*)++]=clip.y1; // Top-left
-    v[(i*)++]=render.x2; v[(i*)++]=render.y1; v[(i*)++]=clip.x2; v[(i*)++]=clip.y1; // Top-right
-    v[(i*)++]=render.x2; v[(i*)++]=render.y2; v[(i*)++]=clip.x2; v[(i*)++]=clip.y2; // Bottom-right
-    v[(i*)++]=render.x1; v[(i*)++]=render.y1; v[(i*)++]=clip.x1; v[(i*)++]=clip.y1; // Top-left
-    v[(i*)++]=render.x2; v[(i*)++]=render.y2; v[(i*)++]=clip.x2; v[(i*)++]=clip.y2; // Bottom-right
-    v[(i*)++]=render.x1; v[(i*)++]=render.y2; v[(i*)++]=clip.x1; v[(i*)++]=clip.y2; // Bottom-left
+    v[(*i)++]=render.x1; v[(*i)++]=render.y1; v[(*i)++]=clip.x1; v[(*i)++]=clip.y1; // Top-left
+    v[(*i)++]=render.x2; v[(*i)++]=render.y1; v[(*i)++]=clip.x2; v[(*i)++]=clip.y1; // Top-right
+    v[(*i)++]=render.x2; v[(*i)++]=render.y2; v[(*i)++]=clip.x2; v[(*i)++]=clip.y2; // Bottom-right
+    v[(*i)++]=render.x1; v[(*i)++]=render.y1; v[(*i)++]=clip.x1; v[(*i)++]=clip.y1; // Top-left
+    v[(*i)++]=render.x2; v[(*i)++]=render.y2; v[(*i)++]=clip.x2; v[(*i)++]=clip.y2; // Bottom-right
+    v[(*i)++]=render.x1; v[(*i)++]=render.y2; v[(*i)++]=clip.x1; v[(*i)++]=clip.y2; // Bottom-left
 
     return v;
 }
@@ -704,12 +711,13 @@ void ENT_add_to_scene(
     float *vertices = NULL;
     int    len      = 0;
 
-    vertices        = ENT_vertices(entity, &len):
+    vertices        = ENT_vertices(entity, &len);
 
     SCENE_activate_layer(LAYER_SPRITE);
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(GL_UTIL_camera());
-    // SCENE_add_uniform(scene, GL_UTIL_scale());
+    // SCENE_add_uniform(MAT_imat2_new(1.0, 1.0));
+    SCENE_add_uniform(GL_UTIL_scale());            // aScale
     SCENE_set_texture(GL_UTIL_id(texture));
     SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }

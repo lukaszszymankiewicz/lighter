@@ -1,7 +1,8 @@
 #include <stdbool.h>
 
 #include "library.h"
-#include "util.h"
+
+#include "../gfx.h"
 
 
 void LIB_create_all(
@@ -18,8 +19,8 @@ void LIB_create_all(
 
 void LIB_free_all(
 ) {
-    TXTR_free(sprites_library[SPRITE_HERO]);
-    TXTR_free(sprites_library[SPRITE_LIGHTER]);
-    TXTR_free(sprites_library[SPRITE_WALLLIGHT]);
-    TXTR_free(tilesets_library[TILESET_BASIC]);
+    GFX_free_texture(sprites_library[SPRITE_HERO]);
+    GFX_free_texture(sprites_library[SPRITE_LIGHTER]);
+    GFX_free_texture(sprites_library[SPRITE_WALLLIGHT]);
+    GFX_free_texture(tilesets_library[TILESET_BASIC]);
 }

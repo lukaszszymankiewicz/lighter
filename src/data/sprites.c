@@ -1,7 +1,6 @@
 #include "library.h"
-#include "util.h"
 
-#include "../texture.h"
+#include "../gfx.h"
 
 texture_t *sprites_library[SPRITE_ALL] = {NULL};
 
@@ -19,7 +18,7 @@ texture_blueprint_t texture_blueprint_walllight = {
 
 void LIB_create_sprites_library(
 ) {
-    sprites_library[SPRITE_HERO]       = TXTR_read_from_file(texture_blueprint_hero.filepath);
-    sprites_library[SPRITE_LIGHTER]    = TXTR_read_from_file(texture_blueprint_lighter.filepath);
-    sprites_library[SPRITE_WALLLIGHT]  = TXTR_read_from_file(texture_blueprint_walllight.filepath);
+    sprites_library[SPRITE_HERO]       = GFX_read_texture(texture_blueprint_hero.filepath);
+    sprites_library[SPRITE_LIGHTER]    = GFX_read_texture(texture_blueprint_lighter.filepath);
+    sprites_library[SPRITE_WALLLIGHT]  = GFX_read_texture(texture_blueprint_walllight.filepath);
 };

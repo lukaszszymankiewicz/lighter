@@ -8,6 +8,17 @@
 #ifndef GFX_H
 #define GFX_H
 
+shader_program_t* GFX_create_gl_program(
+    const char* vertex_shader_path,
+    const char* fragment_shader_path,
+    const char* geometry_shader_path
+);
+
+typedef struct texture {
+    SDL_Surface *surface;
+    int          id;
+} texture_t;
+
 extern SDL_Window *window;
 
 GLuint GFX_generate_texture_ID();
@@ -26,23 +37,14 @@ void GFX_free();
 void GFX_clear_screen();
 void GFX_update();
 
-void GFX_set_interpolation_2d(int interpolation);
 void GFX_bind_texture(GLuint texture_id);
-void GFX_specify_texture(SDL_Surface *surface, int mode);
+void GFX_use_shader_program(int id);
+void GFX_destroy_framebuffer(GLuint id);
+void GFX_free_texture(texture_t* texture);
 
 int GFX_type_size(GLenum type);
 
-void GFX_use_shader_program(int id);
-
-void GFX_bind_framebuffer(GLuint id);
-void GFX_destroy_framebuffer(GLuint id);
-
-shader_program_t* GFX_create_gl_program(
-    const char* vertex_shader_path,
-    const char* fragment_shader_path,
-    const char* geometry_shader_path
-);
-
+texture_t* GFX_read_texture(const char *filepath);
 framebuffer_t* GFX_create_framebuffer();
 
 #endif

@@ -10,21 +10,23 @@
 // TODO: TBD?
 #define MAX_SHADER_UNIFORMS_ARGS_LEN  MAX_SHADER_UNIFORMS_ARGS * MAX_SHADER_UNIFORMS           
 
-// to properl swich axes from normal coords to NDC
+// to properly swich axes from normal coords to NDC
 #define Y_AXIS_DIR -1.0
 #define X_AXIS_DIR  1.0
 
 extern float scale_x;
 extern float scale_y;
-
 extern float camera_x;
 extern float camera_y;
+extern float framebuffer_w;
+extern float framebuffer_h;
 
 typedef struct render_coord {
     float x1; float y1;
     float x2; float y2;
 } render_coord_t;
 
+// TODO: to GFX?
 typedef struct shader_program {
     int           program;
     int           vertex_shader_id;
@@ -38,6 +40,7 @@ typedef struct shader_program {
     unsigned int  vbo;
 } shader_program_t;
 
+// TODO: to GFX?
 typedef struct framebuffer {
     unsigned int id;
     unsigned int texture;

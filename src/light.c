@@ -659,9 +659,9 @@ void LIG_add_to_scene(
         v[j++] = GL_UTIL_y(ptr->y);
     }
 
-    float r = light->light_polygons[i].red,
-    float g = light->light_polygons[i].green,
-    float b = light->light_polygons[i].blue,
+    float r = light->light_polygons[i].red;
+    float g = light->light_polygons[i].green;
+    float b = light->light_polygons[i].blue;
 
     SCENE_activate_layer(LAYER_LIGHT);
     SCENE_add_new_drawable_object();

@@ -27,24 +27,67 @@
 SDL_GLContext gl_context        = NULL;
 SDL_Window   *window            = NULL;
 
-int texture_id_counter                   = 0;
-int max_buffer_len                       = 512;
-
-void GFX_use_shader_program(
-    int id
-) {
-    glUseProgram(id);
-}
-
-void GFX_turn_off_shaders(
-) {
-    GFX_use_shader_program(0);
-}
+int texture_id_counter          = 0;
+int max_buffer_len              = 512;
+int TEXTURE_MODE                = GL_RGB;
 
 GLuint GFX_generate_texture_ID(
 ) {
     texture_id_counter++;
     return (GLuint) texture_id_counter;
+}
+
+texture_t* GFX_read_texture(
+    const char *filepath
+) {
+    SDL_Surface *surface        = NULL;
+    texture_t* tex              = NULL;
+
+    GLuint texture_id           = GFX_generate_texture_ID();
+    surface                     = IMG_Load(filepath);
+    tex                         = (texture_t*)malloc(sizeof(texture_t));
+
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    if(surface && surface->format->BytesPerPixel == 4) {
+        TEXTURE_MODE = GL_RGBA; 
+    }
+
+    // surface can be NULL, check must be done beforehand
+    if (surface) {
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, TEXTURE_MODE,
+            surface->w, surface->h,
+            0, TEXTURE_MODE, GL_UNSIGNED_BYTE, surface->pixels
+        );
+    }
+
+
+    tex->surface   = surface;
+    tex->id        = texture_id;
+    // tex->filepath  = filepath;
+    printf("texture %s read and has id %d\n", filepath, texture_id);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return tex;
+}
+
+void GFX_free_texture(
+    texture_t* texture
+) {
+    if (texture && texture->surface) {
+        SDL_FreeSurface(texture->surface);
+        texture->surface    = NULL;
+        GLuint TextureID    = texture->id;
+        glDeleteTextures(1, &TextureID);
+        free(texture);
+        texture = NULL;
+    }
 }
 
 int GFX_check_shader_compile_status(
@@ -264,36 +307,11 @@ void GFX_bind_texture(
     glBindTexture(GL_TEXTURE_2D, texture_id);
 }
 
-// specify texture in OpenGL
-void GFX_specify_texture(
-    SDL_Surface *surface,
-    int          mode
+void GFX_set_viewport(
 ) {
-    // surface can be NULL, check must be done beforehand
-    if(surface && surface->format->BytesPerPixel == 4) {
-        mode = GL_RGBA; 
-    }
-    // TODO: leftoverw
-    // RGBA8888 
-    // color key 0x80 0xFF 0xFF
-    // There’s not much to do to use the alpha channel. Just make a PNG with transparency, load the
-    // texture as GL_RGBA (I think glpng will do this for you automatically).
-    // Then set your blend mode to GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA and enable blending
-
-    // surface can be NULL, check must be done beforehand
-    if (surface) {
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            mode,
-            surface->w,
-            surface->h,
-            0,
-            mode,
-            GL_UNSIGNED_BYTE,
-            surface->pixels
-        );
-    }
+    GLint m_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+    glViewport(0, 0, (float)m_viewport[2], (float)m_viewport[3]);
 }
 
 // sets global rendering scale which must be a positive integer. Scale tries to fit best tile_per_x 
@@ -310,6 +328,11 @@ bool GFX_set_global_render_scale(
     float max_screen_w = (float)m_viewport[2];
     float max_screen_h = (float)m_viewport[3];
 
+    framebuffer_w = max_screen_w;
+    framebuffer_h = max_screen_h;
+
+    printf("max: %f %f \n", max_screen_w, max_screen_h);
+
     int closestSclaleX = (int)((float)max_screen_w / ((float)TILE_WIDTH * tile_per_x));
     int closestSclaleY = (int)((float)max_screen_h / ((float)TILE_HEIGHT * tile_per_y));
     
@@ -319,6 +342,15 @@ bool GFX_set_global_render_scale(
     // global scale is calculated and set
     scale_x = (float)TILE_WIDTH / (max_screen_w / 2.0 / tile_per_x) * scale;
     scale_y = (float)TILE_HEIGHT / (max_screen_h / 2.0 / tile_per_y) * scale;
+
+    scale_x = 1.0;
+    scale_y = 1.0;
+
+    scale_x = (2.0 / framebuffer_w);
+    scale_y = (2.0 / framebuffer_h);
+
+    scale_x = (2.0 / 320.0);
+    scale_y = (2.0 / 240.0);
 
     return true;
 }
@@ -352,9 +384,11 @@ bool GFX_init_sdl_with_gl(
     return true;
 }
 
+// TODO:delete
 bool GFX_init_video(
 ) {
-    return (SDL_Init(SDL_INIT_VIDEO) == 0);
+    // return (SDL_Init(SDL_INIT_VIDEO) == 0);
+    return true;
 };
 
 bool GFX_create_gl_context(
@@ -368,9 +402,11 @@ bool GFX_init_glew(
     return (glewInit() == GLEW_OK);
 }
 
+// TODO: delete
 bool GFX_init_vsync(
 ){
-    return (SDL_GL_SetSwapInterval(1) == 0);
+    // return (SDL_GL_SetSwapInterval(1) == 0);
+    return true;
 }
 
 bool GFX_init_gl_params(
@@ -387,11 +423,6 @@ bool GFX_init_png(
     return (bool)IMG_Init(IMG_INIT_PNG);
 };
 
-void GFX_clear_screen() {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-};
-
 void GFX_update() {
     SDL_GL_SwapWindow(window);
     SDL_UpdateWindowSurface(window);
@@ -403,7 +434,8 @@ void GFX_free(
     if (gl_context) {
         // TODO: some cleaning here?
         // glDeleteProgram(opengl_program_id);
-        GFX_turn_off_shaders();
+        glUseProgram(0);
+
     }
 
     if (window) {
@@ -418,24 +450,29 @@ framebuffer_t* GFX_create_framebuffer(
     framebuffer_t* framebuffer = NULL;
     framebuffer                = (framebuffer_t*)malloc(sizeof(framebuffer_t));
 
+    glViewport(0, 0, 1366, 768);    
+
     GLuint id;
     glGenFramebuffers(1, &id);
+    glBindFramebuffer(GL_FRAMEBUFFER, id);
 
     GLuint tex;
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
-
+    
     glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL
+        GL_TEXTURE_2D, 0, GL_RGB,
+        SCREEN_WIDTH, SCREEN_HEIGHT,
+        0, GL_RGB, GL_UNSIGNED_BYTE, NULL
     );
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glFramebufferTexture2D(
         GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0
     );
-    
+
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         printf("Framebuffer cannot be created! \n");
         return NULL;
@@ -444,13 +481,9 @@ framebuffer_t* GFX_create_framebuffer(
     framebuffer->id      = id;
     framebuffer->texture = tex;
 
-    return framebuffer;
-}
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-void GFX_bind_framebuffer(
-    GLuint id
-) {
-    glBindFramebuffer(GL_FRAMEBUFFER, id);
+    return framebuffer;
 }
 
 void GFX_destroy_framebuffer(

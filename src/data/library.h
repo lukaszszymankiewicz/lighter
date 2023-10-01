@@ -1,11 +1,11 @@
 #include <stdbool.h>
 
 #include "../animation.h"
+#include "../gfx.h"
 #include "../global.h"
 #include "../gl_util.h"
 #include "../level.h"
 #include "../source.h"
-#include "../texture.h"
 #include "../tile.h"
 
 #ifndef LIBRARY_H

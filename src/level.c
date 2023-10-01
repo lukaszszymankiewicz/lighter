@@ -7,13 +7,19 @@
 #include "gl_util.h"
 #include "global.h"
 #include "level.h"
+#include "mat.h"
 #include "scene.h"
 #include "segment.h"
-#include "texture.h"
 #include "tile.h"
 
 #define ENTITY_RENDER_COUNT      4
 #define LEVEL_VERTICES_FOR_SCENE 2500
+
+// camera position in pixels
+int   icamera_x      = 0;
+int   icamera_y      = 0;
+
+const static int EMPTY_CELL = -1;
 
 enum { W, S, A, D };
 
@@ -21,8 +27,6 @@ enum { W, S, A, D };
 typedef struct cell {
     int edge[4];
 } cell_t;
-
-const static int EMPTY_CELL = -1;
 
 int LVL_size_x(
     level_t *level
@@ -298,12 +302,10 @@ void LVL_analyze(
 
 float* LVL_tiles_vertices(
     level_t *level,
-    int      x0,
-    int      y0,
     int     *i
 ) {
-    int st_x           = x0 - ENTITY_DRAW_X_RANGE;
-    int st_y           = y0 - ENTITY_DRAW_Y_RANGE;
+    int st_x           = icamera_x - ENTITY_DRAW_X_RANGE;
+    int st_y           = icamera_y - ENTITY_DRAW_Y_RANGE;
 
     int st_tile_pos_x  = st_x / TILE_WIDTH;
     int st_tile_pos_y  = st_y / TILE_HEIGHT;
@@ -345,20 +347,19 @@ float* LVL_tiles_vertices(
     return v;
 }
 
-void LVL_put_on_scene(
-    level_t *level,
-    int x0,
-    int y0
+void LVL_draw(
+    level_t *level
 ) {
     int len         = 0;
     float *vertices = NULL;
-    float *vertices = LVL_tiles_vertices(level, x0, y0, &len);
+    vertices        = LVL_tiles_vertices(level, &len);
     int tileset     = LVL_tileset_id(level);
 
     SCENE_activate_layer(LAYER_TILE);
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(GL_UTIL_camera());
-    // SCENE_add_uniform(scene, GL_UTIL_scale());
+    // SCENE_add_uniform(MAT_imat2_new(1.0, 1.0));
+    SCENE_add_uniform(GL_UTIL_scale());            // aScale
     SCENE_set_texture(GL_UTIL_id(tileset));
     SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }

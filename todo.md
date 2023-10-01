@@ -46,17 +46,17 @@
   - [x] clean up gl util module, use atomizd function (rename camera functions to someting)
   - [x] remove this ugly render coord from entity blueprints
   - [x] try to join two render functions
-  - [ ] remove global scale, use ortho matrix instead
+  - [x] remove global scale, use ortho matrix instead
   - [x] some kind of global camera/scale matrix/vector?
-  - [ ] remove camera uniforms, use projection matrix instead
+  - [x] remove camera uniforms, use projection matrix instead
+  - [x] framebuffer for each layer (maybe, scalling can be omitted then?)
+  - [x] add global scale can be propably easily deleted
+  - [x] put shader light effect to buffer
+  - [x] made shader pixel-perfect
+  - [ ] add transparency to light effect shader
   - [ ] add entity filp
-  - [ ] framebuffer for each layer (maybe, scalling can be omitted then?)
-  - [ ] add global scale can be propably easily deleted
   - [ ] add stencil buffer
   - [ ] add differ effect
-  - [ ] put shader light effect to buffer
-  - [ ] add transparency to light effect shader
-  - [ ] made shader pixel-perfect
   - [ ] add wobble
 - [ ] repair all unit-tests (once again!)
 - [ ] clear all memory leaks!

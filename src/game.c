@@ -11,6 +11,8 @@
 #include "global.h"
 #include "level.h"
 #include "light.h"
+#include "point.h"
+#include "post.h"
 #include "render.h"
 #include "scene.h"
 #include "timer.h"
@@ -161,25 +163,24 @@ void GAME_apply_logic(
 void GAME_set_camera(
     game_t* game
 ) {
-    camera_x = GL_UTIL_x(ENTMAN_hero_x(game->entity_manager));
-    camera_y = GL_UTIL_y(ENTMAN_hero_y(game->entity_manager));
+    icamera_x = ENTMAN_hero_x(game->entity_manager);
+    icamera_y = ENTMAN_hero_y(game->entity_manager);
+    camera_x = GL_UTIL_x(icamera_x);
+    camera_y = GL_UTIL_y(icamera_y);
 }
 
 void GAME_draw_everything(
     game_t* game
 ) {
     SCENE_clear();
-    GFX_clear_screen();
     GAME_set_camera(game);
+    LVL_draw(game->level);
 
     // TODO: put_on_scene -> draw
-    LVL_put_on_scene(game->level, ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
+    ENTMAN_put_on_scene(game->entity_manager);
 
-    // TODO: put_on_scene -> draw
-    // ENTMAN_put_on_scene(game->entity_manager);
-
-    // GAME_draw_light(game);
-    // POST_draw_posteffect(game);
+    GAME_draw_light(game);
+    POST_draw();
     SCENE_draw(scene);
     GFX_update();
 }
@@ -191,7 +192,8 @@ void GAME_draw_nothing(
 void GAME_init_scene(
 ) {
     SCENE_new();
-
+    
+    // TODO: add_layer + attach shader to one fun
     SCENE_add_layer(LAYER_TILE);
     SCENE_add_layer(LAYER_SPRITE);
     SCENE_add_layer(LAYER_LIGHT);
@@ -204,7 +206,7 @@ void GAME_init_scene(
 }
 
 void GAME_init_level(
-    game_t game
+    game_t *game
 ) {
     LVL_fill(game->level);
     LVL_analyze(game->level);

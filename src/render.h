@@ -1,7 +1,5 @@
 #include "gl_util.h"
 
-#include <stdbool.h>
-
 #ifndef RENDER_H
 #define RENDER_H
 
@@ -12,7 +10,8 @@ void RENDER_shader(
     int      n_vertices,
     float   *uniforms[MAX_SHADER_UNIFORMS],
     int      count,
-    GLenum   mode
+    GLenum   mode,
+    int      buffer
 );
 
 #endif

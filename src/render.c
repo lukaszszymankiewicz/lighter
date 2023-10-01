@@ -1,12 +1,11 @@
-#include "./data/library.h"
-
 #include <GL/glew.h>
 #include <GL/gl.h>
+#include <GL/glu.h>
 
-#include <stdbool.h>
 #include <stdio.h>
 
-#include "gfx.h"
+#include "./data/library.h"
+
 #include "render.h"
 
 void RENDER_set_uniform(
@@ -62,19 +61,37 @@ void RENDER_shader(
     int      n_vertices,
     float   *uniforms[MAX_SHADER_UNIFORMS],
     int      count,
-    GLenum   mode
+    GLenum   mode,
+    int      buffer
 ) { 
-    printf("rendering program %d --------- \n", shader_library[shader]->program);
+    printf("SHADER PROGRAM id %d \n", shader_library[shader]->program);
+
+    printf("BUFFER id %d \n", buffer);
+    glUseProgram(shader_library[shader]->program);
+    glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+
     glBindVertexArray(shader_library[shader]->vao);
     glBindBuffer(GL_ARRAY_BUFFER, shader_library[shader]->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*n_vertices, vertices, GL_STATIC_DRAW);
 
+    RENDER_set_uniforms(shader, uniforms);
+
+    if (buffer != 0) {
+        // to framebuffer
+        glViewport(0, 0, 320, 240);    
+        printf("TEXTURE id %d \n\n", texture);
+        printf("buffer %d", buffer);
+    } else {
+        // from framebuffer to screen
+        glViewport(0, 0, 1366.0, 768.0);    
+
+    }
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
-    RENDER_set_uniforms(shader, uniforms);
     glDrawArrays(mode, 0, (int)(n_vertices/count));
 
-    // cleanup
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
