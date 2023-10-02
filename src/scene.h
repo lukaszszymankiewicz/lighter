@@ -38,9 +38,8 @@ extern scene_t *scene;
 
 void SCENE_new();
 void SCENE_clear();
-void SCENE_attach_shader(int layer, int shader_id, int mode);
-void SCENE_add_layer(int i);
-void SCENE_add_buffer_layer(int i);
+void SCENE_add_layer(int layer, int shader_id, int mode);
+void SCENE_add_buffer_layer(int layer, int shader_id, int mode);
 void SCENE_add_new_drawable_object();
 void SCENE_set_texture(float *texture);
 void SCENE_add_uniform(float *value);

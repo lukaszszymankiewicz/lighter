@@ -44,6 +44,10 @@ typedef struct shader_program {
 typedef struct framebuffer {
     unsigned int id;
     unsigned int texture;
+    unsigned int x0;
+    unsigned int y0;
+    unsigned int w;
+    unsigned int h;
 } framebuffer_t;
 
 float GL_UTIL_x(int x);

@@ -192,17 +192,10 @@ void GAME_draw_nothing(
 void GAME_init_scene(
 ) {
     SCENE_new();
-    
-    // TODO: add_layer + attach shader to one fun
-    SCENE_add_layer(LAYER_TILE);
-    SCENE_add_layer(LAYER_SPRITE);
-    SCENE_add_layer(LAYER_LIGHT);
-    SCENE_add_buffer_layer(LAYER_BUFFER);
-
-    SCENE_attach_shader(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
-    SCENE_attach_shader(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
-    SCENE_attach_shader(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
-    SCENE_attach_shader(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
+    SCENE_add_layer(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
+    SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
+    SCENE_add_layer(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
+    SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
 }
 
 void GAME_init_level(

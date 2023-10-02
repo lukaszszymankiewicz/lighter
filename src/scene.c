@@ -41,50 +41,66 @@ void SCENE_clear(
 }
 
 void SCENE_add_layer(
-    int      i
+    int layer,
+    int shader_id,
+    int mode
 ) {
-    if (i>MAX_LAYERS_ON_SCENE) { 
-        printf("Requested layer exceeds maximum number! \n");
+    if (layer>MAX_LAYERS_ON_SCENE || layer<0) { 
+        printf("Requested layer exceeds has inproper index number! \n");
         return;
     }
+
     for (int j=0; j<MAX_DRAWBLE_OBJECTS_ON_LAYER; j++) {
-        scene->layers[i].objs[j].vertices      = NULL;
-        scene->layers[i].objs[j].uniform_count = 0;
+        scene->layers[layer].objs[j].vertices      = NULL;
+        scene->layers[layer].objs[j].uniform_count = 0;
 
         for (int u=0; u<MAX_SHADER_UNIFORMS; u++) {
-            scene->layers[i].objs[j].uniforms[u] = NULL;
+            scene->layers[layer].objs[j].uniforms[u] = NULL;
         }
     }
 
-    scene->layers[i].n_objs          = -1;
-    scene->layers[i].on              = true;
-    scene->layers[i].framebuffer     = NULL;
-    scene->layers[i].framebuffer     = (framebuffer_t*)malloc(sizeof(framebuffer_t));
+    scene->layers[layer].n_objs          = -1;
+    scene->layers[layer].on              = true;
 
-    scene->layers[i].framebuffer->id      = DEFAULT_FRAMEBUFFER;
-    scene->layers[i].framebuffer->texture = NO_TEXTURE;
+    scene->layers[layer].framebuffer          = NULL;
+    scene->layers[layer].framebuffer          = (framebuffer_t*)malloc(sizeof(framebuffer_t));
+    scene->layers[layer].framebuffer->id      = DEFAULT_FRAMEBUFFER;
+    scene->layers[layer].framebuffer->texture = NO_TEXTURE;
+    scene->layers[layer].framebuffer->x0      = 0;
+    scene->layers[layer].framebuffer->y0      = 0;
+    scene->layers[layer].framebuffer->w       = framebuffer_w;
+    scene->layers[layer].framebuffer->h       = framebuffer_h;
+
+    scene->layers[layer].shader_id = shader_id;
+    scene->layers[layer].mode      = mode;
 
     scene->n_layers++;
 }
 
 void SCENE_add_buffer_layer(
-    int      i
+    int layer,
+    int shader_id,
+    int mode
 ) {
-    SCENE_add_layer(i);
+    // create basic layer
+    SCENE_add_layer(layer, shader_id, mode);
+    
     // delete previous framebuffer data
-    free(scene->layers[i].framebuffer);
+    free(scene->layers[layer].framebuffer);
 
     // create new framebuffer for current layer
-    scene->layers[i].framebuffer = NULL;
-    scene->layers[i].framebuffer = GFX_create_framebuffer();
+    scene->layers[layer].framebuffer = NULL;
+    scene->layers[layer].framebuffer = GFX_create_framebuffer();
 
-    int new_id = scene->layers[i].framebuffer->id;
+    int new_id = scene->layers[layer].framebuffer->id;
 
     // update previous layers
-    for (int l=0; l<i; l++) {
-        scene->layers[l].framebuffer->id = new_id;
+    for (int l=0; l<layer; l++) {
+        scene->layers[l].framebuffer->id     = new_id;
+        scene->layers[layer].framebuffer->w  = SCREEN_WIDTH;
+        scene->layers[layer].framebuffer->h  = SCREEN_HEIGHT;
     }
-    scene->layers[i].framebuffer->id = DEFAULT_FRAMEBUFFER;
+    scene->layers[layer].framebuffer->id = DEFAULT_FRAMEBUFFER;
 }
 
 void SCENE_new(
@@ -92,15 +108,6 @@ void SCENE_new(
     scene            = (scene_t*)malloc(sizeof(scene_t));
     scene->n_layers  = 0;
     scene->cur_layer = -1;
-}
-
-void SCENE_attach_shader(
-    int layer,
-    int shader_id,
-    int mode
-) {
-    scene->layers[layer].shader_id = shader_id;
-    scene->layers[layer].mode      = mode;
 }
 
 void SCENE_activate_layer(
@@ -217,7 +224,9 @@ void SCENE_draw(
                 scene->layers[layer].objs[i].uniforms,
                 scene->layers[layer].objs[i].count,
                 scene->layers[layer].mode,
-                scene->layers[layer].framebuffer->id
+                scene->layers[layer].framebuffer->id,
+                scene->layers[layer].framebuffer->w,
+                scene->layers[layer].framebuffer->h
             );
         }
     }

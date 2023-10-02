@@ -25,13 +25,14 @@ GLuint GFX_generate_texture_ID();
 
 bool GFX_init_png();
 bool GFX_init_gl_params();
-bool GFX_init_vsync();
 bool GFX_init_glew();
 bool GFX_init_window();
 bool GFX_init_sdl_with_gl();
-bool GFX_init_video();
 bool GFX_create_gl_context();
 bool GFX_set_global_render_scale();
+
+void GFX_set_single_pixel_scale();
+void GFX_set_multiple_pixel_scale();
 
 void GFX_free();
 void GFX_clear_screen();

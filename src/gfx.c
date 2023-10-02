@@ -311,48 +311,24 @@ void GFX_set_viewport(
 ) {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
-    glViewport(0, 0, (float)m_viewport[2], (float)m_viewport[3]);
+    
+    float w = (float)m_viewport[2];
+    float h = (float)m_viewport[3];
+
+    framebuffer_w = w;
+    framebuffer_h = h;
 }
 
-// sets global rendering scale which must be a positive integer. Scale tries to fit best tile_per_x 
-// and tile_per_y. This is needed to achieve pixel-perfect rendering (which can be done only if each
-// pixel in every drawing routine is multiplied by some scale).
-bool GFX_set_global_render_scale(
+void GFX_set_single_pixel_scale(
 ) {
-    float tile_per_x = (float)MAX_SCREEN_TILE_PER_X;
-    float tile_per_y = (float)MAX_SCREEN_TILE_PER_Y;        ;
-
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
-    
-    float max_screen_w = (float)m_viewport[2];
-    float max_screen_h = (float)m_viewport[3];
-
-    framebuffer_w = max_screen_w;
-    framebuffer_h = max_screen_h;
-
-    printf("max: %f %f \n", max_screen_w, max_screen_h);
-
-    int closestSclaleX = (int)((float)max_screen_w / ((float)TILE_WIDTH * tile_per_x));
-    int closestSclaleY = (int)((float)max_screen_h / ((float)TILE_HEIGHT * tile_per_y));
-    
-    // best scaling is chosen (fit most of tile_per_x or tile_per_y)
-    int scale = MAX(closestSclaleX, closestSclaleY);
-    
-    // global scale is calculated and set
-    scale_x = (float)TILE_WIDTH / (max_screen_w / 2.0 / tile_per_x) * scale;
-    scale_y = (float)TILE_HEIGHT / (max_screen_h / 2.0 / tile_per_y) * scale;
-
-    scale_x = 1.0;
-    scale_y = 1.0;
-
     scale_x = (2.0 / framebuffer_w);
     scale_y = (2.0 / framebuffer_h);
+}
 
-    scale_x = (2.0 / 320.0);
-    scale_y = (2.0 / 240.0);
-
-    return true;
+void GFX_set_multiple_pixel_scale(
+) {
+    scale_x = (2.0 / (float)SCREEN_WIDTH);
+    scale_y = (2.0 / (float)SCREEN_HEIGHT);
 }
 
 bool GFX_init_window() {
@@ -384,13 +360,6 @@ bool GFX_init_sdl_with_gl(
     return true;
 }
 
-// TODO:delete
-bool GFX_init_video(
-) {
-    // return (SDL_Init(SDL_INIT_VIDEO) == 0);
-    return true;
-};
-
 bool GFX_create_gl_context(
 ) {
     gl_context = SDL_GL_CreateContext(window);
@@ -400,13 +369,6 @@ bool GFX_create_gl_context(
 bool GFX_init_glew(
 ) {
     return (glewInit() == GLEW_OK);
-}
-
-// TODO: delete
-bool GFX_init_vsync(
-){
-    // return (SDL_GL_SetSwapInterval(1) == 0);
-    return true;
 }
 
 bool GFX_init_gl_params(
@@ -447,10 +409,10 @@ void GFX_free(
 
 framebuffer_t* GFX_create_framebuffer(
 ) {
+    GFX_set_single_pixel_scale();
+
     framebuffer_t* framebuffer = NULL;
     framebuffer                = (framebuffer_t*)malloc(sizeof(framebuffer_t));
-
-    glViewport(0, 0, 1366, 768);    
 
     GLuint id;
     glGenFramebuffers(1, &id);
@@ -480,6 +442,10 @@ framebuffer_t* GFX_create_framebuffer(
     
     framebuffer->id      = id;
     framebuffer->texture = tex;
+    framebuffer->x0      = 0;
+    framebuffer->y0      = 0;
+    framebuffer->w       = framebuffer_w;
+    framebuffer->h       = framebuffer_h;
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
