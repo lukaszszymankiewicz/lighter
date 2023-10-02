@@ -358,8 +358,7 @@ void LVL_draw(
     SCENE_activate_layer(LAYER_TILE);
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(GL_UTIL_camera());
-    // SCENE_add_uniform(MAT_imat2_new(1.0, 1.0));
-    SCENE_add_uniform(GL_UTIL_scale());            // aScale
+    SCENE_add_uniform(GL_UTIL_multiple_pixel_scale());
     SCENE_set_texture(GL_UTIL_id(tileset));
     SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }

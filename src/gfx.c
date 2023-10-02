@@ -319,18 +319,6 @@ void GFX_set_viewport(
     framebuffer_h = h;
 }
 
-void GFX_set_single_pixel_scale(
-) {
-    scale_x = (2.0 / framebuffer_w);
-    scale_y = (2.0 / framebuffer_h);
-}
-
-void GFX_set_multiple_pixel_scale(
-) {
-    scale_x = (2.0 / (float)SCREEN_WIDTH);
-    scale_y = (2.0 / (float)SCREEN_HEIGHT);
-}
-
 bool GFX_init_window() {
     window = SDL_CreateWindow(
         GAME_NAME,
@@ -409,8 +397,6 @@ void GFX_free(
 
 framebuffer_t* GFX_create_framebuffer(
 ) {
-    GFX_set_single_pixel_scale();
-
     framebuffer_t* framebuffer = NULL;
     framebuffer                = (framebuffer_t*)malloc(sizeof(framebuffer_t));
 

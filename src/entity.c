@@ -662,13 +662,6 @@ render_coord_t ENT_clip(
 render_coord_t ENT_render(
     entity_t       *entity
 ) {
-    render_coord_t r  =GL_UTIL_rect(
-        entity->x,
-        entity->y,
-        ENT_current_frame_width(entity),
-        ENT_current_frame_height(entity)
-    );
- 
     return GL_UTIL_rect(
         entity->x,
         entity->y,
@@ -716,8 +709,7 @@ void ENT_add_to_scene(
     SCENE_activate_layer(LAYER_SPRITE);
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(GL_UTIL_camera());
-    // SCENE_add_uniform(MAT_imat2_new(1.0, 1.0));
-    SCENE_add_uniform(GL_UTIL_scale());            // aScale
+    SCENE_add_uniform(GL_UTIL_multiple_pixel_scale());
     SCENE_set_texture(GL_UTIL_id(texture));
     SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }

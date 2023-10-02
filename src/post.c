@@ -22,7 +22,7 @@
 //      1.0 * ((float)SCREEN_HEIGHT / SCREEN_DIV) / (H / RES_DIV) * SCALE
 // };
 
-render_coord_t render = (render_coord_t){
+render_coord_t render = (render_coord_t) {
     -0.234,
     -0.3125,
      0.234,
@@ -33,10 +33,10 @@ render_coord_t clip  = (render_coord_t){ 0.0, 0.0, 1.0, 1.0 };
 
 float* POST_vertices(
 ) {
-    float         *v          = NULL;
-
-    v = (float*)malloc(sizeof(float) * VERTICES_PER_POST_TEX);
-    int i = 0;
+    int    i;
+    float *v = NULL;
+    v        = (float*)malloc(sizeof(float) * VERTICES_PER_POST_TEX);
+    i        = 0;
     
     // TODO: commonize it
     // Position                               Texcoords
@@ -62,8 +62,7 @@ void POST_draw(
     SCENE_activate_layer(LAYER_BUFFER);
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(MAT_vec2_new(0.0, 0.0));     // aCamera
-    SCENE_add_uniform(MAT_imat2_new(1.0, 1.0));    // aScale
-    // SCENE_add_uniform(GL_UTIL_scale());            // aScale
+    SCENE_add_uniform(GL_UTIL_multiple_pixel_scale()); // aScale
     SCENE_set_texture(GL_UTIL_id(buffer_texture)); // texture
     SCENE_add_vertices(len, vertices, POST_RENDER_COUNT);
 }

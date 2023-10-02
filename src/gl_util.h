@@ -14,8 +14,6 @@
 #define Y_AXIS_DIR -1.0
 #define X_AXIS_DIR  1.0
 
-extern float scale_x;
-extern float scale_y;
 extern float camera_x;
 extern float camera_y;
 extern float framebuffer_w;
@@ -54,8 +52,9 @@ float GL_UTIL_x(int x);
 float GL_UTIL_y(int y);
 
 float* GL_UTIL_camera();
-float* GL_UTIL_scale();
 float* GL_UTIL_id(int id);
+float* GL_UTIL_single_pixel_scale();
+float* GL_UTIL_multiple_pixel_scale();
 
 render_coord_t GL_UTIL_rect(int x, int y, int w, int h);
 render_coord_t GL_UTIL_clip(int x1, int y1, int x2, int y2, int w, int h);
