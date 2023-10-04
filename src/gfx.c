@@ -307,7 +307,7 @@ void GFX_bind_texture(
     glBindTexture(GL_TEXTURE_2D, texture_id);
 }
 
-void GFX_set_viewport(
+bool GFX_set_viewport(
 ) {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
@@ -317,6 +317,8 @@ void GFX_set_viewport(
 
     framebuffer_w = w;
     framebuffer_h = h;
+
+    return true;
 }
 
 bool GFX_init_window() {

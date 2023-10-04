@@ -11,7 +11,9 @@ void RENDER_shader(
     float   *uniforms[MAX_SHADER_UNIFORMS],
     int      count,
     GLenum   mode,
-    int      buffer
+    int      buffer,
+    int      buffer_w,
+    int      buffer_h
 );
 
 #endif

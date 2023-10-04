@@ -4,10 +4,10 @@
 
 #include <stdio.h>
 
-float camera_x       = 0;
-float camera_y       = 0;
-float framebuffer_w  = 0;
-float framebuffer_h  = 0;
+float camera_x       = 0.0;
+float camera_y       = 0.0;
+float framebuffer_w  = 0.0;
+float framebuffer_h  = 0.0;
 
 float* GL_UTIL_id(
     int id

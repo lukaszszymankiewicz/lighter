@@ -89,16 +89,18 @@ void SCENE_add_buffer_layer(
     free(scene->layers[layer].framebuffer);
 
     // create new framebuffer for current layer
-    scene->layers[layer].framebuffer = NULL;
-    scene->layers[layer].framebuffer = GFX_create_framebuffer();
+    scene->layers[layer].framebuffer    = NULL;
+    scene->layers[layer].framebuffer    = GFX_create_framebuffer();
+    // scene->layers[layer].framebuffer->w = SCREEN_WIDTH;
+    // scene->layers[layer].framebuffer->h = SCREEN_HEIGHT;
 
     int new_id = scene->layers[layer].framebuffer->id;
 
     // update previous layers
     for (int l=0; l<layer; l++) {
-        scene->layers[l].framebuffer->id     = new_id;
-        scene->layers[layer].framebuffer->w  = SCREEN_WIDTH;
-        scene->layers[layer].framebuffer->h  = SCREEN_HEIGHT;
+        scene->layers[l].framebuffer->id = new_id;
+        scene->layers[l].framebuffer->w  = SCREEN_WIDTH;
+        scene->layers[l].framebuffer->h  = SCREEN_HEIGHT;
     }
     scene->layers[layer].framebuffer->id = DEFAULT_FRAMEBUFFER;
 }
