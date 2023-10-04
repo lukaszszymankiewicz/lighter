@@ -662,12 +662,12 @@ render_coord_t ENT_clip(
 render_coord_t ENT_render(
     entity_t       *entity
 ) {
-    return GL_UTIL_rect(
+    return (render_coord_t) {
         entity->x,
         entity->y,
-        ENT_current_frame_width(entity),
-        ENT_current_frame_height(entity)
-    );
+        entity->x + ENT_current_frame_width(entity),
+        entity->y + ENT_current_frame_height(entity)
+    };
 }
 
 float* ENT_vertices(
@@ -709,6 +709,7 @@ void ENT_add_to_scene(
     SCENE_activate_layer(LAYER_SPRITE);
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(GL_UTIL_camera());
+    SCENE_add_uniform(GL_UTIL_scale());  // aScale
     SCENE_set_texture(GL_UTIL_id(texture));
     SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }

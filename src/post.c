@@ -17,7 +17,8 @@ float* POST_vertices(
     v        = (float*)malloc(sizeof(float) * VERTICES_PER_POST_TEX);
     i        = 0;
     
-    render_coord_t render = GL_UTIL_rect(0.0, 0.0, (float)SCREEN_WIDTH, (float)SCREEN_WIDTH);
+    //render_coord_t render = GL_UTIL_rect(0.0, 0.0, (float)SCREEN_WIDTH, (float)SCREEN_WIDTH);
+    render_coord_t render = (render_coord_t){ 0.0, 0.0, (float)SCREEN_WIDTH, (float)SCREEN_WIDTH };
     render_coord_t clip   = (render_coord_t){ 0.0, 1.0, 1.0, 0.0 };
 
     // TODO: commonize it
@@ -44,6 +45,7 @@ void POST_draw(
     SCENE_activate_layer(LAYER_BUFFER);
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(MAT_vec2_new(0.0, 0.0));     // aCamera
+    SCENE_add_uniform(MAT_vec2_new(320.0, 240.0));     // aScale
     SCENE_set_texture(GL_UTIL_id(buffer_texture)); // texture
     SCENE_add_vertices(len, vertices, POST_RENDER_COUNT);
 }

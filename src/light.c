@@ -655,8 +655,7 @@ void LIG_add_to_scene(
 
     // TODO: some better function? translate it to gl coords system
     for (ptr=vertex; ptr; ptr=ptr->next) {
-        v[j++] = GL_UTIL_x(ptr->x);
-        v[j++] = GL_UTIL_y(ptr->y);
+        v[j++] = ptr->x; v[j++] = ptr->y;
     }
 
     float r = light->light_polygons[i].red;
@@ -666,6 +665,7 @@ void LIG_add_to_scene(
     SCENE_activate_layer(LAYER_LIGHT);
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(GL_UTIL_camera());  // aCamera
+    SCENE_add_uniform(GL_UTIL_scale());  // aScale
     SCENE_add_uniform(MAT_vec4_new(r, g, b, 1.0)); // aColor
     SCENE_add_vertices(len, v, LIGHT_RENDER_COUNT);
 

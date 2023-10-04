@@ -66,12 +66,6 @@ void RENDER_shader(
     int            buffer_w,
     int            buffer_h
 ) { 
-    for (int i=0; i<n_vertices; i++) {
-            printf("%f \n", vertices[i]);
-        if (((i+1) % 4) == 0) {
-            printf("\n");
-        }
-    }
     printf("SHADER PROGRAM id %d \n", shader_library[shader]->program);
     glUseProgram(shader_library[shader]->program);
 

@@ -15,6 +15,11 @@ float* GL_UTIL_id(
     return MAT_scalar_new((float)id);
 }
 
+float* GL_UTIL_scale(
+) {
+    return MAT_vec2_new((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
+}
+
 float* GL_UTIL_camera(
 ) {
     return MAT_vec2_new(camera_x, camera_y);
