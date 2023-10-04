@@ -35,26 +35,22 @@ float* GL_UTIL_camera(
 float GL_UTIL_x(
     int x
 ) {
-    return ((float)x - (1.0/x)) * X_AXIS_DIR;
+    return (((2.0 * (float)x) / (float)SCREEN_WIDTH) - 1.0) * X_AXIS_DIR;
 }
 
 float GL_UTIL_y(
     int y
 ) {
-    return ((float)y - (1.0/y)) * Y_AXIS_DIR;
+    return (((2.0 * (float)y) / (float)SCREEN_HEIGHT) - 1.0) * Y_AXIS_DIR;
 }
 
 render_coord_t GL_UTIL_rect(
-    int x,
-    int y,
-    int w,
-    int h
+    int x, int y,
+    int w, int h
 ) {
     return (render_coord_t) {
-        GL_UTIL_x(x),
-        GL_UTIL_y(y),
-        GL_UTIL_x(x + w),
-        GL_UTIL_y(y + h)
+        GL_UTIL_x(x    ), GL_UTIL_y(y    ),
+        GL_UTIL_x(x + w), GL_UTIL_y(y + h)
     };
 }
 
@@ -64,9 +60,9 @@ render_coord_t GL_UTIL_clip(
     int w,  int h
 ) {
     return (render_coord_t) {
-        (float)x1/(float)w,
-        (float)y1/(float)h,
-        (float)x2/(float)w,
-        (float)y2/(float)h
+        (float)x1 / (float)w,
+        (float)y1 / (float)h,
+        (float)x2 / (float)w,
+        (float)y2 / (float)h
     };
 }

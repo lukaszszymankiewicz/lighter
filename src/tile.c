@@ -15,9 +15,9 @@ render_coord_t TILE_clip(
     int h = tilesets_library[tileset_id]->surface->h;
 
     return GL_UTIL_clip(
-        row     * TILE_WIDTH, col     * TILE_HEIGHT,
+         row    * TILE_WIDTH,  col    * TILE_HEIGHT,
         (row+1) * TILE_WIDTH, (col+1) * TILE_HEIGHT,
-        w, h
+         w,                    h
     );
 }
 
@@ -27,7 +27,7 @@ tile_t* TILE_new(
     int            row,
     int            col,
     int            x,            // x of tile on level (left, down coord) in px
-    int            y            // y of tile on level (left, down coord) in px
+    int            y             // y of tile on level (left, down coord) in px
 ) {
     tile_t *new_tile       = NULL;
     new_tile               = (tile_t*)malloc(sizeof(tile_t));
