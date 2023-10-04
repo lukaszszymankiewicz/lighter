@@ -67,9 +67,9 @@ void RENDER_shader(
     int            buffer_h
 ) { 
     for (int i=0; i<n_vertices; i++) {
-            printf("%f /n", vertices[i]);
+            printf("%f \n", vertices[i]);
         if (((i+1) % 4) == 0) {
-            printf("/n");
+            printf("\n");
         }
     }
     printf("SHADER PROGRAM id %d \n", shader_library[shader]->program);
@@ -77,28 +77,11 @@ void RENDER_shader(
 
     printf("BUFFER id %d, size: %d %d %d %d \n", buffer, 0, 0, buffer_w, buffer_h);
     glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+    glViewport(0, 0, buffer_w, buffer_h);    
 
-    if (buffer == 0) {
-        // to screen
-        glViewport(0, 0, 1366, 768);    
-        glBlitNamedFramebuffer(
-            buffer,
-            0,
-            0, 0, 320, 240,
-            0, 0, 320, 240,
-            GL_COLOR_BUFFER_BIT,
-            GL_NEAREST
-        );
-    } else {
-        // to buffer
-        // glViewport(0, 0, 320, 240);    
-
-        glBindVertexArray(shader_library[shader]->vao);
-        glBindBuffer(GL_ARRAY_BUFFER, shader_library[shader]->vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*n_vertices, vertices, GL_STATIC_DRAW);
-    }
-
-
+    glBindVertexArray(shader_library[shader]->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, shader_library[shader]->vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*n_vertices, vertices, GL_STATIC_DRAW);
     RENDER_set_uniforms(shader, uniforms);
     
     printf("TEXTURE id %d \n", texture);

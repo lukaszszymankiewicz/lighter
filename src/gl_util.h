@@ -1,18 +1,7 @@
 #ifndef GL_UTIL_H
 #define GL_UTIL_H
 
-#define MAX_VERTEX_LEN                50
-
-// TODO: TBD
-#define MAX_SHADER_UNIFORMS_ARGS      4
 #define MAX_SHADER_UNIFORMS           3
-
-// TODO: TBD?
-#define MAX_SHADER_UNIFORMS_ARGS_LEN  MAX_SHADER_UNIFORMS_ARGS * MAX_SHADER_UNIFORMS           
-
-// to properly swich axes from normal coords to NDC
-#define Y_AXIS_DIR -1.0
-#define X_AXIS_DIR  1.0
 
 extern float camera_x;
 extern float camera_y;
@@ -53,8 +42,6 @@ float GL_UTIL_y(int y);
 
 float* GL_UTIL_camera();
 float* GL_UTIL_id(int id);
-float* GL_UTIL_single_pixel_scale();
-float* GL_UTIL_multiple_pixel_scale();
 
 render_coord_t GL_UTIL_rect(int x, int y, int w, int h);
 render_coord_t GL_UTIL_clip(int x1, int y1, int x2, int y2, int w, int h);

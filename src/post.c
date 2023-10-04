@@ -18,7 +18,7 @@ float* POST_vertices(
     i        = 0;
     
     render_coord_t render = GL_UTIL_rect(0.0, 0.0, (float)SCREEN_WIDTH, (float)SCREEN_WIDTH);
-    render_coord_t clip   = (render_coord_t){ 0.0, 0.0, 1.0, 1.0 };
+    render_coord_t clip   = (render_coord_t){ 0.0, 1.0, 1.0, 0.0 };
 
     // TODO: commonize it
     // Position                         Texcoords
