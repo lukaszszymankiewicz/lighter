@@ -53,6 +53,7 @@
   - [x] add global scale can be propably easily deleted
   - [x] put shader light effect to buffer
   - [x] made shader pixel-perfect
+  - [ ] scale framebuffer for pixel perfect graphic
   - [ ] add transparency to light effect shader
   - [ ] add entity filp
   - [ ] add stencil buffer
