@@ -706,11 +706,15 @@ void ENT_add_to_scene(
 
     vertices        = ENT_vertices(entity, &len);
 
+    array_t camera_arr  = GL_UTIL_camera();
+    array_t scale_arr   = GL_UTIL_scale();
+    array_t texture_arr = GL_UTIL_id(texture);
+
     SCENE_activate_layer(LAYER_SPRITE);
     SCENE_add_new_drawable_object();
-    SCENE_add_uniform(GL_UTIL_camera());
-    SCENE_add_uniform(GL_UTIL_scale());  // aScale
-    SCENE_set_texture(GL_UTIL_id(texture));
+    SCENE_add_uniform(camera_arr);
+    SCENE_add_uniform(scale_arr);
+    SCENE_set_texture(texture_arr);
     SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }
 

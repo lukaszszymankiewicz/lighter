@@ -7,45 +7,43 @@
 #include "gl_util.h"
 #include "mat.h"
 
-#define VERTICES_PER_POST_TEX  24
-#define POST_RENDER_COUNT      4
+#define VERTICES_PER_POST_TEX       24
+#define POST_RENDER_COUNT           4
 
-float* POST_vertices(
+render_coord_t render = (render_coord_t) { 0.0, 0.0, 0.0, 0.0 };
+render_coord_t clip   = (render_coord_t) { 0.0, 0.0, 0.0, 0.0 };
+
+void POST_set(
 ) {
-    int    i;
-    float *v = NULL;
-    v        = (float*)malloc(sizeof(float) * VERTICES_PER_POST_TEX);
-    i        = 0;
-    
-    //render_coord_t render = GL_UTIL_rect(0.0, 0.0, (float)SCREEN_WIDTH, (float)SCREEN_WIDTH);
-    render_coord_t render = (render_coord_t){ 0.0, 0.0, (float)SCREEN_WIDTH, (float)SCREEN_WIDTH };
-    render_coord_t clip   = (render_coord_t){ 0.0, 1.0, 1.0, 0.0 };
+    GL_UTIL_set_pixelperfect_scale();
+    render = (render_coord_t) { 0.0, 0.0, (float)SCREEN_WIDTH, (float)SCREEN_WIDTH };
+    clip   = GL_UTIL_clip(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
+}
 
-    // TODO: commonize it
-    // Position                         Texcoords
-    v[i++]=render.x1; v[i++]=render.y1; v[i++]=clip.x1; v[i++]=clip.y1; // Top-left
-    v[i++]=render.x2; v[i++]=render.y1; v[i++]=clip.x2; v[i++]=clip.y1; // Top-right
-    v[i++]=render.x2; v[i++]=render.y2; v[i++]=clip.x2; v[i++]=clip.y2; // Bottom-right
-    v[i++]=render.x1; v[i++]=render.y1; v[i++]=clip.x1; v[i++]=clip.y1; // Top-left
-    v[i++]=render.x2; v[i++]=render.y2; v[i++]=clip.x2; v[i++]=clip.y2; // Bottom-right
-    v[i++]=render.x1; v[i++]=render.y2; v[i++]=clip.x1; v[i++]=clip.y2; // Bottom-left
+array_t POST_vertices(
+) {
+    array_t pos_arr = GL_UTIL_coord_to_matrix(render);
+    array_t tex_arr = GL_UTIL_coord_to_matrix(clip);
 
-    return v;
+    MAT_join(pos_arr, tex_arr);
+
+    return pos_arr;
 }
 
 void POST_draw(
 ) {
-    int    len      = VERTICES_PER_POST_TEX;
+    int    len           = VERTICES_PER_POST_TEX;
+    int texture          = SCENE_get_layer_buffer_tex(LAYER_BUFFER);
 
-    float *vertices = NULL;
-    vertices        = POST_vertices();
-    
-    int buffer_texture = SCENE_get_layer_buffer_tex(LAYER_BUFFER);
+    array_t vertices_arr = POST_vertices();
+    array_t camera_arr   = MAT_vec2_new(0.0, 0.0);
+    array_t scale_arr    = GL_UTIL_scale();
+    array_t texture_arr  = GL_UTIL_id(texture);
 
     SCENE_activate_layer(LAYER_BUFFER);
     SCENE_add_new_drawable_object();
-    SCENE_add_uniform(MAT_vec2_new(0.0, 0.0));     // aCamera
-    SCENE_add_uniform(MAT_vec2_new(320.0, 240.0));     // aScale
-    SCENE_set_texture(GL_UTIL_id(buffer_texture)); // texture
-    SCENE_add_vertices(len, vertices, POST_RENDER_COUNT);
+    SCENE_add_uniform(camera_arr);
+    SCENE_add_uniform(scale_arr);
+    SCENE_set_texture(texture_arr);
+    SCENE_add_vertices(len, vertices_arr.values, POST_RENDER_COUNT);
 }

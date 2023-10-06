@@ -72,3 +72,5 @@ UTIL:
  - [ ] check for unused constants/functions
  - [ ] cleanup Makefile
  - [ ] point/geometry etc to some 'core' module
+ - [ ] rethink which of the engine compononests should be an extern
+   (entity_manager?)

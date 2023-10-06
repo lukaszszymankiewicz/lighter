@@ -1,7 +1,10 @@
+#include "mat.h"
+
 #ifndef GL_UTIL_H
 #define GL_UTIL_H
 
-#define MAX_SHADER_UNIFORMS           3
+#define MAX_SHADER_UNIFORMS 3
+#define VERTICES_PER_RECT   6
 
 extern float camera_x;
 extern float camera_y;
@@ -37,15 +40,18 @@ typedef struct framebuffer {
     unsigned int h;
 } framebuffer_t;
 
-float GL_UTIL_x(int x);
-float GL_UTIL_y(int y);
+extern float pixel_perfect_scale;
 
-float* GL_UTIL_camera();
-float* GL_UTIL_id(int id);
+array_t GL_UTIL_camera();
+array_t GL_UTIL_id(int id);
+array_t GL_UTIL_scale();
 
-render_coord_t GL_UTIL_rect(int x, int y, int w, int h);
 render_coord_t GL_UTIL_clip(int x1, int y1, int x2, int y2, int w, int h);
 
-float* GL_UTIL_scale();
+array_t GL_UTIL_coord_to_matrix(render_coord_t coord);
+array_t GL_UTIL_coord_to_matrix_flip_h(render_coord_t coord);
+array_t GL_UTIL_coord_to_matrix_flip_w(render_coord_t coord);
+
+void GL_UTIL_set_pixelperfect_scale();
 
 #endif

@@ -445,3 +445,4 @@ void GFX_destroy_framebuffer(
 ) {
     glDeleteFramebuffers(1, &id);
 }
+

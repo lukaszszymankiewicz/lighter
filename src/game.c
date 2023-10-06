@@ -163,10 +163,10 @@ void GAME_apply_logic(
 void GAME_set_camera(
     game_t* game
 ) {
-    icamera_x = ENTMAN_hero_x(game->entity_manager);
-    icamera_y = ENTMAN_hero_y(game->entity_manager);
-    camera_x = GL_UTIL_x(icamera_x);
-    camera_y = GL_UTIL_y(icamera_y);
+    camera_x = ENTMAN_hero_x(game->entity_manager);
+    camera_y = ENTMAN_hero_y(game->entity_manager);
+    // camera_x = GL_UTIL_x(icamera_x);
+    // camera_y = GL_UTIL_y(icamera_y);
 }
 
 void GAME_draw_everything(
@@ -191,7 +191,9 @@ void GAME_draw_nothing(
 
 void GAME_init_scene(
 ) {
-    SCENE_new();
+    SCENE_new(); // create scene
+    POST_set();  // set postprocess effects
+
     SCENE_add_layer(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
     SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
     SCENE_add_layer(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);

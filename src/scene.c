@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "gfx.h"
+#include "mat.h"
 #include "global.h"
 #include "render.h"
 #include "scene.h"
@@ -91,8 +92,6 @@ void SCENE_add_buffer_layer(
     // create new framebuffer for current layer
     scene->layers[layer].framebuffer    = NULL;
     scene->layers[layer].framebuffer    = GFX_create_framebuffer();
-    // scene->layers[layer].framebuffer->w = SCREEN_WIDTH;
-    // scene->layers[layer].framebuffer->h = SCREEN_HEIGHT;
 
     int new_id = scene->layers[layer].framebuffer->id;
 
@@ -132,12 +131,12 @@ int SCENE_cur_uniform(
 }
 
 void SCENE_add_uniform(
-    float      *value
+    array_t arr
 ) {
     int obj         = SCENE_cur_obj();
     int cur_uniform = SCENE_cur_uniform();
 
-    scene->layers[scene->cur_layer].objs[obj].uniforms[cur_uniform] = value;
+    scene->layers[scene->cur_layer].objs[obj].uniforms[cur_uniform] = arr.values;
     scene->layers[scene->cur_layer].objs[obj].uniform_count++;
 }
 
@@ -147,14 +146,15 @@ void SCENE_add_new_drawable_object(
 }
 
 void SCENE_set_texture(
-    float      *texture
+    array_t arr
 ) {
     int obj = SCENE_cur_obj();
 
-    scene->layers[scene->cur_layer].objs[obj].texture = (int)(texture[0]);
-    SCENE_add_uniform(texture);
+    scene->layers[scene->cur_layer].objs[obj].texture = (int)(arr.values[0]);
+    SCENE_add_uniform(arr);
 }
 
+// TODO: here we can also introduce array
 void SCENE_add_vertices(
     int         len,
     float      *vertices,

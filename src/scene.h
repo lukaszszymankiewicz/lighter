@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include "gl_util.h"
+#include "mat.h"
 
 #ifndef SCENE_H
 #define SCENE_H
@@ -41,8 +42,8 @@ void SCENE_clear();
 void SCENE_add_layer(int layer, int shader_id, int mode);
 void SCENE_add_buffer_layer(int layer, int shader_id, int mode);
 void SCENE_add_new_drawable_object();
-void SCENE_set_texture(float *texture);
-void SCENE_add_uniform(float *value);
+void SCENE_set_texture(array_t arr);
+void SCENE_add_uniform(array_t arr);
 void SCENE_add_vertices(int len, float *vertices, int val_per_vertex);
 void SCENE_activate_layer(int layer);
 void SCENE_free();

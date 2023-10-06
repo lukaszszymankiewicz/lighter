@@ -662,11 +662,15 @@ void LIG_add_to_scene(
     float g = light->light_polygons[i].green;
     float b = light->light_polygons[i].blue;
 
+    array_t camera_arr  = GL_UTIL_camera();
+    array_t scale_arr   = GL_UTIL_scale();
+    array_t color_arr   = MAT_vec4_new(r, g, b, 1.0);
+
     SCENE_activate_layer(LAYER_LIGHT);
     SCENE_add_new_drawable_object();
-    SCENE_add_uniform(GL_UTIL_camera());  // aCamera
-    SCENE_add_uniform(GL_UTIL_scale());  // aScale
-    SCENE_add_uniform(MAT_vec4_new(r, g, b, 1.0)); // aColor
+    SCENE_add_uniform(camera_arr); // aCamera
+    SCENE_add_uniform(scale_arr);  // aScale
+    SCENE_add_uniform(color_arr);  // aColor
     SCENE_add_vertices(len, v, LIGHT_RENDER_COUNT);
 
     // cleanup
