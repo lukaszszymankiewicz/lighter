@@ -16,4 +16,6 @@ void RENDER_shader(
     int      buffer_h
 );
 
+void RENDER_clear_buffer(int buffer);
+
 #endif

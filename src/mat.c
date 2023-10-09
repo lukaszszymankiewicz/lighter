@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "mat.h"
 
@@ -10,11 +11,14 @@ array_t MAT_new(
     arr.values = NULL;
     arr.values = (float*)malloc(sizeof(float) * rows * cols);
 
-    for (int c=0; c<cols; cols++) { 
-        for (int r=0; r<rows; rows++) { 
+    for (int c=0; c<cols; c++) { 
+        for (int r=0; r<rows; r++) { 
             arr.values[c*rows + r] = 0.0;
         }
     }
+
+    arr.rows = rows;
+    arr.cols = cols;
 
     return arr;
 }
@@ -70,24 +74,46 @@ void MAT_free(
 }
 
 void MAT_join(
-    array_t arr1,
-    array_t arr2
+    array_t *arr1,
+    array_t *arr2
 ) {
-    int new_rows = arr1.rows + arr2.rows;
-    int new_cols = arr1.cols;
+    int new_rows = arr1->rows;
+    int new_cols = arr1->cols + arr2->cols;
 
-    arr1.values = realloc(arr1.values, sizeof(float) * new_rows * new_cols);
+    float* values = NULL;
+    values        = (float*)malloc(sizeof(float) * new_rows * new_cols);
+    // arr1->values = realloc(arr1->values, sizeof(float) * new_rows * new_cols);
 
     int i=0; 
 
-    for (int c=0; c<new_cols; c++) {
-        for (int r=0; r<arr1.rows; r++) {
-            arr1.values[i++] = arr1.values[c*arr1.rows + r];
+    for (int r=0; r<new_rows; r++) {
+        for (int c=0; c<arr1->cols; c++) {
+            values[i++] = arr1->values[r*arr1->cols + c];
         }
 
-        for (int r=0; r<arr2.rows; r++) {
-            arr1.values[i++] = arr2.values[c*arr2.rows + r];
+        for (int c=0; c<arr2->cols; c++) {
+            values[i++] = arr2->values[r*arr2->cols + c];
         }
     }
+    free(arr1->values);
+    free(arr2->values);
+
+    arr1->values = NULL;
+    arr2->values = NULL;
+
+    arr1->rows   = new_rows;
+    arr1->cols   = new_cols;
+    arr1->values = values;
     // TODO: free here?
+}
+
+void MAT_debug(
+    array_t arr
+) {
+    for (int r=0; r<arr.rows; r++) {
+        for (int c=0; c<arr.cols; c++) {
+            printf("%f ", arr.values[r*arr.cols + c]);
+        }
+        printf("\n");
+    }
 }

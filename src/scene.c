@@ -31,7 +31,7 @@ void SCENE_clear(
             
             // clean vertices
             if (scene->layers[i].objs[j].vertices != NULL) {
-                free(scene->layers[i].objs[j].vertices);
+                // free(scene->layers[i].objs[j].vertices);
             }
             scene->layers[i].objs[j].vertices   = NULL;
 
@@ -39,6 +39,10 @@ void SCENE_clear(
         scene->layers[i].n_objs      = -1;
     }
     scene->cur_layer                 = -1;
+    
+    for (int l=0; l<scene->n_layers; l++) {
+        RENDER_clear_buffer(scene->layers[l].framebuffer->id);
+    }
 }
 
 void SCENE_add_layer(
@@ -163,7 +167,9 @@ void SCENE_add_vertices(
     int j=scene->layers[scene->cur_layer].n_objs;
 
     if (vertices) {
-        scene->layers[scene->cur_layer].objs[j].vertices = vertices;
+        for (int l=0; l<len; l++) {
+            scene->layers[scene->cur_layer].objs[j].vertices = vertices;
+        }
     }
 
     scene->layers[scene->cur_layer].objs[j].len     = len;

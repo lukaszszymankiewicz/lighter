@@ -157,16 +157,14 @@ void GAME_apply_logic(
     game_t* game
 ) {
     GAME_update_events(game);
-    GAME_update_entities(game);
+    // GAME_update_entities(game);
 }
 
 void GAME_set_camera(
     game_t* game
 ) {
-    camera_x = ENTMAN_hero_x(game->entity_manager);
-    camera_y = ENTMAN_hero_y(game->entity_manager);
-    // camera_x = GL_UTIL_x(icamera_x);
-    // camera_y = GL_UTIL_y(icamera_y);
+    camera_x = ENTMAN_hero_x(game->entity_manager) - ENTITY_DRAW_X_RANGE;
+    camera_y = ENTMAN_hero_y(game->entity_manager) - ENTITY_DRAW_Y_RANGE;
 }
 
 void GAME_draw_everything(

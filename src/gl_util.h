@@ -6,8 +6,8 @@
 #define MAX_SHADER_UNIFORMS 3
 #define VERTICES_PER_RECT   6
 
-extern float camera_x;
-extern float camera_y;
+extern int camera_x;
+extern int camera_y;
 extern float framebuffer_w;
 extern float framebuffer_h;
 

@@ -53,9 +53,10 @@
   - [x] add global scale can be propably easily deleted
   - [x] put shader light effect to buffer
   - [x] made shader pixel-perfect
-  - [ ] scale framebuffer for pixel perfect graphic
+  - [x] scale framebuffer for pixel perfect graphic
+  - [x] add entity filp
+  - [ ] put camera ideally on center of screen
   - [ ] add transparency to light effect shader
-  - [ ] add entity filp
   - [ ] add stencil buffer
   - [ ] add differ effect
   - [ ] add wobble

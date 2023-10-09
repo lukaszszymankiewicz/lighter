@@ -7,8 +7,8 @@
 #define RECT_VERTICES_ROWS 6
 #define RECT_VERTICES_COLS 2
 
-float camera_x            = 0.0;
-float camera_y            = 0.0;
+int camera_x              = 0;
+int camera_y              = 0;
 float framebuffer_w       = 1.0;
 float framebuffer_h       = 1.0;
 float pixel_perfect_scale = 1.0;
@@ -53,14 +53,14 @@ void GL_UTIL_set_pixelperfect_scale(
 array_t GL_UTIL_coord_to_matrix(
     render_coord_t coord
 ) {
-    array_t arr = MAT_new(RECT_VERTICES_ROWS, RECT_VERTICES_COLS );
+    array_t arr = MAT_new(RECT_VERTICES_ROWS, RECT_VERTICES_COLS);
 
-    arr.values[0 ]=coord.x1; arr.values[1 ]=coord.y1;
-    arr.values[2 ]=coord.x2; arr.values[3 ]=coord.y1;
-    arr.values[4 ]=coord.x2; arr.values[5 ]=coord.y2;
-    arr.values[6 ]=coord.x1; arr.values[7 ]=coord.y1;
-    arr.values[8 ]=coord.x2; arr.values[9 ]=coord.y2;
-    arr.values[10]=coord.x1; arr.values[11]=coord.y2;
+    arr.values[0 ]=coord.x1; arr.values[1 ]=coord.y2;
+    arr.values[2 ]=coord.x2; arr.values[3 ]=coord.y2;
+    arr.values[4 ]=coord.x2; arr.values[5 ]=coord.y1;
+    arr.values[6 ]=coord.x1; arr.values[7 ]=coord.y2;
+    arr.values[8 ]=coord.x2; arr.values[9 ]=coord.y1;
+    arr.values[10]=coord.x1; arr.values[11]=coord.y1;
 
     return arr;
 }

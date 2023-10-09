@@ -26,7 +26,4 @@ bool LVL_obstacle_on_pos(level_t* level, int x, int y);
 
 tile_t* LVL_tile_on_pos(level_t *level, int x, int y);
 
-extern int icamera_x;
-extern int icamera_y;
-
 #endif

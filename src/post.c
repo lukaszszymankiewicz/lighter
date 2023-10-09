@@ -16,8 +16,24 @@ render_coord_t clip   = (render_coord_t) { 0.0, 0.0, 0.0, 0.0 };
 void POST_set(
 ) {
     GL_UTIL_set_pixelperfect_scale();
-    render = (render_coord_t) { 0.0, 0.0, (float)SCREEN_WIDTH, (float)SCREEN_WIDTH };
-    clip   = GL_UTIL_clip(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    int max_w = SCREEN_WIDTH*pixel_perfect_scale; 
+    int max_h = SCREEN_HEIGHT*pixel_perfect_scale; 
+    
+    float scale_w = 0.80;
+
+    float corr_w = (framebuffer_w - max_w) * scale_w;
+    // float corr_h = (framebuffer_h - max_h) * 0.1;
+    float corr_h = -10;
+
+    render = (render_coord_t) {
+        corr_w,
+        corr_h,
+        max_w + corr_w,
+        max_h + corr_h
+    };
+
+    clip  = (render_coord_t) { 0, 1, 1, 0 };
 }
 
 array_t POST_vertices(
@@ -25,7 +41,7 @@ array_t POST_vertices(
     array_t pos_arr = GL_UTIL_coord_to_matrix(render);
     array_t tex_arr = GL_UTIL_coord_to_matrix(clip);
 
-    MAT_join(pos_arr, tex_arr);
+    MAT_join(&pos_arr, &tex_arr);
 
     return pos_arr;
 }
@@ -37,7 +53,7 @@ void POST_draw(
 
     array_t vertices_arr = POST_vertices();
     array_t camera_arr   = MAT_vec2_new(0.0, 0.0);
-    array_t scale_arr    = GL_UTIL_scale();
+    array_t scale_arr    = MAT_vec2_new((float)1366, (float)768);
     array_t texture_arr  = GL_UTIL_id(texture);
 
     SCENE_activate_layer(LAYER_BUFFER);

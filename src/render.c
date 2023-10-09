@@ -54,6 +54,14 @@ void RENDER_set_uniforms(
     }
 }
 
+void RENDER_clear_buffer(
+    int buffer
+) {
+    glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+    glClearColor(0.1f, 0.1f, 0.2f, 1.0f );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 void RENDER_shader(
     int            shader,
     int            texture,

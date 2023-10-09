@@ -15,10 +15,6 @@
 #define ENTITY_RENDER_COUNT      4
 #define LEVEL_VERTICES_FOR_SCENE 2500
 
-// camera position in pixels
-int   icamera_x      = 0;
-int   icamera_y      = 0;
-
 const static int EMPTY_CELL = -1;
 
 enum { W, S, A, D };
@@ -304,8 +300,8 @@ float* LVL_tiles_vertices(
     level_t *level,
     int     *i
 ) {
-    int st_x           = icamera_x - ENTITY_DRAW_X_RANGE;
-    int st_y           = icamera_y - ENTITY_DRAW_Y_RANGE;
+    int st_x           = camera_x - ENTITY_DRAW_X_RANGE;
+    int st_y           = camera_y - ENTITY_DRAW_Y_RANGE;
 
     int st_tile_pos_x  = st_x / TILE_WIDTH;
     int st_tile_pos_y  = st_y / TILE_HEIGHT;
