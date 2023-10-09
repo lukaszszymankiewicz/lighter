@@ -5,12 +5,17 @@
 #include <stdbool.h>
 
 #include "gfx.h"
-#include "mat.h"
+#include "gl_util.h"
 #include "global.h"
+#include "mat.h"
 #include "render.h"
 #include "scene.h"
 
 scene_t *scene = NULL;
+
+// TODO: TBD
+#define RECT_VERTICES_ROWS 6
+#define RECT_VERTICES_COLS 2
 
 void SCENE_clear(
 ) {
@@ -29,11 +34,11 @@ void SCENE_clear(
                 }
             }
             
-            // clean vertices
-            if (scene->layers[i].objs[j].vertices != NULL) {
+            // TODO: clean vertices
+            // if (scene->layers[i].objs[j].vertices != NULL) {
                 // free(scene->layers[i].objs[j].vertices);
-            }
-            scene->layers[i].objs[j].vertices   = NULL;
+            // }
+            // scene->layers[i].objs[j].vertices   = NULL;
 
         }
         scene->layers[i].n_objs      = -1;
@@ -56,7 +61,8 @@ void SCENE_add_layer(
     }
 
     for (int j=0; j<MAX_DRAWBLE_OBJECTS_ON_LAYER; j++) {
-        scene->layers[layer].objs[j].vertices      = NULL;
+        // TODO: clean it!
+        // scene->layers[layer].objs[j].vertices      = NULL;
         scene->layers[layer].objs[j].uniform_count = 0;
 
         for (int u=0; u<MAX_SHADER_UNIFORMS; u++) {
@@ -158,6 +164,20 @@ void SCENE_set_texture(
     SCENE_add_uniform(arr);
 }
 
+void SCENE_add_vertices2(
+    array_t     arr
+) {
+    int j=scene->layers[scene->cur_layer].n_objs;
+    int len = arr.rows * arr.cols;
+
+    for (int l=0; l<len; l++) {
+        scene->layers[scene->cur_layer].objs[j].vertices = arr;
+    }
+    // TODO: len and count should be deleted!
+    scene->layers[scene->cur_layer].objs[j].len    = len;
+    scene->layers[scene->cur_layer].objs[j].count  = arr.cols;
+}
+
 // TODO: here we can also introduce array
 void SCENE_add_vertices(
     int         len,
@@ -168,7 +188,7 @@ void SCENE_add_vertices(
 
     if (vertices) {
         for (int l=0; l<len; l++) {
-            scene->layers[scene->cur_layer].objs[j].vertices = vertices;
+            // scene->layers[scene->cur_layer].objs[j].vertices.values = vertices;
         }
     }
 
@@ -193,7 +213,6 @@ void SCENE_free(
     scene = NULL;
 }
 
-
 bool SCENE_layer_is_on(
     int      layer
 ) {
@@ -212,6 +231,71 @@ int SCENE_get_layer_buffer_tex(
     return scene->layers[layer].framebuffer->texture;
 }
 
+int SCENE_get_current_object_texture(
+) {
+    int cur_object = SCENE_cur_obj();
+    return scene->layers[scene->cur_layer].objs[cur_object].texture;
+}
+
+array_t* SCENE_get_current_object_vertices(
+) {
+    int cur_object = SCENE_cur_obj();
+    return &(scene->layers[scene->cur_layer].objs[cur_object].vertices);
+}
+
+array_t coord_to_matrix(
+    float x1, float y1,
+    float x2, float y2
+) {
+
+    array_t arr = MAT_new(RECT_VERTICES_ROWS, RECT_VERTICES_COLS);
+
+    arr.values[0 ]=x1; arr.values[1 ]=y2;
+    arr.values[2 ]=x2; arr.values[3 ]=y2;
+    arr.values[4 ]=x2; arr.values[5 ]=y1;
+    arr.values[6 ]=x1; arr.values[7 ]=y2;
+    arr.values[8 ]=x2; arr.values[9 ]=y1;
+    arr.values[10]=x1; arr.values[11]=y1;
+
+    return arr;
+}
+
+void SCENE_draw_texture(
+    int   draw_x, int   draw_y,
+    int   clip_x, int   clip_y,
+    int        w, int        h,
+    int    tex_w, int    tex_h,
+    bool  flip_w, bool  flip_h,
+    int  texture
+) {
+    int corr_w = (int)flip_w * w;
+    int corr_h = (int)flip_h * h;
+
+    array_t pos_arr = coord_to_matrix(
+        (draw_x + 0) + corr_w, (draw_y + 0) + corr_h,
+        (draw_x + w) - corr_w, (draw_y + h) - corr_h
+    );
+    array_t tex_arr = coord_to_matrix(
+        (clip_x + 0) / tex_w, (clip_y + 0) / tex_h,
+        (clip_x + w) / tex_w, (clip_y + h) / tex_h
+    );
+    MAT_join(&pos_arr, &tex_arr);
+
+    // still same texture is drawn - appending vertices
+    if (SCENE_get_current_object_texture() == texture) {
+        MAT_append(SCENE_get_current_object_vertices(), &pos_arr);
+        return;
+    } 
+
+    array_t scale_arr    = GL_UTIL_scale();
+    array_t texture_arr  = GL_UTIL_id(texture);
+
+    SCENE_add_new_drawable_object();
+    SCENE_add_uniform(scale_arr);
+    SCENE_set_texture(texture_arr);
+    SCENE_add_vertices2(pos_arr);
+}
+
 void SCENE_draw(
 ) {
     for (int layer=0; layer<scene->n_layers; layer++) {
@@ -227,9 +311,11 @@ void SCENE_draw(
             RENDER_shader(
                 scene->layers[layer].shader_id,
                 scene->layers[layer].objs[i].texture,
-                scene->layers[layer].objs[i].vertices,
+                scene->layers[layer].objs[i].vertices.values,
+                // TODO: rows * cols
                 scene->layers[layer].objs[i].len,
                 scene->layers[layer].objs[i].uniforms,
+                // TODO: cols
                 scene->layers[layer].objs[i].count,
                 scene->layers[layer].mode,
                 scene->layers[layer].framebuffer->id,

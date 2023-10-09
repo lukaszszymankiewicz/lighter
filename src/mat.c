@@ -82,7 +82,6 @@ void MAT_join(
 
     float* values = NULL;
     values        = (float*)malloc(sizeof(float) * new_rows * new_cols);
-    // arr1->values = realloc(arr1->values, sizeof(float) * new_rows * new_cols);
 
     int i=0; 
 
@@ -104,7 +103,22 @@ void MAT_join(
     arr1->rows   = new_rows;
     arr1->cols   = new_cols;
     arr1->values = values;
-    // TODO: free here?
+}
+
+void MAT_append(
+    array_t *arr1,
+    array_t *arr2
+) {
+    int new_rows = arr1->rows + arr2->rows;
+    int new_cols = arr1->cols;
+
+    arr1->values = (float*)realloc(arr1->values, sizeof(float) * new_rows * new_cols);
+
+    int j=0; 
+
+    for (int i=arr1->rows * arr1->cols; i<new_rows*new_cols; i++) {
+        arr1->values[i++] = arr2->values[j++];
+    }
 }
 
 void MAT_debug(

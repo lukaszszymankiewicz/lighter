@@ -14,7 +14,7 @@
 typedef struct drawable_shader {
     int         texture;
     int         len;
-    float      *vertices;    
+    array_t     vertices;    
     float      *uniforms[MAX_SHADER_UNIFORMS];
     int         uniform_count;
     int         count;
@@ -48,6 +48,15 @@ void SCENE_add_vertices(int len, float *vertices, int val_per_vertex);
 void SCENE_activate_layer(int layer);
 void SCENE_free();
 void SCENE_draw();
+
+void SCENE_draw_texture(
+    int   draw_x, int   draw_y,
+    int   clip_x, int   clip_y,
+    int        w, int        h,
+    int    tex_w, int    tex_h,
+    bool  flip_w, bool  flip_h,
+    int  texture
+);
 
 int SCENE_get_layer_buffer_tex(int layer);
 

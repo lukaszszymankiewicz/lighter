@@ -172,13 +172,13 @@ void GAME_draw_everything(
 ) {
     SCENE_clear();
     GAME_set_camera(game);
-    LVL_draw(game->level);
+    // LVL_draw(game->level);
 
     // TODO: put_on_scene -> draw
     ENTMAN_put_on_scene(game->entity_manager);
 
-    GAME_draw_light(game);
-    POST_draw();
+    // GAME_draw_light(game);
+    // POST_draw();
     SCENE_draw(scene);
     GFX_update();
 }
@@ -195,7 +195,7 @@ void GAME_init_scene(
     SCENE_add_layer(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
     SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
     SCENE_add_layer(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
-    SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
+    // SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
 }
 
 void GAME_init_level(

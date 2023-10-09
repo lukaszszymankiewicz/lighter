@@ -639,7 +639,7 @@ bool ENT_render_with_flip(
 ) {
     return entity->direction == LEFT;
 }
-
+// TODO: TBD
 render_coord_t ENT_frame_clip(
     entity_t *entity
 ) {
@@ -649,7 +649,7 @@ render_coord_t ENT_frame_clip(
 
     return GL_UTIL_clip(r.x, r.y, r.x+r.w, r.y+r.h, w, h);
 }
-
+// TODO: TBD
 render_coord_t ENT_clip(
     entity_t *entity
 ) {
@@ -658,7 +658,7 @@ render_coord_t ENT_clip(
     }
     return ENT_frame_clip(entity);
 }
-
+// TODO: tbd
 render_coord_t ENT_render(
     entity_t       *entity,
     bool            flip
@@ -673,7 +673,7 @@ render_coord_t ENT_render(
         entity->y + ENT_current_frame_height(entity)
     };
 }
-
+// TODO: TBD
 array_t ENT_vertices(
     entity_t *entity
 ) {
@@ -689,7 +689,6 @@ array_t ENT_vertices(
     return pos_arr;
 }
 
-//TODO: to manager!
 void ENT_add_to_scene(
     entity_t *entity
 ) {
@@ -697,19 +696,20 @@ void ENT_add_to_scene(
         return;
     }
 
-    int    texture       = ENT_texture_id(entity);
+    SCENE_draw_texture(
+        entity->x,
+        entity->y,
+        ENT_current_frame(entity).rect.x,
+        ENT_current_frame(entity).rect.y,
+        ENT_current_frame(entity).rect.w,
+        ENT_current_frame(entity).rect.h,
+        ANIM_get_texture_width(ENT_get_animation_sheet(entity)),
+        ANIM_get_texture_height(ENT_get_animation_sheet(entity)),
+        false,
+        false,
+        ENT_texture_id(entity)
+    );
 
-    array_t vertices_arr = ENT_vertices(entity);
-    array_t camera_arr   = GL_UTIL_camera();
-    array_t scale_arr    = GL_UTIL_scale();
-    array_t texture_arr  = GL_UTIL_id(texture);
-
-    SCENE_activate_layer(LAYER_SPRITE);
-    SCENE_add_new_drawable_object();
-    SCENE_add_uniform(camera_arr);
-    SCENE_add_uniform(scale_arr);
-    SCENE_set_texture(texture_arr);
-    SCENE_add_vertices(VERTICES_PER_SINGLE_SPRITE, vertices_arr.values, ENTITY_RENDER_COUNT);
 }
 
 void ENT_free(

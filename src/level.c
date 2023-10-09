@@ -338,7 +338,6 @@ float* LVL_tiles_vertices(
                    v[(*i)++]=tile->clip.x1;   v[(*i)++]=tile->clip.y1;
             }
         }
-
     }
     return v;
 }

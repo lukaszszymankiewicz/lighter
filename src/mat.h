@@ -14,6 +14,7 @@ array_t MAT_scalar_new(float a1);
 array_t MAT_vec4_new(float a1, float a2, float a3, float a4);
 
 void MAT_join(array_t *arr1, array_t *arr2);
+void MAT_append(array_t *arr1, array_t *arr2);
 void MAT_free(array_t arr);
 void MAT_debug(array_t arr);
 
