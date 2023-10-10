@@ -173,12 +173,13 @@ void GAME_draw_everything(
 ) {
     SCENE_clear();
     GAME_set_camera(game);
-    // LVL_draw(game->level);
+
+    SCENE_activate_layer(LAYER_TILE);
+    LVL_draw(game->level);
 
     SCENE_activate_layer(LAYER_SPRITE);
-    // TODO: put_on_scene -> draw
     // TODO: manager as global component
-    ENTMAN_put_on_scene(game->entity_manager);
+    ENTMAN_draw(game->entity_manager);
 
     // GAME_draw_light(game);
     // POST_draw();

@@ -2,42 +2,23 @@
 
 #include "data/library.h"
 
-#include "gl_util.h"
-#include "global.h"
 #include "tile.h"
 
-render_coord_t TILE_clip(
-    int tileset_id,
-    int row,
-    int col
-) { 
-    int w = tilesets_library[tileset_id]->surface->w;
-    int h = tilesets_library[tileset_id]->surface->h;
-
-    return GL_UTIL_clip(
-         row    * TILE_WIDTH,  col    * TILE_HEIGHT,
-        (row+1) * TILE_WIDTH, (col+1) * TILE_HEIGHT,
-         w,                    h
-    );
-}
-
 tile_t* TILE_new(
-    int            blueprint_id,
-    int            tileset_id,
-    int            row,
-    int            col,
-    int            x,            // x of tile on level (left, down coord) in px
-    int            y             // y of tile on level (left, down coord) in px
+    int            x,        
+    int            y,         
+    int            blueprint_id
 ) {
     tile_t *new_tile       = NULL;
     new_tile               = (tile_t*)malloc(sizeof(tile_t));
     
-    render_coord_t render  = (render_coord_t){x, y, x+TILE_WIDTH, y+TILE_HEIGHT};
-
-    new_tile->blueprint_id = blueprint_id;
-    new_tile->tileset_id   = tileset_id;
-    new_tile->render       = render;
-    new_tile->clip         = TILE_clip(tileset_id, row, col);
+    new_tile->x            = x;
+    new_tile->y            = y;
+    
+    new_tile->row          = tilesets_library[blueprint_id]->row;
+    new_tile->col          = tilesets_library[blueprint_id]->col;
+    new_tile->obstacle     = tilesets_library[blueprint_id]->obstacle;
+    new_tile->tileset_id   = tilesets_library[blueprint_id]->tileset_id;
 
     return new_tile;
 }

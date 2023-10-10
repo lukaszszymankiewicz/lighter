@@ -215,7 +215,7 @@ void ENTMAN_calc_light(
     }
 }
 
-void ENTMAN_put_on_scene(
+void ENTMAN_draw(
     entity_manager_t* entity_manager
 ) {
     for (int i=0; i<MAX_ENTITY; i++) {

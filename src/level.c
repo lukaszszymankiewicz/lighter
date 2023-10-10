@@ -83,22 +83,6 @@ int LVL_tileset_id(
     return tilesets_library[id]->id;
 }
 
-void LVL_fill_structure(
-    level_t *level,
-    int      id,
-    int      row, int      col,
-    int      x,   int      y
-) {
-    tile_t *tile    = NULL;
-
-    int tileset_id  = tiles_library[id]->tileset_id;  
-    int pos_x       = x * TILE_WIDTH;  
-    int pos_y       = y * TILE_HEIGHT;  
-
-    tile = TILE_new(id, tileset_id, row, col, pos_x, pos_y);
-    LVL_set_tile(level, tile, x, y);
-}
-
 void LVL_fill(
     level_t* level
 ) {
@@ -107,11 +91,11 @@ void LVL_fill(
     for (int x=0; x<LVL_size_x(level); x++) {
         for (int y=0; y<LVL_size_y(level); y++) {
 
-            int id  = LVL_tile_blueprint_on_pos(level, x, y);
-            int row = tiles_library[id]->row;
-            int col = tiles_library[id]->col;
+            int blueprint_id = LVL_tile_blueprint_on_pos(level, x, y);
+            tile_t *tile     = NULL;
+            tile             = TILE_new(x * TILE_WIDTH, y * TILE_HEIGHT, blueprint_id);
 
-            LVL_fill_structure(level, id, row, col, x, y);
+            LVL_set_tile(level, tile, x, y);
         }
     }
 }
@@ -150,9 +134,8 @@ bool LVL_obstacle_on_pos(
     if (x<0 || x>LVL_size_x(level) || y<0 || y>LVL_size_y(level)) {
         return false;
     }
-    int tile_id = LVL_tile_blueprint_on_pos(level, x, y);
-
-    return tiles_library[tile_id]->obstacle;
+    int pos = LVL_pos(level, x, y);
+    return level->structure[pos]->obstacle;
 }
 
 // fills level obstacle_segments.
@@ -301,7 +284,9 @@ void LVL_draw(
     level_t *level
 ) {
     int texture        = LVL_tileset_id(level);
-    
+    int texture_w      = tilesets_library[tile->tileset_id]->surface.w;
+    int texture_h      = tilesets_library[tile->tileset_id]->surface.h;
+                
     int st_x           = camera_x - ENTITY_DRAW_X_RANGE;
     int st_y           = camera_y - ENTITY_DRAW_Y_RANGE;
 
@@ -316,38 +301,23 @@ void LVL_draw(
             tile_t *tile = NULL;
             tile         = LVL_tile_on_pos(level, x, y);
             
-            // TODO: this and method in the ENT_vertices can be commonized
-            if (!tile) {
-                continue;
-            }
+            if (!tile) { continue; }
 
             SCENE_draw_texture(
-                tile->x,
-                entity->x - camera_x,
-                entity->y - camera_y,
-                ENT_current_frame(entity).rect.x,
-                ENT_current_frame(entity).rect.y,
-                ENT_current_frame_width(entity),
-                ENT_current_frame_height(entity),
-                ANIM_get_texture_width(ENT_get_animation_sheet(entity)),
-                ANIM_get_texture_height(ENT_get_animation_sheet(entity)),
-                ENT_flip_hor(entity),
-                ENT_flip_ver(entity),
-                ENT_texture_id(entity)
+                tile->x - camera_x,
+                tile->y - camera_y,
+                tile->row * TILE_WIDTH,
+                tile->col * TILE_HEIGHT,
+                TILE_WIDTH,
+                TILE_HEIGHT,
+                texture_w,
+                texture_h,
+                false,
+                false,
+                texture        
             );
         }
     }
-
-    array_t camera_arr  = GL_UTIL_camera();
-    array_t scale_arr   = GL_UTIL_scale();
-    array_t texture_arr = GL_UTIL_id(tileset);
-
-    SCENE_activate_layer(LAYER_TILE);
-    SCENE_add_new_drawable_object();
-    SCENE_add_uniform(camera_arr);
-    SCENE_add_uniform(scale_arr);
-    SCENE_set_texture(texture_arr);
-    SCENE_add_vertices(len, vertices, ENTITY_RENDER_COUNT);
 }
 
 void LVL_free(
