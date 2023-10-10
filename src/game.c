@@ -70,9 +70,10 @@ void GAME_init_entities(
     int n_fills = LVL_n_entity_fills(game->level);
 
     for (int i=0; i<n_fills; i++) {
-        int x  = levels_library[game->level->blueprint_id]->entities[i].x;
-        int y  = levels_library[game->level->blueprint_id]->entities[i].y;
-        int id = levels_library[game->level->blueprint_id]->entities[i].id;
+        int blueprint_id = game->level->blueprint_id;
+        int x            = levels_library[blueprint_id]->entities[i].x;
+        int y            = levels_library[blueprint_id]->entities[i].y;
+        int id           = levels_library[blueprint_id]->entities[i].id;
 
         ENTMAN_add_entity(game->entity_manager, x, y, id);
     }
@@ -174,12 +175,14 @@ void GAME_draw_everything(
     GAME_set_camera(game);
     // LVL_draw(game->level);
 
+    SCENE_activate_layer(LAYER_SPRITE);
     // TODO: put_on_scene -> draw
+    // TODO: manager as global component
     ENTMAN_put_on_scene(game->entity_manager);
 
     // GAME_draw_light(game);
     // POST_draw();
-    SCENE_draw(scene);
+    SCENE_draw();
     GFX_update();
 }
 

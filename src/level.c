@@ -296,10 +296,12 @@ void LVL_analyze(
     }
 }
 
-float* LVL_tiles_vertices(
-    level_t *level,
-    int     *i
+
+void LVL_draw(
+    level_t *level
 ) {
+    int texture        = LVL_tileset_id(level);
+    
     int st_x           = camera_x - ENTITY_DRAW_X_RANGE;
     int st_y           = camera_y - ENTITY_DRAW_Y_RANGE;
 
@@ -308,8 +310,6 @@ float* LVL_tiles_vertices(
     int end_tile_pos_x = st_tile_pos_x + SCREEN_TILE_PER_Y;
     int end_tile_pos_y = st_tile_pos_y + SCREEN_TILE_PER_X;
 
-    float *v = (float*)malloc(sizeof(float) * LEVEL_VERTICES_FOR_SCENE);
-
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
 
@@ -317,39 +317,27 @@ float* LVL_tiles_vertices(
             tile         = LVL_tile_on_pos(level, x, y);
             
             // TODO: this and method in the ENT_vertices can be commonized
-            if (tile) {
-                   // Top-left
-                   v[(*i)++]=tile->render.x1; v[(*i)++]=tile->render.y2;
-                   v[(*i)++]=tile->clip.x1;   v[(*i)++]=tile->clip.y2;
-                   // Top-right
-                   v[(*i)++]=tile->render.x2; v[(*i)++]=tile->render.y2;
-                   v[(*i)++]=tile->clip.x2;   v[(*i)++]=tile->clip.y2; 
-                   // Bottom-right
-                   v[(*i)++]=tile->render.x2; v[(*i)++]=tile->render.y1;
-                   v[(*i)++]=tile->clip.x2;   v[(*i)++]=tile->clip.y1;
-                   // Top-left
-                   v[(*i)++]=tile->render.x1; v[(*i)++]=tile->render.y2;
-                   v[(*i)++]=tile->clip.x1;   v[(*i)++]=tile->clip.y2;
-                   // Bottom-right
-                   v[(*i)++]=tile->render.x2; v[(*i)++]=tile->render.y1;
-                   v[(*i)++]=tile->clip.x2;   v[(*i)++]=tile->clip.y1;
-                   // Bottom-left
-                   v[(*i)++]=tile->render.x1; v[(*i)++]=tile->render.y1;
-                   v[(*i)++]=tile->clip.x1;   v[(*i)++]=tile->clip.y1;
+            if (!tile) {
+                continue;
             }
+
+            SCENE_draw_texture(
+                tile->x,
+                entity->x - camera_x,
+                entity->y - camera_y,
+                ENT_current_frame(entity).rect.x,
+                ENT_current_frame(entity).rect.y,
+                ENT_current_frame_width(entity),
+                ENT_current_frame_height(entity),
+                ANIM_get_texture_width(ENT_get_animation_sheet(entity)),
+                ANIM_get_texture_height(ENT_get_animation_sheet(entity)),
+                ENT_flip_hor(entity),
+                ENT_flip_ver(entity),
+                ENT_texture_id(entity)
+            );
         }
     }
-    return v;
-}
 
-void LVL_draw(
-    level_t *level
-) {
-    int len         = 0;
-    float *vertices = NULL;
-    vertices        = LVL_tiles_vertices(level, &len);
-    int tileset     = LVL_tileset_id(level);
-    
     array_t camera_arr  = GL_UTIL_camera();
     array_t scale_arr   = GL_UTIL_scale();
     array_t texture_arr = GL_UTIL_id(tileset);

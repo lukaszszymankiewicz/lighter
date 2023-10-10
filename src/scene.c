@@ -272,12 +272,16 @@ void SCENE_draw_texture(
     int corr_h = (int)flip_h * h;
 
     array_t pos_arr = coord_to_matrix(
-        (draw_x + 0) + corr_w, (draw_y + 0) + corr_h,
-        (draw_x + w) - corr_w, (draw_y + h) - corr_h
+        (float)(draw_x + 0) + (float)corr_w,
+        (float)(draw_y + 0) + (float)corr_h,
+        (float)(draw_x + w) - (float)corr_w,
+        (float)(draw_y + h) - (float)corr_h
     );
     array_t tex_arr = coord_to_matrix(
-        (clip_x + 0) / tex_w, (clip_y + 0) / tex_h,
-        (clip_x + w) / tex_w, (clip_y + h) / tex_h
+        (float)(clip_x + 0) / (float)tex_w,
+        (float)(clip_y + 0) / (float)tex_h,
+        (float)(clip_x + w) / (float)tex_w,
+        (float)(clip_y + h) / (float)tex_h
     );
     MAT_join(&pos_arr, &tex_arr);
 
@@ -287,10 +291,13 @@ void SCENE_draw_texture(
         return;
     } 
 
+    // array_t camera_arr   = GL_UTIL_camera();
+    // TODO: add auto scale_arr from layer framebuffer size
     array_t scale_arr    = GL_UTIL_scale();
     array_t texture_arr  = GL_UTIL_id(texture);
 
     SCENE_add_new_drawable_object();
+    // SCENE_add_uniform(camera_arr);
     SCENE_add_uniform(scale_arr);
     SCENE_set_texture(texture_arr);
     SCENE_add_vertices2(pos_arr);

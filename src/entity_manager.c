@@ -226,10 +226,10 @@ void ENTMAN_put_on_scene(
         if (!entity) { continue; }
 
         if (ENTMAN_entity_in_draw_range(entity_manager, entity)) {
-            ENT_add_to_scene(entity);
+            ENT_draw(entity);
 
             if (entity->hold) {
-                ENT_add_to_scene(entity->hold);
+                ENT_draw(entity->hold);
             }
         }
     }

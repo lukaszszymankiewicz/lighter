@@ -10,6 +10,7 @@
 #include "scene.h"
 #include "sorted_list.h"
 #include "source.h"
+#include <stdbool.h>
 
 #define ENTITY_RENDER_COUNT        4
 #define MAX_SPRITES                20
@@ -634,62 +635,19 @@ void ENT_resolve(entity_t* entity) {
     }
 }
 
-bool ENT_render_with_flip(
+bool ENT_flip_ver(
+    entity_t *entity
+) {
+    return false;
+}
+
+bool ENT_flip_hor(
     entity_t *entity
 ) {
     return entity->direction == LEFT;
 }
-// TODO: TBD
-render_coord_t ENT_frame_clip(
-    entity_t *entity
-) {
-    int      w = ANIM_get_texture_width(ENT_get_animation_sheet(entity));
-    int      h = ANIM_get_texture_height(ENT_get_animation_sheet(entity));
-    SDL_Rect r = ENT_current_frame(entity).rect;
 
-    return GL_UTIL_clip(r.x, r.y, r.x+r.w, r.y+r.h, w, h);
-}
-// TODO: TBD
-render_coord_t ENT_clip(
-    entity_t *entity
-) {
-    if (ENT_has_not_flag(entity, ANIMATIABLE)) {
-        return ANIM_full_clip(ENT_get_animation_sheet(entity));
-    }
-    return ENT_frame_clip(entity);
-}
-// TODO: tbd
-render_coord_t ENT_render(
-    entity_t       *entity,
-    bool            flip
-) {
-    int corr = ENT_current_frame_width(entity) * (int)flip;
-
-    // TODO: this is temporary - entity should know nothing about rendering stuff
-    return (render_coord_t) {
-        entity->x + corr,
-        entity->y,
-        entity->x + ENT_current_frame_width(entity) - corr,
-        entity->y + ENT_current_frame_height(entity)
-    };
-}
-// TODO: TBD
-array_t ENT_vertices(
-    entity_t *entity
-) {
-    bool           flip       = ENT_render_with_flip(entity);
-    render_coord_t clip       = ENT_clip(entity);
-    render_coord_t render     = ENT_render(entity, flip);
-
-    array_t pos_arr = GL_UTIL_coord_to_matrix(render);
-    array_t tex_arr = GL_UTIL_coord_to_matrix(clip);
-
-    MAT_join(&pos_arr, &tex_arr);
-
-    return pos_arr;
-}
-
-void ENT_add_to_scene(
+void ENT_draw(
     entity_t *entity
 ) {
     if (ENT_has_flag(entity, NOT_DRAWABLE)) {
@@ -697,19 +655,18 @@ void ENT_add_to_scene(
     }
 
     SCENE_draw_texture(
-        entity->x,
-        entity->y,
+        entity->x - camera_x,
+        entity->y - camera_y,
         ENT_current_frame(entity).rect.x,
         ENT_current_frame(entity).rect.y,
-        ENT_current_frame(entity).rect.w,
-        ENT_current_frame(entity).rect.h,
+        ENT_current_frame_width(entity),
+        ENT_current_frame_height(entity),
         ANIM_get_texture_width(ENT_get_animation_sheet(entity)),
         ANIM_get_texture_height(ENT_get_animation_sheet(entity)),
-        false,
-        false,
+        ENT_flip_hor(entity),
+        ENT_flip_ver(entity),
         ENT_texture_id(entity)
     );
-
 }
 
 void ENT_free(

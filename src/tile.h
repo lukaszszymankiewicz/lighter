@@ -11,6 +11,10 @@
 typedef struct tile {
   render_coord_t clip;
   render_coord_t render;
+  int            x,
+  int            y,
+  int            row,
+  int            col,
   int            blueprint_id;
   int            tileset_id;
   bool           obstacle;
