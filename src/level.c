@@ -279,21 +279,23 @@ void LVL_analyze(
     }
 }
 
-
 void LVL_draw(
     level_t *level
 ) {
-    int texture        = LVL_tileset_id(level);
-    int texture_w      = tilesets_library[tile->tileset_id]->surface.w;
-    int texture_h      = tilesets_library[tile->tileset_id]->surface.h;
-                
-    int st_x           = camera_x - ENTITY_DRAW_X_RANGE;
-    int st_y           = camera_y - ENTITY_DRAW_Y_RANGE;
+    int id             = levels_library[level->blueprint_id]->tileset_id; 
+    int tileset        = LVL_tileset_id(level);
+    int texture_w      = tilesets_library[id]->surface->w;
+    int texture_h      = tilesets_library[id]->surface->h;
 
-    int st_tile_pos_x  = st_x / TILE_WIDTH;
-    int st_tile_pos_y  = st_y / TILE_HEIGHT;
-    int end_tile_pos_x = st_tile_pos_x + SCREEN_TILE_PER_Y;
-    int end_tile_pos_y = st_tile_pos_y + SCREEN_TILE_PER_X;
+    int st_x           = (camera_x + ENTITY_DRAW_X_RANGE) / TILE_WIDTH;
+    int st_y           = (camera_y + ENTITY_DRAW_Y_RANGE) / TILE_HEIGHT;
+
+    printf("camera %d %d \n", st_x, st_y);
+
+    int st_tile_pos_x  = st_x - (SCREEN_WIDTH / TILE_WIDTH / 2) - 1;
+    int st_tile_pos_y  = st_y - (SCREEN_HEIGHT / TILE_HEIGHT / 2) -1;
+    int end_tile_pos_x = st_x + (SCREEN_WIDTH / TILE_WIDTH / 2) + 1;
+    int end_tile_pos_y = st_y + (SCREEN_HEIGHT / TILE_HEIGHT / 2) + 1;
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
@@ -314,7 +316,7 @@ void LVL_draw(
                 texture_h,
                 false,
                 false,
-                texture        
+                tileset        
             );
         }
     }

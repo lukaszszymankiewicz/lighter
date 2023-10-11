@@ -287,20 +287,49 @@ void SCENE_draw_texture(
 
     // still same texture is drawn - appending vertices
     if (SCENE_get_current_object_texture() == texture) {
-        MAT_append(SCENE_get_current_object_vertices(), &pos_arr);
+
+        int cur_object = SCENE_cur_obj();
+        // TODO: separate function
+        MAT_append(&(scene->layers[scene->cur_layer].objs[cur_object].vertices), &pos_arr);
+
+        printf("rows and cols %d %d \n",
+            scene->layers[scene->cur_layer].objs[cur_object].vertices.rows,
+            scene->layers[scene->cur_layer].objs[cur_object].vertices.cols
+        );
+
+        if (scene->layers[scene->cur_layer].objs[cur_object].vertices.rows > 335) {
+            MAT_debug(scene->layers[scene->cur_layer].objs[cur_object].vertices);
+        }
+
         return;
     } 
 
+    SCENE_add_new_drawable_object();
     // array_t camera_arr   = GL_UTIL_camera();
     // TODO: add auto scale_arr from layer framebuffer size
     array_t scale_arr    = GL_UTIL_scale();
     array_t texture_arr  = GL_UTIL_id(texture);
-
-    SCENE_add_new_drawable_object();
     // SCENE_add_uniform(camera_arr);
+
     SCENE_add_uniform(scale_arr);
     SCENE_set_texture(texture_arr);
     SCENE_add_vertices2(pos_arr);
+}
+
+int SCENE_vertices_n(
+    int layer,
+    int n
+) {
+    drawable_shader_t obj = scene->layers[layer].objs[n];
+    return obj.vertices.rows * obj.vertices.cols;
+}
+
+int SCENE_vertices_count(
+    int layer,
+    int n
+) {
+    drawable_shader_t obj = scene->layers[layer].objs[n];
+    return obj.vertices.cols;
 }
 
 void SCENE_draw(
@@ -314,16 +343,15 @@ void SCENE_draw(
 
         for (int i=0; i<scene->layers[layer].n_objs+1; i++) {
             printf("OBJECT %d \n", i);
-            printf("vertices to render: %d\n", scene->layers[layer].objs[i].len);
+            printf("vertices to render: %d\n", SCENE_vertices_n(layer, i));
+
             RENDER_shader(
                 scene->layers[layer].shader_id,
                 scene->layers[layer].objs[i].texture,
                 scene->layers[layer].objs[i].vertices.values,
-                // TODO: rows * cols
-                scene->layers[layer].objs[i].len,
+                SCENE_vertices_n(layer, i),
                 scene->layers[layer].objs[i].uniforms,
-                // TODO: cols
-                scene->layers[layer].objs[i].count,
+                SCENE_vertices_count(layer, i),
                 scene->layers[layer].mode,
                 scene->layers[layer].framebuffer->id,
                 scene->layers[layer].framebuffer->w,

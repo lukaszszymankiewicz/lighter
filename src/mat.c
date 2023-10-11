@@ -117,8 +117,14 @@ void MAT_append(
     int j=0; 
 
     for (int i=arr1->rows * arr1->cols; i<new_rows*new_cols; i++) {
-        arr1->values[i++] = arr2->values[j++];
+        arr1->values[i] = arr2->values[j++];
     }
+
+    arr1->rows   = new_rows;
+    arr1->cols   = new_cols;
+
+    // free(arr2->values);
+    // arr2->values = NULL;
 }
 
 void MAT_debug(

@@ -15,10 +15,10 @@ tile_t* TILE_new(
     new_tile->x            = x;
     new_tile->y            = y;
     
-    new_tile->row          = tilesets_library[blueprint_id]->row;
-    new_tile->col          = tilesets_library[blueprint_id]->col;
-    new_tile->obstacle     = tilesets_library[blueprint_id]->obstacle;
-    new_tile->tileset_id   = tilesets_library[blueprint_id]->tileset_id;
+    new_tile->row          = tiles_library[blueprint_id]->row;
+    new_tile->col          = tiles_library[blueprint_id]->col;
+    new_tile->obstacle     = tiles_library[blueprint_id]->obstacle;
+    new_tile->tileset_id   = tiles_library[blueprint_id]->tileset_id;
 
     return new_tile;
 }

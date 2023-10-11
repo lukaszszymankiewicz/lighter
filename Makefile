@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS := --std=c99 -Wall -g
+CFLAGS := --std=c99 -Wall -pg
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 LIBS = -lGL -lGLU -lGLEW -lm 
 
