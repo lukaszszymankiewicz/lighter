@@ -36,15 +36,15 @@ void POST_set(
     clip  = (render_coord_t) { 0, 1, 1, 0 };
 }
 
-array_t POST_vertices(
-) {
-    array_t pos_arr = GL_UTIL_coord_to_matrix(render);
-    array_t tex_arr = GL_UTIL_coord_to_matrix(clip);
-
-    MAT_join(&pos_arr, &tex_arr);
-
-    return pos_arr;
-}
+// array_t POST_vertices(
+// ) {
+//     array_t pos_arr = GL_UTIL_coord_to_matrix(render);
+//     array_t tex_arr = GL_UTIL_coord_to_matrix(clip);
+// 
+//     MAT_join(&pos_arr, &tex_arr);
+// 
+//     return pos_arr;
+// }
 
 void POST_draw(
 ) {
@@ -57,9 +57,9 @@ void POST_draw(
     array_t texture_arr  = GL_UTIL_id(texture);
 
     SCENE_activate_layer(LAYER_BUFFER);
-    SCENE_add_new_drawable_object();
-    SCENE_add_uniform(camera_arr);
-    SCENE_add_uniform(scale_arr);
-    SCENE_set_texture(texture_arr);
-    SCENE_add_vertices(len, vertices_arr.values, POST_RENDER_COUNT);
+    // SCENE_add_new_drawable_object();
+    // SCENE_add_uniform(camera_arr);
+    // SCENE_add_uniform(scale_arr);
+    // SCENE_set_texture(texture_arr);
+    // SCENE_add_vertices(len, vertices_arr.values, POST_RENDER_COUNT);
 }

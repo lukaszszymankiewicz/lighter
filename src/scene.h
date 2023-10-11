@@ -41,10 +41,6 @@ void SCENE_new();
 void SCENE_clear();
 void SCENE_add_layer(int layer, int shader_id, int mode);
 void SCENE_add_buffer_layer(int layer, int shader_id, int mode);
-void SCENE_add_new_drawable_object();
-void SCENE_set_texture(array_t arr);
-void SCENE_add_uniform(array_t arr);
-void SCENE_add_vertices(int len, float *vertices, int val_per_vertex);
 void SCENE_activate_layer(int layer);
 void SCENE_free();
 void SCENE_draw();
@@ -56,6 +52,15 @@ void SCENE_draw_texture(
     int    tex_w, int    tex_h,
     bool  flip_w, bool  flip_h,
     int  texture
+);
+
+void SCENE_draw_polygon(
+    float *vertices,
+    int   len,
+    float r,
+    float g,
+    float b,
+    float a
 );
 
 int SCENE_get_layer_buffer_tex(int layer);

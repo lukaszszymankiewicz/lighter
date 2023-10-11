@@ -1,9 +1,9 @@
 #include <stdlib.h>
-#include <stdbool.h>
 #include <stdio.h>
 
-#include "global.h"
 #include "vertex.h"
+
+#define COORD_PER_VERTEX 2
 
 vertex_t* VRTX_new(
     int x,
@@ -20,9 +20,6 @@ vertex_t* VRTX_new(
     return new_vertex;
 }
 
-// Function to insert a given vertex at its correct position into a vertex list with increasing
-// order (angle is used as sorting paramter). This is needed for creating points of simple convex
-// polygon.
 void VRTX_add_point(
     vertex_t **head,
     int        x,
@@ -94,43 +91,36 @@ void VRTX_merge(
     }
 }
 
-int VRTX_max_y(
-    vertex_t* vertex
+void VRTX_move(
+    vertex_t* vertices,
+    int       x_diff,
+    int       y_diff
 ) {
-    if (vertex->next==NULL) {
-        return vertex->y;
-    }
-    else {
-        return MAX(vertex->y, vertex->next->y);
+    vertex_t *ptr    = NULL;
+
+    for (ptr=vertices; ptr; ptr=ptr->next) {
+        ptr->x = ptr->x - x_diff;
+        ptr->y = ptr->y - y_diff;
     }
 }
 
-void VRTX_delete(
-    vertex_t **head,
-    int          y
+float* VRTX_to_coords(
+    vertex_t* vertices
 ) {
-    vertex_t *ptr  = NULL;
-    vertex_t *prev = NULL;
-    ptr            = (*head);
+    vertex_t *ptr    = NULL;
+    vertex_t *coords = NULL;
 
-    while(ptr) {
-        if (VRTX_max_y(ptr) <= y) {
-            if (prev == NULL) {
-                ptr=ptr->next;
-                (*head) = ptr;
-            }
-            else {
-                prev->next = ptr->next;
-                free(ptr);
-                ptr = prev->next;
-            }
-        }
-        prev = ptr;
-        if (ptr==NULL) {
-            return;
-        }
-        ptr = ptr->next;
+    coords  = (float*)malloc(sizeof(float) * VRTX_len(vertices) * COORD_PER_VERTEX);
+
+    for (ptr=vertices; ptr; ptr=ptr->next) {
+        coords[j++] = ptr->x;
+        coords[j++] = ptr->y;
     }
+
+    // vertices is consumed
+    VRTX_free(vertices);
+
+    return coords;
 }
 
 void VRTX_debug(

@@ -65,11 +65,11 @@ void RENDER_clear_buffer(
 void RENDER_shader(
     int            shader,
     int            texture,
-    GLfloat       *vertices,
+    float         *vertices,
     int            n_vertices,
     float         *uniforms[MAX_SHADER_UNIFORMS],
     int            count,
-    GLenum         mode,
+    int            mode,
     int            buffer,
     int            buffer_w,
     int            buffer_h

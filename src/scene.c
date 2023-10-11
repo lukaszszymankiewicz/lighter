@@ -16,6 +16,7 @@ scene_t *scene = NULL;
 // TODO: TBD
 #define RECT_VERTICES_ROWS 6
 #define RECT_VERTICES_COLS 2
+#define COORD_PER_POLYGON_VERTEX 2
 
 void SCENE_clear(
 ) {
@@ -164,7 +165,7 @@ void SCENE_set_texture(
     SCENE_add_uniform(arr);
 }
 
-void SCENE_add_vertices2(
+void SCENE_add_vertices(
     array_t     arr
 ) {
     int j=scene->layers[scene->cur_layer].n_objs;
@@ -173,28 +174,10 @@ void SCENE_add_vertices2(
     for (int l=0; l<len; l++) {
         scene->layers[scene->cur_layer].objs[j].vertices = arr;
     }
+
     // TODO: len and count should be deleted!
     scene->layers[scene->cur_layer].objs[j].len    = len;
     scene->layers[scene->cur_layer].objs[j].count  = arr.cols;
-}
-
-// TODO: here we can also introduce array
-// TODO: TBD
-void SCENE_add_vertices(
-    int         len,
-    float      *vertices,
-    int         val_per_vertex
-) {
-    int j=scene->layers[scene->cur_layer].n_objs;
-
-    if (vertices) {
-        for (int l=0; l<len; l++) {
-            // scene->layers[scene->cur_layer].objs[j].vertices.values = vertices;
-        }
-    }
-
-    scene->layers[scene->cur_layer].objs[j].len     = len;
-    scene->layers[scene->cur_layer].objs[j].count   = val_per_vertex;
 }
 
 void SCENE_free(
@@ -244,6 +227,21 @@ array_t* SCENE_get_current_object_vertices(
     return &(scene->layers[scene->cur_layer].objs[cur_object].vertices);
 }
 
+array_t polygon_coord_to_matrix(
+    float *coords
+    int    len
+) {
+    array_t arr = MAT_new((int)len/COORD_PER_POLYGON_VERTEX, (int)COORD_PER_POLYGON_VERTEX);
+
+    for (int i=0; i<len; i++) {
+        arr.values[i]=coords[i];
+    }
+    
+    free(coords);
+
+    return arr;
+}
+
 array_t coord_to_matrix(
     float x1, float y1,
     float x2, float y2
@@ -258,6 +256,24 @@ array_t coord_to_matrix(
     arr.values[10]=x1; arr.values[11]=y1;
 
     return arr;
+}
+
+void SCENE_draw_polygon(
+    float *vertices,
+    int   len,
+    float r,
+    float g,
+    float b,
+    float a
+) {
+    array_t arr         = polygon_coord_to_matrix(vertices, len);
+    array_t scale_arr   = GL_UTIL_scale();
+    array_t color_arr   = MAT_vec4_new(r, g, b, a);
+
+    SCENE_add_new_drawable_object();
+    SCENE_add_uniform(scale_arr);
+    SCENE_add_uniform(color_arr);
+    SCENE_add_vertices(arr);
 }
 
 void SCENE_draw_texture(
@@ -298,11 +314,10 @@ void SCENE_draw_texture(
     // TODO: add auto scale_arr from layer framebuffer size
     array_t scale_arr    = GL_UTIL_scale();
     array_t texture_arr  = GL_UTIL_id(texture);
-    // SCENE_add_uniform(camera_arr);
 
     SCENE_add_uniform(scale_arr);
     SCENE_set_texture(texture_arr);
-    SCENE_add_vertices2(pos_arr);
+    SCENE_add_vertices(pos_arr);
 }
 
 int SCENE_vertices_n(

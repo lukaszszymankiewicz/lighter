@@ -1,12 +1,7 @@
 #include <stdbool.h>
 
-#include "gl_util.h"
-
 #ifndef TILE_H
 #define TILE_H
-
-#define WIDTH_COEF (float)TILE_WIDTH / (float) SCREEN_WIDTH
-#define HEIGHT_COEF (float)TILE_HEIGHT / (float) SCREEN_HEIGHT
 
 typedef struct tile {
   int            x;

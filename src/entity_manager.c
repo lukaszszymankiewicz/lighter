@@ -186,12 +186,10 @@ void ENTMAN_calc_single_entity_light(
 
     float angle          = ENT_light_angle(entity);
     float wobble_corr    = ENT_wobble_coef(entity);
-    
-    int n_poly = light->n_poly;
 
-    // for (int i=0; i<n_poly; i++) {
+    // for (int i=0; i<light->n_poly; i++) {
     for (int i=0; i<1; i++) {
-        LIG_add_to_scene(emit_x, emit_y, i, angle, wobble_corr, light, obs);
+        LIG_draw_polygon(emit_x, emit_y, i, angle, wobble_corr, light, obs);
     }
 
     if (obs) { SEG_free(obs); }

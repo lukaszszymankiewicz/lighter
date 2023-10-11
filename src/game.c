@@ -181,7 +181,9 @@ void GAME_draw_everything(
     // TODO: manager as global component
     ENTMAN_draw(game->entity_manager);
 
-    // GAME_draw_light(game);
+    SCENE_activate_layer(LAYER_LIGHT);
+    GAME_draw_light(game);
+
     // POST_draw();
     SCENE_draw();
     GFX_update();

@@ -32,7 +32,6 @@ typedef struct animation_sheet {
   animation_t  animations[MAX_ANIMATION];
 } animation_sheet_t;
 
-render_coord_t ANIM_full_clip(animation_sheet_t animation);
 
 int ANIM_get_texture_width(animation_sheet_t animation);
 int ANIM_get_texture_height(animation_sheet_t animation);

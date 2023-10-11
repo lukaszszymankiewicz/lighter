@@ -11,11 +11,6 @@ extern int camera_y;
 extern float framebuffer_w;
 extern float framebuffer_h;
 
-typedef struct render_coord {
-    float x1; float y1;
-    float x2; float y2;
-} render_coord_t;
-
 // TODO: to GFX?
 typedef struct shader_program {
     int           program;
@@ -45,10 +40,6 @@ extern float pixel_perfect_scale;
 array_t GL_UTIL_camera();
 array_t GL_UTIL_id(int id);
 array_t GL_UTIL_scale();
-
-render_coord_t GL_UTIL_clip(int x1, int y1, int x2, int y2, int w, int h);
-
-array_t GL_UTIL_coord_to_matrix(render_coord_t coord);
 
 void GL_UTIL_set_pixelperfect_scale();
 

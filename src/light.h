@@ -11,10 +11,12 @@
 #define R                               2000
 #define RAY_THRESHOLD                   2
 
-void LIG_add_to_scene(
-    int x,      int y,
-    int i,
-    float angle, float coef,
+void LIG_draw_polygon(
+    int            x,
+    int            y,
+    int            i,
+    float          angle,
+    float          coef,
     lightsource_t *light,
     segment_t     *obstacles
 );

@@ -16,12 +16,6 @@ START_TEST (VRTX_add_point_check) {
 
     VRTX_add_point(&head, 0, 30, 0);
     ck_assert_int_eq(VRTX_len(head), 3);
-
-    VRTX_delete(&head, 25);
-    ck_assert_int_eq(VRTX_len(head), 2);
-
-    VRTX_delete(&head, 15);
-    ck_assert_int_eq(VRTX_len(head), 1);
 }
 END_TEST
 

@@ -602,7 +602,7 @@ vertex_t* LIG_get_light_polygon(
     return light_polygon;
 }
 
-vertex_t* LIG_single_add_light_polygon(
+vertex_t* LIG_calc_polygon(
     int              x,
     int              y,
     int              n,
@@ -633,7 +633,7 @@ vertex_t* LIG_single_add_light_polygon(
     return light_polygon;
 };
 
-void LIG_add_to_scene(
+void LIG_draw_polygon(
     int              x,
     int              y,
     int              i,
@@ -642,37 +642,21 @@ void LIG_add_to_scene(
     lightsource_t   *light,
     segment_t       *obstacles
 ) {
-    vertex_t        *vertex  = NULL;
-    vertex_t        *ptr     = NULL;
-    float           *v       = NULL;
-    int              j       = 0;
+    vertex_t *vertex   = NULL;
+    float    *coords   = NULL;
+    int       n_coords = 0
 
-    // calculate in global coords
-    vertex   = LIG_single_add_light_polygon(x, y, i, angle, coef, light, obstacles);
-    int len  = VRTX_len(vertex) * LIGHT_RENDER_COUNT;
+    vertex       = LIG_calc_polygon(x, y, i, angle, coef, light, obstacles);
+    VRTX_move(vertex, camera_x, camera_y):
+    n_coords     = VRTX_len(vertex) * LIGHT_RENDER_COUNT;
+    coords       = VRTX_to_coords(vertex);
 
-    v        = (float*)malloc(sizeof(float) * len);
-
-    // TODO: some better function? translate it to gl coords system
-    for (ptr=vertex; ptr; ptr=ptr->next) {
-        v[j++] = ptr->x; v[j++] = ptr->y;
-    }
-
-    float r = light->light_polygons[i].red;
-    float g = light->light_polygons[i].green;
-    float b = light->light_polygons[i].blue;
-
-    array_t camera_arr  = GL_UTIL_camera();
-    array_t scale_arr   = GL_UTIL_scale();
-    array_t color_arr   = MAT_vec4_new(r, g, b, 1.0);
-
-    SCENE_activate_layer(LAYER_LIGHT);
-    SCENE_add_new_drawable_object();
-    SCENE_add_uniform(camera_arr); // aCamera
-    SCENE_add_uniform(scale_arr);  // aScale
-    SCENE_add_uniform(color_arr);  // aColor
-    SCENE_add_vertices(len, v, LIGHT_RENDER_COUNT);
-
-    // cleanup
-    VRTX_free(vertex);
+    SCENE_draw_polygon(
+        coords,
+        n_coords,
+        light->light_polygons[i].red,
+        light->light_polygons[i].green,
+        light->light_polygons[i].blue,
+        1.0
+    );
 }
