@@ -19,6 +19,7 @@ array_t MAT_new(
 
     arr.rows = rows;
     arr.cols = cols;
+    arr.cap  = rows * cols;
 
     return arr;
 }
@@ -103,6 +104,7 @@ void MAT_join(
     arr1->rows   = new_rows;
     arr1->cols   = new_cols;
     arr1->values = values;
+    arr1->cap    = new_cols * new_rows;
 }
 
 void MAT_append(
@@ -111,8 +113,12 @@ void MAT_append(
 ) {
     int new_rows = arr1->rows + arr2->rows;
     int new_cols = arr1->cols;
-
-    arr1->values = (float*)realloc(arr1->values, sizeof(float) * new_rows * new_cols);
+    
+    if (new_rows * new_cols > arr1.cap) {
+        int new_cap  = (new_rows * new_cols) * 2;
+        arr1->cap    = new_cap
+        arr1->values = (float*)realloc(arr1->values, sizeof(float) * new_cap);
+    }
 
     int j=0; 
 
@@ -122,7 +128,8 @@ void MAT_append(
 
     arr1->rows   = new_rows;
     arr1->cols   = new_cols;
-
+    
+    // TODO: free here?
     // free(arr2->values);
     // arr2->values = NULL;
 }

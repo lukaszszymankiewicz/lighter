@@ -179,6 +179,7 @@ void SCENE_add_vertices2(
 }
 
 // TODO: here we can also introduce array
+// TODO: TBD
 void SCENE_add_vertices(
     int         len,
     float      *vertices,
@@ -247,7 +248,6 @@ array_t coord_to_matrix(
     float x1, float y1,
     float x2, float y2
 ) {
-
     array_t arr = MAT_new(RECT_VERTICES_ROWS, RECT_VERTICES_COLS);
 
     arr.values[0 ]=x1; arr.values[1 ]=y2;
@@ -287,19 +287,8 @@ void SCENE_draw_texture(
 
     // still same texture is drawn - appending vertices
     if (SCENE_get_current_object_texture() == texture) {
-
-        int cur_object = SCENE_cur_obj();
-        // TODO: separate function
-        MAT_append(&(scene->layers[scene->cur_layer].objs[cur_object].vertices), &pos_arr);
-
-        printf("rows and cols %d %d \n",
-            scene->layers[scene->cur_layer].objs[cur_object].vertices.rows,
-            scene->layers[scene->cur_layer].objs[cur_object].vertices.cols
-        );
-
-        if (scene->layers[scene->cur_layer].objs[cur_object].vertices.rows > 335) {
-            MAT_debug(scene->layers[scene->cur_layer].objs[cur_object].vertices);
-        }
+        array_t* old_vertices = SCENE_get_current_object_vertices();
+        MAT_append(old_vertices, &pos_arr);
 
         return;
     } 

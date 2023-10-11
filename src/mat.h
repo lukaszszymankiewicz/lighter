@@ -5,6 +5,7 @@ typedef struct array {
     float* values;
     int    rows;
     int    cols;
+    int    cap;
 } array_t;
 
 array_t MAT_new(int rows, int cols);

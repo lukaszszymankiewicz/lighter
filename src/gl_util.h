@@ -49,8 +49,6 @@ array_t GL_UTIL_scale();
 render_coord_t GL_UTIL_clip(int x1, int y1, int x2, int y2, int w, int h);
 
 array_t GL_UTIL_coord_to_matrix(render_coord_t coord);
-array_t GL_UTIL_coord_to_matrix_flip_h(render_coord_t coord);
-array_t GL_UTIL_coord_to_matrix_flip_w(render_coord_t coord);
 
 void GL_UTIL_set_pixelperfect_scale();
 
