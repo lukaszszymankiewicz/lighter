@@ -5,7 +5,6 @@ layout (location = 1) in vec2 aTexCoord;
 
 vec2 aPosNDC;
 
-// uniform vec2 aCamera;
 uniform vec2 aScale;
 
 out vec2 TexCoord;

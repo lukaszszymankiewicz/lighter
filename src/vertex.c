@@ -108,13 +108,14 @@ float* VRTX_to_coords(
     vertex_t* vertices
 ) {
     vertex_t *ptr    = NULL;
-    vertex_t *coords = NULL;
+    float    *coords = NULL;
+    int       j      = 0;
 
-    coords  = (float*)malloc(sizeof(float) * VRTX_len(vertices) * COORD_PER_VERTEX);
+    coords = (float*)malloc(sizeof(float) * VRTX_len(vertices) * COORD_PER_VERTEX);
 
     for (ptr=vertices; ptr; ptr=ptr->next) {
-        coords[j++] = ptr->x;
-        coords[j++] = ptr->y;
+        coords[j++] = (float)ptr->x;
+        coords[j++] = (float)ptr->y;
     }
 
     // vertices is consumed

@@ -228,7 +228,7 @@ array_t* SCENE_get_current_object_vertices(
 }
 
 array_t polygon_coord_to_matrix(
-    float *coords
+    float *coords,
     int    len
 ) {
     array_t arr = MAT_new((int)len/COORD_PER_POLYGON_VERTEX, (int)COORD_PER_POLYGON_VERTEX);
@@ -284,20 +284,20 @@ void SCENE_draw_texture(
     bool  flip_w, bool  flip_h,
     int  texture
 ) {
-    int corr_w = (int)flip_w * w;
-    int corr_h = (int)flip_h * h;
+    int corr_w = (int)(!flip_w) * w;
+    int corr_h = (int)(!flip_h) * h;
 
     array_t pos_arr = coord_to_matrix(
-        (float)(draw_x + 0) + (float)corr_w,
-        (float)(draw_y + 0) + (float)corr_h,
-        (float)(draw_x + w) - (float)corr_w,
-        (float)(draw_y + h) - (float)corr_h
+        (float)(0             + draw_x + 0),
+        (float)(SCREEN_HEIGHT - draw_y + 0),
+        (float)(0             + draw_x + w),
+        (float)(SCREEN_HEIGHT - draw_y - h)
     );
     array_t tex_arr = coord_to_matrix(
-        (float)(clip_x + 0) / (float)tex_w,
-        (float)(clip_y + 0) / (float)tex_h,
-        (float)(clip_x + w) / (float)tex_w,
-        (float)(clip_y + h) / (float)tex_h
+        (float)(clip_x + w - corr_w) / (float)tex_w,
+        (float)(clip_y + h - corr_h) / (float)tex_h,
+        (float)(clip_x + 0 + corr_w) / (float)tex_w,
+        (float)(clip_y + 0 + corr_h) / (float)tex_h
     );
     MAT_join(&pos_arr, &tex_arr);
 
@@ -310,8 +310,7 @@ void SCENE_draw_texture(
     } 
 
     SCENE_add_new_drawable_object();
-    // array_t camera_arr   = GL_UTIL_camera();
-    // TODO: add auto scale_arr from layer framebuffer size
+
     array_t scale_arr    = GL_UTIL_scale();
     array_t texture_arr  = GL_UTIL_id(texture);
 

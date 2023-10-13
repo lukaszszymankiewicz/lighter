@@ -158,7 +158,7 @@ void GAME_apply_logic(
     game_t* game
 ) {
     GAME_update_events(game);
-    // GAME_update_entities(game);
+    GAME_update_entities(game);
 }
 
 void GAME_set_camera(
@@ -264,7 +264,7 @@ void GAME_loop(
         GAME_apply_logic(game);
         GAME_draw(game);
         GAME_update_time(game);
-        game->loop = false;
+        // game->loop = false;
     }
 
     return;

@@ -644,10 +644,10 @@ void LIG_draw_polygon(
 ) {
     vertex_t *vertex   = NULL;
     float    *coords   = NULL;
-    int       n_coords = 0
+    int       n_coords = 0;
 
     vertex       = LIG_calc_polygon(x, y, i, angle, coef, light, obstacles);
-    VRTX_move(vertex, camera_x, camera_y):
+    VRTX_move(vertex, camera_x, camera_y + 24);
     n_coords     = VRTX_len(vertex) * LIGHT_RENDER_COUNT;
     coords       = VRTX_to_coords(vertex);
 

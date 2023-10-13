@@ -644,7 +644,8 @@ bool ENT_flip_ver(
 bool ENT_flip_hor(
     entity_t *entity
 ) {
-    return entity->direction == LEFT;
+    // return entity->direction == LEFT;
+    return false;
 }
 
 void ENT_draw(

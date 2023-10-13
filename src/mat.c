@@ -114,9 +114,9 @@ void MAT_append(
     int new_rows = arr1->rows + arr2->rows;
     int new_cols = arr1->cols;
     
-    if (new_rows * new_cols > arr1.cap) {
+    if (new_rows * new_cols > arr1->cap) {
         int new_cap  = (new_rows * new_cols) * 2;
-        arr1->cap    = new_cap
+        arr1->cap    = new_cap;
         arr1->values = (float*)realloc(arr1->values, sizeof(float) * new_cap);
     }
 
