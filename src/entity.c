@@ -553,7 +553,7 @@ entity_t* ENT_init(
     // position 
     entity->x                = x;        
     entity->y                = y;
-    entity->direction        = LEFT; // this is the default but I donw know why
+    entity->direction        = RIGHT; // this is the default but I donw know why
     entity->x_vel            = 0;
     entity->y_vel            = 0;
 
@@ -566,14 +566,7 @@ entity_t* ENT_init(
     entity->light            = (entity_light_t) {0, 0, RIGHT_RAD};
 
     // interactions
-    // entity->handle           = blueprint->handle_type;
-    // entity->light_pt         = blueprint->light_emmit_pt;
-    // entity->flags            = blueprint->flags;
     entity->hold             = NULL;
-
-    // assets
-    // entity->sheet            = &blueprint->animation;
-    // entity->lightsource_id   = blueprint->lightsource_id;
 
     // actions
     entity->update_fun_t     = 0;                
@@ -644,8 +637,7 @@ bool ENT_flip_ver(
 bool ENT_flip_hor(
     entity_t *entity
 ) {
-    // return entity->direction == LEFT;
-    return false;
+    return entity->direction == LEFT;
 }
 
 void ENT_draw(
@@ -654,10 +646,10 @@ void ENT_draw(
     if (ENT_has_flag(entity, NOT_DRAWABLE)) {
         return;
     }
-
+    printf("trying to draw entity: %d %d \n", entity->x, entity->y);
     SCENE_draw_texture(
-        entity->x - camera_x,
-        entity->y - camera_y,
+        entity->x,
+        entity->y,
         ENT_current_frame(entity).rect.x,
         ENT_current_frame(entity).rect.y,
         ENT_current_frame_width(entity),

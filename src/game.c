@@ -164,8 +164,9 @@ void GAME_apply_logic(
 void GAME_set_camera(
     game_t* game
 ) {
-    camera_x = ENTMAN_hero_x(game->entity_manager) - ENTITY_DRAW_X_RANGE;
-    camera_y = ENTMAN_hero_y(game->entity_manager) - ENTITY_DRAW_Y_RANGE;
+    printf("hero x and y: %d %d \n", ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
+    camera_x = ENTMAN_hero_x(game->entity_manager) - SCREEN_WIDTH / 2;
+    camera_y = ENTMAN_hero_y(game->entity_manager) - SCREEN_HEIGHT / 2;
 }
 
 void GAME_draw_everything(

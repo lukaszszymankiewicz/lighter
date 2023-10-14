@@ -292,10 +292,10 @@ void LVL_draw(
 
     printf("camera %d %d \n", st_x, st_y);
 
-    int st_tile_pos_x  = st_x - (SCREEN_WIDTH / TILE_WIDTH / 2) - 1;
-    int st_tile_pos_y  = st_y - (SCREEN_HEIGHT / TILE_HEIGHT / 2) -1;
-    int end_tile_pos_x = st_x + (SCREEN_WIDTH / TILE_WIDTH / 2) + 1;
-    int end_tile_pos_y = st_y + (SCREEN_HEIGHT / TILE_HEIGHT / 2) + 1;
+    int st_tile_pos_x  = st_x - (SCREEN_WIDTH / TILE_WIDTH / 2) - 2;
+    int st_tile_pos_y  = st_y - (SCREEN_HEIGHT / TILE_HEIGHT / 2) -2;
+    int end_tile_pos_x = st_x + (SCREEN_WIDTH / TILE_WIDTH / 2) + 2;
+    int end_tile_pos_y = st_y + (SCREEN_HEIGHT / TILE_HEIGHT / 2) + 2;
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
@@ -306,8 +306,8 @@ void LVL_draw(
             if (!tile) { continue; }
 
             SCENE_draw_texture(
-                tile->x - camera_x,
-                tile->y - camera_y,
+                tile->x,
+                tile->y,
                 tile->row * TILE_WIDTH,
                 tile->col * TILE_HEIGHT,
                 TILE_WIDTH,

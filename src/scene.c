@@ -247,7 +247,7 @@ array_t coord_to_matrix(
     float x2, float y2
 ) {
     array_t arr = MAT_new(RECT_VERTICES_ROWS, RECT_VERTICES_COLS);
-
+    
     arr.values[0 ]=x1; arr.values[1 ]=y2;
     arr.values[2 ]=x2; arr.values[3 ]=y2;
     arr.values[4 ]=x2; arr.values[5 ]=y1;
@@ -269,9 +269,11 @@ void SCENE_draw_polygon(
     array_t arr         = polygon_coord_to_matrix(vertices, len);
     array_t scale_arr   = GL_UTIL_scale();
     array_t color_arr   = MAT_vec4_new(r, g, b, a);
+    array_t camera_arr  = MAT_vec2_new(camera_x, camera_y);
 
     SCENE_add_new_drawable_object();
     SCENE_add_uniform(scale_arr);
+    SCENE_add_uniform(camera_arr);
     SCENE_add_uniform(color_arr);
     SCENE_add_vertices(arr);
 }
@@ -286,12 +288,12 @@ void SCENE_draw_texture(
 ) {
     int corr_w = (int)(!flip_w) * w;
     int corr_h = (int)(!flip_h) * h;
-
+    
     array_t pos_arr = coord_to_matrix(
-        (float)(0             + draw_x + 0),
-        (float)(SCREEN_HEIGHT - draw_y + 0),
-        (float)(0             + draw_x + w),
-        (float)(SCREEN_HEIGHT - draw_y - h)
+        (float)(draw_x + 0),
+        (float)(draw_y + 0),
+        (float)(draw_x + w),
+        (float)(draw_y + h)
     );
     array_t tex_arr = coord_to_matrix(
         (float)(clip_x + w - corr_w) / (float)tex_w,
@@ -313,8 +315,10 @@ void SCENE_draw_texture(
 
     array_t scale_arr    = GL_UTIL_scale();
     array_t texture_arr  = GL_UTIL_id(texture);
+    array_t camera_arr   = MAT_vec2_new(camera_x, camera_y);
 
     SCENE_add_uniform(scale_arr);
+    SCENE_add_uniform(camera_arr);
     SCENE_set_texture(texture_arr);
     SCENE_add_vertices(pos_arr);
 }
