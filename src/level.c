@@ -41,7 +41,8 @@ int LVL_pos(
     int x,
     int y
 ) {
-    return y * LVL_size_x(level) + x;
+    // return y * LVL_size_x(level) + x;
+    return (LVL_size_y(level) - y - 1) * LVL_size_x(level) + x;
 }
 
 void LVL_set_tile(
@@ -126,6 +127,20 @@ tile_t* LVL_tile_on_pos(
     return NULL;
 }
 
+bool LVL_obstacle_on_pos2(
+    level_t* level,
+    int x,
+    int y
+) {
+    if (x<0 || x>LVL_size_x(level) || y<0 || y>LVL_size_y(level)) {
+        return false;
+    }
+
+    // int pos = y * LVL_size_x(level) + x;
+    //return level->structure[pos]->obstacle;
+    return level->structure[LVL_pos(level, x, y)]->obstacle;
+}
+
 bool LVL_obstacle_on_pos(
     level_t* level,
     int x,
@@ -134,8 +149,7 @@ bool LVL_obstacle_on_pos(
     if (x<0 || x>LVL_size_x(level) || y<0 || y>LVL_size_y(level)) {
         return false;
     }
-    int pos = LVL_pos(level, x, y);
-    return level->structure[pos]->obstacle;
+    return level->structure[LVL_pos(level, x, y)]->obstacle;
 }
 
 // fills level obstacle_segments.
@@ -277,6 +291,9 @@ void LVL_analyze(
             }
         }
     }
+    // DEBUG
+    SEG_debug(level->obstacle_segments); 
+
 }
 
 void LVL_draw(

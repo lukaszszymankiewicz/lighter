@@ -43,13 +43,8 @@
 #define ENTITY_UPDATE_Y_RANGE        SCREEN_HEIGHT + 32
 #define ENTITY_UPDATE_LIGHT_X_RANGE  SCREEN_WIDTH * 2
 #define ENTITY_UPDATE_LIGHT_Y_RANGE  SCREEN_HEIGHT * 2
-#define SCREEN_TILE_PER_X            12
-#define SCREEN_TILE_PER_Y            15
-#define MAX_SCREEN_TILE_PER_X        10
-#define MAX_SCREEN_TILE_PER_Y        7
+#define Y_DIRECTION                  -1
 
-#define CAMERA_X                 (int)SCREEN_WIDTH / 2
-#define CAMERA_Y                 (int)SCREEN_HEIGHT / 2
 
 #define MAX_LIGHT_LEVEL          255.0
 #define DEFAULT_LIGHT_R          238.0 / MAX_LIGHT_LEVEL   // default light R color

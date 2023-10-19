@@ -9,7 +9,7 @@ uniform vec2 aCamera;
 
 void main()
 {
-    // aPosNDC = (2.0 * aPos / aScale) - 1.0;
+    // aPosNDC = (2.0 * (aPos-aCamera) / aScale) - 1.0;
 
     aPosNDC = vec2(
         ((2.0 * (aPos.x-aCamera.x) / aScale.x) - 1.0),

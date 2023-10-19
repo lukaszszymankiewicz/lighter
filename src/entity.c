@@ -440,7 +440,7 @@ void ENT_update_friction(
     }
 
     if (entity->state == JUMPING || entity->state == FALLING_DOWN) {
-        entity->y_vel += Y_FRICTION;
+        entity->y_vel += (Y_FRICTION * Y_DIRECTION);
     }
 }
 

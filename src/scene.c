@@ -255,6 +255,12 @@ array_t coord_to_matrix(
     arr.values[8 ]=x2; arr.values[9 ]=y1;
     arr.values[10]=x1; arr.values[11]=y1;
 
+    printf("gl coords ordered to be drawn: %f %f -> %f %f \n", 
+        ((2.0 * (x1 - (float)camera_x) / 320.0) - 1.0),
+        ((2.0 * (y1 - (float)camera_y) / 240.0) - 1.0),
+        ((2.0 * (x2 - (float)camera_x) / 320.0) - 1.0),
+        ((2.0 * (y2 - (float)camera_y) / 240.0) - 1.0)
+    );
     return arr;
 }
 
@@ -289,6 +295,13 @@ void SCENE_draw_texture(
     int corr_w = (int)(!flip_w) * w;
     int corr_h = (int)(!flip_h) * h;
     
+    printf("texture ordered to be drawn: %d %d -> %d %d \n", 
+        draw_x + 0,
+        draw_y + 0,
+        draw_x + w,
+        draw_y + h
+    );
+
     array_t pos_arr = coord_to_matrix(
         (float)(draw_x + 0),
         (float)(draw_y + 0),
