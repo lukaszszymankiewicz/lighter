@@ -55,6 +55,7 @@
   - [x] made shader pixel-perfect
   - [x] scale framebuffer for pixel perfect graphic
   - [x] add entity filp
+  - [ ] remove all unnecessary prints
   - [ ] put camera ideally on center of screen
   - [ ] add transparency to light effect shader
   - [ ] add stencil buffer
@@ -64,7 +65,7 @@
 - [ ] clear all memory leaks!
 - [ ] repair light vertex calculations
 - [x] remove error codes
-- [ ] make tile render as as separate shader
+- [x] make tile render as as separate shader
 - [ ] game options to some global config
 
 UTIL:

@@ -235,9 +235,9 @@ int ENT_handle_y(
     int handle     = ENT_handle(entity);
 
     if (
-        handle == HANDLE_BACK_UP || 
-        handle == HANDLE_MIDDLE_UP || 
-        handle == HANDLE_FRONT_UP 
+        handle == HANDLE_BACK_DOWN || 
+        handle == HANDLE_MIDDLE_DOWN || 
+        handle == HANDLE_FRONT_DOWN
     ) {
         y = 0;
     } else if  (
@@ -281,7 +281,7 @@ int ENT_hold_y(
         return ENT_handle_y(entity);
     }
 
-    frame_t f   = ENT_current_frame(entity);
+    frame_t f = ENT_current_frame(entity);
 
     return f.handle_y;
 }
@@ -295,6 +295,7 @@ int ENT_held_item_x(
 int ENT_held_item_y(
     entity_t *entity
 ) {
+
     return entity->y + ENT_hold_y(entity) - ENT_handle_y(entity->hold);
 }
 
@@ -449,7 +450,7 @@ void ENT_jump(
 ) {
     if (entity->state == STANDING || entity->state == WALKING || entity->state == NOTHING) {
         entity->state = JUMPING;
-        entity->y_vel -= JUMP_POWUH;
+        entity->y_vel -= (JUMP_POWUH * Y_DIRECTION);
     }
 }
 
@@ -553,7 +554,7 @@ entity_t* ENT_init(
     // position 
     entity->x                = x;        
     entity->y                = y;
-    entity->direction        = RIGHT; // this is the default but I donw know why
+    entity->direction        = RIGHT;
     entity->x_vel            = 0;
     entity->y_vel            = 0;
 
@@ -731,9 +732,9 @@ void ENT_update_collision(
                obstacle->x2,
                obstacle->y2, 
                entity->x + rect.x,
-               entity->y + rect.y + 1,
+               entity->y + rect.y + (1 * Y_DIRECTION),
                entity->x + rect.x + rect.w,
-               entity->y + rect.y + rect.h + 1
+               entity->y + rect.y + rect.h + (1 * Y_DIRECTION)
             );
 
             if (x_collision != -1) { SRTLST_insert(&x_intersections, x_collision, 0); }
@@ -757,14 +758,14 @@ void ENT_update_collision(
     if (y_intersections != NULL) {
 
         // moving up
-        if (entity->y_vel < 0) { 
-            entity->y = SRTLST_get_last(y_intersections);
+        if (entity->y_vel > 0) { 
+            int h = ENT_current_frame_height(entity);
+            entity->y = y_intersections->value + h;
         }
 
         // falling down
         else {
-            int h = ENT_current_frame_height(entity);
-            entity->y = y_intersections->value - h;
+            entity->y = y_intersections->value;
             entity->state = STANDING;
         }
         entity->y_vel = 0;  //stop moving!

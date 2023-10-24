@@ -7,8 +7,8 @@
 // changes done to light angle if looking in different direction
 float lightpos_up_down_corr[2][5] = {
   // LEFT  RIGHT  UP               DOWN             NONE
-     {0,   0,     RIGHT_RAD+DEG30, RIGHT_RAD-DEG30, RIGHT_RAD },      // RIGHT 
-     {0,   0,     LEFT_RAD-DEG30,  LEFT_RAD+DEG30,  LEFT_RAD  }       // LEFT 
+     {0,   0,     RIGHT_RAD-DEG30, RIGHT_RAD+DEG30, RIGHT_RAD },      // RIGHT 
+     {0,   0,     LEFT_RAD+DEG30,  LEFT_RAD-DEG30,  LEFT_RAD  }       // LEFT 
 };
 
 float SRC_move_lightsource(
