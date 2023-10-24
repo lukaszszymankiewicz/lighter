@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "entity.h"
+#include "components.h"
 #include "entity_manager.h"
 #include "geometry.h"
 #include "global.h"
@@ -8,20 +9,17 @@
 #include "segment.h"
 #include "scene.h"
 
-entity_manager_t* ENTMAN_new(
+void ENTMAN_init(
 ) {
-    entity_manager_t* entity_manager  = NULL;
-    entity_manager                    = (entity_manager_t*)malloc(sizeof(entity_manager_t));
+    entity_manager = NULL;
+    entity_manager = (entity_manager_t*)malloc(sizeof(entity_manager_t));
 
     for (int i=0; i<MAX_ENTITY; i++) {
         entity_manager->entities[i]   = NULL;
     }
-
-    return entity_manager;
 }
 
 void ENTMAN_add_entity(
-    entity_manager_t* entity_manager,
     int               x_tile,
     int               y_tile,
     int               id
@@ -38,20 +36,18 @@ void ENTMAN_add_entity(
 }
 
 entity_t* ENTMAN_get(
-    entity_manager_t* entity_manager,
     int id
 ) {
     return entity_manager->entities[id];
 }
 
+// TODO: make it parametrizable
 int ENTMAN_hero_x(
-    entity_manager_t* entity_manager
 ) {
     return entity_manager->entities[ENTITY_HERO]->x;
 }
 
 int ENTMAN_hero_y(
-    entity_manager_t* entity_manager
 ) {
     return entity_manager->entities[ENTITY_HERO]->y;
 }
@@ -89,7 +85,6 @@ void ENTMAN_apply_collision(
 // smaller ranges
 // TODO: calc middle point of entity to be sure that if fits into check range
 bool ENTMAN_entity_in_range(
-    entity_manager_t* entity_manager,
     entity_t*         entity,
     int               range_x,
     int               range_y
@@ -108,28 +103,24 @@ bool ENTMAN_entity_in_range(
 }
 
 bool ENTMAN_entity_in_update_range(
-    entity_manager_t* entity_manager,
     entity_t*         entity
 ) {
-    return (ENTMAN_entity_in_range(entity_manager, entity, ENTITY_UPDATE_X_RANGE, ENTITY_UPDATE_X_RANGE));
+    return (ENTMAN_entity_in_range(entity, ENTITY_UPDATE_X_RANGE, ENTITY_UPDATE_X_RANGE));
 }
 
 bool ENTMAN_entity_in_light_update_range(
-    entity_manager_t* entity_manager,
     entity_t*         entity
 ) {
-    return (ENTMAN_entity_in_range(entity_manager, entity, ENTITY_UPDATE_LIGHT_X_RANGE, ENTITY_UPDATE_LIGHT_Y_RANGE));
+    return (ENTMAN_entity_in_range(entity, ENTITY_UPDATE_LIGHT_X_RANGE, ENTITY_UPDATE_LIGHT_Y_RANGE));
 }
 
 bool ENTMAN_entity_in_draw_range(
-    entity_manager_t* entity_manager,
     entity_t*         entity
 ) {
-    return (ENTMAN_entity_in_range(entity_manager, entity, ENTITY_UPDATE_DRAW_X_RANGE, ENTITY_UPDATE_DRAW_Y_RANGE));
+    return (ENTMAN_entity_in_range(entity, ENTITY_UPDATE_DRAW_X_RANGE, ENTITY_UPDATE_DRAW_Y_RANGE));
 }
 
 void ENTMAT_update(
-    entity_manager_t* entity_manager,
     segment_t*        obstacles
 ) {
     for (int i=0; i<MAX_ENTITY; i++) {
@@ -139,7 +130,7 @@ void ENTMAT_update(
 
         if (!entity) { continue; }
 
-        if (ENTMAN_entity_in_update_range(entity_manager, entity)) {
+        if (ENTMAN_entity_in_update_range(entity)) {
             ENTMAN_apply_collision(obstacles, entity);
             ENT_update(entity); 
             ENT_resolve(entity);
@@ -167,7 +158,6 @@ segment_t* ENTMAN_light_obstacles(
 }
 
 void ENTMAN_calc_single_entity_light(
-    entity_manager_t* entity_manager,
     entity_t*         entity,
     segment_t*        obstacles
 ) {
@@ -186,7 +176,8 @@ void ENTMAN_calc_single_entity_light(
 
     float angle          = ENT_light_angle(entity);
     float wobble_corr    = ENT_wobble_coef(entity);
-
+    
+    // TODO: add all light polygons
     // for (int i=0; i<light->n_poly; i++) {
     for (int i=0; i<1; i++) {
         LIG_draw_polygon(emit_x, emit_y, i, angle, wobble_corr, light, obs);
@@ -196,7 +187,6 @@ void ENTMAN_calc_single_entity_light(
 }
 
 void ENTMAN_calc_light(
-    entity_manager_t* entity_manager,
     segment_t*        obstacles
 ) {
     // for (int i=0; i<MAX_ENTITY; i++) {
@@ -206,15 +196,14 @@ void ENTMAN_calc_light(
 
         if (!entity) { continue; }
 
-        if (ENTMAN_entity_in_light_update_range(entity_manager, entity)) {
-            ENTMAN_calc_single_entity_light(entity_manager, entity, obstacles);
-            ENTMAN_calc_single_entity_light(entity_manager, entity->hold, obstacles);
+        if (ENTMAN_entity_in_light_update_range(entity)) {
+            ENTMAN_calc_single_entity_light(entity, obstacles);
+            ENTMAN_calc_single_entity_light(entity->hold, obstacles);
         }
     }
 }
 
 void ENTMAN_draw(
-    entity_manager_t* entity_manager
 ) {
     for (int i=0; i<MAX_ENTITY; i++) {
 
@@ -223,7 +212,7 @@ void ENTMAN_draw(
 
         if (!entity) { continue; }
 
-        if (ENTMAN_entity_in_draw_range(entity_manager, entity)) {
+        if (ENTMAN_entity_in_draw_range(entity)) {
             ENT_draw(entity);
 
             if (entity->hold) {
@@ -234,7 +223,6 @@ void ENTMAN_draw(
 }
 
 void ENTMAN_free(
-    entity_manager_t* entity_manager
 ) { 
     for (int i=0; i<MAX_ENTITY; i++) {
         if (entity_manager->entities[i] == NULL) {

@@ -22,6 +22,9 @@ void TIMER_pause(game_timer_t *timer);
 void TIMER_unpause(game_timer_t *timer);
 void TIMER_free(game_timer_t *timer);
 
+void TIMER_init_fps_timer();
+void TIMER_init_cap_timer();
+
 bool TIMER_is_started(game_timer_t *timer);
 bool TIMER_is_paused(game_timer_t *timer);
 

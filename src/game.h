@@ -5,29 +5,30 @@
 #ifndef GAME_H
 #define GAME_H
 
-#define GFX_INITIALIZERS_N 2 
 
-enum GRAPHIC_OPTION {
-    GRAPHIC_OFF,
-    GRAPHIC_ON
-};
+typedef struct game_config {
+  int               max_frames;
+  bool              use_gfx;
+  int               level_id;
+} game_config_t;
 
 typedef struct game {
   bool               loop;                  // main game loop
   int                frame;                 // current number of game frame
   int                frame_ticks;           // ticks passed
-  int                max_frames; 
 
-  void              (*draw_func)(struct game *g);
+  game_config_t      config;
 
+  // TODO: make level global
   game_timer_t      *fps_timer;            // FPS timer
   game_timer_t      *cap_timer;            // capping timer (for equall length in-game frame)
 
+  // TODO: make level global
   level_t           *level;                // level
-  entity_manager_t  *entity_manager;
+  // TODO: make event manager
   SDL_Event          event;                // SDL event (keyboard, mouse etc)
 } game_t;
 
-void GAME_run(int level_id, int graphic_option, int max_frames);
+void GAME_run(game_config_t config);
 
 #endif

@@ -35,9 +35,7 @@ typedef struct scene {
     layer_t            layers[MAX_LAYERS_ON_SCENE];
 } scene_t; 
 
-extern scene_t *scene;
-
-void SCENE_new();
+void SCENE_init();
 void SCENE_clear();
 void SCENE_add_layer(int layer, int shader_id, int mode);
 void SCENE_add_buffer_layer(int layer, int shader_id, int mode);

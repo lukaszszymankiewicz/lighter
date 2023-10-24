@@ -3,6 +3,7 @@
 
 #include "data/library.h"
 
+#include "components.h"
 #include "controller.h"
 #include "entity_manager.h"
 #include "game.h"
@@ -17,12 +18,14 @@
 #include "scene.h"
 #include "timer.h"
 
-void GAME_create_library(
+game_t *game      = NULL;
+
+void GAME_init_library(
 ) {
     LIB_create_all();
 }
 
-void GAME_read_modules(
+void GAME_init_modules(
 ) {
     LIB_init_all_modules();
 }
@@ -46,26 +49,25 @@ void GAME_update_events(
     game_t *game
 ) {
     GAME_handle_SDL_events(game);
-    CON_update(keyboard);
+    CON_update();
 }
 
 void GAME_close(
     game_t *game
 ) {
     GAME_free_all_files();
-    CON_free(keyboard);
+    CON_free();
     TIMER_free(game->cap_timer);
     TIMER_free(game->fps_timer);
-    ENTMAN_free(game->entity_manager);
+    ENTMAN_free();
     LVL_free(game->level);
     free(game);
     GFX_free();
     SDL_Quit();
-    SCENE_free(scene);
+    SCENE_free();
 };
 
-void GAME_init_entities(
-    game_t *game
+void GAME_fill_entities(
 ) {
     int n_fills = LVL_n_entity_fills(game->level);
 
@@ -75,34 +77,30 @@ void GAME_init_entities(
         int y            = levels_library[blueprint_id]->entities[i].y;
         int id           = levels_library[blueprint_id]->entities[i].id;
 
-        ENTMAN_add_entity(game->entity_manager, x, y, id);
+        ENTMAN_add_entity(x, y, id);
     }
 }
 
-game_t* GAME_init(
-    int level_id,
-    int max_frames
+void GAME_init_global_components(
 ) {
-    game_t* game         = NULL;
+    CON_init();
+    ENTMAN_init();
+    TIMER_init_fps_timer();
+    TIMER_init_cap_timer();
+    SCENE_init();
+}
+
+void GAME_init(
+    game_config_t config
+) {
     game                 = (game_t*)malloc(sizeof(game_t));
 
-    game->max_frames     = max_frames;
-
-    keyboard             = CON_init();
-
     game->loop           = true;
-    game->entity_manager = ENTMAN_new();
-    
-    game->level          = NULL;
-    game->level          = LVL_new(level_id);
-
     game->frame          = 0;
-    game->fps_timer      = TIMER_new();
-    game->cap_timer      = TIMER_new();
 
-    TIMER_start(game->fps_timer);
+    game->level          = NULL;
+    game->level          = LVL_new(game->config.level_id);
 
-    return game;
 };
 
 void GAME_update_ticks(
@@ -127,31 +125,22 @@ void GAME_delay_frame(
     }
 }
 
-void GAME_start_cap_time(
-    game_t* game
-) {
-    TIMER_start(game->cap_timer);
-}
-
 void GAME_update_entities(
     game_t *game
 ) {
-    ENTMAT_update(game->entity_manager, game->level->obstacle_segments);
+    ENTMAT_update(game->level->obstacle_segments);
 }
 
 void GAME_draw_light(
-    game_t* game
 ) {
-    ENTMAN_calc_light(
-        game->entity_manager,
-        game->level->obstacle_segments
-    );
+    ENTMAN_calc_light(game->level->obstacle_segments);
 }
 
 void GAME_start_time(
     game_t* game
 ) {
-    GAME_start_cap_time(game);
+    TIMER_start(fps_timer);
+    TIMER_start(cap_timer);
 }
 
 void GAME_apply_logic(
@@ -162,42 +151,34 @@ void GAME_apply_logic(
 }
 
 void GAME_set_camera(
-    game_t* game
 ) {
-    printf("hero x and y: %d %d \n", ENTMAN_hero_x(game->entity_manager), ENTMAN_hero_y(game->entity_manager));
-    camera_x = ENTMAN_hero_x(game->entity_manager) - SCREEN_WIDTH / 2;
-    camera_y = ENTMAN_hero_y(game->entity_manager) - SCREEN_HEIGHT / 2;
+    // TODO: make it better
+    camera_x = ENTMAN_hero_x() - SCREEN_WIDTH / 2;
+    camera_y = ENTMAN_hero_y() - SCREEN_HEIGHT / 2;
 }
 
 void GAME_draw_everything(
-    game_t* game
 ) {
     SCENE_clear();
-    GAME_set_camera(game);
+    GAME_set_camera();
 
     SCENE_activate_layer(LAYER_TILE);
     LVL_draw(game->level);
 
     SCENE_activate_layer(LAYER_SPRITE);
-    // TODO: manager as global component
-    ENTMAN_draw(game->entity_manager);
+    ENTMAN_draw();
 
     SCENE_activate_layer(LAYER_LIGHT);
-    GAME_draw_light(game);
+    GAME_draw_light();
 
     // POST_draw();
     SCENE_draw();
     GFX_update();
 }
 
-void GAME_draw_nothing(
-    game_t* game
-) { }
-
-void GAME_init_scene(
+void GAME_fill_scene(
 ) {
-    SCENE_new(); // create scene
-    POST_set();  // set postprocess effects
+    POST_set();
 
     SCENE_add_layer(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
     SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
@@ -205,36 +186,23 @@ void GAME_init_scene(
     // SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
 }
 
-void GAME_init_level(
-    game_t *game
+void GAME_fill_level(
 ) {
     LVL_fill(game->level);
     LVL_analyze(game->level);
 }
 
 game_t* GAME_new(
-    int level_id,
-    int graphic_option,
-    int max_frames
+    game_config_t config
 ) {
-    game_t *game      = NULL;
-    
-    // TODO: read-> init, create ->init
-    GAME_read_modules();
-    GAME_create_library();
+    GAME_init(config);
+    GAME_init_global_components();
+    GAME_init_modules();
+    GAME_init_library();
 
-    game              = GAME_init(level_id, max_frames);
-    
-    // TODO: config should do this, also be not afraid of one more `if` for each frame
-    if(graphic_option == GRAPHIC_ON) {
-        game->draw_func = &GAME_draw_everything; 
-    } else {
-        game->draw_func = &GAME_draw_nothing; 
-    }
-
-    GAME_init_scene();
-    GAME_init_entities(game);
-    GAME_init_level(game);
+    GAME_fill_scene();
+    GAME_fill_entities();
+    GAME_fill_level();
 
     return game;
 }
@@ -242,7 +210,7 @@ game_t* GAME_new(
 void GAME_draw(
     game_t* game
 ) {
-    game->draw_func(game);
+    GAME_draw_everything(); 
 }
 
 void GAME_update_time(
@@ -253,6 +221,11 @@ void GAME_update_time(
     GAME_delay_frame(game);
 }
 
+bool GAME_shold_run(
+) {
+    return (game->loop) && (game->frame != game->config.max_frames);
+}
+
 void GAME_loop(
     game_t* game
 ) {
@@ -260,24 +233,19 @@ void GAME_loop(
         return;
     }
 
-    while((game->loop) && (game->frame != game->max_frames)) {
+    while( GAME_shold_run() ) {
         GAME_start_time(game);
         GAME_apply_logic(game);
         GAME_draw(game);
         GAME_update_time(game);
         // game->loop = false;
     }
-
-    return;
 }
 
 void GAME_run(
-    int level_id,
-    int graphic_option,
-    int max_frames
+    game_config_t config
 ) {
-    game_t* game = NULL;
-    game         = GAME_new(level_id, graphic_option, max_frames);
+    game         = GAME_new(config);
     GAME_loop(game);
     GAME_close(game);
 }

@@ -11,9 +11,6 @@
 #include "render.h"
 #include "scene.h"
 
-scene_t *scene = NULL;
-
-// TODO: TBD
 #define RECT_VERTICES_ROWS 6
 #define RECT_VERTICES_COLS 2
 #define COORD_PER_POLYGON_VERTEX 2
@@ -115,8 +112,9 @@ void SCENE_add_buffer_layer(
     scene->layers[layer].framebuffer->id = DEFAULT_FRAMEBUFFER;
 }
 
-void SCENE_new(
+void SCENE_init(
 ) {
+    scene            = NULL;
     scene            = (scene_t*)malloc(sizeof(scene_t));
     scene->n_layers  = 0;
     scene->cur_layer = -1;
@@ -233,10 +231,8 @@ array_t polygon_coord_to_matrix(
 ) {
     array_t arr = MAT_new((int)len/COORD_PER_POLYGON_VERTEX, (int)COORD_PER_POLYGON_VERTEX);
 
-    printf("polygon \n");
     for (int i=0; i<len; i++) {
-        arr.values[i]=coords[i];
-        printf("%f \n", coords[i]);
+        arr.values[i]=(float)coords[i];
     }
     
     free(coords);
@@ -257,12 +253,6 @@ array_t coord_to_matrix(
     arr.values[8 ]=x2; arr.values[9 ]=y1;
     arr.values[10]=x1; arr.values[11]=y1;
 
-    printf("gl coords ordered to be drawn: %f %f -> %f %f \n", 
-        ((2.0 * (x1 - (float)camera_x) / 320.0) - 1.0),
-        ((2.0 * (y1 - (float)camera_y) / 240.0) - 1.0),
-        ((2.0 * (x2 - (float)camera_x) / 320.0) - 1.0),
-        ((2.0 * (y2 - (float)camera_y) / 240.0) - 1.0)
-    );
     return arr;
 }
 
@@ -297,13 +287,6 @@ void SCENE_draw_texture(
     int corr_w = (int)(flip_w) * w;
     int corr_h = (int)(flip_h) * h;
     
-    printf("texture ordered to be drawn: %d %d -> %d %d \n", 
-        draw_x + 0,
-        draw_y + 0,
-        draw_x + w,
-        draw_y + h
-    );
-
     array_t pos_arr = coord_to_matrix(
         (float)(draw_x + 0),
         (float)(draw_y + 0),
@@ -311,10 +294,6 @@ void SCENE_draw_texture(
         (float)(draw_y + h)
     );
     array_t tex_arr = coord_to_matrix(
-        // (float)(clip_x + w - corr_w) / (float)tex_w,
-        // (float)(clip_y + h - corr_h) / (float)tex_h,
-        // (float)(clip_x + 0 + corr_w) / (float)tex_w,
-        // (float)(clip_y + 0 + corr_h) / (float)tex_h
         (float)(clip_x + 0 + corr_w) / (float)tex_w,
         (float)(clip_y + h         ) / (float)tex_h,
         (float)(clip_x + w - corr_w) / (float)tex_w,

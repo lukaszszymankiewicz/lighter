@@ -43,6 +43,7 @@ OBJS =                                     \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o       \
 	$(BUILDDIR)/animation.o                \
 	$(BUILDDIR)/controller.o               \
+	$(BUILDDIR)/components.o               \
 	$(BUILDDIR)/entity.o                   \
 	$(BUILDDIR)/entity_manager.o           \
 	$(BUILDDIR)/game.o                     \

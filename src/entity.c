@@ -486,11 +486,11 @@ void ENT_move(
 void ENT_update_control(
     entity_t *entity
 ) {
-    if (CON_button_still_pressed(keyboard, SDL_SCANCODE_W)) {
+    if (CON_button_still_pressed(SDL_SCANCODE_W)) {
         ENT_direct_holdable_upwards(entity->hold);
     }
 
-    else if (CON_button_still_pressed(keyboard, SDL_SCANCODE_S)) {
+    else if (CON_button_still_pressed(SDL_SCANCODE_S)) {
         ENT_direct_holdable_downwards(entity->hold);
     }
 
@@ -498,16 +498,16 @@ void ENT_update_control(
         ENT_direct_holdable_clean(entity->hold, entity->direction);
     }
 
-    if (CON_button_still_pressed(keyboard, SDL_SCANCODE_SPACE)) {
+    if (CON_button_still_pressed(SDL_SCANCODE_SPACE)) {
         ENT_jump(entity);
     }
 
-    if (CON_button_still_pressed(keyboard, SDL_SCANCODE_D)) {
+    if (CON_button_still_pressed(SDL_SCANCODE_D)) {
         ENT_move(entity, RIGHT);
         ENT_change_dir(entity, RIGHT);
     }
 
-    if (CON_button_still_pressed(keyboard, SDL_SCANCODE_A)) {
+    if (CON_button_still_pressed(SDL_SCANCODE_A)) {
         ENT_move(entity, LEFT);
         ENT_change_dir(entity, LEFT);
     }

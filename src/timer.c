@@ -1,9 +1,11 @@
+#include <SDL2/SDL.h>
+
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <SDL2/SDL.h>
-
 #include "timer.h"
+#include "components.h"
+
 
 // Basically the https://lazyfoo.net/tutorials/SDL/25_capping_frame_rate/index.php 
 game_timer_t* TIMER_new(
@@ -84,6 +86,16 @@ bool TIMER_is_paused(
     game_timer_t *timer
 ) {
     return timer->paused && timer->started;
+}
+
+void TIMER_init_fps_timer(
+) {
+    fps_timer      = TIMER_new();
+}
+
+void TIMER_init_cap_timer(
+) {
+    cap_timer      = TIMER_new();
 }
 
 void TIMER_free( 

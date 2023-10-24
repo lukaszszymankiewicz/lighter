@@ -1,27 +1,22 @@
-#include <stdio.h>
+#include <stdbool.h>
 
 #include "game.h"
 
-int graphic_option    = GRAPHIC_ON;
-int defult_level      = 0;
-int defult_max_frames = -1;
+#define  graphic_on         true
+#define  graphic_off        false
+#define  defult_level       0
+#define  defult_max_frames -1
+#define  GAME_COMPLETE      0
 
-const char* GRAPHIC_OFF_ARG = "gfx_off";
-const char* RUN_ONE_FRAME   = "one_frame";
+game_config_t default_config = (game_config_t) {
+    defult_max_frames,
+    graphic_on,
+    defult_level      
+};
 
 int main(
-    int argc,
-    char* args[]
 ) {
-    if ((argc > 1) && (strcmp(args[1], GRAPHIC_OFF_ARG) == 0)) {
-        graphic_option = GRAPHIC_OFF;
-    }
+    GAME_run(default_config);
 
-    if ((argc > 2) && (strcmp(args[2], RUN_ONE_FRAME) == 0)) {
-        defult_max_frames = 1;
-    }
-
-    GAME_run(defult_level, graphic_option, defult_max_frames);
-
-    return 0;
+    return GAME_COMPLETE;
 }
