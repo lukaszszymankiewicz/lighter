@@ -1,8 +1,8 @@
-#include "library.h"
+#include "modules.h"
 
 #include "../gfx.h"
 
-gfx_module_t* gfx_module_library[GFX_MODULE_ALL] = { NULL };
+gfx_module_t* gfx_modules[GFX_MODULE_ALL] = { NULL };
 
 gfx_module_blueprint_t init_sdl_gl     = (gfx_module_blueprint_t){ GFX_init_sdl_with_gl };
 gfx_module_blueprint_t init_window     = (gfx_module_blueprint_t){ GFX_init_window };
@@ -12,7 +12,7 @@ gfx_module_blueprint_t init_gl_params  = (gfx_module_blueprint_t){ GFX_init_gl_p
 gfx_module_blueprint_t init_png        = (gfx_module_blueprint_t){ GFX_init_png };
 gfx_module_blueprint_t viewport        = (gfx_module_blueprint_t){ GFX_set_viewport };
 
-gfx_module_t* LIB_init_gfx_module(
+gfx_module_t* MOD_init_gfx_module(
     bool       (*fun)()
 ) {
     gfx_module_t* module = NULL;
@@ -23,19 +23,22 @@ gfx_module_t* LIB_init_gfx_module(
     return module;
 }
 
-void LIB_init_gfx_modules(
+void MOD_init_gfx(
 ) {
-    gfx_module_library[GFX_MODULE_SDL_GL]     = LIB_init_gfx_module(init_sdl_gl.fun);
-    gfx_module_library[GFX_MODULE_WINDOW]     = LIB_init_gfx_module(init_window.fun);
-    gfx_module_library[GFX_MODULE_GL_CONTEXT] = LIB_init_gfx_module(init_gl_context.fun);
-    gfx_module_library[GFX_MODULE_GLEW]       = LIB_init_gfx_module(init_glew.fun);
-    gfx_module_library[GFX_MODULE_GL_PARAMS]  = LIB_init_gfx_module(init_gl_params.fun);
-    gfx_module_library[GFX_MODULE_PNG]        = LIB_init_gfx_module(init_png.fun);
-    gfx_module_library[GFX_VIEWPORT]          = LIB_init_gfx_module(viewport.fun);
-
+    gfx_modules[GFX_MODULE_SDL_GL]     = MOD_init_gfx_module(init_sdl_gl.fun);
+    gfx_modules[GFX_MODULE_WINDOW]     = MOD_init_gfx_module(init_window.fun);
+    gfx_modules[GFX_MODULE_GL_CONTEXT] = MOD_init_gfx_module(init_gl_context.fun);
+    gfx_modules[GFX_MODULE_GLEW]       = MOD_init_gfx_module(init_glew.fun);
+    gfx_modules[GFX_MODULE_GL_PARAMS]  = MOD_init_gfx_module(init_gl_params.fun);
+    gfx_modules[GFX_MODULE_PNG]        = MOD_init_gfx_module(init_png.fun);
+    gfx_modules[GFX_VIEWPORT]          = MOD_init_gfx_module(viewport.fun);
 }
 
-void LIB_init_all_modules(
+void MOD_init(
+    bool use_gfx
 ) {
-    LIB_init_gfx_modules();
+    if (!use_gfx) {
+        return;
+    }
+    MOD_init_gfx();
 }

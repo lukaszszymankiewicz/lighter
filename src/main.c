@@ -14,9 +14,15 @@ game_config_t default_config = (game_config_t) {
     defult_level      
 };
 
+game_config_t no_gfx_config = (game_config_t) {
+    defult_max_frames,
+    graphic_off,
+    defult_level      
+};
+
 int main(
 ) {
-    GAME_run(default_config);
+    GAME_run(no_gfx_config);
 
     return GAME_COMPLETE;
 }

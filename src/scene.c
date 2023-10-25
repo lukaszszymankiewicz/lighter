@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "components.h"
 #include "gfx.h"
 #include "gl_util.h"
 #include "global.h"

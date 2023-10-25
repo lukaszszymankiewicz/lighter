@@ -19,12 +19,6 @@ typedef struct game {
 
   game_config_t      config;
 
-  // TODO: make level global
-  game_timer_t      *fps_timer;            // FPS timer
-  game_timer_t      *cap_timer;            // capping timer (for equall length in-game frame)
-
-  // TODO: make level global
-  level_t           *level;                // level
   // TODO: make event manager
   SDL_Event          event;                // SDL event (keyboard, mouse etc)
 } game_t;

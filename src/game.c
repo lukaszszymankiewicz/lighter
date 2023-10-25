@@ -2,9 +2,11 @@
 #include <stdio.h>
 
 #include "data/library.h"
+#include "modules/modules.h"
 
 #include "components.h"
 #include "controller.h"
+#include "level_manager.h"
 #include "entity_manager.h"
 #include "game.h"
 #include "gfx.h"
@@ -20,134 +22,61 @@
 
 game_t *game      = NULL;
 
-void GAME_init_library(
-) {
-    LIB_create_all();
-}
-
-void GAME_init_modules(
-) {
-    LIB_init_all_modules();
-}
-
-void GAME_free_all_files(
-) {
-    LIB_free_all();
-}
-
+// TODO: make event_manager
 void GAME_handle_SDL_events(
-    game_t *game
 ) {
-  while (SDL_PollEvent(&(game->event)) != 0) {
-    if (game->event.type == SDL_QUIT) { 
-        game->loop = false; 
+    while (SDL_PollEvent(&(game->event)) != 0) {
+        if (game->event.type == SDL_QUIT) { 
+            game->loop = false; 
         }
     }
 }
 
 void GAME_update_events(
-    game_t *game
 ) {
-    GAME_handle_SDL_events(game);
+    GAME_handle_SDL_events();
     CON_update();
 }
 
 void GAME_close(
-    game_t *game
 ) {
-    GAME_free_all_files();
+    LIB_free_all();
     CON_free();
-    TIMER_free(game->cap_timer);
-    TIMER_free(game->fps_timer);
+    TIMER_free(cap_timer);
+    TIMER_free(fps_timer);
     ENTMAN_free();
-    LVL_free(game->level);
+    LVL_free(level_manager->level);
     free(game);
     GFX_free();
     SDL_Quit();
-    SCENE_free();
-};
 
-void GAME_fill_entities(
-) {
-    int n_fills = LVL_n_entity_fills(game->level);
-
-    for (int i=0; i<n_fills; i++) {
-        int blueprint_id = game->level->blueprint_id;
-        int x            = levels_library[blueprint_id]->entities[i].x;
-        int y            = levels_library[blueprint_id]->entities[i].y;
-        int id           = levels_library[blueprint_id]->entities[i].id;
-
-        ENTMAN_add_entity(x, y, id);
+    if (game->config.use_gfx) {
+        SCENE_free();
     }
-}
-
-void GAME_init_global_components(
-) {
-    CON_init();
-    ENTMAN_init();
-    TIMER_init_fps_timer();
-    TIMER_init_cap_timer();
-    SCENE_init();
-}
+};
 
 void GAME_init(
-    game_config_t config
 ) {
     game                 = (game_t*)malloc(sizeof(game_t));
-
     game->loop           = true;
     game->frame          = 0;
-
-    game->level          = NULL;
-    game->level          = LVL_new(game->config.level_id);
-
 };
 
-void GAME_update_ticks(
-    game_t* game
-) {
-    game->frame_ticks = TIMER_get_ticks(game->cap_timer);
-}
-
-void GAME_update_frame(
-    game_t* game
-) {
-    if(game->frame_ticks < SCREEN_TICKS_PER_FRAME) {
-        game->frame++;
-    }
-}
-
-void GAME_delay_frame(
-    game_t* game
-) {
-    if(game->frame_ticks < SCREEN_TICKS_PER_FRAME) {
-        SDL_Delay(SCREEN_TICKS_PER_FRAME - game->frame_ticks);
-    }
-}
-
 void GAME_update_entities(
-    game_t *game
 ) {
-    ENTMAT_update(game->level->obstacle_segments);
-}
-
-void GAME_draw_light(
-) {
-    ENTMAN_calc_light(game->level->obstacle_segments);
+    ENTMAT_update(level_manager->level->obstacle_segments);
 }
 
 void GAME_start_time(
-    game_t* game
 ) {
     TIMER_start(fps_timer);
     TIMER_start(cap_timer);
 }
 
 void GAME_apply_logic(
-    game_t* game
 ) {
-    GAME_update_events(game);
-    GAME_update_entities(game);
+    GAME_update_events();
+    GAME_update_entities();
 }
 
 void GAME_set_camera(
@@ -159,17 +88,21 @@ void GAME_set_camera(
 
 void GAME_draw_everything(
 ) {
+    if (!(game->config.use_gfx)) {
+        return;
+    }
+
     SCENE_clear();
     GAME_set_camera();
 
     SCENE_activate_layer(LAYER_TILE);
-    LVL_draw(game->level);
+    LVL_draw(level_manager->level);
 
     SCENE_activate_layer(LAYER_SPRITE);
     ENTMAN_draw();
 
     SCENE_activate_layer(LAYER_LIGHT);
-    GAME_draw_light();
+    ENTMAN_calc_light(level_manager->level->obstacle_segments);
 
     // POST_draw();
     SCENE_draw();
@@ -186,39 +119,32 @@ void GAME_fill_scene(
     // SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
 }
 
-void GAME_fill_level(
-) {
-    LVL_fill(game->level);
-    LVL_analyze(game->level);
-}
-
-game_t* GAME_new(
+void GAME_new(
     game_config_t config
 ) {
-    GAME_init(config);
-    GAME_init_global_components();
-    GAME_init_modules();
-    GAME_init_library();
+    GAME_init();
+    COMPONENTS_init();
+
+    MOD_init(config.use_gfx);
+    LIB_init(config.use_gfx);
 
     GAME_fill_scene();
-    GAME_fill_entities();
-    GAME_fill_level();
-
-    return game;
-}
-
-void GAME_draw(
-    game_t* game
-) {
-    GAME_draw_everything(); 
+    LVLMAN_fill(config.level_id);
 }
 
 void GAME_update_time(
-    game_t* game
 ) {
-    GAME_update_ticks(game);
-    GAME_update_frame(game);
-    GAME_delay_frame(game);
+    // update ticks
+    game->frame_ticks = TIMER_get_ticks(cap_timer);
+    
+    // update frame
+    if(game->frame_ticks < SCREEN_TICKS_PER_FRAME) {
+        game->frame++;
+    }
+    // delay frame if needed
+    if(game->frame_ticks < SCREEN_TICKS_PER_FRAME) {
+        SDL_Delay(SCREEN_TICKS_PER_FRAME - game->frame_ticks);
+    }
 }
 
 bool GAME_shold_run(
@@ -227,17 +153,16 @@ bool GAME_shold_run(
 }
 
 void GAME_loop(
-    game_t* game
 ) {
     if (!game) {
         return;
     }
 
-    while( GAME_shold_run() ) {
-        GAME_start_time(game);
-        GAME_apply_logic(game);
-        GAME_draw(game);
-        GAME_update_time(game);
+    while(GAME_shold_run() ) {
+        GAME_start_time();
+        GAME_apply_logic();
+        GAME_draw_everything(); 
+        GAME_update_time();
         // game->loop = false;
     }
 }
@@ -245,7 +170,7 @@ void GAME_loop(
 void GAME_run(
     game_config_t config
 ) {
-    game         = GAME_new(config);
-    GAME_loop(game);
-    GAME_close(game);
+    GAME_new(config);
+    GAME_loop();
+    GAME_close();
 }

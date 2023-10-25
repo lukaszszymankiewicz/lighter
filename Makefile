@@ -17,6 +17,7 @@ MEMORYLOG = memory_check.txt
 
 BUILDDIR = build
 DATADIR = data
+MODDIR = modules
 
 clear_screen:
 	clear
@@ -31,7 +32,6 @@ $(BUILDDIR)/%.o:	$(TESTDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 OBJS =                                     \
-	$(BUILDDIR)/$(DATADIR)/gfx_modules.o   \
 	$(BUILDDIR)/$(DATADIR)/entities.o      \
 	$(BUILDDIR)/$(DATADIR)/levels.o        \
 	$(BUILDDIR)/$(DATADIR)/library.o       \
@@ -41,6 +41,7 @@ OBJS =                                     \
 	$(BUILDDIR)/$(DATADIR)/tiles.o         \
 	$(BUILDDIR)/$(DATADIR)/tilesets.o      \
 	$(BUILDDIR)/$(DATADIR)/wobbles.o       \
+	$(BUILDDIR)/$(MODDIR)/gfx_modules.o    \
 	$(BUILDDIR)/animation.o                \
 	$(BUILDDIR)/controller.o               \
 	$(BUILDDIR)/components.o               \
@@ -51,6 +52,7 @@ OBJS =                                     \
 	$(BUILDDIR)/geometry.o                 \
 	$(BUILDDIR)/gfx.o                      \
 	$(BUILDDIR)/level.o                    \
+	$(BUILDDIR)/level_manager.o            \
 	$(BUILDDIR)/light.o                    \
 	$(BUILDDIR)/mat.o                      \
     $(BUILDDIR)/render.o                   \
@@ -120,13 +122,13 @@ $(BUILDDIR)/test_suite:	$(TESTOBJS) $(BUILDDIR)/check_tests.o
 clean:
 	rm -f $(BUILDDIR)/*.o
 	rm -f $(BUILDDIR)/$(DATADIR)/*.o
+	rm -f $(BUILDDIR)/$(MODDIR)/*.o
 	rm -f $(BUILDDIR)/$(FINAL_OBJ)
 	rm -f $(BUILDDIR)/$(FINAL_TEST_OBJ)
 	rm $(LEVELLOG)
 	rm $(MEMORYLOG)
 
 # TODO: add creating build/data folder
-
 lighter:  $(BUILDDIR)/lighter
 
 tests:	 $(BUILDDIR)/test_suite

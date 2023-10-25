@@ -2,10 +2,9 @@
 
 #include "library.h"
 
-#include "../gfx.h"
 
-
-void LIB_create_all(
+void LIB_init(
+    bool use_gfx
 ) {
     LIB_create_entity_library();
     LIB_create_wobble_library();
@@ -14,7 +13,10 @@ void LIB_create_all(
     LIB_create_levels_library();
     LIB_create_tile_library();
     LIB_create_tilesets_library();
-    LIB_create_shaders_library();
+
+    if (use_gfx) {
+        LIB_create_shaders_library();
+    }
 }
 
 void LIB_free_all(

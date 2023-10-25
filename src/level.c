@@ -110,7 +110,7 @@ level_t* LVL_new(
     new_level->blueprint_id      = blueprint_id;
     new_level->obstacle_segments = NULL;
 
-    int tileset_id = levels_library[blueprint_id]->tileset_id;
+    int tileset_id               = levels_library[blueprint_id]->tileset_id;
     new_level->tileset_id        = tilesets_library[tileset_id]->id;
 
     return new_level;

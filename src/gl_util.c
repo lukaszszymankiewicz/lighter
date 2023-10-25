@@ -10,12 +10,14 @@ float framebuffer_w       = 1.0;
 float framebuffer_h       = 1.0;
 float pixel_perfect_scale = 1.0;
 
+// TODO: to GFX
 array_t GL_UTIL_id(
     int id
 ) {
     return MAT_scalar_new((float)id);
 }
 
+// TODO: read this from layer params
 array_t GL_UTIL_scale(
 ) {
     return MAT_vec2_new((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
