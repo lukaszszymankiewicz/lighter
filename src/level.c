@@ -323,16 +323,12 @@ void LVL_draw(
             if (!tile) { continue; }
 
             SCENE_draw_texture(
-                tile->x,
-                tile->y,
-                tile->row * TILE_WIDTH,
-                tile->col * TILE_HEIGHT,
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                texture_w,
-                texture_h,
-                false,
-                false,
+                tile->x,                tile->y,
+                TILE_WIDTH,             TILE_HEIGHT,
+                tile->row * TILE_WIDTH, tile->col * TILE_HEIGHT,
+                TILE_WIDTH,             TILE_HEIGHT,
+                texture_w,              texture_h,
+                false,                  false,
                 tileset        
             );
         }

@@ -45,8 +45,9 @@ void SCENE_draw();
 
 void SCENE_draw_texture(
     int   draw_x, int   draw_y,
+    int   draw_h, int   draw_w,
     int   clip_x, int   clip_y,
-    int        w, int        h,
+    int   clip_w, int   clip_h,
     int    tex_w, int    tex_h,
     bool  flip_w, bool  flip_h,
     int  texture

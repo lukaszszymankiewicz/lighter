@@ -649,16 +649,12 @@ void ENT_draw(
     }
     printf("trying to draw entity: %d %d \n", entity->x, entity->y);
     SCENE_draw_texture(
-        entity->x,
-        entity->y,
-        ENT_current_frame(entity).rect.x,
-        ENT_current_frame(entity).rect.y,
-        ENT_current_frame_width(entity),
-        ENT_current_frame_height(entity),
-        ANIM_get_texture_width(ENT_get_animation_sheet(entity)),
-        ANIM_get_texture_height(ENT_get_animation_sheet(entity)),
-        ENT_flip_hor(entity),
-        ENT_flip_ver(entity),
+        entity->x,                             entity->y,
+        ENT_current_frame_width(entity),       ENT_current_frame_height(entity),
+        ENT_current_frame(entity).rect.x,      ENT_current_frame(entity).rect.y,
+        ENT_current_frame_width(entity),       ENT_current_frame_height(entity),
+        ENT_get_animation_sheet(entity).width, ENT_get_animation_sheet(entity).height,
+        ENT_flip_hor(entity),                  ENT_flip_ver(entity),
         ENT_texture_id(entity)
     );
 }

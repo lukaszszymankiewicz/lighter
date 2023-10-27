@@ -279,26 +279,27 @@ void SCENE_draw_polygon(
 
 void SCENE_draw_texture(
     int   draw_x, int   draw_y,
+    int   draw_h, int   draw_w,
     int   clip_x, int   clip_y,
-    int        w, int        h,
+    int   clip_w, int   clip_h,
     int    tex_w, int    tex_h,
     bool  flip_w, bool  flip_h,
     int  texture
 ) {
-    int corr_w = (int)(flip_w) * w;
-    int corr_h = (int)(flip_h) * h;
+    int corr_w = (int)(flip_w) * clip_w;
+    int corr_h = (int)(flip_h) * clip_h;
     
     array_t pos_arr = coord_to_matrix(
-        (float)(draw_x + 0),
-        (float)(draw_y + 0),
-        (float)(draw_x + w),
-        (float)(draw_y + h)
+        (float)(draw_x +      0),
+        (float)(draw_y +      0),
+        (float)(draw_x + draw_w),
+        (float)(draw_y + draw_h)
     );
     array_t tex_arr = coord_to_matrix(
-        (float)(clip_x + 0 + corr_w) / (float)tex_w,
-        (float)(clip_y + h - corr_h) / (float)tex_h,
-        (float)(clip_x + w - corr_w) / (float)tex_w,
-        (float)(clip_y + 0 + corr_h) / (float)tex_h
+        (float)(clip_x +      0 + corr_w) / (float)tex_w,
+        (float)(clip_y + clip_h - corr_h) / (float)tex_h,
+        (float)(clip_x + clip_w - corr_w) / (float)tex_w,
+        (float)(clip_y +      0 + corr_h) / (float)tex_h
     );
     MAT_join(&pos_arr, &tex_arr);
 

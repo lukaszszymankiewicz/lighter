@@ -20,8 +20,12 @@ void POST_draw(
     camera_x = 0; camera_y = 0;
 
     SCENE_draw_texture(
-          0,   0,   0,   0,
-        320, 240, 320, 240,
-        false, true, texture
+          0,   0,
+        320, 240,
+          0,   0,
+        320, 240,
+        320, 240,
+        false, true,
+        texture
     );
 }
