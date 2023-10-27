@@ -7,7 +7,6 @@
 #include "global.h"
 #include "light.h"
 #include "segment.h"
-#include "scene.h"
 
 void ENTMAN_init(
 ) {

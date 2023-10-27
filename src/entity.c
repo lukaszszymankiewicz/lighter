@@ -1,16 +1,15 @@
+#include <stdbool.h>
+
 #include "data/library.h"
 
 #include "animation.h"
 #include "controller.h"
 #include "entity.h"
 #include "geometry.h"
-#include "gl_util.h"
 #include "global.h"
-#include "mat.h"
 #include "scene.h"
 #include "sorted_list.h"
 #include "source.h"
-#include <stdbool.h>
 
 #define ENTITY_RENDER_COUNT        4
 #define MAX_SPRITES                20

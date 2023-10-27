@@ -1,13 +1,9 @@
-#include <math.h>
 #include <stdbool.h>
-#include <stdio.h>
 
 #include "data/library.h"
 
-#include "gl_util.h"
 #include "global.h"
 #include "level.h"
-#include "mat.h"
 #include "scene.h"
 #include "segment.h"
 #include "tile.h"
@@ -306,8 +302,6 @@ void LVL_draw(
 
     int st_x           = (camera_x + ENTITY_DRAW_X_RANGE) / TILE_WIDTH;
     int st_y           = (camera_y + ENTITY_DRAW_Y_RANGE) / TILE_HEIGHT;
-
-    printf("camera %d %d \n", st_x, st_y);
 
     int st_tile_pos_x  = st_x - (SCREEN_WIDTH / TILE_WIDTH / 2) - 2;
     int st_tile_pos_y  = st_y - (SCREEN_HEIGHT / TILE_HEIGHT / 2) -2;

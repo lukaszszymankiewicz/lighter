@@ -1,12 +1,9 @@
 #include "./data/library.h"
 
 #include "geometry.h"
-#include "gl_util.h"
-#include "gfx.h"
 #include "global.h"
 #include "light.h"
 #include "point.h"
-#include "mat.h"
 #include "segment.h"
 #include "source.h"
 #include "scene.h"

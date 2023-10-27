@@ -7,10 +7,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "gfx.h"
-#include "gl_util.h"
 #include "global.h"
 
 #define OPENGL_MAJOR_VERSION 3
