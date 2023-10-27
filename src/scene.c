@@ -296,9 +296,9 @@ void SCENE_draw_texture(
     );
     array_t tex_arr = coord_to_matrix(
         (float)(clip_x + 0 + corr_w) / (float)tex_w,
-        (float)(clip_y + h         ) / (float)tex_h,
+        (float)(clip_y + h - corr_h) / (float)tex_h,
         (float)(clip_x + w - corr_w) / (float)tex_w,
-        (float)(clip_y + 0         ) / (float)tex_h
+        (float)(clip_y + 0 + corr_h) / (float)tex_h
     );
     MAT_join(&pos_arr, &tex_arr);
 

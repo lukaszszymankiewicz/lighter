@@ -56,10 +56,12 @@ void GAME_close(
 };
 
 void GAME_init(
+    game_config_t config
 ) {
     game                 = (game_t*)malloc(sizeof(game_t));
     game->loop           = true;
     game->frame          = 0;
+    game->config         = config;
 };
 
 void GAME_update_entities(
@@ -104,7 +106,9 @@ void GAME_draw_everything(
     SCENE_activate_layer(LAYER_LIGHT);
     ENTMAN_calc_light(level_manager->level->obstacle_segments);
 
-    // POST_draw();
+    SCENE_activate_layer(LAYER_BUFFER);
+    POST_draw();
+
     SCENE_draw();
     GFX_update();
 }
@@ -112,17 +116,17 @@ void GAME_draw_everything(
 void GAME_fill_scene(
 ) {
     POST_set();
-
+    // mode to SCENE
     SCENE_add_layer(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
-    SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE, GL_POLYGON);
+    SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE, GL_TRIANGLES);
     SCENE_add_layer(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
-    // SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
+    SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
 }
 
 void GAME_new(
     game_config_t config
 ) {
-    GAME_init();
+    GAME_init(config);
     COMPONENTS_init();
 
     MOD_init(config.use_gfx);
@@ -163,7 +167,6 @@ void GAME_loop(
         GAME_apply_logic();
         GAME_draw_everything(); 
         GAME_update_time();
-        // game->loop = false;
     }
 }
 

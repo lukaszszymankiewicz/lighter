@@ -20,9 +20,16 @@ game_config_t no_gfx_config = (game_config_t) {
     defult_level      
 };
 
+game_config_t blit_config = (game_config_t) {
+    1,
+    graphic_on,
+    defult_level      
+};
+
 int main(
 ) {
-    GAME_run(no_gfx_config);
+    // GAME_run(blit_config);
+    GAME_run(default_config);
 
     return GAME_COMPLETE;
 }
