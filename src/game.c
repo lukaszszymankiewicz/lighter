@@ -10,7 +10,6 @@
 #include "entity_manager.h"
 #include "game.h"
 #include "gfx.h"
-#include "gl_util.h"
 #include "global.h"
 #include "level.h"
 #include "light.h"
@@ -115,12 +114,11 @@ void GAME_draw_everything(
 
 void GAME_fill_scene(
 ) {
-    POST_set();
-    // mode to SCENE
-    SCENE_add_layer(LAYER_TILE, SHADER_TEXTURE, GL_TRIANGLES);
-    SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE, GL_TRIANGLES);
-    SCENE_add_layer(LAYER_LIGHT, SHADER_LIGHT, GL_POLYGON);
-    SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE, GL_TRIANGLES);
+    // TODO: mode to SCENE
+    SCENE_add_layer(LAYER_TILE, SHADER_TEXTURE);
+    SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE);
+    SCENE_add_layer(LAYER_LIGHT, SHADER_LIGHT);
+    SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE);
 }
 
 void GAME_new(

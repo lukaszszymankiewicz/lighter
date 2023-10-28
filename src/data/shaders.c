@@ -3,7 +3,6 @@
 #include "library.h"
 
 #include "../gfx.h"
-#include "../gl_util.h"
 
 shader_program_t* shader_library[SHADER_ALL] = { NULL };
 

@@ -3,10 +3,38 @@
 
 #include <stdbool.h>
 
-#include "gl_util.h"
-
 #ifndef GFX_H
 #define GFX_H
+
+#define MAX_SHADER_UNIFORMS 4
+
+extern int   camera_x;
+extern int   camera_y;
+extern float framebuffer_w;
+extern float framebuffer_h;
+extern int   pixel_perfect_scale;
+
+typedef struct shader_program {
+    int           program;
+    int           vertex_shader_id;
+    int           fragment_shader_id;
+    int           geometry_shader_id;
+    int           n_uniforms;
+    int           uniform_loc[MAX_SHADER_UNIFORMS];
+    int           uniform_types[MAX_SHADER_UNIFORMS];
+    char         *uniform_names[MAX_SHADER_UNIFORMS];
+    unsigned int  vao;
+    unsigned int  vbo;
+} shader_program_t;
+
+typedef struct framebuffer {
+    unsigned int id;
+    unsigned int texture;
+    unsigned int x0;
+    unsigned int y0;
+    unsigned int w;
+    unsigned int h;
+} framebuffer_t;
 
 shader_program_t* GFX_create_gl_program(
     const char* vertex_shader_path,
@@ -21,7 +49,7 @@ typedef struct texture {
 
 extern SDL_Window *window;
 
-GLuint GFX_generate_texture_ID();
+int GFX_generate_texture_ID();
 
 bool GFX_init_png();
 bool GFX_init_gl_params();

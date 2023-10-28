@@ -1,7 +1,7 @@
+#include "gfx.h"
+
 #ifndef RENDER_H
 #define RENDER_H
-
-#define MAX_SHADER_UNIFORMS 3
 
 void RENDER_shader(
     int      shader,

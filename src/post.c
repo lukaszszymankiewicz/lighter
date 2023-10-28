@@ -1,40 +1,40 @@
-#include <stdbool.h>
-#include <stdlib.h>
-
+#include "gfx.h"
 #include "global.h"
 #include "post.h"
 #include "scene.h"
 
-#include "gl_util.h"
 
-void POST_set(
+int POST_get_screen_multiplication_coef(
+    float w, float h
 ) {
-    GL_UTIL_set_pixelperfect_scale();
+    int scale_w = (int)w / (int)SCREEN_WIDTH;
+    int scale_h = (int)h / (int)SCREEN_HEIGHT;
+
+    return MIN(scale_w, scale_h);
 }
 
 void POST_draw(
 ) {
     int texture          = SCENE_get_layer_buffer_tex(LAYER_BUFFER);
     
-    // camera needs to zero
-    camera_x = 0; camera_y = 0;
+    // force camera to be zero
+    camera_x = 0;
+    camera_y = 0;
+
+    int w = SCENE_get_layer_buffer_width();
+    int h = SCENE_get_layer_buffer_height();
+    int m = POST_get_screen_multiplication_coef(w, h);
+
+    int x0 = (w-SCREEN_WIDTH*m)/2;
+    int y0 = (h-SCREEN_HEIGHT*m)/2;
 
     SCENE_draw_texture(
-          (1138 - 960)/2, (768-720)/2,
-                     960,         720,
-                       0,           0,
-                     320,         240,
-                     320,         240,
-                   false,         true,
+        x0, y0,
+        SCREEN_WIDTH*m, SCREEN_HEIGHT*m,
+        0, 0,
+        SCREEN_WIDTH, SCREEN_HEIGHT,
+        SCREEN_WIDTH, SCREEN_HEIGHT,
+        false, true,
         texture
     );
-    // SCENE_draw_texture(
-    //       0,   0,
-    //     320, 240,
-    //       0,   0,
-    //     320, 240,
-    //     320, 240,
-    //     false, true,
-    //     texture
-    // );
 }

@@ -1,7 +1,5 @@
 #include <SDL2/SDL.h>
 
-#include "gl_util.h"
-
 #ifndef SPRITES_H
 #define SPRITES_H
 

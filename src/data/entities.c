@@ -1,7 +1,6 @@
 #include "library.h"
 
 #include "../animation.h"
-#include "../gl_util.h"
 
 entity_blueprint_t* entity_library[ENTITY_ALL] = {NULL};
 

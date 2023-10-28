@@ -1,7 +1,5 @@
 #include <stdbool.h>
 
-#include "../gl_util.h"
-
 #include "library.h"
 
 tile_blueprint_t *tiles_library[TILE_ALL] = {NULL};

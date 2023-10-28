@@ -3,7 +3,6 @@
 #include "../animation.h"
 #include "../global.h"
 #include "../gfx.h"
-#include "../gl_util.h"
 #include "../level.h"
 #include "../source.h"
 #include "../tile.h"

@@ -29,10 +29,24 @@ int texture_id_counter          = 0;
 int max_buffer_len              = 512;
 int TEXTURE_MODE                = GL_RGB;
 
-GLuint GFX_generate_texture_ID(
+int   camera_x              = 0;
+int   camera_y              = 0;
+float framebuffer_w         = 1.0;
+float framebuffer_h         = 1.0;
+int   pixel_perfect_scale   = 1;
+
+int GFX_generate_texture_ID(
 ) {
     texture_id_counter++;
-    return (GLuint) texture_id_counter;
+    return (int) texture_id_counter;
+}
+
+void GFX_set_pixelperfect_scale(
+) {
+    int pix_scale_w = (int)framebuffer_w / (int)SCREEN_WIDTH;
+    int pix_scale_h = (int)framebuffer_h / (int)SCREEN_HEIGHT;
+
+    pixel_perfect_scale = MIN(pix_scale_w, pix_scale_h);
 }
 
 texture_t* GFX_read_texture(

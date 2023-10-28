@@ -48,7 +48,6 @@ OBJS =                                     \
 	$(BUILDDIR)/entity.o                   \
 	$(BUILDDIR)/entity_manager.o           \
 	$(BUILDDIR)/game.o                     \
-	$(BUILDDIR)/gl_util.o                  \
 	$(BUILDDIR)/geometry.o                 \
 	$(BUILDDIR)/gfx.o                      \
 	$(BUILDDIR)/level.o                    \
@@ -98,7 +97,6 @@ TESTOBJS =                                    \
 	$(BUILDDIR)/game.o                        \
 	$(BUILDDIR)/geometry.o                    \
 	$(BUILDDIR)/gfx.o                         \
-	$(BUILDDIR)/gl_util.o                     \
 	$(BUILDDIR)/render.o                      \
 	$(BUILDDIR)/level.o                       \
 	$(BUILDDIR)/light.o                       \

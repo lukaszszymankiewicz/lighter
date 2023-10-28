@@ -1,12 +1,12 @@
 #include "data/library.h"
 
+#include <GL/gl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
 #include "components.h"
 #include "gfx.h"
-#include "gl_util.h"
 #include "global.h"
 #include "mat.h"
 #include "render.h"
@@ -15,6 +15,12 @@
 #define RECT_VERTICES_ROWS 6
 #define RECT_VERTICES_COLS 2
 #define COORD_PER_POLYGON_VERTEX 2
+
+array_t SCENE_id(
+    int id
+) {
+    return MAT_scalar_new((float)id);
+}
 
 void SCENE_clear(
 ) {
@@ -51,8 +57,7 @@ void SCENE_clear(
 
 void SCENE_add_layer(
     int layer,
-    int shader_id,
-    int mode
+    int shader_id
 ) {
     if (layer>MAX_LAYERS_ON_SCENE || layer<0) { 
         printf("Requested layer exceeds has inproper index number! \n");
@@ -82,18 +87,16 @@ void SCENE_add_layer(
     scene->layers[layer].framebuffer->h       = framebuffer_h;
 
     scene->layers[layer].shader_id = shader_id;
-    scene->layers[layer].mode      = mode;
 
     scene->n_layers++;
 }
 
 void SCENE_add_buffer_layer(
     int layer,
-    int shader_id,
-    int mode
+    int shader_id
 ) {
     // create basic layer
-    SCENE_add_layer(layer, shader_id, mode);
+    SCENE_add_layer(layer, shader_id);
     
     // delete previous framebuffer data
     free(scene->layers[layer].framebuffer);
@@ -164,6 +167,13 @@ void SCENE_set_texture(
     SCENE_add_uniform(arr);
 }
 
+void SCENE_set_mode(
+    GLuint     mode
+) {
+    int j=scene->layers[scene->cur_layer].n_objs;
+    scene->layers[scene->cur_layer].objs[j].mode    = mode;
+}
+
 void SCENE_add_vertices(
     array_t     arr
 ) {
@@ -214,6 +224,16 @@ int SCENE_get_layer_buffer_tex(
     return scene->layers[layer].framebuffer->texture;
 }
 
+int SCENE_get_layer_buffer_width(
+) {
+    return scene->layers[scene->cur_layer].framebuffer->w;
+}
+
+int SCENE_get_layer_buffer_height(
+) {
+    return scene->layers[scene->cur_layer].framebuffer->h;
+}
+
 int SCENE_get_current_object_texture(
 ) {
     int cur_object = SCENE_cur_obj();
@@ -257,6 +277,14 @@ array_t coord_to_matrix(
     return arr;
 }
 
+array_t SCENE_set_scale(
+) {
+    int w = SCENE_get_layer_buffer_width();
+    int h = SCENE_get_layer_buffer_height();
+
+    return MAT_vec2_new(w, h);
+}
+
 void SCENE_draw_polygon(
     float *vertices,
     int   len,
@@ -266,7 +294,7 @@ void SCENE_draw_polygon(
     float a
 ) {
     array_t arr         = polygon_coord_to_matrix(vertices, len);
-    array_t scale_arr   = GL_UTIL_scale();
+    array_t scale_arr   = SCENE_set_scale();
     array_t color_arr   = MAT_vec4_new(r, g, b, a);
     array_t camera_arr  = MAT_vec2_new(camera_x, camera_y);
 
@@ -275,11 +303,12 @@ void SCENE_draw_polygon(
     SCENE_add_uniform(camera_arr);
     SCENE_add_uniform(color_arr);
     SCENE_add_vertices(arr);
+    SCENE_set_mode(GL_POLYGON);
 }
 
 void SCENE_draw_texture(
     int   draw_x, int   draw_y,
-    int   draw_h, int   draw_w,
+    int   draw_w, int   draw_h,
     int   clip_x, int   clip_y,
     int   clip_w, int   clip_h,
     int    tex_w, int    tex_h,
@@ -313,21 +342,22 @@ void SCENE_draw_texture(
 
     SCENE_add_new_drawable_object();
 
-    array_t scale_arr    = GL_UTIL_scale();
-    array_t texture_arr  = GL_UTIL_id(texture);
+    array_t scale_arr    = SCENE_set_scale();
+    array_t texture_arr  = SCENE_id(texture);
     array_t camera_arr   = MAT_vec2_new(camera_x, camera_y);
 
     SCENE_add_uniform(scale_arr);
     SCENE_add_uniform(camera_arr);
     SCENE_set_texture(texture_arr);
     SCENE_add_vertices(pos_arr);
+    SCENE_set_mode(GL_TRIANGLES);
 }
 
 int SCENE_vertices_n(
     int layer,
     int n
 ) {
-    drawable_shader_t obj = scene->layers[layer].objs[n];
+    shader_params_t obj = scene->layers[layer].objs[n];
     return obj.vertices.rows * obj.vertices.cols;
 }
 
@@ -335,7 +365,7 @@ int SCENE_vertices_count(
     int layer,
     int n
 ) {
-    drawable_shader_t obj = scene->layers[layer].objs[n];
+    shader_params_t obj = scene->layers[layer].objs[n];
     return obj.vertices.cols;
 }
 
@@ -359,7 +389,7 @@ void SCENE_draw(
                 SCENE_vertices_n(layer, i),
                 scene->layers[layer].objs[i].uniforms,
                 SCENE_vertices_count(layer, i),
-                scene->layers[layer].mode,
+                scene->layers[layer].objs[i].mode,
                 scene->layers[layer].framebuffer->id,
                 scene->layers[layer].framebuffer->w,
                 scene->layers[layer].framebuffer->h
