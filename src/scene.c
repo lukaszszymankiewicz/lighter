@@ -57,7 +57,8 @@ void SCENE_clear(
 
 void SCENE_add_layer(
     int layer,
-    int shader_id
+    int w,
+    int h
 ) {
     if (layer>MAX_LAYERS_ON_SCENE || layer<0) { 
         printf("Requested layer exceeds has inproper index number! \n");
@@ -83,35 +84,32 @@ void SCENE_add_layer(
     scene->layers[layer].framebuffer->texture = NO_TEXTURE;
     scene->layers[layer].framebuffer->x0      = 0;
     scene->layers[layer].framebuffer->y0      = 0;
-    scene->layers[layer].framebuffer->w       = framebuffer_w;
-    scene->layers[layer].framebuffer->h       = framebuffer_h;
-
-    scene->layers[layer].shader_id = shader_id;
+    scene->layers[layer].framebuffer->w       = w;
+    scene->layers[layer].framebuffer->h       = h;
 
     scene->n_layers++;
 }
 
 void SCENE_add_buffer_layer(
     int layer,
-    int shader_id
+    int w,
+    int h
 ) {
     // create basic layer
-    SCENE_add_layer(layer, shader_id);
+    SCENE_add_layer(layer, w, h);
     
     // delete previous framebuffer data
     free(scene->layers[layer].framebuffer);
 
     // create new framebuffer for current layer
     scene->layers[layer].framebuffer    = NULL;
-    scene->layers[layer].framebuffer    = GFX_create_framebuffer();
+    scene->layers[layer].framebuffer    = GFX_create_framebuffer(w, h);
 
     int new_id = scene->layers[layer].framebuffer->id;
 
     // update previous layers
     for (int l=0; l<layer; l++) {
         scene->layers[l].framebuffer->id = new_id;
-        scene->layers[l].framebuffer->w  = SCREEN_WIDTH;
-        scene->layers[l].framebuffer->h  = SCREEN_HEIGHT;
     }
     scene->layers[layer].framebuffer->id = DEFAULT_FRAMEBUFFER;
 }
@@ -172,6 +170,13 @@ void SCENE_set_mode(
 ) {
     int j=scene->layers[scene->cur_layer].n_objs;
     scene->layers[scene->cur_layer].objs[j].mode    = mode;
+}
+
+void SCENE_set_shader(
+    int     shader_id
+) {
+    int j=scene->layers[scene->cur_layer].n_objs;
+    scene->layers[scene->cur_layer].objs[j].shader_id    = shader_id;
 }
 
 void SCENE_add_vertices(
@@ -304,6 +309,9 @@ void SCENE_draw_polygon(
     SCENE_add_uniform(color_arr);
     SCENE_add_vertices(arr);
     SCENE_set_mode(GL_POLYGON);
+    
+    // TODO: rename SHADER_LIGHT -> SHADER_POLYGON
+    SCENE_set_shader(SHADER_LIGHT);
 }
 
 void SCENE_draw_texture(
@@ -351,6 +359,7 @@ void SCENE_draw_texture(
     SCENE_set_texture(texture_arr);
     SCENE_add_vertices(pos_arr);
     SCENE_set_mode(GL_TRIANGLES);
+    SCENE_set_shader(SHADER_TEXTURE);
 }
 
 int SCENE_vertices_n(
@@ -383,7 +392,7 @@ void SCENE_draw(
             printf("vertices to render: %d\n", SCENE_vertices_n(layer, i));
 
             RENDER_shader(
-                scene->layers[layer].shader_id,
+                scene->layers[layer].objs[i].shader_id,
                 scene->layers[layer].objs[i].texture,
                 scene->layers[layer].objs[i].vertices.values,
                 SCENE_vertices_n(layer, i),

@@ -10,8 +10,10 @@
 
 extern int   camera_x;
 extern int   camera_y;
-extern float framebuffer_w;
-extern float framebuffer_h;
+
+extern float FRAMEBUFFER_WIDTH;
+extern float FRAMEBUFFER_HEIGHT;
+
 extern int   pixel_perfect_scale;
 
 typedef struct shader_program {
@@ -74,6 +76,6 @@ void GFX_free_texture(texture_t* texture);
 int GFX_type_size(GLenum type);
 
 texture_t* GFX_read_texture(const char *filepath);
-framebuffer_t* GFX_create_framebuffer();
+framebuffer_t* GFX_create_framebuffer(int w, int h);
 
 #endif

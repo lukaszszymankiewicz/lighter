@@ -120,8 +120,9 @@ bool ENTMAN_entity_in_draw_range(
 }
 
 void ENTMAT_update(
-    segment_t*        obstacles
 ) {
+    segment_t* obstacles = level_manager->level->obstacle_segments;
+
     for (int i=0; i<MAX_ENTITY; i++) {
         
         entity_t* entity = NULL;
@@ -186,8 +187,9 @@ void ENTMAN_calc_single_entity_light(
 }
 
 void ENTMAN_calc_light(
-    segment_t*        obstacles
 ) {
+    segment_t* obstacles = level_manager->level->obstacle_segments;
+
     // for (int i=0; i<MAX_ENTITY; i++) {
     for (int i=0; i<1; i++) {
         entity_t* entity = NULL;

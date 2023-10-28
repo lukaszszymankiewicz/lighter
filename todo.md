@@ -55,9 +55,9 @@
   - [x] made shader pixel-perfect
   - [x] scale framebuffer for pixel perfect graphic
   - [x] add entity filp
-  - [ ] remove all unnecessary prints
-  - [ ] put camera ideally on center of screen
   - [ ] add transparency to light effect shader
+  - [ ] put camera ideally on center of screen
+  - [ ] remove all unnecessary prints
   - [ ] add stencil buffer
   - [ ] add differ effect
   - [ ] add wobble
@@ -74,5 +74,6 @@ UTIL:
  - [ ] check for unused constants/functions
  - [ ] cleanup Makefile
  - [ ] point/geometry etc to some 'core' module
- - [ ] rethink which of the engine compononests should be an extern
+ - [ ] add event manager
+ - [x] rethink which of the engine compononests should be an extern
    (entity_manager?)

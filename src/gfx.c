@@ -31,8 +31,10 @@ int TEXTURE_MODE                = GL_RGB;
 
 int   camera_x              = 0;
 int   camera_y              = 0;
-float framebuffer_w         = 1.0;
-float framebuffer_h         = 1.0;
+
+float FRAMEBUFFER_WIDTH     = 1.0;
+float FRAMEBUFFER_HEIGHT    = 1.0;
+
 int   pixel_perfect_scale   = 1;
 
 int GFX_generate_texture_ID(
@@ -43,8 +45,8 @@ int GFX_generate_texture_ID(
 
 void GFX_set_pixelperfect_scale(
 ) {
-    int pix_scale_w = (int)framebuffer_w / (int)SCREEN_WIDTH;
-    int pix_scale_h = (int)framebuffer_h / (int)SCREEN_HEIGHT;
+    int pix_scale_w = (int)FRAMEBUFFER_WIDTH / (int)SCREEN_WIDTH;
+    int pix_scale_h = (int)FRAMEBUFFER_WIDTH / (int)SCREEN_HEIGHT;
 
     pixel_perfect_scale = MIN(pix_scale_w, pix_scale_h);
 }
@@ -327,8 +329,8 @@ bool GFX_set_viewport(
     float w = (float)m_viewport[2];
     float h = (float)m_viewport[3];
 
-    framebuffer_w = w;
-    framebuffer_h = h;
+    FRAMEBUFFER_HEIGHT = h;
+    FRAMEBUFFER_WIDTH  = w;
 
     return true;
 }
@@ -410,6 +412,8 @@ void GFX_free(
 };
 
 framebuffer_t* GFX_create_framebuffer(
+    int w,
+    int h
 ) {
     framebuffer_t* framebuffer = NULL;
     framebuffer                = (framebuffer_t*)malloc(sizeof(framebuffer_t));
@@ -444,8 +448,8 @@ framebuffer_t* GFX_create_framebuffer(
     framebuffer->texture = tex;
     framebuffer->x0      = 0;
     framebuffer->y0      = 0;
-    framebuffer->w       = framebuffer_w;
-    framebuffer->h       = framebuffer_h;
+    framebuffer->w       = w;
+    framebuffer->h       = h;
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

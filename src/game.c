@@ -12,8 +12,6 @@
 #include "gfx.h"
 #include "global.h"
 #include "level.h"
-#include "light.h"
-#include "point.h"
 #include "post.h"
 #include "render.h"
 #include "scene.h"
@@ -31,12 +29,6 @@ void GAME_handle_SDL_events(
     }
 }
 
-void GAME_update_events(
-) {
-    GAME_handle_SDL_events();
-    CON_update();
-}
-
 void GAME_close(
 ) {
     LIB_free_all();
@@ -44,6 +36,7 @@ void GAME_close(
     TIMER_free(cap_timer);
     TIMER_free(fps_timer);
     ENTMAN_free();
+    // This function to manager
     LVL_free(level_manager->level);
     free(game);
     GFX_free();
@@ -63,11 +56,6 @@ void GAME_init(
     game->config         = config;
 };
 
-void GAME_update_entities(
-) {
-    ENTMAT_update(level_manager->level->obstacle_segments);
-}
-
 void GAME_start_time(
 ) {
     TIMER_start(fps_timer);
@@ -76,8 +64,11 @@ void GAME_start_time(
 
 void GAME_apply_logic(
 ) {
-    GAME_update_events();
-    GAME_update_entities();
+    // TODO: this to separate function
+    GAME_handle_SDL_events();
+    CON_update();
+    // TODO: this stays
+    ENTMAT_update();
 }
 
 void GAME_set_camera(
@@ -97,13 +88,14 @@ void GAME_draw_everything(
     GAME_set_camera();
 
     SCENE_activate_layer(LAYER_TILE);
+    // TODO: THIs function to level manager
     LVL_draw(level_manager->level);
 
     SCENE_activate_layer(LAYER_SPRITE);
     ENTMAN_draw();
 
     SCENE_activate_layer(LAYER_LIGHT);
-    ENTMAN_calc_light(level_manager->level->obstacle_segments);
+    ENTMAN_calc_light();
 
     SCENE_activate_layer(LAYER_BUFFER);
     POST_draw();
@@ -114,11 +106,10 @@ void GAME_draw_everything(
 
 void GAME_fill_scene(
 ) {
-    // TODO: mode to SCENE
-    SCENE_add_layer(LAYER_TILE, SHADER_TEXTURE);
-    SCENE_add_layer(LAYER_SPRITE, SHADER_TEXTURE);
-    SCENE_add_layer(LAYER_LIGHT, SHADER_LIGHT);
-    SCENE_add_buffer_layer(LAYER_BUFFER, SHADER_TEXTURE);
+    SCENE_add_layer(LAYER_TILE, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SCENE_add_layer(LAYER_SPRITE, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SCENE_add_layer(LAYER_LIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SCENE_add_buffer_layer(LAYER_BUFFER, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 }
 
 void GAME_new(
