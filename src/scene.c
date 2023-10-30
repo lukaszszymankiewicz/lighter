@@ -12,8 +12,8 @@
 #include "render.h"
 #include "scene.h"
 
-#define RECT_VERTICES_ROWS 6
-#define RECT_VERTICES_COLS 2
+#define RECT_VERTICES_ROWS       6
+#define RECT_VERTICES_COLS       2
 #define COORD_PER_POLYGON_VERTEX 2
 
 array_t SCENE_id(
@@ -290,18 +290,23 @@ array_t SCENE_set_scale(
     return MAT_vec2_new(w, h);
 }
 
-// TODO: here everything in ints (colors), then divide to use NDC
 void SCENE_draw_polygon(
     float *vertices,
-    int   len,
-    float r,
-    float g,
-    float b,
-    float a
+    int   n_vertices,
+    int   r,
+    int   g,
+    int   b,
+    int   a
 ) {
+    int    len = n_vertices * COORD_PER_POLYGON_VERTEX;
+    float r_gl = (float)r / COLOR_COEF;
+    float g_gl = (float)g / COLOR_COEF;
+    float b_gl = (float)b / COLOR_COEF;
+    float a_gl = (float)a / COLOR_COEF;
+
     array_t arr         = polygon_coord_to_matrix(vertices, len);
     array_t scale_arr   = SCENE_set_scale();
-    array_t color_arr   = MAT_vec4_new(r, g, b, a);
+    array_t color_arr   = MAT_vec4_new(r_gl, g_gl, b_gl, a_gl);
     array_t camera_arr  = MAT_vec2_new(camera_x, camera_y);
 
     SCENE_add_new_drawable_object();

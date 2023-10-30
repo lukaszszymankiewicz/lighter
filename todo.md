@@ -55,8 +55,9 @@
   - [x] made shader pixel-perfect
   - [x] scale framebuffer for pixel perfect graphic
   - [x] add entity filp
-  - [ ] add transparency to light effect shader
+  - [x] add transparency to light effect shader (test it)
   - [ ] put camera ideally on center of screen
+  - [ ] add proper scene cleaning
   - [ ] remove all unnecessary prints
   - [ ] add stencil buffer
   - [ ] add differ effect

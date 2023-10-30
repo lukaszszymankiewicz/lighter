@@ -28,8 +28,8 @@ game_config_t blit_config = (game_config_t) {
 
 int main(
 ) {
-    // GAME_run(blit_config);
-    GAME_run(default_config);
+    GAME_run(blit_config);
+    // GAME_run(default_config);
 
     return GAME_COMPLETE;
 }

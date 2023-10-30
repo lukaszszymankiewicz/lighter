@@ -11,8 +11,6 @@
 
 #include <stdio.h>
 
-#define LIGHT_RENDER_COUNT        2
-
 // TODO: replace it with function in geometry.h
 // checks if ray intersects with obstacle
 bool LIG_ray_intersect(
@@ -639,17 +637,17 @@ void LIG_draw_polygon(
     lightsource_t   *light,
     segment_t       *obstacles
 ) {
-    vertex_t *vertex   = NULL;
-    float    *coords   = NULL;
-    int       n_coords = 0;
+    vertex_t *vertex     = NULL;
+    float    *coords     = NULL;
+    int       n_vertices = 0;
 
     vertex       = LIG_calc_polygon(x, y, i, angle, coef, light, obstacles);
-    n_coords     = VRTX_len(vertex) * LIGHT_RENDER_COUNT;
+    n_vertices   = VRTX_len(vertex);
     coords       = VRTX_to_coords(vertex);
-
+    
     SCENE_draw_polygon(
         coords,
-        n_coords,
+        n_vertices,
         light->light_polygons[i].red,
         light->light_polygons[i].green,
         light->light_polygons[i].blue,

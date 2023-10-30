@@ -12,10 +12,10 @@ typedef short int direction_t;
 typedef struct lightpolygon { 
     int   x;
     int   y;
-    float red;
-    float green;
-    float blue;
-    float light_power;
+    int   red;
+    int   green;
+    int   blue;
+    int   light_power;
     int   width;
 } lightpolygon_t;
 

@@ -24,6 +24,7 @@ void ENTMAN_add_entity(
     int               id
 ) {
     entity_t* entity = NULL;
+    // TODO: make x and y already calculatedc
     entity           = ENT_generate(x_tile*TILE_WIDTH, y_tile*TILE_HEIGHT, id);
 
     for (int i=0; i<MAX_ENTITY; i++) {

@@ -58,11 +58,11 @@ void SCENE_draw_texture(
 
 void SCENE_draw_polygon(
     float *vertices,
-    int   len,
-    float r,
-    float g,
-    float b,
-    float a
+    int    n_coords,
+    int    r,
+    int    g,
+    int    b,
+    int    a
 );
 
 #endif
