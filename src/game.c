@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdio.h>
 
 #include "data/library.h"
 #include "modules/modules.h"
@@ -11,16 +10,13 @@
 #include "game.h"
 #include "gfx.h"
 #include "global.h"
-#include "level.h"
 #include "post.h"
-#include "render.h"
 #include "scene.h"
 #include "timer.h"
 
 game_t *game      = NULL;
 
-// TODO: make event_manager
-void GAME_handle_SDL_events(
+void GAME_handle_window_events(
 ) {
     while (SDL_PollEvent(&(game->event)) != 0) {
         if (game->event.type == SDL_QUIT) { 
@@ -28,24 +24,6 @@ void GAME_handle_SDL_events(
         }
     }
 }
-
-void GAME_close(
-) {
-    LIB_free_all();
-    CON_free();
-    TIMER_free(cap_timer);
-    TIMER_free(fps_timer);
-    ENTMAN_free();
-    // This function to manager
-    LVL_free(level_manager->level);
-    free(game);
-    GFX_free();
-    SDL_Quit();
-
-    if (game->config.use_gfx) {
-        SCENE_free();
-    }
-};
 
 void GAME_init(
     game_config_t config
@@ -60,15 +38,6 @@ void GAME_start_time(
 ) {
     TIMER_start(fps_timer);
     TIMER_start(cap_timer);
-}
-
-void GAME_apply_logic(
-) {
-    // TODO: this to separate function
-    GAME_handle_SDL_events();
-    CON_update();
-    // TODO: this stays
-    ENTMAT_update();
 }
 
 void GAME_set_camera(
@@ -87,8 +56,7 @@ void GAME_draw_everything(
     GAME_set_camera();
 
     SCENE_activate_layer(LAYER_TILE);
-    // TODO: THIs function to level manager
-    LVL_draw(level_manager->level);
+    LVLMAN_draw();
 
     SCENE_activate_layer(LAYER_SPRITE);
     ENTMAN_draw();
@@ -109,19 +77,6 @@ void GAME_fill_scene(
     SCENE_add_layer(LAYER_SPRITE, SCREEN_WIDTH, SCREEN_HEIGHT);
     SCENE_add_layer(LAYER_LIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
     SCENE_add_buffer_layer(LAYER_BUFFER, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-}
-
-void GAME_new(
-    game_config_t config
-) {
-    GAME_init(config);
-    COMPONENTS_init();
-
-    MOD_init(config.use_gfx);
-    LIB_init(config.use_gfx);
-
-    GAME_fill_scene();
-    LVLMAN_fill(config.level_id);
 }
 
 void GAME_update_time(
@@ -152,11 +107,43 @@ void GAME_loop(
 
     while(GAME_shold_run() ) {
         GAME_start_time();
-        GAME_apply_logic();
+        GAME_handle_window_events();
+        CON_update();
+        ENTMAT_update();
         GAME_draw_everything(); 
         GAME_update_time();
     }
 }
+
+void GAME_new(
+    game_config_t config
+) {
+    GAME_init(config);
+    COMPONENTS_init();
+
+    MOD_init(config.use_gfx);
+    LIB_init(config.use_gfx);
+
+    GAME_fill_scene();
+    LVLMAN_fill(config.level_id);
+}
+
+void GAME_close(
+) {
+    LIB_free_all();
+    CON_free();
+    TIMER_free(cap_timer);
+    TIMER_free(fps_timer);
+    ENTMAN_free();
+    LVLMAN_free();
+    free(game);
+    GFX_free();
+    SDL_Quit();
+
+    if (game->config.use_gfx) {
+        SCENE_free();
+    }
+};
 
 void GAME_run(
     game_config_t config

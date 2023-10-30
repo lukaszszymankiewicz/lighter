@@ -38,3 +38,13 @@ void LVLMAN_fill(
     LVL_analyze(level_manager->level);
 }
 
+void LVLMAN_draw(
+) {
+    LVL_draw(level_manager->level);
+}
+
+void LVLMAN_free(
+) {
+    LVL_free(level_manager->level);
+}
+

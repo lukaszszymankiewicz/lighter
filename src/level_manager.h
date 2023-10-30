@@ -10,5 +10,7 @@ typedef struct level_manager {
 
 void LVLMAN_init();
 void LVLMAN_fill(int id);
+void LVLMAN_draw();
+void LVLMAN_free();
 
 #endif

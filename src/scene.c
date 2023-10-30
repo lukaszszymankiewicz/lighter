@@ -315,8 +315,6 @@ void SCENE_draw_polygon(
     SCENE_add_uniform(color_arr);
     SCENE_add_vertices(arr);
     SCENE_set_mode(GL_POLYGON);
-    
-    // TODO: rename SHADER_LIGHT -> SHADER_POLYGON
     SCENE_set_shader(SHADER_LIGHT);
 }
 
