@@ -41,9 +41,9 @@ void SCENE_clear(
             
             // TODO: clean vertices
             // if (scene->layers[i].objs[j].vertices != NULL) {
-                // free(scene->layers[i].objs[j].vertices);
+            //     free(scene->layers[i].objs[j].vertices);
+            //     scene->layers[i].objs[j].vertices   = NULL;
             // }
-            // scene->layers[i].objs[j].vertices   = NULL;
 
         }
         scene->layers[i].n_objs      = -1;
@@ -251,6 +251,12 @@ array_t* SCENE_get_current_object_vertices(
     return &(scene->layers[scene->cur_layer].objs[cur_object].vertices);
 }
 
+bool SCENE_current_object_vertices_empty(
+) {
+    int cur_object = SCENE_cur_obj();
+    return scene->layers[scene->cur_layer].objs[cur_object].vertices.rows == 0;
+}
+
 array_t polygon_coord_to_matrix(
     float *coords,
     int    len
@@ -299,12 +305,21 @@ void SCENE_draw_polygon(
     int   a
 ) {
     int    len = n_vertices * COORD_PER_POLYGON_VERTEX;
+
     float r_gl = (float)r / COLOR_COEF;
     float g_gl = (float)g / COLOR_COEF;
     float b_gl = (float)b / COLOR_COEF;
     float a_gl = (float)a / COLOR_COEF;
 
-    array_t arr         = polygon_coord_to_matrix(vertices, len);
+    array_t pos_arr     = polygon_coord_to_matrix(vertices, len);
+
+    if (!(SCENE_current_object_vertices_empty())) {
+        array_t* old_vertices = SCENE_get_current_object_vertices();
+        MAT_append(old_vertices, &pos_arr);
+
+        return;
+    } 
+
     array_t scale_arr   = SCENE_set_scale();
     array_t color_arr   = MAT_vec4_new(r_gl, g_gl, b_gl, a_gl);
     array_t camera_arr  = MAT_vec2_new(camera_x, camera_y);
@@ -313,7 +328,7 @@ void SCENE_draw_polygon(
     SCENE_add_uniform(scale_arr);
     SCENE_add_uniform(camera_arr);
     SCENE_add_uniform(color_arr);
-    SCENE_add_vertices(arr);
+    SCENE_add_vertices(pos_arr);
     SCENE_set_mode(GL_POLYGON);
     SCENE_set_shader(SHADER_LIGHT);
 }

@@ -57,6 +57,7 @@
   - [x] add entity filp
   - [x] add transparency to light effect shader (test it)
   - [x] put camera ideally on center of screen
+  - [ ] multiple light polygons 
   - [ ] add proper scene cleaning
   - [ ] remove all unnecessary prints
   - [ ] add stencil buffer
@@ -64,10 +65,10 @@
   - [ ] add wobble
 - [ ] repair all unit-tests (once again!)
 - [ ] clear all memory leaks!
-- [ ] repair light vertex calculations
+- [x] repair light vertex calculations
 - [x] remove error codes
 - [x] make tile render as as separate shader
-- [ ] game options to some global config
+- [x] game options to some global config
 
 UTIL:
  - [ ] create a namesystem for ids: gl_texture ids should be reconizable from library ids

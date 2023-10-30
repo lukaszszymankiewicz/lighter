@@ -46,7 +46,7 @@ float SRC_get_light_polygon_width_corr(
 ) {
     int coef = source->light_polygons[i].width;
 
-    if (coef){
+    if (coef) {
         return PI / coef;
     }
     return 0.0;

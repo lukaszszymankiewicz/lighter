@@ -617,6 +617,9 @@ vertex_t* LIG_calc_polygon(
     width                       = light->width;
     width_corr                  = SRC_get_light_polygon_width_corr(light, n);
 
+    printf("width = %f \n", width);
+    printf("width corr = %f \n", width_corr);
+
     light_polygon = LIG_get_light_polygon(
         x+x_corr,
         y+y_corr,

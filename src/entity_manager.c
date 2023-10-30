@@ -164,9 +164,7 @@ void ENTMAN_calc_single_entity_light(
     float angle          = ENT_light_angle(entity);
     float wobble_corr    = ENT_wobble_coef(entity);
     
-    // TODO: add all light polygons
-    // for (int i=0; i<light->n_poly; i++) {
-    for (int i=0; i<1; i++) {
+    for (int i=0; i<light->n_poly; i++) {
         LIG_draw_polygon(emit_x, emit_y, i, angle, wobble_corr, light, obs);
     }
 
