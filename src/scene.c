@@ -290,6 +290,7 @@ array_t SCENE_set_scale(
     return MAT_vec2_new(w, h);
 }
 
+// TODO: here everything in ints (colors), then divide to use NDC
 void SCENE_draw_polygon(
     float *vertices,
     int   len,

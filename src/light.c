@@ -653,6 +653,6 @@ void LIG_draw_polygon(
         light->light_polygons[i].red,
         light->light_polygons[i].green,
         light->light_polygons[i].blue,
-        1.0
+        light->light_polygons[i].light_power
     );
 }

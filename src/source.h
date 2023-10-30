@@ -15,7 +15,7 @@ typedef struct lightpolygon {
     float red;
     float green;
     float blue;
-    int   light_power;
+    float light_power;
     int   width;
 } lightpolygon_t;
 
