@@ -176,8 +176,8 @@ void ENTMAN_calc_single_entity_light(
 int ENTMAN_entity_follow_x(
     int entity_id
 ) {
-    int id = entity_manager->entities[entity_id]->id;
-    int w  = ENT_current_frame_width(id);
+    entity_t *entity = entity_manager->entities[entity_id];
+    int w  = ENT_current_frame_width(entity);
     int x  = entity_manager->entities[entity_id]->x;
 
     return x + w/2 - SCREEN_WIDTH/2;
@@ -186,8 +186,8 @@ int ENTMAN_entity_follow_x(
 int ENTMAN_entity_follow_y(
     int entity_id
 ) {
-    int id = entity_manager->entities[entity_id]->id;
-    int h  = ENT_current_frame_height(id);
+    entity_t *entity = entity_manager->entities[entity_id];
+    int h  = ENT_current_frame_height(entity);
     int y  = entity_manager->entities[entity_id]->y;
 
     return y + h/2 - SCREEN_HEIGHT/2;

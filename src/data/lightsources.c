@@ -23,7 +23,7 @@ lightsource_t lighsource_wallight = {
 lightsource_t lighsource_lighter = {
     PI/7, 7, 3, 
     {
-        (lightpolygon_t){0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50.0 / 256.0, 0},
+        (lightpolygon_t){0,  0, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 50, 0},
         (lightpolygon_t){0, -2, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 30, 36},
         (lightpolygon_t){0, +2, DEFAULT_LIGHT_R, DEFAULT_LIGHT_G, DEFAULT_LIGHT_B, 20, 72},
     }

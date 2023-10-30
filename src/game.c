@@ -42,8 +42,8 @@ void GAME_start_time(
 
 void GAME_set_camera(
 ) {
-    camera_x = ENTMAN_entity_follow_x(); 
-    camera_x = ENTMAN_entity_follow_y(); 
+    camera_x = ENTMAN_entity_follow_x(ENTITY_HERO); 
+    camera_y = ENTMAN_entity_follow_y(ENTITY_HERO); 
 }
 
 void GAME_draw_everything(
