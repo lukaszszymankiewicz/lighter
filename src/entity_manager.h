@@ -18,8 +18,8 @@ void ENTMAN_apply_collision(segment_t* obstacles, entity_t *entity);
 
 bool ENTMAN_entity_in_range(entity_t* entity, int range_x, int range_y);
 
-int ENTMAN_hero_x(); 
-int ENTMAN_hero_y(); 
+int ENTMAN_entity_follow_x(); 
+int ENTMAN_entity_follow_y(); 
 
 void ENTMAN_free();
 

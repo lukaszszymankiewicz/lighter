@@ -41,17 +41,6 @@ entity_t* ENTMAN_get(
     return entity_manager->entities[id];
 }
 
-// TODO: make it parametrizable
-int ENTMAN_hero_x(
-) {
-    return entity_manager->entities[ENTITY_HERO]->x;
-}
-
-int ENTMAN_hero_y(
-) {
-    return entity_manager->entities[ENTITY_HERO]->y;
-}
-
 void ENTMAN_apply_collision(
     segment_t* obstacles,
     entity_t *entity
@@ -81,16 +70,13 @@ void ENTMAN_apply_collision(
     }
 }
 
-// TODO: we only check one point of entity whether is inside rect, this can not be sufficient for
-// smaller ranges
-// TODO: calc middle point of entity to be sure that if fits into check range
 bool ENTMAN_entity_in_range(
     entity_t*         entity,
     int               range_x,
     int               range_y
 ) {
-    int hero_x = ENTMAN_hero_x(entity_manager); 
-    int hero_y = ENTMAN_hero_y(entity_manager); 
+    int hero_x = ENTMAN_entity_follow_x(ENTITY_HERO);
+    int hero_y = ENTMAN_entity_follow_y(ENTITY_HERO); 
 
     return GEO_pt_in_rect(
         entity->x,
@@ -185,6 +171,26 @@ void ENTMAN_calc_single_entity_light(
     }
 
     if (obs) { SEG_free(obs); }
+}
+
+int ENTMAN_entity_follow_x(
+    int entity_id
+) {
+    int id = entity_manager->entities[entity_id]->id;
+    int w  = ENT_current_frame_width(id);
+    int x  = entity_manager->entities[entity_id]->x;
+
+    return x + w/2 - SCREEN_WIDTH/2;
+}
+
+int ENTMAN_entity_follow_y(
+    int entity_id
+) {
+    int id = entity_manager->entities[entity_id]->id;
+    int h  = ENT_current_frame_height(id);
+    int y  = entity_manager->entities[entity_id]->y;
+
+    return y + h/2 - SCREEN_HEIGHT/2;
 }
 
 void ENTMAN_calc_light(

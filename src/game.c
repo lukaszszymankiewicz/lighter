@@ -73,9 +73,8 @@ void GAME_apply_logic(
 
 void GAME_set_camera(
 ) {
-    // TODO: make it better
-    camera_x = ENTMAN_hero_x() - SCREEN_WIDTH / 2;
-    camera_y = ENTMAN_hero_y() - SCREEN_HEIGHT / 2;
+    camera_x = ENTMAN_entity_follow_x(); 
+    camera_x = ENTMAN_entity_follow_y(); 
 }
 
 void GAME_draw_everything(

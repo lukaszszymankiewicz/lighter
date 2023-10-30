@@ -85,6 +85,9 @@ int ENT_light_emit_y(entity_t *entity);
 int ENT_held_item_x(entity_t *entity);
 int ENT_held_item_y(entity_t *entity);
 
+int ENT_current_frame_width(entity_t *entity);
+int ENT_current_frame_height(entity_t *entity);
+
 lightsource_t* ENT_get_light(entity_t *entity);
 wobble_t*      ENT_get_wobble(entity_t *entity);
 
