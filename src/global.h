@@ -69,6 +69,6 @@ enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };
 // TODO: move it accrdingly
 enum segtype { HOR, VER, UNKNOWN };
 // TODO: move it accrdingly
-enum layers { LAYER_TILE, LAYER_SPRITE, LAYER_LIGHT, LAYER_BUFFER, LAYER_ALL };
+enum layers { LAYER_LIGHT, LAYER_TILE, LAYER_SPRITE, LAYER_BUFFER, LAYER_ALL };
 
 #endif

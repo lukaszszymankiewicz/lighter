@@ -55,28 +55,29 @@ void GAME_draw_everything(
     SCENE_clear();
     GAME_set_camera();
 
+    SCENE_activate_layer(LAYER_LIGHT);
+    ENTMAN_calc_light();
+
     SCENE_activate_layer(LAYER_TILE);
     LVLMAN_draw();
 
     SCENE_activate_layer(LAYER_SPRITE);
     ENTMAN_draw();
 
-    SCENE_activate_layer(LAYER_LIGHT);
-    ENTMAN_calc_light();
-
-    SCENE_activate_layer(LAYER_BUFFER);
-    POST_draw();
+    // SCENE_activate_layer(LAYER_BUFFER);
+    // POST_draw();
 
     SCENE_draw();
     GFX_update();
 }
 
+// TODO: assosiate each layer with drawing function
 void GAME_fill_scene(
 ) {
-    SCENE_add_layer(LAYER_TILE, SCREEN_WIDTH, SCREEN_HEIGHT);
-    SCENE_add_layer(LAYER_SPRITE, SCREEN_WIDTH, SCREEN_HEIGHT);
-    SCENE_add_layer(LAYER_LIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
-    SCENE_add_buffer_layer(LAYER_BUFFER, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+    SCENE_add_layer(LAYER_LIGHT, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+    SCENE_add_layer(LAYER_TILE, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+    SCENE_add_layer(LAYER_SPRITE, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+    // SCENE_add_buffer_layer(LAYER_BUFFER, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 }
 
 void GAME_update_time(

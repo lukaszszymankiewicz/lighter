@@ -242,18 +242,27 @@ int SCENE_get_layer_buffer_height(
 int SCENE_get_current_object_texture(
 ) {
     int cur_object = SCENE_cur_obj();
+    if (cur_object == -1) {
+        return -1;
+    }
     return scene->layers[scene->cur_layer].objs[cur_object].texture;
 }
 
 array_t* SCENE_get_current_object_vertices(
 ) {
     int cur_object = SCENE_cur_obj();
+    if (cur_object == -1) {
+        return NULL;
+    }
     return &(scene->layers[scene->cur_layer].objs[cur_object].vertices);
 }
 
 bool SCENE_current_object_vertices_empty(
 ) {
     int cur_object = SCENE_cur_obj();
+    if (cur_object == -1) {
+        return true;
+    }
     return scene->layers[scene->cur_layer].objs[cur_object].vertices.rows == 0;
 }
 
@@ -420,7 +429,8 @@ void SCENE_draw(
                 scene->layers[layer].objs[i].mode,
                 scene->layers[layer].framebuffer->id,
                 scene->layers[layer].framebuffer->w,
-                scene->layers[layer].framebuffer->h
+                scene->layers[layer].framebuffer->h,
+                layer
             );
         }
     }

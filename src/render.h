@@ -13,7 +13,9 @@ void RENDER_shader(
     int      mode,
     int      buffer,
     int      buffer_w,
-    int      buffer_h
+    int      buffer_h,
+    // TODO: delete it afterwards
+    int      d
 );
 
 void RENDER_clear_buffer(int buffer);
