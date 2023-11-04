@@ -65,6 +65,41 @@ void RENDER_clear_buffer(
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
+void RENDER_set_viewport(
+    int            buffer,
+    int            buffer_w,
+    int            buffer_h
+) { 
+    printf("BUFFER id %d, size: %d %d %d %d \n", buffer, 0, 0, buffer_w, buffer_h);
+    glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+    glViewport(0, 0, buffer_w, buffer_h);    
+}
+
+void RENDER_to_stencil(
+) {
+    glEnable(GL_STENCIL_TEST);
+    printf("STENCIL!\n");
+    // TODO: this to overall cleaning?
+    glClear(GL_STENCIL_BUFFER_BIT); 
+    glStencilFunc(GL_ALWAYS, 1, 0xffffff);
+    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
+void RENDER_affect_stencil(
+) {
+    printf("AFFECT BY STENCIL\n");
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_EQUAL, 1, 0xffffffff);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+}
+
+void RENDER_dismiss_stencil(
+) {
+    printf("DISMISS STENCIL\n");
+    glDisable(GL_STENCIL_TEST);
+}
+
 void RENDER_shader(
     int            shader,
     int            texture,
@@ -72,39 +107,10 @@ void RENDER_shader(
     int            n_vertices,
     float         *uniforms[MAX_SHADER_UNIFORMS],
     int            count,
-    int            mode,
-    int            buffer,
-    int            buffer_w,
-    int            buffer_h,
-    int d
+    int            mode
 ) { 
-
     printf("SHADER PROGRAM id %d \n", shader_library[shader]->program);
     glUseProgram(shader_library[shader]->program);
-
-    printf("BUFFER id %d, size: %d %d %d %d \n", buffer, 0, 0, buffer_w, buffer_h);
-    glBindFramebuffer(GL_FRAMEBUFFER, buffer);
-    glViewport(0, 0, buffer_w, buffer_h);    
-    
-    // light case
-    if (d == LAYER_LIGHT) {
-        glEnable(GL_STENCIL_TEST);
-        printf("STENCIL!\n");
-        glClear(GL_STENCIL_BUFFER_BIT); 
-        glStencilFunc(GL_ALWAYS, 1, 0xffffff);
-        glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    } else if (d == LAYER_TILE) {
-    // affect by light case
-        printf("DEPTH!\n");
-        glEnable(GL_STENCIL_TEST);
-        glStencilFunc(GL_EQUAL, 1, 0xffffffff);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-    } else {
-    // do not affect by light
-        printf("SPRITES\n");
-        glDisable(GL_STENCIL_TEST);
-    }
 
     glBindVertexArray(shader_library[shader]->vao);
     glBindBuffer(GL_ARRAY_BUFFER, shader_library[shader]->vbo);

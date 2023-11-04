@@ -3,6 +3,12 @@
 #ifndef RENDER_H
 #define RENDER_H
 
+void RENDER_set_viewport(
+    int            buffer,
+    int            buffer_w,
+    int            buffer_h
+);
+
 void RENDER_shader(
     int      shader,
     int      texture,
@@ -10,14 +16,12 @@ void RENDER_shader(
     int      n_vertices,
     float   *uniforms[MAX_SHADER_UNIFORMS],
     int      count,
-    int      mode,
-    int      buffer,
-    int      buffer_w,
-    int      buffer_h,
-    // TODO: delete it afterwards
-    int      d
+    int      mode
 );
 
+void RENDER_to_stencil();
+void RENDER_affect_stencil();
+void RENDER_dismiss_stencil();
 void RENDER_clear_buffer(int buffer);
 
 #endif
