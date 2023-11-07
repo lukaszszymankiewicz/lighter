@@ -13,20 +13,19 @@ int POST_get_screen_multiplication_coef(
     return MIN(scale_w, scale_h);
 }
 
+// TODO: rename it to scalre or smth?
 void POST_draw(
 ) {
-    int texture          = SCENE_get_layer_buffer_tex(LAYER_BUFFER);
-    
     // force camera to be zero
     camera_x = 0;
     camera_y = 0;
 
-    int w = SCENE_get_layer_buffer_width();
-    int h = SCENE_get_layer_buffer_height();
-    int m = POST_get_screen_multiplication_coef(w, h);
-
-    int x0 = (w-SCREEN_WIDTH*m)/2;
-    int y0 = (h-SCREEN_HEIGHT*m)/2;
+    int texture = SCENE_get_buffer_tex();
+    int w       = SCENE_get_buffer_width();
+    int h       = SCENE_get_buffer_height();
+    int m       = POST_get_screen_multiplication_coef(w, h);
+    int x0      = (w-SCREEN_WIDTH*m)/2;
+    int y0      = (h-SCREEN_HEIGHT*m)/2;
 
     SCENE_draw_texture(
         x0, y0,

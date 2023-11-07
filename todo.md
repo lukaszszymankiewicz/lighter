@@ -57,10 +57,12 @@
   - [x] add entity filp
   - [x] add transparency to light effect shader (test it)
   - [x] put camera ideally on center of screen
+
+  - [ ] add stencil buffer
+
   - [ ] multiple light polygons 
   - [ ] add proper scene cleaning
   - [ ] remove all unnecessary prints
-  - [ ] add stencil buffer
   - [ ] add differ effect
   - [ ] add wobble
 - [ ] repair all unit-tests (once again!)

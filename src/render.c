@@ -7,8 +7,6 @@
 #include "./data/library.h"
 
 #include "global.h"
-// TODO: delete afterwards
-#include "components.h"
 #include "render.h"
 
 void RENDER_set_uniform(
@@ -62,7 +60,7 @@ void RENDER_clear_buffer(
 ) {
     glBindFramebuffer(GL_FRAMEBUFFER, buffer);
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void RENDER_set_viewport(
@@ -80,7 +78,6 @@ void RENDER_to_stencil(
     glEnable(GL_STENCIL_TEST);
     printf("STENCIL!\n");
     // TODO: this to overall cleaning?
-    glClear(GL_STENCIL_BUFFER_BIT); 
     glStencilFunc(GL_ALWAYS, 1, 0xffffff);
     glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

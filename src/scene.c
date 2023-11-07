@@ -50,10 +50,9 @@ void SCENE_clear(
     }
     scene->cur_layer                 = -1;
     
-    // TODO: cleaning should be done smart
-    // for (int l=0; l<scene->n_layers; l++) {
-    //     RENDER_clear_buffer(scene->layers[l].framebuffer->id);
-    // }
+    for (int b=0; b<scene->n_buffers; b++) {
+        RENDER_clear_buffer(scene->buffers[b]->id);
+    }
 }
 
 void SCENE_add_layer(
@@ -73,8 +72,24 @@ void SCENE_add_layer(
             scene->layers[layer].objs[j].uniforms[u] = NULL;
         }
     }
-
+    scene->layers[layer].on = true;
     scene->n_layers++;
+}
+
+void SCENE_add_defalt_buffer(
+) {
+    // create default buffer
+    scene->buffers[scene->n_buffers] = NULL;
+    scene->buffers[scene->n_buffers] = (framebuffer_t*)malloc(sizeof(framebuffer_t));
+
+    scene->buffers[scene->n_buffers]->x0      = 0;
+    scene->buffers[scene->n_buffers]->y0      = 0;
+    scene->buffers[scene->n_buffers]->w       = FRAMEBUFFER_WIDTH;
+    scene->buffers[scene->n_buffers]->h       = FRAMEBUFFER_HEIGHT;
+    scene->buffers[scene->n_buffers]->texture = 0;
+    scene->buffers[scene->n_buffers]->id      = DEFAULT_FRAMEBUFFER;
+
+    scene->n_buffers++;
 }
 
 void SCENE_add_buffer(
@@ -94,18 +109,6 @@ void SCENE_init(
     scene->cur_layer  = -1;
     scene->cur_buffer = 0;
 
-    // create default buffer
-    scene->buffers[scene->n_buffers] = NULL;
-    scene->buffers[scene->n_buffers] = (framebuffer_t*)malloc(sizeof(framebuffer_t));
-
-    scene->buffers[scene->n_buffers]->x0      = 0;
-    scene->buffers[scene->n_buffers]->y0      = 0;
-    scene->buffers[scene->n_buffers]->w       = SCREEN_WIDTH;
-    scene->buffers[scene->n_buffers]->h       = SCREEN_HEIGHT;
-    scene->buffers[scene->n_buffers]->texture = 0;
-    scene->buffers[scene->n_buffers]->id      = DEFAULT_FRAMEBUFFER;
-
-    scene->n_buffers++;
 }
 
 void SCENE_activate_buffer(
@@ -215,18 +218,18 @@ bool SCENE_layer_is_off(
     return !(SCENE_layer_is_on(layer));
 }
 
-int SCENE_get_layer_buffer_tex(
+int SCENE_get_buffer_tex(
     int layer
 ) {
     return scene->buffers[scene->cur_buffer]->texture;
 }
 
-int SCENE_get_layer_buffer_width(
+int SCENE_get_buffer_width(
 ) {
     return scene->buffers[scene->cur_buffer]->w;
 }
 
-int SCENE_get_layer_buffer_height(
+int SCENE_get_buffer_height(
 ) {
     return scene->buffers[scene->cur_buffer]->h;
 }
@@ -291,8 +294,8 @@ array_t coord_to_matrix(
 
 array_t SCENE_set_scale(
 ) {
-    int w = SCENE_get_layer_buffer_width();
-    int h = SCENE_get_layer_buffer_height();
+    int w = SCENE_get_buffer_width();
+    int h = SCENE_get_buffer_height();
 
     return MAT_vec2_new(w, h);
 }

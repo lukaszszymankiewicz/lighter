@@ -646,7 +646,7 @@ void ENT_draw(
     if (ENT_has_flag(entity, NOT_DRAWABLE)) {
         return;
     }
-    printf("trying to draw entity: %d %d \n", entity->x, entity->y);
+
     SCENE_draw_texture(
         entity->x,                             entity->y,
         ENT_current_frame_width(entity),       ENT_current_frame_height(entity),

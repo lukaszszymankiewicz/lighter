@@ -38,7 +38,7 @@ level_blueprint_t level_blueprint_sample = {
     2,
     {
         (entity_fill_t) {6, 6, 0},
-        (entity_fill_t) {3, 7, 2}
+        (entity_fill_t) {4, 4, 2}
     }
 };
 
