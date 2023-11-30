@@ -304,7 +304,7 @@ void LVL_draw(
     int st_y           = (camera_y + ENTITY_DRAW_Y_RANGE) / TILE_HEIGHT;
 
     int st_tile_pos_x  = st_x - (SCREEN_WIDTH / TILE_WIDTH / 2) - 2;
-    int st_tile_pos_y  = st_y - (SCREEN_HEIGHT / TILE_HEIGHT / 2) -2;
+    int st_tile_pos_y  = st_y - (SCREEN_HEIGHT / TILE_HEIGHT / 2) - 2;
     int end_tile_pos_x = st_x + (SCREEN_WIDTH / TILE_WIDTH / 2) + 2;
     int end_tile_pos_y = st_y + (SCREEN_HEIGHT / TILE_HEIGHT / 2) + 2;
 
