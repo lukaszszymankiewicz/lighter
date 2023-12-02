@@ -17,6 +17,7 @@ typedef struct lightpolygon {
     int   blue;
     int   light_power;
     int   width;
+    float angle_corr;
 } lightpolygon_t;
 
 typedef struct wobble {
@@ -35,6 +36,7 @@ int SRC_get_light_penetrating_power(lightsource_t *lght);
 int SRC_get_light_polygon_x_corr(lightsource_t *lght, float angle, int i);
 int SRC_get_light_polygon_y_corr(lightsource_t *lght, float angle, int i);
 
+float SRC_get_light_polygon_angle_corr(lightsource_t *source, int i);
 float SRC_get_light_polygon_width_corr(lightsource_t *lght, int i);
 float SRC_move_lightsource(direction_t light_dir, direction_t entity_dir);
 

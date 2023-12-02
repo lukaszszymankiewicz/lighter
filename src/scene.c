@@ -22,6 +22,48 @@ array_t SCENE_id(
     return MAT_scalar_new((float)id);
 }
 
+int SCENE_cur_obj(
+) {
+    return scene->layers[scene->cur_layer].n_objs;
+}
+
+array_t* SCENE_get_current_object_vertices(
+) {
+    int cur_object = SCENE_cur_obj();
+    if (cur_object == -1) {
+        return NULL;
+    }
+    return &(scene->layers[scene->cur_layer].objs[cur_object].vertices);
+}
+
+void SCENE_clear_layer(
+    int layer
+) {
+    for (int j=0; j<MAX_DRAWBLE_OBJECTS_ON_LAYER; j++) {
+        scene->layers[layer].objs[j].texture       = -1;
+        scene->layers[layer].objs[j].len           =  0;
+        scene->layers[layer].objs[j].count         =  0;
+        scene->layers[layer].objs[j].uniform_count =  0;
+        
+        // clean uniforms
+        for (int u=0; u<MAX_SHADER_UNIFORMS; u++) {
+            if (scene->layers[layer].objs[j].uniforms[u] != NULL) {
+                free(scene->layers[layer].objs[j].uniforms[u]);
+                scene->layers[layer].objs[j].uniforms[u] = NULL;
+            }
+        }
+        
+        // TODO: clean vertices
+        // if (scene->layers[i].objs[j].vertices != NULL) {
+        //     free(scene->layers[i].objs[j].vertices);
+        //     scene->layers[i].objs[j].vertices   = NULL;
+        // }
+
+    }
+    scene->layers[layer].n_objs      = -1;
+}
+
+// TODO: maybe it should be SCENE_clear_layer?
 void SCENE_clear(
 ) {
     for (int i=0; i<scene->n_layers; i++) {
@@ -40,7 +82,7 @@ void SCENE_clear(
             }
             
             // TODO: clean vertices
-            // if (scene->layers[i].objs[j].vertices != NULL) {
+            // if (scene->layers[i].objs[j].vertices.values != NULL) {
             //     free(scene->layers[i].objs[j].vertices);
             //     scene->layers[i].objs[j].vertices   = NULL;
             // }
@@ -53,6 +95,12 @@ void SCENE_clear(
     for (int b=0; b<scene->n_buffers; b++) {
         RENDER_clear_buffer(scene->buffers[b]->id);
     }
+}
+
+void SCENE_clean_buffer(
+    int buffer
+) { 
+    RENDER_clear_buffer(scene->buffers[buffer]->id);
 }
 
 void SCENE_add_layer(
@@ -82,22 +130,25 @@ void SCENE_add_defalt_buffer(
     scene->buffers[scene->n_buffers] = NULL;
     scene->buffers[scene->n_buffers] = (framebuffer_t*)malloc(sizeof(framebuffer_t));
 
-    scene->buffers[scene->n_buffers]->x0      = 0;
-    scene->buffers[scene->n_buffers]->y0      = 0;
-    scene->buffers[scene->n_buffers]->w       = FRAMEBUFFER_WIDTH;
-    scene->buffers[scene->n_buffers]->h       = FRAMEBUFFER_HEIGHT;
-    scene->buffers[scene->n_buffers]->texture = 0;
-    scene->buffers[scene->n_buffers]->id      = DEFAULT_FRAMEBUFFER;
+    scene->buffers[scene->n_buffers]->x0          = 0;
+    scene->buffers[scene->n_buffers]->y0          = 0;
+    scene->buffers[scene->n_buffers]->w           = FRAMEBUFFER_WIDTH;
+    scene->buffers[scene->n_buffers]->h           = FRAMEBUFFER_HEIGHT;
+    scene->buffers[scene->n_buffers]->texture     = 0;
+    scene->buffers[scene->n_buffers]->id          = DEFAULT_FRAMEBUFFER;
 
     scene->n_buffers++;
 }
 
 void SCENE_add_buffer(
-    int w,
-    int h
+    int    id,
+    int    w,
+    int    h
 ) {
-    scene->buffers[scene->n_buffers] = GFX_create_framebuffer(w, h);
+    printf("buffer with id %d id created \n", id);
+    scene->buffers[id] = GFX_create_framebuffer(id, w, h);
     scene->n_buffers++;
+    printf("active buffers: %d \n", scene->n_buffers);
 }
 
 void SCENE_init(
@@ -108,7 +159,6 @@ void SCENE_init(
     scene->n_buffers  = 0;
     scene->cur_layer  = -1;
     scene->cur_buffer = 0;
-
 }
 
 void SCENE_activate_buffer(
@@ -123,10 +173,6 @@ void SCENE_activate_layer(
     scene->cur_layer = layer;
 }
 
-int SCENE_cur_obj(
-) {
-    return scene->layers[scene->cur_layer].n_objs;
-}
 
 int SCENE_cur_uniform(
 ) {
@@ -177,11 +223,20 @@ void SCENE_set_shader(
 void SCENE_add_vertices(
     array_t     arr
 ) {
-    int j=scene->layers[scene->cur_layer].n_objs;
+    int j = scene->layers[scene->cur_layer].n_objs;
     int len = arr.rows * arr.cols;
 
+    scene->layers[scene->cur_layer].objs[j].vertices = arr;
+
+    printf("\n");
     for (int l=0; l<len; l++) {
-        scene->layers[scene->cur_layer].objs[j].vertices = arr;
+        printf("%f ", 
+        scene->layers[scene->cur_layer].objs[j].vertices.values[l]
+    );
+
+        if ((l+1) % 2 == 0) {
+            printf("\n");
+        }
     }
 
     // TODO: len and count should be deleted!
@@ -202,8 +257,8 @@ void SCENE_free(
         // }
     }
 
-    free(scene);      
-    scene = NULL;
+    // free(scene);      
+    // scene = NULL;
 }
 
 bool SCENE_layer_is_on(
@@ -219,7 +274,6 @@ bool SCENE_layer_is_off(
 }
 
 int SCENE_get_buffer_tex(
-    int layer
 ) {
     return scene->buffers[scene->cur_buffer]->texture;
 }
@@ -243,14 +297,6 @@ int SCENE_get_current_object_texture(
     return scene->layers[scene->cur_layer].objs[cur_object].texture;
 }
 
-array_t* SCENE_get_current_object_vertices(
-) {
-    int cur_object = SCENE_cur_obj();
-    if (cur_object == -1) {
-        return NULL;
-    }
-    return &(scene->layers[scene->cur_layer].objs[cur_object].vertices);
-}
 
 bool SCENE_current_object_vertices_empty(
 ) {
@@ -261,7 +307,7 @@ bool SCENE_current_object_vertices_empty(
     return scene->layers[scene->cur_layer].objs[cur_object].vertices.rows == 0;
 }
 
-array_t polygon_coord_to_matrix(
+array_t SCENE_polygon_coord_to_matrix(
     float *coords,
     int    len
 ) {
@@ -282,12 +328,12 @@ array_t coord_to_matrix(
 ) {
     array_t arr = MAT_new(RECT_VERTICES_ROWS, RECT_VERTICES_COLS);
     
-    arr.values[0 ]=x1; arr.values[1 ]=y2;
-    arr.values[2 ]=x2; arr.values[3 ]=y2;
-    arr.values[4 ]=x2; arr.values[5 ]=y1;
-    arr.values[6 ]=x1; arr.values[7 ]=y2;
-    arr.values[8 ]=x2; arr.values[9 ]=y1;
-    arr.values[10]=x1; arr.values[11]=y1;
+    arr.values[0 ] = x1; arr.values[1 ] = y2;
+    arr.values[2 ] = x2; arr.values[3 ] = y2;
+    arr.values[4 ] = x2; arr.values[5 ] = y1;
+    arr.values[6 ] = x1; arr.values[7 ] = y2;
+    arr.values[8 ] = x2; arr.values[9 ] = y1;
+    arr.values[10] = x1; arr.values[11] = y1;
 
     return arr;
 }
@@ -300,44 +346,75 @@ array_t SCENE_set_scale(
     return MAT_vec2_new(w, h);
 }
 
-void SCENE_draw_polygon(
+void SCENE_put_polygon_to_scene(
     float *vertices,
     int   n_vertices,
+    int   x0,
+    int   y0,
     int   r,
     int   g,
     int   b,
     int   a
 ) {
-    int    len = n_vertices * COORD_PER_POLYGON_VERTEX;
+    int len     = n_vertices * COORD_PER_POLYGON_VERTEX;
+    int buffer  = SCENE_get_buffer_tex();
 
-    float r_gl = (float)r / COLOR_COEF;
-    float g_gl = (float)g / COLOR_COEF;
-    float b_gl = (float)b / COLOR_COEF;
-    float a_gl = (float)a / COLOR_COEF;
+    for (int i=0; i<len; i++) {
+        printf("%f ", vertices[i]);
+        if ((i+1) % 2 ==0) {
+            printf("\n");
+        }
+    }
 
-    array_t pos_arr     = polygon_coord_to_matrix(vertices, len);
+    float r_gl = (float) r / COLOR_COEF;
+    float g_gl = (float) g / COLOR_COEF;
+    float b_gl = (float) b / COLOR_COEF;
+    float a_gl = (float) a / COLOR_COEF;
 
-    if (!(SCENE_current_object_vertices_empty())) {
-        array_t* old_vertices = SCENE_get_current_object_vertices();
-        MAT_append(old_vertices, &pos_arr);
+    array_t pos_arr     = SCENE_polygon_coord_to_matrix(vertices, len);
 
-        return;
-    } 
+    printf("\n");
+    for (int i=0; i<len; i++) {
+        printf("%f ", pos_arr.values[i]);
+
+        if ((i+1) % 2 ==0) {
+            printf("\n");
+        }
+    }
+
+
 
     array_t scale_arr   = SCENE_set_scale();
     array_t color_arr   = MAT_vec4_new(r_gl, g_gl, b_gl, a_gl);
     array_t camera_arr  = MAT_vec2_new(camera_x, camera_y);
+    array_t emit_arr    = MAT_vec2_new(
+        (float)x0 + scale_arr.values[0]/2.0 - (float)camera_arr.values[0],
+        (float)y0 + scale_arr.values[1]/2.0 - (float)camera_arr.values[1] 
 
-    SCENE_add_new_drawable_object();
+        // (float)x0 + scale_arr.values[0]/2.0,
+        // (float)y0 + scale_arr.values[1]/2.0
+    );
+
+    printf("\n");
+    for (int i=0; i<len; i++) {
+        if ((i+1) % 2 ==0) {
+            printf("%f ", 2.0 * (pos_arr.values[i] - camera_arr.values[0]) / 320.0 -1.0);
+            printf("\n");
+        } else {
+            printf("%f ", 2.0 * (pos_arr.values[i] - camera_arr.values[1]) / 240.0 -1.0);
+        }
+    }
+
     SCENE_add_uniform(scale_arr);
     SCENE_add_uniform(camera_arr);
     SCENE_add_uniform(color_arr);
+    SCENE_add_uniform(emit_arr);
     SCENE_add_vertices(pos_arr);
     SCENE_set_mode(GL_POLYGON);
     SCENE_set_shader(SHADER_LIGHT);
 }
 
-void SCENE_draw_texture(
+void SCENE_put_texture_to_scene(
     int   draw_x, int   draw_y,
     int   draw_w, int   draw_h,
     int   clip_x, int   clip_y,
@@ -401,31 +478,53 @@ int SCENE_vertices_count(
     return obj.vertices.cols;
 }
 
-void SCENE_use_stencil(
-    int mode
+int SCENE_get_screen_multiplication_coef(
+    float w, float h
 ) {
-    switch (mode)
-    {
-        case NO_STENCIL:
-            RENDER_dismiss_stencil();
-            return;
-        case DRAW_TO_STENCIL:
-            RENDER_to_stencil();
-            return;
-        case AFFECT_BY_STENCIL:
-            RENDER_affect_stencil();
-            return;
-        default:
-            RENDER_dismiss_stencil();
-            return;
-    }
+    int pix_scale_w = (int)FRAMEBUFFER_WIDTH / (int)w;
+    int pix_scale_h = (int)FRAMEBUFFER_WIDTH / (int)h;
+
+    return MIN(pix_scale_w, pix_scale_h);
 }
 
-void SCENE_draw(
-    int layer,
-    int target,
-    int stencil
+// scale cur_buffer to fit on DEFAULT_FRAMEBUFFER (physical screen size) and put such texture on
+// crrent layer
+// TODO: use custom function and not SCENE_put_texture_to_scene
+void SCENE_draw_scaled_buffer(
 ) {
+    int buffer = scene->cur_buffer;
+
+    // force camera to be zero
+    camera_x = 0; camera_y = 0;
+    
+    int texture = SCENE_get_buffer_tex();
+
+    int w       = SCENE_get_buffer_width();
+    int h       = SCENE_get_buffer_height();
+    int m       = SCENE_get_screen_multiplication_coef(w, h);
+    int x0      = (FRAMEBUFFER_WIDTH-SCREEN_WIDTH*m)/2;
+    int y0      = (FRAMEBUFFER_HEIGHT-SCREEN_HEIGHT*m)/2;
+
+    SCENE_activate_buffer(DEFAULT_FRAMEBUFFER);
+
+    SCENE_put_texture_to_scene(
+        x0, y0,
+        SCREEN_WIDTH*m, SCREEN_HEIGHT*m,
+        0, 0,
+        SCREEN_WIDTH, SCREEN_HEIGHT,
+        SCREEN_WIDTH, SCREEN_HEIGHT,
+        false, true,
+        texture
+    );
+
+    SCENE_activate_buffer(buffer);
+}
+
+void SCENE_render_current_layer(
+) {
+    int layer  = scene->cur_layer;
+    int target = scene->cur_buffer;
+
     printf("\nLAYER: %d ~~~~~~~~~~~~~~~~\n", layer);
     if (SCENE_layer_is_off(layer)) {
         printf("NOT DRAWING ANYTHING\n");
@@ -435,8 +534,8 @@ void SCENE_draw(
     printf("objects to render: %d\n", scene->layers[layer].n_objs+1);
 
     for (int i=0; i<scene->layers[layer].n_objs+1; i++) {
-        printf("OBJECT %d \n", i);
-        printf("vertices to render: %d\n", SCENE_vertices_n(layer, i));
+        printf("\nOBJECT: %d | ", i);
+        printf("vertices: %d | ", SCENE_vertices_n(layer, i));
 
         RENDER_set_viewport(
             scene->buffers[target]->id,
@@ -444,7 +543,7 @@ void SCENE_draw(
             scene->buffers[target]->h
         );
 
-        SCENE_use_stencil(stencil);
+        RENDER_set_attachment(scene->buffers[target]->attachment);
 
         RENDER_shader(
             scene->layers[layer].objs[i].shader_id,

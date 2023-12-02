@@ -43,6 +43,7 @@ int GFX_generate_texture_ID(
     return (int) texture_id_counter;
 }
 
+// TODO: used?
 void GFX_set_pixelperfect_scale(
 ) {
     int pix_scale_w = (int)FRAMEBUFFER_WIDTH / (int)SCREEN_WIDTH;
@@ -83,6 +84,7 @@ texture_t* GFX_read_texture(
 
     tex->surface   = surface;
     tex->id        = texture_id;
+    // TODO: uncommment
     // tex->filepath  = filepath;
     printf("texture %s read and has id %d\n", filepath, texture_id);
 
@@ -380,7 +382,12 @@ bool GFX_init_gl_params(
 ) {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
+
+    // this is the base
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // this is somehow good
+    // glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
 
     return true;
 }
@@ -412,9 +419,18 @@ void GFX_free(
     IMG_Quit();
 };
 
+unsigned int GFX_generate_framebuffer_texture(
+    int tex
+) {
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+    printf("Created texture for framebuffer, GL_COLOR_ATTACHMENT0 for texture %d \n", tex);
+    return GL_COLOR_ATTACHMENT0;
+}
+
 framebuffer_t* GFX_create_framebuffer(
-    int w,
-    int h
+    int   buffer_id,
+    int   w,
+    int   h
 ) {
     framebuffer_t* framebuffer = NULL;
     framebuffer                = (framebuffer_t*)malloc(sizeof(framebuffer_t));
@@ -428,31 +444,31 @@ framebuffer_t* GFX_create_framebuffer(
     glBindTexture(GL_TEXTURE_2D, tex);
     
     glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGB,
+        GL_TEXTURE_2D, 0, GL_RGBA,
         SCREEN_WIDTH, SCREEN_HEIGHT,
-        0, GL_RGB, GL_UNSIGNED_BYTE, NULL
+        0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
     );
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0
-    );
+    unsigned int attachment = GFX_generate_framebuffer_texture(tex);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         printf("Framebuffer cannot be created! \n");
         return NULL;
     }
     
-    framebuffer->id      = id;
-    framebuffer->texture = tex;
-    framebuffer->x0      = 0;
-    framebuffer->y0      = 0;
-    framebuffer->w       = w;
-    framebuffer->h       = h;
+    framebuffer->id         = id;
+    framebuffer->texture    = tex;
+    framebuffer->x0         = 0;
+    framebuffer->y0         = 0;
+    framebuffer->w          = w;
+    framebuffer->h          = h;
+    framebuffer->attachment = attachment;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glEnablei(GL_BLEND, id);
+    glBindFramebuffer(GL_FRAMEBUFFER, DEFAULT_FRAMEBUFFER);
 
     return framebuffer;
 }

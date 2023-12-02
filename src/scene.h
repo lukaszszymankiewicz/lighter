@@ -6,16 +6,9 @@
 #define SCENE_H
 
 #define MAX_LAYERS_ON_SCENE           5
-#define MAX_BUFFERS_ON_SCENE          2
+#define MAX_BUFFERS_ON_SCENE          3
 #define MAX_DRAWBLE_OBJECTS_ON_LAYER  10
-#define DEFAULT_FRAMEBUFFER           0
 #define NO_TEXTURE                    0
-
-enum STENCIL_EFFECT {
-    NO_STENCIL,
-    DRAW_TO_STENCIL,
-    AFFECT_BY_STENCIL
-};
 
 typedef struct  shader_params {
     int         shader_id;
@@ -53,12 +46,17 @@ void SCENE_add_layer(int layer);
 void SCENE_activate_buffer(int buffer);
 void SCENE_activate_layer(int layer);
 void SCENE_add_defalt_buffer();
-void SCENE_add_buffer(int w, int h);
+void SCENE_add_buffer(int id, int w, int h);
 
+void SCENE_draw_scaled_buffer();
+
+void SCENE_clean_buffer(int buffer);
 void SCENE_free();
-void SCENE_draw();
+void SCENE_render_current_layer();
+void SCENE_clear_layer(int layer);
+void SCENE_add_new_drawable_object();
 
-void SCENE_draw_texture(
+void SCENE_put_texture_to_scene(
     int   draw_x, int   draw_y,
     int   draw_h, int   draw_w,
     int   clip_x, int   clip_y,
@@ -68,9 +66,11 @@ void SCENE_draw_texture(
     int  texture
 );
 
-void SCENE_draw_polygon(
+void SCENE_put_polygon_to_scene(
     float *vertices,
     int    n_coords,
+    int    x0,
+    int    y0,
     int    r,
     int    g,
     int    b,

@@ -19,9 +19,7 @@ void RENDER_shader(
     int      mode
 );
 
-void RENDER_to_stencil();
-void RENDER_affect_stencil();
-void RENDER_dismiss_stencil();
 void RENDER_clear_buffer(int buffer);
+void RENDER_set_attachment(int attachment);
 
 #endif

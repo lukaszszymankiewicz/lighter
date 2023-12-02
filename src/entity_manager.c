@@ -144,7 +144,7 @@ segment_t* ENTMAN_light_obstacles(
     return obs;
 }
 
-void ENTMAN_calc_single_entity_light(
+void ENTMAN_put_entity_light_to_scene(
     entity_t*         entity,
     segment_t*        obstacles
 ) {
@@ -152,22 +152,47 @@ void ENTMAN_calc_single_entity_light(
         return; 
     }
 
-    segment_t* obs       = NULL;
-    obs                  = ENTMAN_light_obstacles(entity, obstacles);
+    segment_t* obs          = NULL;
+    obs                     = ENTMAN_light_obstacles(entity, obstacles);
         
-    lightsource_t* light = NULL;
-    light                = ENT_get_light(entity);
+    lightsource_t* source   = NULL;
+    source                  = ENT_get_light(entity);
 
-    int emit_x           = ENT_light_emit_x(entity);
-    int emit_y           = ENT_light_emit_y(entity);
-
-    float angle          = ENT_light_angle(entity);
-    float wobble_corr    = ENT_wobble_coef(entity);
+    int   emit_x            = ENT_light_emit_x(entity);
+    int   emit_y            = ENT_light_emit_y(entity);
+    float angle             = ENT_light_angle(entity);
+    float wobble_angle_corr = ENT_wobble_coef(entity);
     
-    for (int i=0; i<light->n_poly; i++) {
-        LIG_draw_polygon(emit_x, emit_y, i, angle, wobble_corr, light, obs);
+    // first approach - each light polygon is a separate render call
+    // benchmark this, and if it not sufficient - change it 
+    for (int i=0; i<source->n_poly; i++) {
+
+        vertex_t *light_polygon  = NULL;
+        float *coords            = NULL;
+        int    n_vertices        = 0;
+        int    final_x           = emit_x + SRC_get_light_polygon_x_corr(source, angle, i);
+        int    final_y           = emit_y + SRC_get_light_polygon_y_corr(source, angle, i);
+        float  final_width       = source->width + SRC_get_light_polygon_width_corr(source, i);
+        float  final_angle       = angle + SRC_get_light_polygon_angle_corr(source, i) + wobble_angle_corr;
+
+        light_polygon = LIG_calculate(final_x, final_y, final_width, final_angle, obstacles);
+        n_vertices    = VRTX_len(light_polygon);
+        coords        = VRTX_to_coords(light_polygon);
+
+        SCENE_add_new_drawable_object();
+        SCENE_put_polygon_to_scene(
+            coords,
+            n_vertices,
+            final_x,
+            final_y,
+            source->light_polygons[i].red,
+            source->light_polygons[i].green,
+            source->light_polygons[i].blue,
+            source->light_polygons[i].light_power
+        );
     }
 
+    // TODO: this should not bee done here I think
     if (obs) { SEG_free(obs); }
 }
 
@@ -191,7 +216,7 @@ int ENTMAN_entity_follow_y(
     return y + h/2 - SCREEN_HEIGHT/2;
 }
 
-void ENTMAN_calc_light(
+void ENTMAN_put_light_to_scene(
 ) {
     segment_t* obstacles = level_manager->level->obstacle_segments;
 
@@ -200,29 +225,33 @@ void ENTMAN_calc_light(
         entity_t* entity = NULL;
         entity           = entity_manager->entities[i];
 
-        if (!entity) { continue; }
+        if (!entity) {
+            continue; 
+        }
 
         if (ENTMAN_entity_in_light_update_range(entity)) {
-            ENTMAN_calc_single_entity_light(entity, obstacles);
-            ENTMAN_calc_single_entity_light(entity->hold, obstacles);
+            printf("entity %d in light draw range \n", entity->id);
+            ENTMAN_put_entity_light_to_scene(entity, obstacles);
+            ENTMAN_put_entity_light_to_scene(entity->hold, obstacles);
         }
     }
 }
 
-void ENTMAN_draw(
+void ENTMAN_put_to_scene(
 ) {
     for (int i=0; i<MAX_ENTITY; i++) {
-
         entity_t* entity = NULL;
         entity           = entity_manager->entities[i];
 
-        if (!entity) { continue; }
+        if (!entity) {
+            continue; 
+        }
 
         if (ENTMAN_entity_in_draw_range(entity)) {
-            ENT_draw(entity);
+            ENT_put_to_scene(entity);
 
             if (entity->hold) {
-                ENT_draw(entity->hold);
+                ENT_put_to_scene(entity->hold);
             }
         }
     }

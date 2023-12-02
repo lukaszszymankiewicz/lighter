@@ -8,6 +8,9 @@
 
 #define MAX_SHADER_UNIFORMS 4
 
+#define FULL_ALPHA 1.0
+#define NO_ALPHA   0.0
+
 extern int   camera_x;
 extern int   camera_y;
 
@@ -36,6 +39,7 @@ typedef struct framebuffer {
     unsigned int y0;
     unsigned int w;
     unsigned int h;
+    unsigned int attachment;
 } framebuffer_t;
 
 shader_program_t* GFX_create_gl_program(
@@ -76,6 +80,6 @@ void GFX_free_texture(texture_t* texture);
 int GFX_type_size(GLenum type);
 
 texture_t* GFX_read_texture(const char *filepath);
-framebuffer_t* GFX_create_framebuffer(int w, int h);
+framebuffer_t* GFX_create_framebuffer(int id, int w, int h);
 
 #endif

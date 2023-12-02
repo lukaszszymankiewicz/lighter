@@ -56,11 +56,12 @@ void RENDER_set_uniforms(
 }
 
 void RENDER_clear_buffer(
-    int buffer
+    int   buffer
 ) {
+    // clear buffer accordin to clearning rule!
     glBindFramebuffer(GL_FRAMEBUFFER, buffer);
-    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void RENDER_set_viewport(
@@ -68,33 +69,16 @@ void RENDER_set_viewport(
     int            buffer_w,
     int            buffer_h
 ) { 
-    printf("BUFFER id %d, size: %d %d %d %d \n", buffer, 0, 0, buffer_w, buffer_h);
+    printf("BUFFER: %d | size: %d %d %d %d | ", buffer, 0, 0, buffer_w, buffer_h);
     glBindFramebuffer(GL_FRAMEBUFFER, buffer);
     glViewport(0, 0, buffer_w, buffer_h);    
 }
 
-void RENDER_to_stencil(
-) {
-    glEnable(GL_STENCIL_TEST);
-    printf("STENCIL!\n");
-    // TODO: this to overall cleaning?
-    glStencilFunc(GL_ALWAYS, 1, 0xffffff);
-    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-}
-
-void RENDER_affect_stencil(
-) {
-    printf("AFFECT BY STENCIL\n");
-    glEnable(GL_STENCIL_TEST);
-    glStencilFunc(GL_EQUAL, 1, 0xffffffff);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-}
-
-void RENDER_dismiss_stencil(
-) {
-    printf("DISMISS STENCIL\n");
-    glDisable(GL_STENCIL_TEST);
+// TODO: is this name accurate?
+void RENDER_set_attachment(
+    int attachment
+) { 
+    glDrawBuffer(attachment);
 }
 
 void RENDER_shader(
@@ -106,7 +90,8 @@ void RENDER_shader(
     int            count,
     int            mode
 ) { 
-    printf("SHADER PROGRAM id %d \n", shader_library[shader]->program);
+    printf("SHADER %d | ", shader_library[shader]->program);
+    printf("TEXTURE %d \n", texture);
     glUseProgram(shader_library[shader]->program);
 
     glBindVertexArray(shader_library[shader]->vao);
@@ -114,7 +99,6 @@ void RENDER_shader(
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*n_vertices, vertices, GL_STATIC_DRAW);
     RENDER_set_uniforms(shader, uniforms);
     
-    printf("TEXTURE id %d \n", texture);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     glDrawArrays(mode, 0, (int)(n_vertices/count));

@@ -11,8 +11,8 @@ typedef struct entity_manager {
 void ENTMAN_init();
 
 void ENTMAN_add_entity(int x_tile, int y_tile, int id);
-void ENTMAN_draw();
-void ENTMAN_calc_light();
+void ENTMAN_put_to_scene();
+void ENTMAN_put_light_to_scene();
 void ENTMAT_update();
 void ENTMAN_apply_collision(segment_t* obstacles, entity_t *entity);
 

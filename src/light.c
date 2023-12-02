@@ -5,8 +5,6 @@
 #include "light.h"
 #include "point.h"
 #include "segment.h"
-#include "source.h"
-#include "scene.h"
 #include "vertex.h"
 
 #include <stdio.h>
@@ -481,6 +479,7 @@ point_t* LIG_add_border_light_vertices(
     return hit_points;
 }
 
+// TODO: obsolete
 // Calculates polygon of shadow which will be rendered on walls (light penetating walls).
 vertex_t* LIG_calc_light_wall_shadow(
     vertex_t *light_polygon,      // light polygon shape
@@ -566,7 +565,7 @@ point_t* LIG_generate_hit_points(
 }
 
 // calculates shape of light polygon (width of light cone is calculated on a fly)
-vertex_t* LIG_get_light_polygon(
+vertex_t* LIG_calculate(
     int        x,
     int        y,
     float      width,
@@ -597,60 +596,3 @@ vertex_t* LIG_get_light_polygon(
     return light_polygon;
 }
 
-vertex_t* LIG_calc_polygon(
-    int              x,
-    int              y,
-    int              n,
-    float            angle,
-    float            coef,
-    lightsource_t   *light,
-    segment_t       *obstacles
-) {
-    int   x_corr;                  // x and y correction values 
-    int   y_corr;                  // x and y correction values
-    float width;                   // light width
-    float width_corr;              // light width correction (some light polygons can be wider)
-
-    vertex_t* light_polygon     = NULL;
-    x_corr                      = SRC_get_light_polygon_x_corr(light, angle, n);
-    y_corr                      = SRC_get_light_polygon_y_corr(light, angle, n);
-    width                       = light->width;
-    width_corr                  = SRC_get_light_polygon_width_corr(light, n);
-
-    light_polygon = LIG_get_light_polygon(
-        x+x_corr,
-        y+y_corr,
-        width+width_corr,
-        angle+coef,
-        obstacles
-    );
-
-    return light_polygon;
-};
-
-void LIG_draw_polygon(
-    int              x,
-    int              y,
-    int              i,
-    float            angle,
-    float            coef,
-    lightsource_t   *light,
-    segment_t       *obstacles
-) {
-    vertex_t *vertex     = NULL;
-    float    *coords     = NULL;
-    int       n_vertices = 0;
-
-    vertex       = LIG_calc_polygon(x, y, i, angle, coef, light, obstacles);
-    n_vertices   = VRTX_len(vertex);
-    coords       = VRTX_to_coords(vertex);
-    
-    SCENE_draw_polygon(
-        coords,
-        n_vertices,
-        light->light_polygons[i].red,
-        light->light_polygons[i].green,
-        light->light_polygons[i].blue,
-        light->light_polygons[i].light_power
-    );
-}

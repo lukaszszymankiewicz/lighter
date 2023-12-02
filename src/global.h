@@ -50,7 +50,7 @@
 
 #define Y_DIRECTION                  -1
 
-#define COLOR_COEF               256.0        // default light R color
+#define COLOR_COEF               256.0      // default light R color
 #define DEFAULT_LIGHT_R          238        // default light R color
 #define DEFAULT_LIGHT_G          220        // default light G color
 #define DEFAULT_LIGHT_B          91         // default light B color
@@ -69,6 +69,9 @@ enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };
 // TODO: move it accrdingly
 enum segtype { HOR, VER, UNKNOWN };
 // TODO: move it accrdingly
-enum layers { LAYER_LIGHT, LAYER_TILE, LAYER_SPRITE, LAYER_BUFFER, LAYER_LIGHT_BUFFER, LAYER_ALL };
+
+enum layers { LAYER_LIGHT, LAYER_TILE, LAYER_SPRITE, SCALED_IMAGE, LAYER_ALL };
+
+enum buffers { DEFAULT_FRAMEBUFFER, FIRST_BUFFER };
 
 #endif

@@ -57,14 +57,11 @@
   - [x] add entity filp
   - [x] add transparency to light effect shader (test it)
   - [x] put camera ideally on center of screen
-
-  - [ ] add stencil buffer
-
-  - [ ] multiple light polygons 
-  - [ ] add proper scene cleaning
-  - [ ] remove all unnecessary prints
+  - [x] multiple light polygons 
   - [ ] add differ effect
   - [ ] add wobble
+  - [ ] add proper scene cleaning
+  - [ ] remove all unnecessary prints
 - [ ] repair all unit-tests (once again!)
 - [ ] clear all memory leaks!
 - [x] repair light vertex calculations
@@ -74,10 +71,15 @@
 
 UTIL:
  - [ ] create a namesystem for ids: gl_texture ids should be reconizable from library ids
- - [ ] consistent types - use float everywher
+ - [ ] consistent types - use float everywhere
  - [ ] check for unused constants/functions
  - [ ] cleanup Makefile
  - [ ] point/geometry etc to some 'core' module
  - [ ] add event manager
  - [x] rethink which of the engine compononests should be an extern
    (entity_manager?)
+ - [ ] add naming convention to shaders
+ - [ ] GFX modules to gfx_manager (?)
+
+DEBUG:
+ - [ ] entities tend to disappear when above some short range

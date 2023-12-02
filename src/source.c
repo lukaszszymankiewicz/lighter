@@ -40,6 +40,13 @@ int SRC_get_light_polygon_y_corr(
     return sin(angle) * source->light_polygons[i].y + cos(angle) * source->light_polygons[i].x;
 }
 
+float SRC_get_light_polygon_angle_corr(
+    lightsource_t *source,
+    int            i
+) {
+    return source->light_polygons[i].angle_corr;
+}
+
 float SRC_get_light_polygon_width_corr(
     lightsource_t *source,
     int            i

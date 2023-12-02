@@ -134,6 +134,16 @@ void MAT_append(
     // arr2->values = NULL;
 }
 
+void MAT_empty(
+    array_t arr
+) {
+    for (int r=0; r<arr.rows; r++) {
+        for (int c=0; c<arr.cols; c++) {
+            printf("%f ", arr.values[r*arr.cols + c]);
+        }
+        printf("\n");
+    }
+}
 void MAT_debug(
     array_t arr
 ) {

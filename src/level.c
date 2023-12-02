@@ -287,12 +287,9 @@ void LVL_analyze(
             }
         }
     }
-    // DEBUG
-    SEG_debug(level->obstacle_segments); 
-
 }
 
-void LVL_draw(
+void LVL_put_to_scene(
     level_t *level
 ) {
     int id             = levels_library[level->blueprint_id]->tileset_id; 
@@ -316,7 +313,7 @@ void LVL_draw(
             
             if (!tile) { continue; }
 
-            SCENE_draw_texture(
+            SCENE_put_texture_to_scene(
                 tile->x,                tile->y,
                 TILE_WIDTH,             TILE_HEIGHT,
                 tile->row * TILE_WIDTH, tile->col * TILE_HEIGHT,

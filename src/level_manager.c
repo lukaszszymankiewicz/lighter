@@ -38,9 +38,9 @@ void LVLMAN_fill(
     LVL_analyze(level_manager->level);
 }
 
-void LVLMAN_draw(
+void LVLMAN_put_to_scene(
 ) {
-    LVL_draw(level_manager->level);
+    LVL_put_to_scene(level_manager->level);
 }
 
 void LVLMAN_free(

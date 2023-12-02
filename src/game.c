@@ -1,4 +1,6 @@
+#include <SDL2/SDL_timer.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "data/library.h"
 #include "modules/modules.h"
@@ -10,7 +12,6 @@
 #include "game.h"
 #include "gfx.h"
 #include "global.h"
-#include "post.h"
 #include "scene.h"
 #include "timer.h"
 
@@ -51,37 +52,46 @@ void GAME_draw_everything(
     if (!(game->config.use_gfx)) {
         return;
     }
+    printf("frame is being drawn ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n");
     // set up
     SCENE_clear();
     GAME_set_camera();
+    
+    SCENE_activate_buffer(FIRST_BUFFER);
+        SCENE_activate_layer(LAYER_TILE);
+            LVLMAN_put_to_scene();
+            SCENE_render_current_layer();
 
-    // SCENE_activate_buffer(2);
-    // SCENE_activate_layer(LAYER_LIGHT);
-    // ENTMAN_calc_light(); // add to layer
-    // SCENE_activate_layer(LAYER_LIGHT_BUFFER);
-    // POST_draw(); // add to layer
+        SCENE_activate_layer(LAYER_SPRITE);
+            ENTMAN_put_to_scene();
+            SCENE_render_current_layer();
 
-    SCENE_activate_buffer(1);
-    SCENE_activate_layer(LAYER_TILE);
-    LVLMAN_draw(); // add to layer
-    SCENE_activate_layer(LAYER_SPRITE);
-    ENTMAN_draw(); // add to layer
-    SCENE_activate_layer(LAYER_BUFFER);
-    POST_draw();
+    SCENE_activate_buffer(FIRST_BUFFER);
+        SCENE_activate_layer(SCALED_IMAGE);
+            SCENE_draw_scaled_buffer();
 
-    // drawing here
-    // SCENE_draw(LAYER_LIGHT, 1, DRAW_TO_STENCIL);
-    // SCENE_draw(LAYER_TILE, 1, AFFECT_BY_STENCIL);
-    // SCENE_draw(LAYER_SPRITE, 1, NO_STENCIL);
+    SCENE_activate_buffer(DEFAULT_FRAMEBUFFER);
+        SCENE_activate_layer(SCALED_IMAGE);
+            SCENE_render_current_layer();
+    
+    // cleanup
+    SCENE_clean_buffer(FIRST_BUFFER);
+    SCENE_clear_layer(SCALED_IMAGE);
+    GAME_set_camera();
 
-    SCENE_draw(LAYER_TILE, 1, NO_STENCIL);
-    SCENE_draw(LAYER_SPRITE, 1, NO_STENCIL);
-    SCENE_draw(LAYER_BUFFER, 1, NO_STENCIL);
+    // light
+    SCENE_activate_buffer(FIRST_BUFFER);
+        SCENE_activate_layer(LAYER_LIGHT);
+            ENTMAN_put_light_to_scene();
+            SCENE_render_current_layer();
 
-    // SCENE_activate_buffer(DEFAULT_FRAMEBUFFER);
-    SCENE_draw(LAYER_BUFFER, DEFAULT_FRAMEBUFFER, NO_STENCIL);
+        SCENE_activate_layer(SCALED_IMAGE);
+            SCENE_draw_scaled_buffer();
 
-    // update screen
+    SCENE_activate_buffer(DEFAULT_FRAMEBUFFER);
+        SCENE_activate_layer(SCALED_IMAGE);
+            SCENE_render_current_layer();
+
     GFX_update();
 }
 
@@ -92,13 +102,9 @@ void GAME_fill_scene(
     SCENE_add_layer(LAYER_LIGHT);
     SCENE_add_layer(LAYER_TILE);
     SCENE_add_layer(LAYER_SPRITE);
-    SCENE_add_layer(LAYER_BUFFER);
+    SCENE_add_layer(SCALED_IMAGE);
     
-    // TODO: add buffer index as parameter
-    // sprites (1)
-    SCENE_add_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
-    // light (2)
-    SCENE_add_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+    SCENE_add_buffer(FIRST_BUFFER, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
 void GAME_update_time(
@@ -127,7 +133,7 @@ void GAME_loop(
         return;
     }
 
-    while(GAME_shold_run() ) {
+    while(GAME_shold_run()) {
         GAME_start_time();
         GAME_handle_window_events();
         CON_update();

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS := --std=c99 -Wall -g
+CFLAGS := --std=c99 -Wall
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 LIBS = -lGL -lGLU -lGLEW -lm 
 
@@ -12,7 +12,6 @@ TESTLINKS = `pkg-config --cflags --libs check sdl2 SDL2_image`
 SRCDIR = src
 TESTDIR = tests
 
-LEVELLOG = level_read_log.txt
 MEMORYLOG = memory_check.txt
 
 BUILDDIR = build
@@ -56,7 +55,6 @@ OBJS =                                     \
 	$(BUILDDIR)/mat.o                      \
     $(BUILDDIR)/render.o                   \
 	$(BUILDDIR)/point.o                    \
-	$(BUILDDIR)/post.o                     \
 	$(BUILDDIR)/segment.o                  \
 	$(BUILDDIR)/scene.o                    \
 	$(BUILDDIR)/sorted_list.o              \
@@ -123,7 +121,6 @@ clean:
 	rm -f $(BUILDDIR)/$(MODDIR)/*.o
 	rm -f $(BUILDDIR)/$(FINAL_OBJ)
 	rm -f $(BUILDDIR)/$(FINAL_TEST_OBJ)
-	rm $(LEVELLOG)
 	rm $(MEMORYLOG)
 
 # TODO: add creating build/data folder

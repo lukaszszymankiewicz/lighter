@@ -640,14 +640,14 @@ bool ENT_flip_hor(
     return entity->direction == LEFT;
 }
 
-void ENT_draw(
+void ENT_put_to_scene(
     entity_t *entity
 ) {
     if (ENT_has_flag(entity, NOT_DRAWABLE)) {
         return;
     }
 
-    SCENE_draw_texture(
+    SCENE_put_texture_to_scene(
         entity->x,                             entity->y,
         ENT_current_frame_width(entity),       ENT_current_frame_height(entity),
         ENT_current_frame(entity).rect.x,      ENT_current_frame(entity).rect.y,

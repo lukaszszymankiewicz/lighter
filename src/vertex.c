@@ -36,14 +36,15 @@ void VRTX_add_point(
     }
 
     // place new point at begininng
-    else if ((*head)->angle >= new_vertex->angle) {
+    // else if ((*head)->angle >= new_vertex->angle) {
+    else if ((*head)->angle <= new_vertex->angle) {
         new_vertex->next = (*head);
         (*head)          = new_vertex;
     }
     else {
         current = (*head);
 
-        while (current->next && current->next->angle < new_vertex->angle) {
+        while (current->next && current->next->angle > new_vertex->angle) {
             current = current->next;
         }
         new_vertex->next = current->next;
@@ -88,19 +89,6 @@ void VRTX_merge(
     while(ptr) {
         VRTX_add_point(head, ptr->x, ptr->y, ptr->angle);
         ptr=ptr->next;
-    }
-}
-
-void VRTX_move(
-    vertex_t* vertices,
-    int       x_diff,
-    int       y_diff
-) {
-    vertex_t *ptr    = NULL;
-
-    for (ptr=vertices; ptr; ptr=ptr->next) {
-        ptr->x = ptr->x - x_diff;
-        ptr->y = ptr->y - y_diff;
     }
 }
 

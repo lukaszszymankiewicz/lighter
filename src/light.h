@@ -3,7 +3,6 @@
 #include "global.h"
 #include "point.h"
 #include "segment.h"
-#include "source.h"
 
 #ifndef LIGHT_H
 #define LIGHT_H
@@ -11,20 +10,11 @@
 #define R                               2000
 #define RAY_THRESHOLD                   2
 
-void LIG_draw_polygon(
-    int            x,
-    int            y,
-    int            i,
-    float          angle,
-    float          coef,
-    lightsource_t *light,
-    segment_t     *obstacles
-);
-
 // TESTING
+// TODO: needed at all?
 vertex_t* LIG_get_base_light_polygon(int x, int y, segment_t *obstacles, point_t* hit_points);
 vertex_t* LIG_find_closest_hit(segment_t* inter, int x1, int y1, int x2, int y2);
-vertex_t* LIG_get_light_polygon(int x, int y, float width, float angle, segment_t* obstacles);
+vertex_t* LIG_calculate(int x, int y, float width, float angle, segment_t* obstacles);
 
 segment_t* LIG_ray_intersects_multiple( int x1, int y1, int x2, int y2, segment_t *obstacles);
 segment_t* LIG_find_closest_hit_segment_ver(segment_t* inter, int r_x1, int r_y1, int r_x2, int r_y2);

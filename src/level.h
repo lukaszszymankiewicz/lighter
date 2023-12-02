@@ -15,7 +15,7 @@ typedef struct level {
 level_t* LVL_new();
 
 void LVL_analyze(level_t *level);
-void LVL_draw(level_t *level);
+void LVL_put_to_scene(level_t *level);
 void LVL_fill(level_t* level);
 void LVL_free(level_t* level);
 
