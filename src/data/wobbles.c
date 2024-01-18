@@ -40,9 +40,20 @@ wobble_t wobble_walk = {
     }
 };
 
+
+void LIB_read_wobble_blueprint(
+    int       id,
+    wobble_t* wobble
+) {
+    if (wobble) {
+        printf("WOBBLE ID = %d read\n", id);
+    }
+    wobble_library[id]      = wobble;
+};
+
 void LIB_create_wobble_library(
 ) {
-    wobble_library[WOBBLE_NO] = &wobble_no;
-    wobble_library[WOBBLE_STABLE] = &wobble_stable;
-    wobble_library[WOBBLE_WALKING] = &wobble_walk;
+    LIB_read_wobble_blueprint(WOBBLE_NO, &wobble_no);
+    LIB_read_wobble_blueprint(WOBBLE_STABLE, &wobble_stable);
+    LIB_read_wobble_blueprint(WOBBLE_WALKING, &wobble_walk);
 }

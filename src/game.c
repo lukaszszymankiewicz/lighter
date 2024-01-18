@@ -52,7 +52,7 @@ void GAME_draw_everything(
     if (!(game->config.use_gfx)) {
         return;
     }
-    printf("frame is being drawn ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n");
+    printf("\n\nFRAME %d ---------- \n", game->frame);
     // set up
     SCENE_clear();
     GAME_set_camera();
@@ -134,9 +134,14 @@ void GAME_loop(
     }
 
     while(GAME_shold_run()) {
+
         GAME_start_time();
         GAME_handle_window_events();
         CON_update();
+
+        if (CON_button_is_just_released(SDL_SCANCODE_Q)) {
+            game->loop = false;
+        }
         ENTMAT_update();
         GAME_draw_everything(); 
         GAME_update_time();

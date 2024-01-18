@@ -18,7 +18,7 @@ tile_t* TILE_new(
     new_tile->row          = tiles_library[blueprint_id]->row;
     new_tile->col          = tiles_library[blueprint_id]->col;
     new_tile->obstacle     = tiles_library[blueprint_id]->obstacle;
-    new_tile->tileset_id   = tiles_library[blueprint_id]->tileset_id;
+    new_tile->tileset_id   = tiles_library[blueprint_id]->tileset;
 
     return new_tile;
 }

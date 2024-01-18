@@ -121,11 +121,13 @@ typedef struct entity_blueprint {
 } entity_blueprint_t;
 
 typedef struct texture_blueprint {
+    int id;
     const char *filepath;
 } texture_blueprint_t;
 
 typedef struct tile_blueprint {
-    int            tileset_id;
+    int            id;
+    int            tileset;
     int            row;
     int            col;
     bool           obstacle;
@@ -146,6 +148,7 @@ typedef struct level_blueprint {
 } level_blueprint_t;
 
 typedef struct shader_program_blueprint {
+    int   id;
     const char *vertex_shader_path;
     const char *fragment_shader_path;
     const char *geomentry_shader_path;

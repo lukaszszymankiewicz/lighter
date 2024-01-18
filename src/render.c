@@ -16,27 +16,26 @@ void RENDER_set_uniform(
 ) {
     switch (type)
     {
+        case GL_FLOAT:
+            glUniform1f(uniform_id, uniform[0]);
+            break;
         case GL_FLOAT_VEC2:
-            glUniform2f(uniform_id, uniform[0], uniform[1]);
-            printf("values: %f %f\n", uniform[0], uniform[1]);
+            glUniform2f((GLuint)uniform_id, (GLfloat)uniform[0], (GLfloat)uniform[1]);
             break;
         case GL_FLOAT_VEC3:
             glUniform3f(uniform_id, uniform[0], uniform[1], uniform[2]);
-            printf("values: %f %f %f\n", uniform[0], uniform[1], uniform[2]);
             break;
         case GL_FLOAT_VEC4:
             glUniform4f(uniform_id, uniform[0], uniform[1], uniform[2], uniform[3]);
-            printf("values: %f %f %f %f\n", uniform[0], uniform[1], uniform[2], uniform[3]);
             break;
         case GL_SAMPLER_2D:
-            glUniform1f(uniform_id, uniform[0]);
-            printf("values: %f \n", uniform[0]);
+            glUniform1i(uniform_id, 0);
             break;
         case GL_FLOAT_MAT2:
             glUniformMatrix2fv(uniform_id, 1, GL_FALSE, &uniform[0]);
-            printf("values: %f %f %f %f\n", uniform[0], uniform[1], uniform[2], uniform[3]);
             break;
         default:
+            printf("unknown default uniform \n");
             break;
     }
 }
@@ -49,8 +48,10 @@ void RENDER_set_uniforms(
         int   uniform_id = shader_library[shader]->uniform_loc[u];
         int   type       = shader_library[shader]->uniform_types[u];
         char *name       = shader_library[shader]->uniform_names[u];
-
-        printf("uniform (%s) with id (%d) ", name, uniform_id);
+        printf("idx %u of %d\n", u, shader_library[shader]->n_uniforms);
+        printf("uniform %s \n", name);
+        printf("id %d \n", uniform_id);
+        printf("type %d \n", type);
         RENDER_set_uniform(uniform_id, type, uniforms[u]);
     }
 }
@@ -74,13 +75,6 @@ void RENDER_set_viewport(
     glViewport(0, 0, buffer_w, buffer_h);    
 }
 
-// TODO: is this name accurate?
-void RENDER_set_attachment(
-    int attachment
-) { 
-    glDrawBuffer(attachment);
-}
-
 void RENDER_shader(
     int            shader,
     int            texture,
@@ -91,7 +85,7 @@ void RENDER_shader(
     int            mode
 ) { 
     printf("SHADER %d | ", shader_library[shader]->program);
-    printf("TEXTURE %d \n", texture);
+    printf("TEXTURE %d", texture);
     glUseProgram(shader_library[shader]->program);
 
     glBindVertexArray(shader_library[shader]->vao);
@@ -99,7 +93,7 @@ void RENDER_shader(
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*n_vertices, vertices, GL_STATIC_DRAW);
     RENDER_set_uniforms(shader, uniforms);
     
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     glDrawArrays(mode, 0, (int)(n_vertices/count));
 

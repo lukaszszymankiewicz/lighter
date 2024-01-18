@@ -24,7 +24,7 @@ void ENTMAN_add_entity(
     int               id
 ) {
     entity_t* entity = NULL;
-    // TODO: make x and y already calculatedc
+    // TODO: make x and y already calculated
     entity           = ENT_generate(x_tile*TILE_WIDTH, y_tile*TILE_HEIGHT, id);
 
     for (int i=0; i<MAX_ENTITY; i++) {
@@ -163,9 +163,11 @@ void ENTMAN_put_entity_light_to_scene(
     float angle             = ENT_light_angle(entity);
     float wobble_angle_corr = ENT_wobble_coef(entity);
     
-    // first approach - each light polygon is a separate render call
+    // TODO: first approach - each light polygon is a separate render call
     // benchmark this, and if it not sufficient - change it 
-    for (int i=0; i<source->n_poly; i++) {
+    // TODO: revert
+    for (int i=0; i<1; i++) {
+    // for (int i=0; i<source->n_poly; i++) {
 
         vertex_t *light_polygon  = NULL;
         float *coords            = NULL;
@@ -178,7 +180,7 @@ void ENTMAN_put_entity_light_to_scene(
         light_polygon = LIG_calculate(final_x, final_y, final_width, final_angle, obstacles);
         n_vertices    = VRTX_len(light_polygon);
         coords        = VRTX_to_coords(light_polygon);
-
+        
         SCENE_add_new_drawable_object();
         SCENE_put_polygon_to_scene(
             coords,
@@ -219,7 +221,8 @@ int ENTMAN_entity_follow_y(
 void ENTMAN_put_light_to_scene(
 ) {
     segment_t* obstacles = level_manager->level->obstacle_segments;
-
+    
+    // TODO: revert
     // for (int i=0; i<MAX_ENTITY; i++) {
     for (int i=0; i<1; i++) {
         entity_t* entity = NULL;
@@ -230,7 +233,6 @@ void ENTMAN_put_light_to_scene(
         }
 
         if (ENTMAN_entity_in_light_update_range(entity)) {
-            printf("entity %d in light draw range \n", entity->id);
             ENTMAN_put_entity_light_to_scene(entity, obstacles);
             ENTMAN_put_entity_light_to_scene(entity->hold, obstacles);
         }

@@ -3,6 +3,7 @@
 
 #include "vertex.h"
 
+#define MAX_ANGLE        10.0
 #define COORD_PER_VERTEX 2
 
 vertex_t* VRTX_new(
@@ -18,6 +19,19 @@ vertex_t* VRTX_new(
     new_vertex->next     = NULL;
 
     return new_vertex;
+}
+
+void VRTX_force_first(
+    vertex_t **head,
+    int        x,
+    int        y
+) {
+    vertex_t* new_vertex = NULL;
+    // gracefully force the vertex to be always first with MAX_ANGLE
+    new_vertex           = VRTX_new(x, y, MAX_ANGLE);
+
+    new_vertex->next     = (*head);
+    (*head)              = new_vertex;
 }
 
 void VRTX_add_point(
@@ -36,7 +50,6 @@ void VRTX_add_point(
     }
 
     // place new point at begininng
-    // else if ((*head)->angle >= new_vertex->angle) {
     else if ((*head)->angle <= new_vertex->angle) {
         new_vertex->next = (*head);
         (*head)          = new_vertex;

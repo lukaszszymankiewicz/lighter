@@ -30,6 +30,7 @@ int SCENE_cur_obj(
 array_t* SCENE_get_current_object_vertices(
 ) {
     int cur_object = SCENE_cur_obj();
+
     if (cur_object == -1) {
         return NULL;
     }
@@ -39,12 +40,11 @@ array_t* SCENE_get_current_object_vertices(
 void SCENE_clear_layer(
     int layer
 ) {
+    printf("clearing for single layer %d \n", layer);
     for (int j=0; j<MAX_DRAWBLE_OBJECTS_ON_LAYER; j++) {
         scene->layers[layer].objs[j].texture       = -1;
-        scene->layers[layer].objs[j].len           =  0;
         scene->layers[layer].objs[j].count         =  0;
-        scene->layers[layer].objs[j].uniform_count =  0;
-        
+
         // clean uniforms
         for (int u=0; u<MAX_SHADER_UNIFORMS; u++) {
             if (scene->layers[layer].objs[j].uniforms[u] != NULL) {
@@ -53,38 +53,49 @@ void SCENE_clear_layer(
             }
         }
         
-        // TODO: clean vertices
-        // if (scene->layers[i].objs[j].vertices != NULL) {
-        //     free(scene->layers[i].objs[j].vertices);
-        //     scene->layers[i].objs[j].vertices   = NULL;
+        // if (scene->layers[layer].objs[j].vertices.values) {
+        //     MAT_free(scene->layers[layer].objs[j].vertices);
         // }
 
+        scene->layers[layer].objs[j].len           =  0;
+        scene->layers[layer].objs[j].uniform_count =  -1;
     }
     scene->layers[layer].n_objs      = -1;
 }
 
-// TODO: maybe it should be SCENE_clear_layer?
 void SCENE_clear(
 ) {
+    printf("SCENE CLEARING\n");
+    printf("for %d layers \n", scene->n_layers);
+
     for (int i=0; i<scene->n_layers; i++) {
-        for (int j=0; j<MAX_DRAWBLE_OBJECTS_ON_LAYER; j++) {
+
+        int objs = scene->layers[i].n_objs+1;
+        printf("layer: %d ", i);
+        printf("clearing for %d objects \n", objs);
+
+        for (int j=0; j<objs; j++) {
             scene->layers[i].objs[j].texture       = -1;
             scene->layers[i].objs[j].len           =  0;
             scene->layers[i].objs[j].count         =  0;
-            scene->layers[i].objs[j].uniform_count =  0;
             
             // clean uniforms
-            for (int u=0; u<MAX_SHADER_UNIFORMS; u++) {
+            int uns = scene->layers[i].objs[j].uniform_count;
+            printf("for object %d uniforms to clean: %d \n", j, uns);
+
+            for (int u=0; u<uns; u++) {
+                printf("    clearing for %d uniform \n", u);
                 if (scene->layers[i].objs[j].uniforms[u] != NULL) {
                     free(scene->layers[i].objs[j].uniforms[u]);
                     scene->layers[i].objs[j].uniforms[u] = NULL;
                 }
+                printf("    cleared!\n");
             }
             
-            // TODO: clean vertices
+            scene->layers[i].objs[j].uniform_count = -1;
+
             // if (scene->layers[i].objs[j].vertices.values != NULL) {
-            //     free(scene->layers[i].objs[j].vertices);
-            //     scene->layers[i].objs[j].vertices   = NULL;
+            //     MAT_free(scene->layers[i].objs[j].vertices);
             // }
 
         }
@@ -92,9 +103,12 @@ void SCENE_clear(
     }
     scene->cur_layer                 = -1;
     
+    printf("EVETYTING CLEARED \n");
+    printf("buffers n: %d", scene->n_buffers);
     for (int b=0; b<scene->n_buffers; b++) {
         RENDER_clear_buffer(scene->buffers[b]->id);
     }
+    printf("BUFFER CLEARED \n");
 }
 
 void SCENE_clean_buffer(
@@ -114,12 +128,14 @@ void SCENE_add_layer(
     for (int j=0; j<MAX_DRAWBLE_OBJECTS_ON_LAYER; j++) {
         // TODO: clean it!
         // scene->layers[layer].objs[j].vertices      = NULL;
-        scene->layers[layer].objs[j].uniform_count = 0;
 
         for (int u=0; u<MAX_SHADER_UNIFORMS; u++) {
             scene->layers[layer].objs[j].uniforms[u] = NULL;
         }
+
+        scene->layers[layer].objs[j].uniform_count = -1;
     }
+    scene->layers[layer].n_objs      = -1;
     scene->layers[layer].on = true;
     scene->n_layers++;
 }
@@ -127,7 +143,6 @@ void SCENE_add_layer(
 void SCENE_add_defalt_buffer(
 ) {
     // create default buffer
-    scene->buffers[scene->n_buffers] = NULL;
     scene->buffers[scene->n_buffers] = (framebuffer_t*)malloc(sizeof(framebuffer_t));
 
     scene->buffers[scene->n_buffers]->x0          = 0;
@@ -145,10 +160,8 @@ void SCENE_add_buffer(
     int    w,
     int    h
 ) {
-    printf("buffer with id %d id created \n", id);
     scene->buffers[id] = GFX_create_framebuffer(id, w, h);
     scene->n_buffers++;
-    printf("active buffers: %d \n", scene->n_buffers);
 }
 
 void SCENE_init(
@@ -159,6 +172,10 @@ void SCENE_init(
     scene->n_buffers  = 0;
     scene->cur_layer  = -1;
     scene->cur_buffer = 0;
+
+    for(int b=0; b<MAX_BUFFERS_ON_SCENE; b++) {
+        scene->buffers[b] = NULL;
+    }
 }
 
 void SCENE_activate_buffer(
@@ -187,9 +204,10 @@ void SCENE_add_uniform(
 ) {
     int obj         = SCENE_cur_obj();
     int cur_uniform = SCENE_cur_uniform();
-
+    
     scene->layers[scene->cur_layer].objs[obj].uniforms[cur_uniform] = arr.values;
     scene->layers[scene->cur_layer].objs[obj].uniform_count++;
+    printf("\nuniform count increased for layer: %d and object: %d, now: %d\n", scene->cur_layer, obj, cur_uniform);
 }
 
 void SCENE_add_new_drawable_object(
@@ -227,17 +245,6 @@ void SCENE_add_vertices(
     int len = arr.rows * arr.cols;
 
     scene->layers[scene->cur_layer].objs[j].vertices = arr;
-
-    printf("\n");
-    for (int l=0; l<len; l++) {
-        printf("%f ", 
-        scene->layers[scene->cur_layer].objs[j].vertices.values[l]
-    );
-
-        if ((l+1) % 2 == 0) {
-            printf("\n");
-        }
-    }
 
     // TODO: len and count should be deleted!
     scene->layers[scene->cur_layer].objs[j].len    = len;
@@ -359,13 +366,6 @@ void SCENE_put_polygon_to_scene(
     int len     = n_vertices * COORD_PER_POLYGON_VERTEX;
     int buffer  = SCENE_get_buffer_tex();
 
-    for (int i=0; i<len; i++) {
-        printf("%f ", vertices[i]);
-        if ((i+1) % 2 ==0) {
-            printf("\n");
-        }
-    }
-
     float r_gl = (float) r / COLOR_COEF;
     float g_gl = (float) g / COLOR_COEF;
     float b_gl = (float) b / COLOR_COEF;
@@ -373,43 +373,49 @@ void SCENE_put_polygon_to_scene(
 
     array_t pos_arr     = SCENE_polygon_coord_to_matrix(vertices, len);
 
-    printf("\n");
-    for (int i=0; i<len; i++) {
-        printf("%f ", pos_arr.values[i]);
-
-        if ((i+1) % 2 ==0) {
-            printf("\n");
-        }
-    }
-
-
-
     array_t scale_arr   = SCENE_set_scale();
     array_t color_arr   = MAT_vec4_new(r_gl, g_gl, b_gl, a_gl);
     array_t camera_arr  = MAT_vec2_new(camera_x, camera_y);
-    array_t emit_arr    = MAT_vec2_new(
-        (float)x0 + scale_arr.values[0]/2.0 - (float)camera_arr.values[0],
-        (float)y0 + scale_arr.values[1]/2.0 - (float)camera_arr.values[1] 
-
-        // (float)x0 + scale_arr.values[0]/2.0,
-        // (float)y0 + scale_arr.values[1]/2.0
-    );
-
-    printf("\n");
-    for (int i=0; i<len; i++) {
-        if ((i+1) % 2 ==0) {
-            printf("%f ", 2.0 * (pos_arr.values[i] - camera_arr.values[0]) / 320.0 -1.0);
-            printf("\n");
-        } else {
-            printf("%f ", 2.0 * (pos_arr.values[i] - camera_arr.values[1]) / 240.0 -1.0);
-        }
-    }
-
+    array_t power_arr   = MAT_scalar_new(2.5);
+    array_t emit_arr    = MAT_vec2_new((float)x0, (float)y0);
+    
+    // vertex
     SCENE_add_uniform(scale_arr);
     SCENE_add_uniform(camera_arr);
+
+    // fragment
+    int obj         = SCENE_cur_obj();
+
+    SCENE_add_uniform(scale_arr);
+    printf("scale_arr: \n");
+    MAT_debug(scale_arr);
+
+    SCENE_add_uniform(camera_arr);
+    printf("camera_arr: \n");
+    MAT_debug(camera_arr);
+
     SCENE_add_uniform(color_arr);
+    printf("color_arr: \n");
+    MAT_debug(color_arr);
+
     SCENE_add_uniform(emit_arr);
+    printf("emit_arr: \n");
+    MAT_debug(emit_arr);
+
+    SCENE_add_uniform(scale_arr);
+    printf("scale_arr: \n");
+    MAT_debug(scale_arr);
+
+    SCENE_add_uniform(camera_arr);
+    printf("camera_arr: \n");
+    MAT_debug(camera_arr);
+
+    SCENE_add_uniform(power_arr);
+    printf("power_arr: \n");
+    MAT_debug(power_arr);
+
     SCENE_add_vertices(pos_arr);
+
     SCENE_set_mode(GL_POLYGON);
     SCENE_set_shader(SHADER_LIGHT);
 }
@@ -439,10 +445,12 @@ void SCENE_put_texture_to_scene(
         (float)(clip_y +      0 + corr_h) / (float)tex_h
     );
     MAT_join(&pos_arr, &tex_arr);
+    // pos_arr was alocated here ^
 
     // still same texture is drawn - appending vertices
     if (SCENE_get_current_object_texture() == texture) {
         array_t* old_vertices = SCENE_get_current_object_vertices();
+        // pos_arr is then freed here for the first time
         MAT_append(old_vertices, &pos_arr);
 
         return;
@@ -451,6 +459,7 @@ void SCENE_put_texture_to_scene(
     SCENE_add_new_drawable_object();
 
     array_t scale_arr    = SCENE_set_scale();
+    printf("texture %d \n", texture);
     array_t texture_arr  = SCENE_id(texture);
     array_t camera_arr   = MAT_vec2_new(camera_x, camera_y);
 
@@ -525,16 +534,15 @@ void SCENE_render_current_layer(
     int layer  = scene->cur_layer;
     int target = scene->cur_buffer;
 
-    printf("\nLAYER: %d ~~~~~~~~~~~~~~~~\n", layer);
+    printf("\nLAYER: %d | n_objects: %d ", layer, scene->layers[layer].n_objs+1);
     if (SCENE_layer_is_off(layer)) {
         printf("NOT DRAWING ANYTHING\n");
         printf("objects to render: 0\n");
         return;
     }
-    printf("objects to render: %d\n", scene->layers[layer].n_objs+1);
 
     for (int i=0; i<scene->layers[layer].n_objs+1; i++) {
-        printf("\nOBJECT: %d | ", i);
+        printf("\n    OBJECT: %d | ", i);
         printf("vertices: %d | ", SCENE_vertices_n(layer, i));
 
         RENDER_set_viewport(
@@ -542,8 +550,6 @@ void SCENE_render_current_layer(
             scene->buffers[target]->w,
             scene->buffers[target]->h
         );
-
-        RENDER_set_attachment(scene->buffers[target]->attachment);
 
         RENDER_shader(
             scene->layers[layer].objs[i].shader_id,

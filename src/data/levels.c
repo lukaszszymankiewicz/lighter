@@ -5,7 +5,7 @@
 level_blueprint_t* levels_library[LEVEL_ALL] = {NULL};
 
 level_blueprint_t level_blueprint_sample = {
-    0,
+    LEVEL_SAMPLE,
     TILESET_BASIC,
     11, 11,
     {
@@ -14,8 +14,8 @@ level_blueprint_t level_blueprint_sample = {
         0,0,3,3,3,3,3,3,3,0,0,
         0,0,3,1,1,1,1,1,3,0,0,
         0,0,3,1,0,0,0,0,3,0,0,
-        0,0,3,3,0,0,0,3,3,0,0,
-        0,0,3,1,1,1,1,1,3,0,0,
+        0,0,3,3,0,0,2,3,3,0,0,
+        0,0,3,1,1,1,1,2,3,0,0,
         0,0,3,3,3,3,3,3,3,0,0,
         0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,
@@ -29,7 +29,7 @@ level_blueprint_t level_blueprint_sample = {
 };
 
 level_blueprint_t level_blueprint_testing = {
-    0,
+    LEVEL_TEST,
     TILESET_BASIC,
     10, 10,
     {
@@ -47,9 +47,18 @@ level_blueprint_t level_blueprint_testing = {
     0, { }
 };
 
+void LIB_read_level_blueprint(
+    level_blueprint_t* blueprint
+) {
+    if (blueprint) {
+        printf("LEVEL BLUEPRINT ID = %d read\n", blueprint->id);
+    }
+    levels_library[blueprint->id]      = blueprint;
+};
+
 void LIB_create_levels_library(
 ) {
-    levels_library[LEVEL_SAMPLE] = &level_blueprint_sample;
-    levels_library[LEVEL_TEST]   = &level_blueprint_testing;
+    LIB_read_level_blueprint(&level_blueprint_sample);
+    LIB_read_level_blueprint(&level_blueprint_testing);
 };
 

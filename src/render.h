@@ -20,6 +20,5 @@ void RENDER_shader(
 );
 
 void RENDER_clear_buffer(int buffer);
-void RENDER_set_attachment(int attachment);
 
 #endif

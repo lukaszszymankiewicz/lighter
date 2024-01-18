@@ -6,7 +6,7 @@
 void LIB_init(
     bool use_gfx
 ) {
-    printf("resources is beaing read ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n");
+    printf("[RESOURCES]\n");
     LIB_create_entity_library();
     LIB_create_wobble_library();
     LIB_create_lightsources_library();

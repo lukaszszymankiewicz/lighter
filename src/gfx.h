@@ -6,7 +6,7 @@
 #ifndef GFX_H
 #define GFX_H
 
-#define MAX_SHADER_UNIFORMS 4
+#define MAX_SHADER_UNIFORMS 8
 
 #define FULL_ALPHA 1.0
 #define NO_ALPHA   0.0
@@ -39,7 +39,6 @@ typedef struct framebuffer {
     unsigned int y0;
     unsigned int w;
     unsigned int h;
-    unsigned int attachment;
 } framebuffer_t;
 
 shader_program_t* GFX_create_gl_program(

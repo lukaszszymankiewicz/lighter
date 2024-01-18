@@ -26,6 +26,7 @@ typedef struct wobble {
 } wobble_t;
 
 typedef struct lightsource {
+    int               id;
     float             width;
     int               penetrating_power;
     int               n_poly;

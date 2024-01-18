@@ -103,9 +103,18 @@ entity_blueprint_t entity_blueprint_walllight = {
     }
 };
 
+void LIB_read_entity_blueprint(
+    entity_blueprint_t* blueprint
+) {
+    if (blueprint) {
+        printf("ENTITY BLUEPRINT ID = %d read\n", blueprint->id);
+    }
+    entity_library[blueprint->id]      = blueprint;
+};
+
 void LIB_create_entity_library(
 ) {
-    entity_library[ENTITY_HERO]      = &entity_blueprint_hero;
-    entity_library[ENTITY_LIGHTER]   = &entity_blueprint_lighter;
-    entity_library[ENTITY_WALLLIGHT] = &entity_blueprint_walllight;
+    LIB_read_entity_blueprint(&entity_blueprint_hero);
+    LIB_read_entity_blueprint(&entity_blueprint_lighter);
+    LIB_read_entity_blueprint(&entity_blueprint_walllight);
 }

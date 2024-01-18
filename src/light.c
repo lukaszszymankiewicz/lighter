@@ -441,13 +441,9 @@ vertex_t* LIG_initial_point_of_light(
     float     width,
     vertex_t* light_polygon
 ) {
-    vertex_t* v = NULL;
 
     if (width != 0.0) {
-        v = VRTX_new(x, y, 0.0);
-        VRTX_merge(&light_polygon, v);
-        
-        if (v) { VRTX_free(v); }
+        VRTX_force_first(&light_polygon, x, y);
     }
 
     return light_polygon;

@@ -4,26 +4,36 @@
 
 tile_blueprint_t *tiles_library[TILE_ALL] = {NULL};
 
+    
 tile_blueprint_t tile_blueprint_nothing = {
-    TILESET_BASIC, 0, 0, OBSTACLE_FALSE
+    TILE_NOTHING, TILESET_BASIC, 0, 0, OBSTACLE_FALSE
 };
 
 tile_blueprint_t tile_blueprint_wall = {
-    TILESET_BASIC, 1, 0, OBSTACLE_FALSE
+    TILE_WALL, TILESET_BASIC, 1, 0, OBSTACLE_FALSE
 };
 
 tile_blueprint_t tile_blueprint_broken_wall = {
-    TILESET_BASIC, 2, 0, OBSTACLE_FALSE
+    TILE_BROKEN_WALL, TILESET_BASIC, 2, 0, OBSTACLE_FALSE 
 };
 
 tile_blueprint_t tile_blueprint_black_obstacle = {
-    TILESET_BASIC, 0, 0, OBSTACLE_TRUE
+    TILE_BLACK, TILESET_BASIC, 0, 0, OBSTACLE_TRUE
+};
+
+void LIB_read_tiles_blueprint(
+    tile_blueprint_t* blueprint
+) {
+    if (blueprint) {
+        printf("TILE BLUEPRINT ID = %d read\n", blueprint->id);
+    }
+    tiles_library[blueprint->id]      = blueprint;
 };
 
 void LIB_create_tile_library(
 ) {
-    tiles_library[TILE_NOTHING]     = &tile_blueprint_nothing;
-    tiles_library[TILE_WALL]        = &tile_blueprint_wall;
-    tiles_library[TILE_BROKEN_WALL] = &tile_blueprint_broken_wall;
-    tiles_library[TILE_BLACK]       = &tile_blueprint_black_obstacle;
+    LIB_read_tiles_blueprint(&tile_blueprint_nothing);
+    LIB_read_tiles_blueprint(&tile_blueprint_wall);
+    LIB_read_tiles_blueprint(&tile_blueprint_broken_wall);
+    LIB_read_tiles_blueprint(&tile_blueprint_black_obstacle);
 };

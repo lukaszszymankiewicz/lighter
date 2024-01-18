@@ -1,4 +1,4 @@
-- [x] add pre-calculated values to tiles while level creation
+i- [x] add pre-calculated values to tiles while level creation
 - [x] add pre-calculated values to entity while level creation
 - [x] all assets needs to have one functio to load them and fill the library (LIB_create_entity_library())
 - [x] entity needs a blueprint which holds all data
@@ -75,7 +75,6 @@ UTIL:
  - [ ] check for unused constants/functions
  - [ ] cleanup Makefile
  - [ ] point/geometry etc to some 'core' module
- - [ ] add event manager
  - [x] rethink which of the engine compononests should be an extern
    (entity_manager?)
  - [ ] add naming convention to shaders

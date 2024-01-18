@@ -6,14 +6,15 @@
 
 shader_program_t* shader_library[SHADER_ALL] = { NULL };
 
-
 shader_program_blueprint_t shader_light = {
+    SHADER_LIGHT,
     "./src/data/shaders/light_vertex.glsl",
     "./src/data/shaders/light_fragment.glsl",
     "",
 };
 
 shader_program_blueprint_t shader_texture = {
+    SHADER_TEXTURE,
     "./src/data/shaders/tex_vertex.glsl",
     "./src/data/shaders/tex_fragment.glsl",
     "",
@@ -34,17 +35,23 @@ void LIB_free_program(
     // glDetachShader
 }
 
-void LIB_create_shaders_library(
+void LIB_read_shader_blueprint(
+    shader_program_blueprint_t *blueprint
 ) {
-    shader_library[SHADER_LIGHT] = GFX_create_gl_program(
-        shader_light.vertex_shader_path,
-        shader_light.fragment_shader_path,
-        shader_light.geomentry_shader_path
+    shader_program_t* shader = GFX_create_gl_program(
+        blueprint->vertex_shader_path,
+        blueprint->fragment_shader_path,
+        blueprint->geomentry_shader_path
     );
 
-    shader_library[SHADER_TEXTURE] = GFX_create_gl_program(
-        shader_texture.vertex_shader_path,
-        shader_texture.fragment_shader_path,
-        shader_texture.geomentry_shader_path
-    );
+    if (shader) {
+        printf("SHADER ID = %d read\n", blueprint->id);
+    }
+    shader_library[blueprint->id] = shader;
+};
+
+void LIB_create_shaders_library(
+) {
+    LIB_read_shader_blueprint(&shader_light);
+    LIB_read_shader_blueprint(&shader_texture);
 };

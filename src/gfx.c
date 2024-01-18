@@ -35,21 +35,36 @@ int   camera_y              = 0;
 float FRAMEBUFFER_WIDTH     = 1.0;
 float FRAMEBUFFER_HEIGHT    = 1.0;
 
+// TODO: this propably needs to be anyhow parametrizable, but for now it will
+// always use the secondary monitor as the output
+int SCREEN_DISPLAY          = 1;
+
 int   pixel_perfect_scale   = 1;
+
+// TODO: make it pretty
+void GLAPIENTRY
+MessageCallback( GLenum source,
+                 GLenum type,
+                 GLuint id,
+                 GLenum severity,
+                 GLsizei length,
+                 const GLchar* message,
+                 const void* userParam )
+{
+  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+            type, severity, message );
+}
+
+int GFX_get_number_of_displays(
+) {
+    return SDL_GetNumVideoDisplays();
+}
 
 int GFX_generate_texture_ID(
 ) {
     texture_id_counter++;
     return (int) texture_id_counter;
-}
-
-// TODO: used?
-void GFX_set_pixelperfect_scale(
-) {
-    int pix_scale_w = (int)FRAMEBUFFER_WIDTH / (int)SCREEN_WIDTH;
-    int pix_scale_h = (int)FRAMEBUFFER_WIDTH / (int)SCREEN_HEIGHT;
-
-    pixel_perfect_scale = MIN(pix_scale_w, pix_scale_h);
 }
 
 texture_t* GFX_read_texture(
@@ -81,12 +96,12 @@ texture_t* GFX_read_texture(
         );
     }
 
+    glDebugMessageCallback(MessageCallback, 0);
 
     tex->surface   = surface;
     tex->id        = texture_id;
     // TODO: uncommment
     // tex->filepath  = filepath;
-    printf("texture %s read and has id %d\n", filepath, texture_id);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -193,8 +208,10 @@ int GFX_type_size(
             return 1;
         case GL_FLOAT_MAT2:
             return 4;
+        case GL_FLOAT:
+            return 1;
         default:
-            return -1;
+            return 1;
     }
 }
 
@@ -224,7 +241,6 @@ shader_program_t* GFX_create_gl_program(
 
     // link 
     GLuint program_id = glCreateProgram();
-    printf("\nSHADER program read: %d ---------- \n", program_id);
 
     glAttachShader(program_id, vertex_shader_id);
     glAttachShader(program_id, fragment_shader_id);
@@ -241,7 +257,6 @@ shader_program_t* GFX_create_gl_program(
     glGetProgramiv(program_id, GL_ACTIVE_UNIFORMS, &n_uniforms);
     shader_program->n_uniforms = n_uniforms;
 
-    printf("\nn uniforms: %d \n", n_uniforms);
     for (i=0; i<n_uniforms; i++) {
         int loc;
         glGetActiveUniform(program_id, (GLuint)i, ALLOWED_UNIFORM_NAME_LEN, &length, NULL, &type, name);
@@ -251,8 +266,6 @@ shader_program_t* GFX_create_gl_program(
         shader_program->uniform_names[i] = NULL;
         shader_program->uniform_names[i] = (char*)malloc(sizeof(char) * strlen(name) + 1);
         strcpy(shader_program->uniform_names[i], name);
-
-        printf("uniform: (%s) on loc (%d) and type (%d) \n", name, loc, type);
     }
     
     // create VBO
@@ -266,8 +279,6 @@ shader_program_t* GFX_create_gl_program(
     // get attribs
     n_attribs = (GLuint)0;
     glGetProgramiv(program_id, GL_ACTIVE_ATTRIBUTES, &n_attribs);
-
-    printf("\nn attribs: %d\n", n_attribs);
     
     int    locs[n_attribs]; 
     int    vec_sizes[n_attribs]; 
@@ -282,11 +293,8 @@ shader_program_t* GFX_create_gl_program(
 
         vec_sizes[i]  = GFX_type_size(type);
         stride       += vec_sizes[i];
-
-        printf("attrib: (%s) on loc (%d) sized: (%d) with stride: (%d) \n", name, loc, vec_sizes[i], stride);
     }
 
-    printf("\n");
     int    atrb_size = 0;
 
     for (i=0; i<n_attribs; i++) {
@@ -333,6 +341,8 @@ bool GFX_set_viewport(
 
     FRAMEBUFFER_HEIGHT = h;
     FRAMEBUFFER_WIDTH  = w;
+    // TODO: only for WSL testing
+    // FRAMEBUFFER_WIDTH  = (int)w/2;
 
     return true;
 }
@@ -340,11 +350,11 @@ bool GFX_set_viewport(
 bool GFX_init_window() {
     window = SDL_CreateWindow(
         GAME_NAME,
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH,
         SCREEN_HEIGHT,
-        SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL 
+        SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_OPENGL
     );
 
     if (!window) {
@@ -380,8 +390,10 @@ bool GFX_init_glew(
 
 bool GFX_init_gl_params(
 ) {
-    glEnable(GL_TEXTURE_2D);
+    // glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
 
     // this is the base
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -419,14 +431,6 @@ void GFX_free(
     IMG_Quit();
 };
 
-unsigned int GFX_generate_framebuffer_texture(
-    int tex
-) {
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-    printf("Created texture for framebuffer, GL_COLOR_ATTACHMENT0 for texture %d \n", tex);
-    return GL_COLOR_ATTACHMENT0;
-}
-
 framebuffer_t* GFX_create_framebuffer(
     int   buffer_id,
     int   w,
@@ -451,8 +455,10 @@ framebuffer_t* GFX_create_framebuffer(
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    unsigned int attachment = GFX_generate_framebuffer_texture(tex);
+    
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0
+    );
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         printf("Framebuffer cannot be created! \n");
@@ -465,7 +471,6 @@ framebuffer_t* GFX_create_framebuffer(
     framebuffer->y0         = 0;
     framebuffer->w          = w;
     framebuffer->h          = h;
-    framebuffer->attachment = attachment;
 
     glEnablei(GL_BLEND, id);
     glBindFramebuffer(GL_FRAMEBUFFER, DEFAULT_FRAMEBUFFER);
