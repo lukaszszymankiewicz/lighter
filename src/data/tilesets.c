@@ -17,6 +17,7 @@ void LIB_read_tileset_blueprint(
     if (tileset) {
         printf("TILESET BLUEPRINT ID = %d read\n", blueprint->id);
     }
+
     tilesets_library[blueprint->id]      = tileset;
 };
 

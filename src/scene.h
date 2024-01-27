@@ -10,21 +10,22 @@
 #define MAX_DRAWBLE_OBJECTS_ON_LAYER  10
 #define NO_TEXTURE                    0
 
-typedef struct  shader_params {
+typedef struct  render_object {
     int         shader_id;
     int         texture;
-    int         len;
-    array_t     vertices;    
-    float      *uniforms[MAX_SHADER_UNIFORMS];
-    int         uniform_count;
-    int         count;
     int         mode;
-} shader_params_t;
+    int         n_vertices;
+    int         count;
+    array_t    *vertices;    
+    array_t    *uniforms[MAX_SHADER_UNIFORMS];
+    char       *name;  // few bytes to ease debugging
+} render_object_t;
 
 typedef struct layer {
+    char             *name;
     bool              on;
     int               n_objs;
-    shader_params_t   objs[MAX_DRAWBLE_OBJECTS_ON_LAYER];
+    render_object_t   objs[MAX_DRAWBLE_OBJECTS_ON_LAYER];
 } layer_t; 
 
 typedef struct scene {
@@ -42,7 +43,7 @@ int SCENE_get_buffer_height();
 
 void SCENE_init();
 void SCENE_clear();
-void SCENE_add_layer(int layer);
+void SCENE_add_layer(int layer, char *name);
 void SCENE_activate_buffer(int buffer);
 void SCENE_activate_layer(int layer);
 void SCENE_add_defalt_buffer();
@@ -56,25 +57,26 @@ void SCENE_render_current_layer();
 void SCENE_clear_layer(int layer);
 void SCENE_add_new_drawable_object();
 
-void SCENE_put_texture_to_scene(
+array_t *SCENE_texture_pos(
     int   draw_x, int   draw_y,
-    int   draw_h, int   draw_w,
+    int   draw_w, int   draw_h,
     int   clip_x, int   clip_y,
     int   clip_w, int   clip_h,
     int    tex_w, int    tex_h,
-    bool  flip_w, bool  flip_h,
-    int  texture
-);
+    bool  flip_w, bool  flip_h
+); 
+
+void SCENE_put_texture_to_scene(array_t *vertices, int texture);
+array_t *SCENE_polygon_coord_to_matrix(float *coords, int n_vertices);
 
 void SCENE_put_polygon_to_scene(
-    float *vertices,
-    int    n_coords,
-    int    x0,
-    int    y0,
-    int    r,
-    int    g,
-    int    b,
-    int    a
+    array_t *vertices,
+    int      x0,
+    int      y0,
+    int      r,
+    int      g,
+    int      b,
+    int      a
 );
 
 #endif

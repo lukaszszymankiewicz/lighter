@@ -19,15 +19,20 @@ extern float FRAMEBUFFER_HEIGHT;
 
 extern int   pixel_perfect_scale;
 
+typedef struct uniform {
+    int   loc;
+    int   type;
+    int   size;
+    char *name;
+} uniform_t;
+
 typedef struct shader_program {
     int           program;
     int           vertex_shader_id;
     int           fragment_shader_id;
     int           geometry_shader_id;
     int           n_uniforms;
-    int           uniform_loc[MAX_SHADER_UNIFORMS];
-    int           uniform_types[MAX_SHADER_UNIFORMS];
-    char         *uniform_names[MAX_SHADER_UNIFORMS];
+    uniform_t    *uniforms[MAX_SHADER_UNIFORMS];
     unsigned int  vao;
     unsigned int  vbo;
 } shader_program_t;

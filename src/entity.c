@@ -11,7 +11,6 @@
 #include "sorted_list.h"
 #include "source.h"
 
-#define ENTITY_RENDER_COUNT        4
 #define MAX_SPRITES                20
 #define VERTICES_PER_SINGLE_SPRITE 24
 #define SPRITES_VERTICES_FOR_SCENE MAX_SPRITES*VERTICES_PER_SINGLE_SPRITE
@@ -646,16 +645,19 @@ void ENT_put_to_scene(
     if (ENT_has_flag(entity, NOT_DRAWABLE)) {
         return;
     }
+    int texture = ENT_texture_id(entity);
 
-    SCENE_put_texture_to_scene(
+    array_t *vertices = SCENE_texture_pos(
         entity->x,                             entity->y,
         ENT_current_frame_width(entity),       ENT_current_frame_height(entity),
         ENT_current_frame(entity).rect.x,      ENT_current_frame(entity).rect.y,
         ENT_current_frame_width(entity),       ENT_current_frame_height(entity),
         ENT_get_animation_sheet(entity).width, ENT_get_animation_sheet(entity).height,
-        ENT_flip_hor(entity),                  ENT_flip_ver(entity),
-        ENT_texture_id(entity)
+        ENT_flip_hor(entity),                  ENT_flip_ver(entity)
     );
+
+    // put all gathered vertices on scene
+    SCENE_put_texture_to_scene(vertices, texture);
 }
 
 void ENT_free(

@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <string.h>
 
 #include <stdio.h>
 
@@ -10,48 +11,75 @@
 #include "render.h"
 
 void RENDER_set_uniform(
-    int    uniform_id,
-    int    type,
-    float *uniform
+    int      uniform_id,
+    int      type,
+    array_t *uniform
 ) {
+    float* v = uniform->values;
+
     switch (type)
     {
         case GL_FLOAT:
-            glUniform1f(uniform_id, uniform[0]);
+            glUniform1f(uniform_id, v[0]);
             break;
         case GL_FLOAT_VEC2:
-            glUniform2f((GLuint)uniform_id, (GLfloat)uniform[0], (GLfloat)uniform[1]);
+            glUniform2f(uniform_id, v[0], v[1]);
             break;
         case GL_FLOAT_VEC3:
-            glUniform3f(uniform_id, uniform[0], uniform[1], uniform[2]);
+            glUniform3f(uniform_id, v[0], v[1], v[2]);
             break;
         case GL_FLOAT_VEC4:
-            glUniform4f(uniform_id, uniform[0], uniform[1], uniform[2], uniform[3]);
+            glUniform4f(uniform_id, v[0], v[1], v[2], v[3]);
             break;
         case GL_SAMPLER_2D:
             glUniform1i(uniform_id, 0);
             break;
         case GL_FLOAT_MAT2:
-            glUniformMatrix2fv(uniform_id, 1, GL_FALSE, &uniform[0]);
+            glUniformMatrix2fv(uniform_id, 1, GL_FALSE, &v[0]);
             break;
         default:
-            printf("unknown default uniform \n");
+            printf("    unknown uniform! \n");
             break;
     }
 }
 
+int RENDER_uniform_n(
+    int         shader
+) {
+    return shader_library[shader]->n_uniforms;
+}
+
+int RENDER_get_uniform_index(
+    int         shader,
+    const char* uniform
+) {
+    int n_uniforms = RENDER_uniform_n(shader);
+
+    for (int u=0; u<n_uniforms; u++) { 
+        const char *name = shader_library[shader]->uniforms[u]->name;
+
+        if (strcmp(name, uniform) == 0) {
+            return u;
+        }
+    }
+    return -1;
+}
+
+int RENDER_get_uniform_size(
+    int shader,
+    int uniform
+) {
+    return shader_library[shader]->uniforms[uniform]->size;
+}
+
 void RENDER_set_uniforms(
     int      shader,
-    float   *uniforms[]
+    array_t *uniforms[]
 ) {
     for (int u=0; u<shader_library[shader]->n_uniforms; u++) { 
-        int   uniform_id = shader_library[shader]->uniform_loc[u];
-        int   type       = shader_library[shader]->uniform_types[u];
-        char *name       = shader_library[shader]->uniform_names[u];
-        printf("idx %u of %d\n", u, shader_library[shader]->n_uniforms);
-        printf("uniform %s \n", name);
-        printf("id %d \n", uniform_id);
-        printf("type %d \n", type);
+        int   uniform_id = shader_library[shader]->uniforms[u]->loc;
+        int   type       = shader_library[shader]->uniforms[u]->type;
+
         RENDER_set_uniform(uniform_id, type, uniforms[u]);
     }
 }
@@ -80,12 +108,13 @@ void RENDER_shader(
     int            texture,
     float         *vertices,
     int            n_vertices,
-    float         *uniforms[MAX_SHADER_UNIFORMS],
+    array_t       *uniforms[MAX_SHADER_UNIFORMS],
     int            count,
     int            mode
 ) { 
     printf("SHADER %d | ", shader_library[shader]->program);
-    printf("TEXTURE %d", texture);
+    printf("TEXTURE %d | ", texture);
+    printf("COUNT %d", count);
     glUseProgram(shader_library[shader]->program);
 
     glBindVertexArray(shader_library[shader]->vao);
@@ -93,9 +122,9 @@ void RENDER_shader(
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*n_vertices, vertices, GL_STATIC_DRAW);
     RENDER_set_uniforms(shader, uniforms);
     
-    // glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glDrawArrays(mode, 0, (int)(n_vertices/count));
+    glDrawArrays(mode, 0, count);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);

@@ -58,7 +58,8 @@ i- [x] add pre-calculated values to tiles while level creation
   - [x] add transparency to light effect shader (test it)
   - [x] put camera ideally on center of screen
   - [x] multiple light polygons 
-  - [ ] add differ effect
+  - [x] add differ effect
+  - [ ] tiles disseaperad
   - [ ] add wobble
   - [ ] add proper scene cleaning
   - [ ] remove all unnecessary prints
@@ -70,6 +71,7 @@ i- [x] add pre-calculated values to tiles while level creation
 - [x] game options to some global config
 
 UTIL:
+ - [ ] add string name to each entity (to ease the debugging!)
  - [ ] create a namesystem for ids: gl_texture ids should be reconizable from library ids
  - [ ] consistent types - use float everywhere
  - [ ] check for unused constants/functions

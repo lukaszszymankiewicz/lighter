@@ -100,8 +100,6 @@ texture_t* GFX_read_texture(
 
     tex->surface   = surface;
     tex->id        = texture_id;
-    // TODO: uncommment
-    // tex->filepath  = filepath;
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -199,19 +197,19 @@ int GFX_type_size(
     switch (type)
     {
         case GL_FLOAT_VEC2:
-            return 2;
+            return 2 * sizeof(GL_FLOAT);
         case GL_FLOAT_VEC3:
-            return 3;
+            return 3 * sizeof(GL_FLOAT);
         case GL_FLOAT_VEC4:
-            return 4;
+            return 4 * sizeof(GL_FLOAT);
         case GL_SAMPLER_2D:
-            return 1;
+            return 1 * sizeof(GLuint);
         case GL_FLOAT_MAT2:
-            return 4;
+            return 4 * sizeof(GL_FLOAT);
         case GL_FLOAT:
-            return 1;
+            return 1 * sizeof(GL_FLOAT);
         default:
-            return 1;
+            return -1;
     }
 }
 
@@ -258,14 +256,19 @@ shader_program_t* GFX_create_gl_program(
     shader_program->n_uniforms = n_uniforms;
 
     for (i=0; i<n_uniforms; i++) {
+        shader_program->uniforms[i] = NULL;
+        shader_program->uniforms[i] = (uniform_t*)malloc(sizeof(uniform_t));
+
         int loc;
         glGetActiveUniform(program_id, (GLuint)i, ALLOWED_UNIFORM_NAME_LEN, &length, NULL, &type, name);
-        loc                              = glGetUniformLocation(program_id, name);
-        shader_program->uniform_loc[i]   = loc;
-        shader_program->uniform_types[i] = type;
-        shader_program->uniform_names[i] = NULL;
-        shader_program->uniform_names[i] = (char*)malloc(sizeof(char) * strlen(name) + 1);
-        strcpy(shader_program->uniform_names[i], name);
+        shader_program->uniforms[i]->name = NULL;
+        shader_program->uniforms[i]->name = (char*)malloc(sizeof(char) * strlen(name) + 1);
+        strcpy(shader_program->uniforms[i]->name, name);
+
+        loc                                = glGetUniformLocation(program_id, name);
+        shader_program->uniforms[i]->loc   = loc;
+        shader_program->uniforms[i]->type  = type;
+        shader_program->uniforms[i]->size  = GFX_type_size(type);
     }
     
     // create VBO
@@ -291,7 +294,7 @@ shader_program_t* GFX_create_gl_program(
         loc      = (int)glGetAttribLocation(program_id, name);
         locs[i]  = loc;
 
-        vec_sizes[i]  = GFX_type_size(type);
+        vec_sizes[i]  = GFX_type_size(type) / sizeof(GL_FLOAT);
         stride       += vec_sizes[i];
     }
 

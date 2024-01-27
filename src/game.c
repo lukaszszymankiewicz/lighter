@@ -62,9 +62,9 @@ void GAME_draw_everything(
             LVLMAN_put_to_scene();
             SCENE_render_current_layer();
 
-        SCENE_activate_layer(LAYER_SPRITE);
-            ENTMAN_put_to_scene();
-            SCENE_render_current_layer();
+         SCENE_activate_layer(LAYER_SPRITE);
+             ENTMAN_put_to_scene();
+             SCENE_render_current_layer();
 
     SCENE_activate_buffer(FIRST_BUFFER);
         SCENE_activate_layer(SCALED_IMAGE);
@@ -75,22 +75,22 @@ void GAME_draw_everything(
             SCENE_render_current_layer();
     
     // cleanup
-    SCENE_clean_buffer(FIRST_BUFFER);
-    SCENE_clear_layer(SCALED_IMAGE);
-    GAME_set_camera();
+    // SCENE_clean_buffer(FIRST_BUFFER);
+    // SCENE_clear_layer(SCALED_IMAGE);
+    // GAME_set_camera();
 
     // light
-    SCENE_activate_buffer(FIRST_BUFFER);
-        SCENE_activate_layer(LAYER_LIGHT);
-            ENTMAN_put_light_to_scene();
-            SCENE_render_current_layer();
+    // SCENE_activate_buffer(FIRST_BUFFER);
+    //     SCENE_activate_layer(LAYER_LIGHT);
+    //         ENTMAN_put_light_to_scene();
+    //         SCENE_render_current_layer();
 
-        SCENE_activate_layer(SCALED_IMAGE);
-            SCENE_draw_scaled_buffer();
+    //     SCENE_activate_layer(SCALED_IMAGE);
+    //         SCENE_draw_scaled_buffer();
 
-    SCENE_activate_buffer(DEFAULT_FRAMEBUFFER);
-        SCENE_activate_layer(SCALED_IMAGE);
-            SCENE_render_current_layer();
+    // SCENE_activate_buffer(DEFAULT_FRAMEBUFFER);
+    //     SCENE_activate_layer(SCALED_IMAGE);
+    //         SCENE_render_current_layer();
 
     GFX_update();
 }
@@ -99,10 +99,10 @@ void GAME_fill_scene(
 ) {
     SCENE_add_defalt_buffer();
 
-    SCENE_add_layer(LAYER_LIGHT);
-    SCENE_add_layer(LAYER_TILE);
-    SCENE_add_layer(LAYER_SPRITE);
-    SCENE_add_layer(SCALED_IMAGE);
+    SCENE_add_layer(LAYER_LIGHT, "Light");
+    SCENE_add_layer(LAYER_TILE, "Tiles");
+    SCENE_add_layer(LAYER_SPRITE, "Sprites");
+    SCENE_add_layer(SCALED_IMAGE, "Pixelated Image");
     
     SCENE_add_buffer(FIRST_BUFFER, SCREEN_WIDTH, SCREEN_HEIGHT);
 }

@@ -163,12 +163,7 @@ void ENTMAN_put_entity_light_to_scene(
     float angle             = ENT_light_angle(entity);
     float wobble_angle_corr = ENT_wobble_coef(entity);
     
-    // TODO: first approach - each light polygon is a separate render call
-    // benchmark this, and if it not sufficient - change it 
-    // TODO: revert
-    for (int i=0; i<1; i++) {
-    // for (int i=0; i<source->n_poly; i++) {
-
+    for (int i=0; i<source->n_poly; i++) {
         vertex_t *light_polygon  = NULL;
         float *coords            = NULL;
         int    n_vertices        = 0;
@@ -177,14 +172,13 @@ void ENTMAN_put_entity_light_to_scene(
         float  final_width       = source->width + SRC_get_light_polygon_width_corr(source, i);
         float  final_angle       = angle + SRC_get_light_polygon_angle_corr(source, i) + wobble_angle_corr;
 
-        light_polygon = LIG_calculate(final_x, final_y, final_width, final_angle, obstacles);
-        n_vertices    = VRTX_len(light_polygon);
-        coords        = VRTX_to_coords(light_polygon);
-        
-        SCENE_add_new_drawable_object();
+        light_polygon     = LIG_calculate(final_x, final_y, final_width, final_angle, obstacles);
+        n_vertices        = VRTX_len(light_polygon);
+        coords            = VRTX_to_coords(light_polygon);
+        array_t *vertices = SCENE_polygon_coord_to_matrix(coords, n_vertices);
+
         SCENE_put_polygon_to_scene(
-            coords,
-            n_vertices,
+            vertices,
             final_x,
             final_y,
             source->light_polygons[i].red,
@@ -222,9 +216,7 @@ void ENTMAN_put_light_to_scene(
 ) {
     segment_t* obstacles = level_manager->level->obstacle_segments;
     
-    // TODO: revert
-    // for (int i=0; i<MAX_ENTITY; i++) {
-    for (int i=0; i<1; i++) {
+    for (int i=0; i<MAX_ENTITY; i++) {
         entity_t* entity = NULL;
         entity           = entity_manager->entities[i];
 

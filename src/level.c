@@ -4,12 +4,10 @@
 
 #include "global.h"
 #include "level.h"
+#include "mat.h"
 #include "scene.h"
 #include "segment.h"
 #include "tile.h"
-
-#define ENTITY_RENDER_COUNT      4
-#define LEVEL_VERTICES_FOR_SCENE 2500
 
 const static int EMPTY_CELL = -1;
 
@@ -296,14 +294,19 @@ void LVL_put_to_scene(
     int tileset        = LVL_tileset_id(level);
     int texture_w      = tilesets_library[id]->surface->w;
     int texture_h      = tilesets_library[id]->surface->h;
-
+    
+    // start drawing from st_x and st_y pixels
     int st_x           = (camera_x + ENTITY_DRAW_X_RANGE) / TILE_WIDTH;
     int st_y           = (camera_y + ENTITY_DRAW_Y_RANGE) / TILE_HEIGHT;
 
-    int st_tile_pos_x  = st_x - (SCREEN_WIDTH / TILE_WIDTH / 2) - 2;
+    // start reading tiles from st_tile_pos_x and st_tile_pos_y 
+    // end at end_tile_pos_x and end_tile_pos_y
+    int st_tile_pos_x  = st_x - (SCREEN_WIDTH  / TILE_WIDTH  / 2) - 2;
     int st_tile_pos_y  = st_y - (SCREEN_HEIGHT / TILE_HEIGHT / 2) - 2;
-    int end_tile_pos_x = st_x + (SCREEN_WIDTH / TILE_WIDTH / 2) + 2;
+    int end_tile_pos_x = st_x + (SCREEN_WIDTH  / TILE_WIDTH  / 2) + 2;
     int end_tile_pos_y = st_y + (SCREEN_HEIGHT / TILE_HEIGHT / 2) + 2;
+    
+    array_t *vertices = NULL;
 
     for (int x=st_tile_pos_x; x<end_tile_pos_x; x++) {
         for (int y=st_tile_pos_y; y<end_tile_pos_y; y++) {
@@ -311,19 +314,26 @@ void LVL_put_to_scene(
             tile_t *tile = NULL;
             tile         = LVL_tile_on_pos(level, x, y);
             
-            if (!tile) { continue; }
+            if (!tile) {
+                continue; 
+            }
 
-            SCENE_put_texture_to_scene(
+            // gather tiles vertices
+            array_t *new_vertices = SCENE_texture_pos(
                 tile->x,                tile->y,
                 TILE_WIDTH,             TILE_HEIGHT,
                 tile->row * TILE_WIDTH, tile->col * TILE_HEIGHT,
                 TILE_WIDTH,             TILE_HEIGHT,
                 texture_w,              texture_h,
-                false,                  false,
-                tileset        
+                false,                  false
             );
+
+            vertices = MAT_append(vertices, new_vertices);
         }
     }
+
+    // put all gathered vertices on scene
+    SCENE_put_texture_to_scene(vertices, tileset);
 }
 
 void LVL_free(
