@@ -87,8 +87,10 @@ float ENT_wobble_coef(
     wobble           = ENT_get_wobble(entity);
         
     int frame = entity->anim_frame_t;
-
-    if (wobble->len == 0) {return 0.0;}
+    printf("entity frame: %d \n", frame);
+    if (wobble->len == 0) {
+        return 0.0;
+    }
 
     if (frame == 0) {
         return wobble->coefs[0];

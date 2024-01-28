@@ -59,12 +59,12 @@ i- [x] add pre-calculated values to tiles while level creation
   - [x] put camera ideally on center of screen
   - [x] multiple light polygons 
   - [x] add differ effect
-  - [ ] tiles disseaperad
+  - [x] add proper scene cleaning
   - [ ] add wobble
-  - [ ] add proper scene cleaning
+  - [ ] tiles disseaperad
   - [ ] remove all unnecessary prints
-- [ ] repair all unit-tests (once again!)
-- [ ] clear all memory leaks!
+- [ ] delete unit all unit-tests
+- [x] clear all memory leaks!
 - [x] repair light vertex calculations
 - [x] remove error codes
 - [x] make tile render as as separate shader

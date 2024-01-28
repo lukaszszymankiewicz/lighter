@@ -47,6 +47,13 @@ float SRC_get_light_polygon_angle_corr(
     return source->light_polygons[i].angle_corr;
 }
 
+float SRC_get_diffuse(
+    lightsource_t *source,
+    int            i
+) {
+    return source->light_polygons[i].diffuse;
+}
+
 float SRC_get_light_polygon_width_corr(
     lightsource_t *source,
     int            i

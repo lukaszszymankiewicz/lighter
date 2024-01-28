@@ -163,6 +163,9 @@ void ENTMAN_put_entity_light_to_scene(
     float angle             = ENT_light_angle(entity);
     float wobble_angle_corr = ENT_wobble_coef(entity);
     
+    printf("wobble: %f \n", wobble_angle_corr);
+    printf("angle: %f \n", angle);
+
     for (int i=0; i<source->n_poly; i++) {
         vertex_t *light_polygon  = NULL;
         float *coords            = NULL;
@@ -171,14 +174,16 @@ void ENTMAN_put_entity_light_to_scene(
         int    final_y           = emit_y + SRC_get_light_polygon_y_corr(source, angle, i);
         float  final_width       = source->width + SRC_get_light_polygon_width_corr(source, i);
         float  final_angle       = angle + SRC_get_light_polygon_angle_corr(source, i) + wobble_angle_corr;
+        float  diffuse           = SRC_get_diffuse(source, i);
 
         light_polygon     = LIG_calculate(final_x, final_y, final_width, final_angle, obstacles);
         n_vertices        = VRTX_len(light_polygon);
         coords            = VRTX_to_coords(light_polygon);
         array_t *vertices = SCENE_polygon_coord_to_matrix(coords, n_vertices);
 
-        SCENE_put_polygon_to_scene(
+        SCENE_put_light_polygon_to_scene(
             vertices,
+            diffuse,
             final_x,
             final_y,
             source->light_polygons[i].red,

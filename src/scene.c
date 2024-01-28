@@ -297,8 +297,9 @@ array_t* SCENE_set_color(
     return MAT_vec4_new((float)r/COLOR_COEF, (float)g/COLOR_COEF, (float)b/COLOR_COEF, (float)a/COLOR_COEF);
 }
 
-void SCENE_put_polygon_to_scene(
+void SCENE_put_light_polygon_to_scene(
     array_t *vertices,
+    float    diffuse,
     int      x0,
     int      y0,
     int      r,
@@ -326,13 +327,13 @@ void SCENE_put_polygon_to_scene(
     array_t *camera_arr    = MAT_vec2_new(camera_x, camera_y);
     array_t *color_arr     = SCENE_set_color(r, g, b, a);
     array_t *emit_arr      = SCENE_set_emit_pt(x0, y0);
-    array_t *power_arr     = MAT_scalar_new(2.5);
+    array_t *diffuse_arr   = MAT_scalar_new(diffuse);
 
     SCENE_add_uniform("aScale", scale_arr); 
     SCENE_add_uniform("aCamera", camera_arr); 
     SCENE_add_uniform("aColor", color_arr);
     SCENE_add_uniform("emit", emit_arr);
-    SCENE_add_uniform("power", power_arr);
+    SCENE_add_uniform("diffuse", diffuse_arr);
 }
 
 array_t *SCENE_texture_pos(

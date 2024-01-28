@@ -69,8 +69,9 @@ array_t *SCENE_texture_pos(
 void SCENE_put_texture_to_scene(array_t *vertices, int texture);
 array_t *SCENE_polygon_coord_to_matrix(float *coords, int n_vertices);
 
-void SCENE_put_polygon_to_scene(
+void SCENE_put_light_polygon_to_scene(
     array_t *vertices,
+    float    diffuse,
     int      x0,
     int      y0,
     int      r,

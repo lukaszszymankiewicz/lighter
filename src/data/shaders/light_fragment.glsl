@@ -2,7 +2,7 @@
 
 uniform vec4 aColor;
 uniform vec2 emit;
-uniform float power;
+uniform float diffuse;
 
 out vec4 outColor;
 
@@ -14,5 +14,5 @@ float lenn (vec2 v) {
 void main() {
     vec2 pos_ndc = 2.0 * gl_FragCoord.xy / emit.xy - 1.0;
     float dist = lenn(pos_ndc);
-    outColor = mix(aColor, vec4(0.0, 0.0, 0.0, 1.0), dist*power);
+    outColor = mix(aColor, vec4(0.0, 0.0, 0.0, 1.0), dist*diffuse);
 }
