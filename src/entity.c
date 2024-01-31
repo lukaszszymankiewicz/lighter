@@ -1,5 +1,5 @@
 #include <stdbool.h>
-
+#include <stdlib.h>
 #include "data/library.h"
 
 #include "animation.h"
@@ -86,8 +86,8 @@ float ENT_wobble_coef(
     wobble_t *wobble = NULL;
     wobble           = ENT_get_wobble(entity);
         
-    int frame = entity->anim_frame_t;
-    printf("entity frame: %d \n", frame);
+    int frame = entity->light.frame;
+
     if (wobble->len == 0) {
         return 0.0;
     }
@@ -120,7 +120,7 @@ animation_t ENT_get_animation(
 wobble_t* ENT_get_wobble(
     entity_t *entity
 ) {
-    int id = ENT_get_animation(entity, entity->state).wobble_id;
+    int id = entity->light.wobble;
     return wobble_library[id];
 }
 
@@ -311,18 +311,31 @@ void ENT_set_hold_y(
     entity->hold->y = ENT_held_item_y(entity);
 }
 
+void ENT_update_wobble(
+    entity_t* entity
+) {
+    if (ENT_has_not_flag(entity, EMMIT_LIGHT)) {
+        return;
+    }
+    int anim_idx = entity->state;
+    entity->light.wobble = ENT_get_animation_sheet(entity).animations[anim_idx].wobble_id;
+    entity->light.frame++;
+}
+
 void ENT_update_hold(
     entity_t *entity
 ) {
     ENT_set_hold_x(entity);
     ENT_set_hold_y(entity);
+    int anim_idx = entity->state;
+    entity->hold->light.wobble = ENT_get_animation_sheet(entity).animations[anim_idx].wobble_id;
+    entity->hold->light.frame++;
 }
 
 void ENT_update_animation(
     entity_t *entity
 ) {
     entity->anim_frame_t++;
-
     int del = ENT_current_frame(entity).delay;
     int len = ENT_get_animation(entity, entity->state).len;
 
@@ -532,15 +545,6 @@ void ENT_update_velocity(
     ENT_update_x_vel(entity);
 }
 
-void ENT_update_wobble(
-    entity_t* entity
-) {
-    if (ENT_has_flag(entity, EMMIT_LIGHT)) {
-        return;
-    }
-    entity->light.frame++;
-}
-
 entity_t* ENT_init(
     int                 x, 
     int                 y,
@@ -564,7 +568,8 @@ entity_t* ENT_init(
     entity->anim_frame_t     = 0;
 
     // light
-    entity->light            = (entity_light_t) {0, 0, RIGHT_RAD};
+    // TODO: some entity_light_t init?
+    entity->light            = (entity_light_t) {rand()%10+1, 0, RIGHT_RAD, 0};
 
     // interactions
     entity->hold             = NULL;

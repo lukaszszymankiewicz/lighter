@@ -13,13 +13,14 @@ entity_blueprint_t entity_blueprint_hero = {
     SPRITE_HERO, // texture_id
     LIGHTSOURCE_NO, // lighsource
     ENTITY_LIGHTER,  // hold id
+    // ENTITY_NO,
     STANDING,  // starting_state
     {
         SPRITE_HERO, 4, 27, 40,
         {
             { // STANDING
                 2, // len
-                WOBBLE_WALKING,
+                WOBBLE_STABLE,
                 {
                     {
                         (SDL_Rect)       { 0,   0,   9,        20        },
@@ -35,7 +36,7 @@ entity_blueprint_t entity_blueprint_hero = {
             },
             { // WALKING
                 2, // len
-                WOBBLE_STABLE,
+                WOBBLE_WALKING,
                 {
                     {
                         (SDL_Rect)       { 0,   20,        9,        20        },
@@ -103,6 +104,44 @@ entity_blueprint_t entity_blueprint_walllight = {
     }
 };
 
+entity_blueprint_t entity_blueprint_lamp_small = {
+    ENTITY_LAMP_SMALL,
+    EMMIT_LIGHT,
+    HANDLE_MIDDLE_MIDDLE,
+    HANDLE_MIDDLE_MIDDLE,
+    SPRITE_LAMP_SMALL,
+    LIGHTSOURCE_LAMP_SMALL,
+    ENTITY_NO,
+    STANDING,
+    {
+        SPRITE_LAMP_SMALL, 1, 32, 32, {
+            1, // len
+            WOBBLE_STABLE,
+            {
+                {
+                    (SDL_Rect)       { 0,        0,   32,        32        },
+                    { (SDL_Rect)     { 0,        0,   32,        32        } },
+                    0, 0, 1, 20 
+                },
+            }
+        } 
+    }
+};
+
+entity_blueprint_t entity_blueprint_lamp_big = {
+    ENTITY_LAMP_BIG,
+    EMMIT_LIGHT,
+    HANDLE_MIDDLE_MIDDLE,
+    HANDLE_MIDDLE_MIDDLE,
+    SPRITE_LAMP_BIG,
+    LIGHTSOURCE_WALLLIGHT,
+    ENTITY_NO,
+    NOTHING,
+    {
+        SPRITE_LAMP_BIG, 0, 32, 32, { } 
+    }
+};
+
 void LIB_read_entity_blueprint(
     entity_blueprint_t* blueprint
 ) {
@@ -117,4 +156,6 @@ void LIB_create_entity_library(
     LIB_read_entity_blueprint(&entity_blueprint_hero);
     LIB_read_entity_blueprint(&entity_blueprint_lighter);
     LIB_read_entity_blueprint(&entity_blueprint_walllight);
+    LIB_read_entity_blueprint(&entity_blueprint_lamp_small);
+    LIB_read_entity_blueprint(&entity_blueprint_lamp_big);
 }

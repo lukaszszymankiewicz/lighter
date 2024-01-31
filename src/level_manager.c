@@ -22,7 +22,7 @@ void LVLMAN_fill_entities(
         int x            = levels_library[blueprint_id]->entities[i].x;
         int y            = levels_library[blueprint_id]->entities[i].y;
         int id           = levels_library[blueprint_id]->entities[i].id;
-
+        
         ENTMAN_add_entity(x, y, id);
     }
 }

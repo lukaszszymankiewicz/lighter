@@ -281,13 +281,17 @@ array_t *SCENE_set_emit_pt(
     int x0,
     int y0
 ) {
-
     int w = SCENE_get_buffer_width();
     int h = SCENE_get_buffer_height();
 
-    int emit_x = x0 + w / 2 - camera_x;
-    int emit_y = y0 + h / 2 - camera_y;
+    int emit_x = x0 - camera_x;
+    int emit_y = y0 - camera_y;
+    // int emit_x = x0 - camera_x;
+    // int emit_y = y0 - camera_y;
+    printf("\nx0, y0 %d %d \n", x0-camera_x, y0-camera_y);
+    printf("emit_x, emit_y %d %d \n", emit_x, emit_y);
 
+    // return MAT_vec2_new(emit_x, emit_y);
     return MAT_vec2_new(emit_x, emit_y);
 }
 

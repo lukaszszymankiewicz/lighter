@@ -19,6 +19,16 @@ texture_blueprint_t texture_blueprint_walllight = {
     "./src/data/sprites/walllight.png"
 };
 
+texture_blueprint_t texture_blueprint_lamp_small = {
+    SPRITE_LAMP_SMALL,
+    "./src/data/sprites/lamp_small.png"
+};
+
+texture_blueprint_t texture_blueprint_lamp_big = {
+    SPRITE_LAMP_BIG,
+    "./src/data/sprites/lamp_big.png"
+};
+
 void LIB_read_sprites_blueprint(
     texture_blueprint_t *blueprint
 ) {
@@ -35,4 +45,6 @@ void LIB_create_sprites_library(
     LIB_read_sprites_blueprint(&texture_blueprint_hero);
     LIB_read_sprites_blueprint(&texture_blueprint_lighter);
     LIB_read_sprites_blueprint(&texture_blueprint_walllight);
+    LIB_read_sprites_blueprint(&texture_blueprint_lamp_small);
+    LIB_read_sprites_blueprint(&texture_blueprint_lamp_big);
 };

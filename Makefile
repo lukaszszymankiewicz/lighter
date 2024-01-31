@@ -4,22 +4,14 @@ LINKS = `pkg-config --cflags --libs sdl2 SDL2_image`
 LIBS = -lGL -lGLU -lGLEW -lm 
 
 FINAL_OBJ = lighter
-FINAL_TEST_OBJ = lighter_tests
-
-TESTOBJ = check_tests_suite
-TESTLINKS = `pkg-config --cflags --libs check sdl2 SDL2_image` 
 
 SRCDIR = src
-TESTDIR = tests
 
 MEMORYLOG = memory_check.txt
 
 BUILDDIR = build
 DATADIR = data
 MODDIR = modules
-
-clear_screen:
-	clear
 
 $(BUILDDIR)/%.o:	$(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -63,57 +55,8 @@ OBJS =                                     \
 	$(BUILDDIR)/timer.o                    \
 	$(BUILDDIR)/vertex.o                   \
 
-TESTOBJS =                                    \
-	$(BUILDDIR)/$(DATADIR)/gfx_modules.o      \
-	$(BUILDDIR)/$(DATADIR)/entities.o         \
-	$(BUILDDIR)/$(DATADIR)/levels.o           \
-	$(BUILDDIR)/$(DATADIR)/library.o          \
-	$(BUILDDIR)/$(DATADIR)/lightsources.o     \
-	$(BUILDDIR)/$(DATADIR)/sprites.o          \
-	$(BUILDDIR)/$(DATADIR)/shaders.o          \
-	$(BUILDDIR)/$(DATADIR)/tiles.o            \
-	$(BUILDDIR)/$(DATADIR)/tilesets.o         \
-	$(BUILDDIR)/$(DATADIR)/wobbles.o          \
-	$(BUILDDIR)/check_animation.o             \
-	$(BUILDDIR)/check_entity.o                \
-	$(BUILDDIR)/check_entity_manager.o        \
-	$(BUILDDIR)/check_geometry.o              \
-	$(BUILDDIR)/check_game.o                  \
-	$(BUILDDIR)/check_level.o                 \
-	$(BUILDDIR)/check_library.o               \
-	$(BUILDDIR)/check_light.o                 \
-	$(BUILDDIR)/check_point.o                 \
-	$(BUILDDIR)/check_segment.o               \
-	$(BUILDDIR)/check_sorted_list.o           \
-	$(BUILDDIR)/check_source.o                \
-	$(BUILDDIR)/check_vertex.o                \
-    $(BUILDDIR)/check_controller.o            \
-	$(BUILDDIR)/animation.o                   \
-	$(BUILDDIR)/controller.o                  \
-	$(BUILDDIR)/entity.o                      \
-	$(BUILDDIR)/entity_manager.o              \
-	$(BUILDDIR)/game.o                        \
-	$(BUILDDIR)/geometry.o                    \
-	$(BUILDDIR)/gfx.o                         \
-	$(BUILDDIR)/render.o                      \
-	$(BUILDDIR)/level.o                       \
-	$(BUILDDIR)/light.o                       \
-	$(BUILDDIR)/mat.o                         \
-	$(BUILDDIR)/point.o                       \
-	$(BUILDDIR)/segment.o                     \
-	$(BUILDDIR)/scene.o                       \
-	$(BUILDDIR)/sorted_list.o                 \
-	$(BUILDDIR)/source.o                      \
-	$(BUILDDIR)/tile.o                        \
-	$(BUILDDIR)/timer.o                       \
-	$(BUILDDIR)/vertex.o                      \
-
-
 $(BUILDDIR)/lighter:	$(OBJS) $(BUILDDIR)/main.o
 	$(CC) $(CFLAGS) $(OBJS) $(BUILDDIR)/main.o -o $(BUILDDIR)/$(FINAL_OBJ)  $(LINKS) $(LIBS)
-
-$(BUILDDIR)/test_suite:	$(TESTOBJS) $(BUILDDIR)/check_tests.o
-	$(CC) $(CFLAGS) $(TESTOBJS) $(BUILDDIR)/check_tests.o -o $(BUILDDIR)/$(FINAL_TEST_OBJ) $(TESTLINKS) $(LIBS)
 
 clean:
 	rm -f $(BUILDDIR)/*.o
@@ -126,11 +69,6 @@ clean:
 # TODO: add creating build/data folder
 lighter:  $(BUILDDIR)/lighter
 
-tests:	 $(BUILDDIR)/test_suite
-
-run_lighter_tests:
-	./$(BUILDDIR)/$(FINAL_TEST_OBJ)
-
 run_lighter:
 	./$(BUILDDIR)/$(FINAL_OBJ)
 
@@ -139,9 +77,6 @@ all:
 
 debug: 
 	gdb ./$(BUILDDIR)/$(FINAL_OBJ)
-
-all_tests:
-	make clear_screen tests run_lighter_tests
 
 .PHONY: memory_check
 memory_check:

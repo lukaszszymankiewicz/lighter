@@ -163,9 +163,6 @@ void ENTMAN_put_entity_light_to_scene(
     float angle             = ENT_light_angle(entity);
     float wobble_angle_corr = ENT_wobble_coef(entity);
     
-    printf("wobble: %f \n", wobble_angle_corr);
-    printf("angle: %f \n", angle);
-
     for (int i=0; i<source->n_poly; i++) {
         vertex_t *light_polygon  = NULL;
         float *coords            = NULL;

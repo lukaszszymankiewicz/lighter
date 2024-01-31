@@ -18,6 +18,7 @@ typedef struct entity_light {
     int   frame;
     int   frame_t;
     float angle;
+    int   wobble;
 } entity_light_t;
 
 typedef struct entity {
