@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "mat.h"
 
@@ -9,18 +10,15 @@ array_t* MAT_new(
 ) {
     array_t *arr  = NULL;
     arr           = (array_t*)malloc(sizeof(array_t));
+
+    arr->rows     = rows;
+    arr->cols     = cols;
+    arr->cap      = arr->rows * arr->cols;
+
     arr->values   = NULL;
-    arr->values   = (float*)malloc(sizeof(float) * rows * cols);
+    arr->values   = (float*)malloc(sizeof(float) * arr->cap);
 
-    for (int c=0; c<cols; c++) { 
-        for (int r=0; r<rows; r++) { 
-            arr->values[c*rows + r] = 0.0;
-        }
-    }
-
-    arr->rows = rows;
-    arr->cols = cols;
-    arr->cap  = rows * cols;
+    memset(arr->values, 0.0, arr->cap);
 
     return arr;
 }
@@ -127,21 +125,11 @@ array_t* MAT_append(
         return arr2;
     }
 
-    int new_rows = arr1->rows + arr2->rows;
-    int new_cols = arr1->cols;
-
     array_t *new      = NULL;
-    new               = MAT_new(new_rows, new_cols);
-    new->values       = (float*)realloc(arr1->values, sizeof(float) * new->cap);
+    new               = MAT_new(arr1->rows + arr2->rows, arr1->cols);
 
-    int j=0; 
-
-    // TODO: use memcpy!
-    for (int i=arr1->rows * arr1->cols; i<new->cap; i++) {
-        new->values[i] = arr2->values[j++];
-    }
-    
-    arr1->values = NULL;
+    memcpy(new->values, arr1->values, sizeof(float) * arr1->cap);
+    memcpy(new->values + arr1->cap, arr2->values, sizeof(float) * arr2->cap);
 
     MAT_free(arr1);
     MAT_free(arr2);

@@ -12,9 +12,10 @@
 #include "render.h"
 #include "scene.h"
 
-#define RECT_VERTICES_ROWS       6
-#define RECT_VERTICES_COLS       2
-#define COORD_PER_POLYGON_VERTEX 2
+#define RECT_VERTICES_ROWS         6
+#define RECT_VERTICES_COLS         2
+#define COORD_PER_POLYGON_VERTEX   2
+#define COLOR_COEF                 256.0
 
 array_t *SCENE_texture_unit(
 ) {
@@ -194,17 +195,13 @@ void SCENE_free(
 ) {
     SCENE_clear();
 
-    for (int i=0; i<MAX_LAYERS_ON_SCENE; i++) {
-        
-        // TODO: invent a way to safely destroy framebuffers
-        // if (scene->layers[i].framebuffer != NULL) {
-        //     GFX_destroy_framebuffer(scene->layers[i].framebuffer->id);
-        //     scene->layers[i].framebuffer = NULL;
-        // }
+    for (int i=0; i<scene->n_buffers; i++) {
+        GFX_destroy_framebuffer(scene->buffers[i]->id);
+        scene->buffers[i] = NULL;
     }
 
-    // free(scene);      
-    // scene = NULL;
+    free(scene);      
+    scene = NULL;
 }
 
 bool SCENE_layer_is_on(
@@ -304,17 +301,15 @@ void SCENE_put_light_polygon_to_scene(
         return;
     }
 
-    printf("buffer tex: %d \n", SCENE_get_buffer_tex());
     int texture        = SCENE_get_buffer_tex();
 
     object->shader_id  = SHADER_LIGHT;
     object->texture    = texture;
     object->mode       = GL_POLYGON;
     
-    // TODO: should this be done on higher function?
     object->vertices       = vertices;
     object->n_vertices     = MAT_n(vertices);
-    object->count          = (int) object->n_vertices / vertices->cols;
+    object->count          = vertices->rows;
     object->name           = "light polygon";
 
     array_t *scale_arr      = SCENE_set_scale();

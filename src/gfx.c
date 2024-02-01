@@ -380,7 +380,6 @@ void GFX_free(
         // TODO: some cleaning here?
         // glDeleteProgram(opengl_program_id);
         glUseProgram(0);
-
     }
 
     if (window) {
@@ -432,7 +431,7 @@ framebuffer_t* GFX_create_framebuffer(
     framebuffer->h          = h;
 
     glEnablei(GL_BLEND, id);
-    glBindFramebuffer(GL_FRAMEBUFFER, DEFAULT_FRAMEBUFFER);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return framebuffer;
 }
@@ -443,3 +442,8 @@ void GFX_destroy_framebuffer(
     glDeleteFramebuffers(1, &id);
 }
 
+void LIB_free_shader(
+    shader_program_t *shader
+) {
+    glDeleteProgram(shader->program);
+}

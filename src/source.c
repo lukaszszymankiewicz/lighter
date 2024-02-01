@@ -4,11 +4,15 @@
 #include "global.h"
 #include "source.h"
 
+#define LIGHT_LEFT   PI/2
+#define LIGHT_RIGHT  PI/2*3
+#define LIGHT_VER    PI/6
+
 // changes done to light angle if looking in different direction
 float lightpos_up_down_corr[2][5] = {
-  // LEFT  RIGHT  UP               DOWN             NONE
-     {0,   0,     RIGHT_RAD-DEG30, RIGHT_RAD+DEG30, RIGHT_RAD },      // RIGHT 
-     {0,   0,     LEFT_RAD+DEG30,  LEFT_RAD-DEG30,  LEFT_RAD  }       // LEFT 
+  // LEFT  RIGHT  UP                     DOWN                   NONE
+     {0,   0,     LIGHT_RIGHT-LIGHT_VER, LIGHT_RIGHT+LIGHT_VER, LIGHT_RIGHT },      // RIGHT 
+     {0,   0,     LIGHT_LEFT +LIGHT_VER, LIGHT_LEFT -LIGHT_VER, LIGHT_LEFT  }       // LEFT 
 };
 
 float SRC_move_lightsource(
@@ -17,7 +21,6 @@ float SRC_move_lightsource(
 ) {
     return lightpos_up_down_corr[entity_dir][light_dir];
 }
-
 int SRC_get_light_polygon_x_corr(
     lightsource_t *source,
     float          angle,

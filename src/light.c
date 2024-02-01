@@ -95,11 +95,12 @@ point_t* LIG_generate_slipover_hit_point(
         return PT_new(SIGN(x2-x1)*SCREEN_WIDTH+1, y2);
     }
 
-    // slipped ray, by now, ends only few pixels from slipped corner. Its end is simply transposed
-    // in such a way, that it is always behind the screen border. This makes sure that such ray will
-    // be checked for every obstacle in a way.
-    // To calculate transposition 'nx' and 'ny' is calculated which is just a number of times ray
-    // needs to be repeated to fall behind the level border.
+    // slipped ray, by now, ends only few pixels from slipped corner. Its end is
+    // simply transposed in such a way, that it is always behind the screen
+    // border. This makes sure that such ray will be checked for every obstacle
+    // in a way. To calculate transposition 'nx' and 'ny' is calculated which is
+    // just a number of times ray needs to be repeated to fall behind the level
+    // border.
     int nx = (int)(SCREEN_WIDTH / abs(dx)) + 1;
     int ny = (int)(SCREEN_HEIGHT / abs(dy)) + 1;
 
@@ -167,6 +168,29 @@ point_t* LIG_generate_aux_hit_points(
     return NULL;
 }
 
+// if ray begins inside of obstacle or it is collinear to obstacle special care is taken to proerly
+// calculate distance between such obstacle to such ray
+int LIG_calculate_dull_ray_end(
+    int r_beg,
+    int r_end,
+    int o_beg,
+    int o_end
+) {
+    // ray begins inside of obstacle
+    if (GEO_value_between_range(r_beg, o_beg, o_end)) {
+        return r_beg;
+    }
+    // if distance between ray and obstacle is still zero it means that they are collinear - one of
+    // the end of obstacle is and hit point
+    int dir = SIGN(r_beg - r_end);
+
+    if (dir == -1) {
+        return MIN(o_beg, o_end);
+    } else {
+        return MAX(o_beg, o_end);
+    }
+}
+
 segment_t* LIG_find_closest_hit_segment_ver(
     segment_t* inter,
     int r_x1,
@@ -200,29 +224,6 @@ segment_t* LIG_find_closest_hit_segment_ver(
     }
 
     return best_seg;
-}
-
-// if ray begins inside of obstacle or it is collinear to obstacle special care is taken to proerly
-// calculate distance between such obstacle to such ray
-int LIG_calculate_dull_ray_end(
-    int r_beg,
-    int r_end,
-    int o_beg,
-    int o_end
-) {
-    // ray begins inside of obstacle
-    if (GEO_value_between_range(r_beg, o_beg, o_end)) {
-        return r_beg;
-    }
-    // if distance between ray and obstacle is still zero it means that they are collinear - one of
-    // the end of obstacle is and hit point
-    int dir = SIGN(r_beg - r_end);
-
-    if (dir == -1) {
-        return MIN(o_beg, o_end);
-    } else {
-        return MAX(o_beg, o_end);
-    }
 }
 
 segment_t* LIG_find_closest_hit_segment_hor(

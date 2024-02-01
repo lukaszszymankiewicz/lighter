@@ -1,6 +1,7 @@
 #include "library.h"
 
 #include "../animation.h"
+#include "../entity.h"
 
 entity_blueprint_t* entity_library[ENTITY_ALL] = {NULL};
 
@@ -119,7 +120,7 @@ entity_blueprint_t entity_blueprint_lamp_small = {
     {
         SPRITE_LAMP_SMALL, 1, 32, 32, {
             1, // len
-            WOBBLE_STABLE,
+            WOBBLE_CIRCLE,
             {
                 {
                     (SDL_Rect)       { 0,        0,   32,        32        },

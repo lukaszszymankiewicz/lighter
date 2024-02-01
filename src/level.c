@@ -35,7 +35,6 @@ int LVL_pos(
     int x,
     int y
 ) {
-    // return y * LVL_size_x(level) + x;
     return (LVL_size_y(level) - y - 1) * LVL_size_x(level) + x;
 }
 
@@ -129,9 +128,6 @@ bool LVL_obstacle_on_pos2(
     if (x<0 || x>LVL_size_x(level) || y<0 || y>LVL_size_y(level)) {
         return false;
     }
-
-    // int pos = y * LVL_size_x(level) + x;
-    //return level->structure[pos]->obstacle;
     return level->structure[LVL_pos(level, x, y)]->obstacle;
 }
 
@@ -296,8 +292,8 @@ void LVL_put_to_scene(
     int texture_h      = tilesets_library[id]->surface->h;
     
     // start drawing from st_x and st_y pixels
-    int st_x           = (camera_x + ENTITY_DRAW_X_RANGE) / TILE_WIDTH;
-    int st_y           = (camera_y + ENTITY_DRAW_Y_RANGE) / TILE_HEIGHT;
+    int st_x           = (camera_x + SCREEN_WIDTH  / 2) / TILE_WIDTH;
+    int st_y           = (camera_y + SCREEN_HEIGHT / 2) / TILE_HEIGHT;
 
     // start reading tiles from st_tile_pos_x and st_tile_pos_y 
     // end at end_tile_pos_x and end_tile_pos_y

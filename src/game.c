@@ -53,21 +53,10 @@ void GAME_draw_everything(
         return;
     }
     printf("\n\nFRAME %d ---------- \n", game->frame);
-    // set up
+
     SCENE_clear();
     GAME_set_camera();
     
-    // TODO: REFACTOR IT
-    // SCENE_put(LVLMAN_put_to_scene, LAYER_TILE)
-    // SCENE_render(LAYER_TILE, FIRST_BUFFER)
-    //
-    // SCENE_put(ENTMAN_put_to_scene, LAYER_SPRITE)
-    // SCENE_render(LAYER_SPRITE, FIRST_BUFFER)
-    
-    // always DEFAULT_FRAMEBUFFER as an output
-    // SCENE_put(SCENE_scale_buffer, SCALED_IMAGE)
-    // SCENE_render(SCALED_IMAGE, DEFAULT_FRAMEBUFFER)
-
     SCENE_activate_buffer(FIRST_BUFFER);
         SCENE_activate_layer(LAYER_TILE);
             LVLMAN_put_to_scene();

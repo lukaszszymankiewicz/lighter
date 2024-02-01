@@ -19,7 +19,6 @@ typedef struct game {
 
   game_config_t      config;
 
-  // TODO: make event manager
   SDL_Event          event;                // SDL event (keyboard, mouse etc)
 } game_t;
 

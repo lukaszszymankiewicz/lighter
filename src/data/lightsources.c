@@ -24,22 +24,24 @@ lightsource_t lighsource_lighter = {
     PI/7, 
     3, 
     {
-        (lightpolygon_t){0,  0, 200, 200, 120, 50,  0, 0, DEFAULT_DIFFUSE * 1.0},
-        (lightpolygon_t){0, -2, 200, 200, 120, 30, 20, 0, DEFAULT_DIFFUSE * 0.8},
-        (lightpolygon_t){0, +2, 200, 200, 120, 20, 20, 0, DEFAULT_DIFFUSE * 0.8},
+        (lightpolygon_t){0,   0, 200, 200, 120, 50,  0, 0,  DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,  -2, 200, 200, 120, 30, 20, 0,  DEFAULT_DIFFUSE * 0.8},
+        (lightpolygon_t){0,  +2, 200, 200, 120, 20, 20, 0,  DEFAULT_DIFFUSE * 0.8},
     }
 };
 
 lightsource_t lighsource_lamp_small = {
     LIGHTSOURCE_LAMP_SMALL,
-    PI/9, 
-    1, 
+    PI/12, 
+    6, 
     {
-        (lightpolygon_t){0,  0, 226, 13, 13, 50, 0,  PI/2, DEFAULT_DIFFUSE * 0.8},
-        (lightpolygon_t){0,  0, 226, 13, 13, 50, 20, PI/2, DEFAULT_DIFFUSE * 1.0},
-        (lightpolygon_t){0,  0, 226, 13, 13, 50, 20, PI/2, DEFAULT_DIFFUSE * 1.0},
-        (lightpolygon_t){0,  0, 226, 13, 13, 50, 50, PI/2, DEFAULT_DIFFUSE * 0.8},
-        (lightpolygon_t){0,  0, 226, 13, 13, 50, 50, PI/2, DEFAULT_DIFFUSE * 0.8},
+        (lightpolygon_t){0,   0, 226, 13, 13, 50, 0,   0,        DEFAULT_DIFFUSE * 1.8},
+        (lightpolygon_t){0,  -2, 226, 13, 13, 30, 20,  0+PI/12,   DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,  +2, 226, 13, 13, 30, 20,  0-PI/12,   DEFAULT_DIFFUSE * 1.0},
+
+        (lightpolygon_t){0,   0, 226, 13, 13, 50, 0,   PI,       DEFAULT_DIFFUSE * 1.8},
+        (lightpolygon_t){0,  -2, 226, 13, 13, 30, 20,  PI+PI/12,  DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,  +2, 226, 13, 13, 30, 20,  PI-PI/12,  DEFAULT_DIFFUSE * 1.0},
     }
 };
 

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS := --std=c99 -Wall -g
+CFLAGS := --std=c99 -Wall
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 LIBS = -lGL -lGLU -lGLEW -lm 
 
@@ -17,9 +17,6 @@ $(BUILDDIR)/%.o:	$(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/$(DATADIR)/%.o:	$(SRCDIR)/$(DATADIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILDDIR)/%.o:	$(TESTDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 OBJS =                                     \
@@ -64,7 +61,6 @@ clean:
 	rm -f $(BUILDDIR)/$(MODDIR)/*.o
 	rm -f $(BUILDDIR)/$(FINAL_OBJ)
 	rm -f $(BUILDDIR)/$(FINAL_TEST_OBJ)
-	rm $(MEMORYLOG)
 
 # TODO: add creating build/data folder
 lighter:  $(BUILDDIR)/lighter

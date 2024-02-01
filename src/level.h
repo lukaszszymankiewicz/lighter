@@ -5,6 +5,11 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
+#define MAX_LEVEL_X_SIZE      20
+#define MAX_LEVEL_Y_SIZE      20
+#define MAX_LEVEL_ENTITY_FILL 10
+#define MAX_LEVEL_SIZE        MAX_LEVEL_X_SIZE * MAX_LEVEL_Y_SIZE
+
 typedef struct level {
     int           blueprint_id;
     int           tileset_id;

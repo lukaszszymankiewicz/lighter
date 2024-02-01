@@ -7,6 +7,7 @@
 #include "global.h"
 #include "light.h"
 #include "segment.h"
+#include "tile.h"
 
 void ENTMAN_init(
 ) {
@@ -24,7 +25,6 @@ void ENTMAN_add_entity(
     int               id
 ) {
     entity_t* entity = NULL;
-    // TODO: make x and y already calculated
     entity           = ENT_generate(x_tile*TILE_WIDTH, y_tile*TILE_HEIGHT, id);
 
     for (int i=0; i<MAX_ENTITY; i++) {
@@ -190,7 +190,6 @@ void ENTMAN_put_entity_light_to_scene(
         );
     }
 
-    // TODO: this should not bee done here I think
     if (obs) { SEG_free(obs); }
 }
 

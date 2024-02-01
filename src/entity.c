@@ -571,7 +571,7 @@ entity_t* ENT_init(
 
     // light
     // TODO: some entity_light_t init?
-    entity->light            = (entity_light_t) {rand()%10+1, 0, RIGHT_RAD, 0};
+    entity->light            = (entity_light_t) {rand()%10+1, 0, PI/2*3, 0};
 
     // interactions
     entity->hold             = NULL;

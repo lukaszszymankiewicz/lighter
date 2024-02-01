@@ -7,12 +7,16 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#define Y_DIRECTION          -1
 #define MAX_VEL               5
 #define MOVE_POWUH            2
 #define X_FRICTION            1
 #define Y_FRICTION            1
 #define JUMP_POWUH            10
 #define MAX_UPDATE_FUN_NUMBER 8
+
+enum direction { RIGHT, LEFT, UP, DOWN, NONE };
+enum state { STANDING, WALKING, JUMPING, FALLING_DOWN, NOTHING, MAX_STATE };
 
 typedef struct entity_light {
     int   frame;

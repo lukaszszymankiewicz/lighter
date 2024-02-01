@@ -7,8 +7,10 @@
 
 #define MAX_LAYERS_ON_SCENE           5
 #define MAX_BUFFERS_ON_SCENE          3
-#define MAX_DRAWBLE_OBJECTS_ON_LAYER  10
-#define NO_TEXTURE                    0
+#define MAX_DRAWBLE_OBJECTS_ON_LAYER  20
+
+enum layers { LAYER_LIGHT, LAYER_TILE, LAYER_SPRITE, SCALED_IMAGE, LAYER_ALL };
+enum buffers { DEFAULT_FRAMEBUFFER, FIRST_BUFFER };
 
 typedef struct  render_object {
     int         shader_id;
@@ -37,10 +39,6 @@ typedef struct scene {
     framebuffer_t     *buffers[MAX_BUFFERS_ON_SCENE];    
 } scene_t; 
 
-int SCENE_get_buffer_tex();
-int SCENE_get_buffer_width();
-int SCENE_get_buffer_height();
-
 void SCENE_init();
 void SCENE_clear();
 void SCENE_add_layer(int layer, char *name);
@@ -55,7 +53,6 @@ void SCENE_clean_buffer(int buffer);
 void SCENE_free();
 void SCENE_render_current_layer();
 void SCENE_clear_layer(int layer);
-void SCENE_add_new_drawable_object();
 
 array_t *SCENE_texture_pos(
     int   draw_x, int   draw_y,

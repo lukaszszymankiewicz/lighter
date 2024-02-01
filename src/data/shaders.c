@@ -20,21 +20,6 @@ shader_program_blueprint_t shader_texture = {
     "",
 };
 
-
-void LIB_free_shader(
-    shader_program_t *blueprint
-) {
-    // TODO: to GFX
-    // glDeleteShader 
-}
-
-void LIB_free_program(
-    shader_program_t *blueprint
-) {
-    // TODO: to GFX
-    // glDetachShader
-}
-
 void LIB_read_shader_blueprint(
     shader_program_blueprint_t *blueprint
 ) {
