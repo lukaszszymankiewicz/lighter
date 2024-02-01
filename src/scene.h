@@ -66,7 +66,7 @@ array_t *SCENE_texture_pos(
     bool  flip_w, bool  flip_h
 ); 
 
-void SCENE_put_texture_to_scene(array_t *vertices, int texture);
+void SCENE_put_texture_to_scene(char *name, array_t *vertices, int texture);
 array_t *SCENE_polygon_coord_to_matrix(float *coords, int n_vertices);
 
 void SCENE_put_light_polygon_to_scene(

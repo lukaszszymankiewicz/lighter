@@ -23,7 +23,8 @@ typedef struct entity_light {
 
 typedef struct entity {
     // global
-    int id;                  // entity global id
+    int   id;                // entity global id
+    char *name;              // pretty name, for debug reasons
 
     // position
     int x;                   // position on global map

@@ -333,7 +333,7 @@ void LVL_put_to_scene(
     }
 
     // put all gathered vertices on scene
-    SCENE_put_texture_to_scene(vertices, tileset);
+    SCENE_put_texture_to_scene("tiles", vertices, tileset);
 }
 
 void LVL_free(

@@ -555,6 +555,7 @@ entity_t* ENT_init(
 
     // global
     entity->id               = blueprint->id;
+    entity->name             = blueprint->name;
     
     // position 
     entity->x                = x;        
@@ -665,7 +666,7 @@ void ENT_put_to_scene(
     );
 
     // put all gathered vertices on scene
-    SCENE_put_texture_to_scene(vertices, texture);
+    SCENE_put_texture_to_scene(entity->name, vertices, texture);
 }
 
 void ENT_free(

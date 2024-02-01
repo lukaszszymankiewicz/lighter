@@ -6,6 +6,7 @@ entity_blueprint_t* entity_library[ENTITY_ALL] = {NULL};
 
 
 entity_blueprint_t entity_blueprint_hero = {
+    "hero",   // name
     ENTITY_HERO, // id
     MOVABLE | APPLY_COLLISION | CONTROLABLE | STATEABLE | APPLY_FRICTION | ANIMATIABLE, // flags
     HANDLE_TYPE_NO,  // handle_type
@@ -13,7 +14,6 @@ entity_blueprint_t entity_blueprint_hero = {
     SPRITE_HERO, // texture_id
     LIGHTSOURCE_NO, // lighsource
     ENTITY_LIGHTER,  // hold id
-    // ENTITY_NO,
     STANDING,  // starting_state
     {
         SPRITE_HERO, 4, 27, 40,
@@ -77,6 +77,7 @@ entity_blueprint_t entity_blueprint_hero = {
 };
 
 entity_blueprint_t entity_blueprint_lighter = {
+    "lighter",
     ENTITY_LIGHTER,
     HOLDABLE | EMMIT_LIGHT,
     HANDLE_MIDDLE_UP,
@@ -91,6 +92,7 @@ entity_blueprint_t entity_blueprint_lighter = {
 };
 
 entity_blueprint_t entity_blueprint_walllight = {
+    "walllight",
     ENTITY_WALLLIGHT,
     EMMIT_LIGHT,
     HANDLE_MIDDLE_MIDDLE,
@@ -105,6 +107,7 @@ entity_blueprint_t entity_blueprint_walllight = {
 };
 
 entity_blueprint_t entity_blueprint_lamp_small = {
+    "small lamp",
     ENTITY_LAMP_SMALL,
     EMMIT_LIGHT,
     HANDLE_MIDDLE_MIDDLE,
@@ -129,6 +132,7 @@ entity_blueprint_t entity_blueprint_lamp_small = {
 };
 
 entity_blueprint_t entity_blueprint_lamp_big = {
+    "big lamp",
     ENTITY_LAMP_BIG,
     EMMIT_LIGHT,
     HANDLE_MIDDLE_MIDDLE,

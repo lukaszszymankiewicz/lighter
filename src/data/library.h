@@ -115,14 +115,15 @@ enum OBSTACLE_TYPE {
 };
 
 typedef struct entity_blueprint {
-    int  id;
-    int  flags;
-    int  handle_type;
-    int  light_emmit_pt;
-    int  texture_id; 
-    int  lightsource_id; 
-    int  hold_id; 
-    int  starting_state; 
+    char *name;
+    int   id;
+    int   flags;
+    int   handle_type;
+    int   light_emmit_pt;
+    int   texture_id; 
+    int   lightsource_id; 
+    int   hold_id; 
+    int   starting_state; 
     animation_sheet_t animation;
 } entity_blueprint_t;
 

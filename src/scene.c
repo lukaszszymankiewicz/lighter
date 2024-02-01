@@ -362,8 +362,8 @@ array_t *SCENE_texture_pos(
     return new;
 }
 
-// TODO: maybe type of texture here?
 void SCENE_put_texture_to_scene(
+    char    *name,
     array_t *vertices,
     int      texture
 ) {
@@ -375,7 +375,7 @@ void SCENE_put_texture_to_scene(
     object->vertices        = vertices;
     object->n_vertices      = MAT_n(vertices);
     object->count           = (int) object->n_vertices / vertices->cols;
-    object->name            = "texture";
+    object->name            = name;
 
     array_t *scale_arr      = SCENE_set_scale();
     array_t *texture_arr    = SCENE_texture_unit();
@@ -424,7 +424,7 @@ void SCENE_draw_scaled_buffer(
         false,          true
     );
 
-    SCENE_put_texture_to_scene(vertices, texture);
+    SCENE_put_texture_to_scene("buffer", vertices, texture);
     SCENE_activate_buffer(buffer);
 }
 
