@@ -25,7 +25,6 @@
 SDL_GLContext gl_context        = NULL;
 SDL_Window   *window            = NULL;
 
-int texture_id_counter          = 0;
 int max_buffer_len              = 512;
 int TEXTURE_MODE                = GL_RGB;
 
@@ -35,50 +34,32 @@ int   camera_y              = 0;
 float FRAMEBUFFER_WIDTH     = 1.0;
 float FRAMEBUFFER_HEIGHT    = 1.0;
 
-// TODO: this propably needs to be anyhow parametrizable, but for now it will
-// always use the secondary monitor as the output
-int SCREEN_DISPLAY          = 1;
-
-int   pixel_perfect_scale   = 1;
-
-// TODO: make it pretty
-void GLAPIENTRY
-MessageCallback( GLenum source,
-                 GLenum type,
-                 GLuint id,
-                 GLenum severity,
-                 GLsizei length,
-                 const GLchar* message,
-                 const void* userParam )
-{
-  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
-            type, severity, message );
-}
-
-int GFX_get_number_of_displays(
+// shamesly copied from Stack Overflow
+void GLAPIENTRY MessageCallback(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* userParam 
 ) {
-    return SDL_GetNumVideoDisplays();
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ), type, severity, message);
 }
 
-int GFX_generate_texture_ID(
-) {
-    texture_id_counter++;
-    return (int) texture_id_counter;
-}
-
+// a lot of defaults, but I dont care
 texture_t* GFX_read_texture(
     const char *filepath
 ) {
-    SDL_Surface *surface        = NULL;
-    texture_t* tex              = NULL;
+    SDL_Surface  *surface = NULL;
+    texture_t    *texture = NULL;
+    GLuint        id;
 
-    GLuint texture_id           = GFX_generate_texture_ID();
-    surface                     = IMG_Load(filepath);
-    tex                         = (texture_t*)malloc(sizeof(texture_t));
+    surface                = IMG_Load(filepath);
+    texture                = (texture_t*)malloc(sizeof(texture_t));
 
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -96,14 +77,12 @@ texture_t* GFX_read_texture(
         );
     }
 
-    glDebugMessageCallback(MessageCallback, 0);
-
-    tex->surface   = surface;
-    tex->id        = texture_id;
+    texture->surface   = surface;
+    texture->id        = id;
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    return tex;
+    return texture;
 }
 
 void GFX_free_texture(
@@ -320,37 +299,19 @@ shader_program_t* GFX_create_gl_program(
     return shader_program;
 }
 
-void GFX_set_interpolation_2d(
-    int interpolation
-) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, interpolation);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, interpolation);
-}
-
-void GFX_bind_texture(
-    GLuint texture_id
-) {
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-}
-
 bool GFX_set_viewport(
 ) {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     
-    float w = (float)m_viewport[2];
-    float h = (float)m_viewport[3];
-
-    FRAMEBUFFER_HEIGHT = h;
-    FRAMEBUFFER_WIDTH  = w;
-    // TODO: only for WSL testing
-    // FRAMEBUFFER_WIDTH  = (int)w/2;
+    FRAMEBUFFER_HEIGHT = (float)m_viewport[3];
+    FRAMEBUFFER_WIDTH  = (float)m_viewport[2];
 
     return true;
 }
 
-bool GFX_init_window() {
+bool GFX_init_window(
+) {
     window = SDL_CreateWindow(
         GAME_NAME,
         SDL_WINDOWPOS_CENTERED,
@@ -365,7 +326,8 @@ bool GFX_init_window() {
         return false;
     }
 
-    SDL_ShowCursor(SDL_DISABLE); // disable cursor on window
+    // disable cursor on window
+    SDL_ShowCursor(SDL_DISABLE);
 
     return true;
 };
@@ -393,16 +355,10 @@ bool GFX_init_glew(
 
 bool GFX_init_gl_params(
 ) {
-    // glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
-
-    // this is the base
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // this is somehow good
-    // glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
 
     return true;
 }

@@ -32,7 +32,7 @@ void RENDER_set_uniform(
             glUniform4f(uniform_id, v[0], v[1], v[2], v[3]);
             break;
         case GL_SAMPLER_2D:
-            glUniform1i(uniform_id, 0);
+            glUniform1i(uniform_id, (int)v[0]);
             break;
         case GL_FLOAT_MAT2:
             glUniformMatrix2fv(uniform_id, 1, GL_FALSE, &v[0]);

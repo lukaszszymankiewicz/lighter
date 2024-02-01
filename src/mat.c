@@ -68,16 +68,6 @@ array_t *MAT_vec4_new(
     return arr;
 }
 
-array_t *MAT_imat2_new(
-    float a1, float a2
-) {
-    array_t *arr   = MAT_new(2, 2);
-    arr->values[0] = a1;
-    arr->values[3] = a2;
-
-    return arr;
-}
-
 void MAT_free(
     array_t *arr
 ) {

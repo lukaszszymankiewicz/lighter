@@ -475,37 +475,7 @@ point_t* LIG_add_border_light_vertices(
     return hit_points;
 }
 
-// TODO: obsolete
 // Calculates polygon of shadow which will be rendered on walls (light penetating walls).
-vertex_t* LIG_calc_light_wall_shadow(
-    vertex_t *light_polygon,      // light polygon shape
-    int       penetrating_power,  // range of light penetating wall (in px)
-    int       x,                  // x starting point (hero)
-    int       y                   // y starting point (hero)
-) { 
-    vertex_t *shadow_polygon = NULL;  
-    vertex_t *ptr            = NULL;
-    ptr                      = light_polygon;
-
-    while(ptr) {
-        if ((ptr->x == x) && (ptr->y == y)) {
-            // starting point (hero position) should not be transfomred. This allows to avoid
-            // checking if light has any width (if so this point will occur, if not won`t).
-            VRTX_add_point(&shadow_polygon, x, y, 0);
-        }
-        else {
-            VRTX_add_point(
-                &shadow_polygon,
-                ptr->x - sin(ptr->angle) * penetrating_power,
-                ptr->y - cos(ptr->angle) * penetrating_power,
-                ptr->angle
-            );
-        }
-        ptr=ptr->next;
-    }
-    return shadow_polygon;
-};
-
 // generate list of points which needs to be check for ray casting
 point_t* LIG_generate_hit_points(
     int x,

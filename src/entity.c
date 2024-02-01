@@ -318,6 +318,7 @@ void ENT_update_wobble(
         return;
     }
     int anim_idx = entity->state;
+    // TODO: make it right!
     entity->light.wobble = ENT_get_animation_sheet(entity).animations[anim_idx].wobble_id;
     entity->light.frame++;
 }

@@ -18,12 +18,6 @@ float SRC_move_lightsource(
     return lightpos_up_down_corr[entity_dir][light_dir];
 }
 
-int SRC_get_light_penetrating_power(
-    lightsource_t *source
-) {
-    return source->penetrating_power;
-}
-
 int SRC_get_light_polygon_x_corr(
     lightsource_t *source,
     float          angle,
@@ -65,13 +59,6 @@ float SRC_get_light_polygon_width_corr(
     }
     return 0.0;
 }
-
-void SRC_free_wobble(
-    wobble_t* wobble
-) {
-    free(wobble);
-    wobble = NULL;
-};
 
 void SRC_free_lightsource(
     lightsource_t* source

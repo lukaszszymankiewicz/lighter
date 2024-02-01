@@ -1,6 +1,7 @@
 #include "components.h"
 
-
+// maybe the window also shouldb e there?
+// TODO: introduce window_t struct holding all window needed data
 controller_t     *keyboard;
 entity_manager_t *entity_manager;
 game_timer_t     *cap_timer;

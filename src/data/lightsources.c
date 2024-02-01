@@ -11,7 +11,8 @@ lightsource_t* lighsources_library[LIGHTSOURCE_ALL] = { NULL };
 
 lightsource_t lighsource_wallight = {
     LIGHTSOURCE_WALLLIGHT,
-    PI/6, 7, 2, 
+    PI/6, 
+    2, 
     {
         (lightpolygon_t){0, 0, 226, 13, 13, 50, 0, 0,  DEFAULT_DIFFUSE},
         (lightpolygon_t){0, 0, 226, 13, 13, 50, 0, PI, DEFAULT_DIFFUSE},
@@ -20,7 +21,8 @@ lightsource_t lighsource_wallight = {
 
 lightsource_t lighsource_lighter = {
     LIGHTSOURCE_LIGHTER,
-    PI/7, 7, 3, 
+    PI/7, 
+    3, 
     {
         (lightpolygon_t){0,  0, 200, 200, 120, 50,  0, 0, DEFAULT_DIFFUSE * 1.0},
         (lightpolygon_t){0, -2, 200, 200, 120, 30, 20, 0, DEFAULT_DIFFUSE * 0.8},
@@ -30,7 +32,8 @@ lightsource_t lighsource_lighter = {
 
 lightsource_t lighsource_lamp_small = {
     LIGHTSOURCE_LAMP_SMALL,
-    PI/9, 7, 1, 
+    PI/9, 
+    1, 
     {
         (lightpolygon_t){0,  0, 226, 13, 13, 50, 0,  PI/2, DEFAULT_DIFFUSE * 0.8},
         (lightpolygon_t){0,  0, 226, 13, 13, 50, 20, PI/2, DEFAULT_DIFFUSE * 1.0},
@@ -42,7 +45,8 @@ lightsource_t lighsource_lamp_small = {
 
 lightsource_t lighsource_lamp_big = {
     LIGHTSOURCE_LAMP_BIG,
-    PI/7, 7, 1, 
+    PI/7, 
+    1, 
     {
         (lightpolygon_t){0,  0, 200, 200, 120, 50,  0, PI/2, DEFAULT_DIFFUSE},
         (lightpolygon_t){0, -2, 200, 200, 120, 30, 20, PI/2, DEFAULT_DIFFUSE},

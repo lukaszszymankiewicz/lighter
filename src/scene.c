@@ -16,10 +16,9 @@
 #define RECT_VERTICES_COLS       2
 #define COORD_PER_POLYGON_VERTEX 2
 
-array_t *SCENE_id(
-    int id
+array_t *SCENE_texture_unit(
 ) {
-    return MAT_scalar_new((float)id);
+    return MAT_scalar_new(DEFAULT_TEXTURE_UNIT);
 }
 
 void SCENE_clear_layer(
@@ -278,21 +277,9 @@ array_t *SCENE_set_scale(
     return MAT_vec2_new(w, h);
 }
 array_t *SCENE_set_emit_pt(
-    int x0,
-    int y0
+    int x0, int y0
 ) {
-    int w = SCENE_get_buffer_width();
-    int h = SCENE_get_buffer_height();
-
-    int emit_x = x0 - camera_x;
-    int emit_y = y0 - camera_y;
-    // int emit_x = x0 - camera_x;
-    // int emit_y = y0 - camera_y;
-    printf("\nx0, y0 %d %d \n", x0-camera_x, y0-camera_y);
-    printf("emit_x, emit_y %d %d \n", emit_x, emit_y);
-
-    // return MAT_vec2_new(emit_x, emit_y);
-    return MAT_vec2_new(emit_x, emit_y);
+    return MAT_vec2_new(x0 - camera_x, y0 - camera_y);
 }
 
 array_t* SCENE_set_color(
@@ -317,8 +304,11 @@ void SCENE_put_light_polygon_to_scene(
         return;
     }
 
+    printf("buffer tex: %d \n", SCENE_get_buffer_tex());
+    int texture        = SCENE_get_buffer_tex();
+
     object->shader_id  = SHADER_LIGHT;
-    object->texture    = NO_TEXTURE;
+    object->texture    = texture;
     object->mode       = GL_POLYGON;
     
     // TODO: should this be done on higher function?
@@ -327,17 +317,19 @@ void SCENE_put_light_polygon_to_scene(
     object->count          = (int) object->n_vertices / vertices->cols;
     object->name           = "light polygon";
 
-    array_t *scale_arr     = SCENE_set_scale();
-    array_t *camera_arr    = MAT_vec2_new(camera_x, camera_y);
-    array_t *color_arr     = SCENE_set_color(r, g, b, a);
-    array_t *emit_arr      = SCENE_set_emit_pt(x0, y0);
-    array_t *diffuse_arr   = MAT_scalar_new(diffuse);
+    array_t *scale_arr      = SCENE_set_scale();
+    array_t *camera_arr     = MAT_vec2_new(camera_x, camera_y);
+    array_t *color_arr      = SCENE_set_color(r, g, b, a);
+    array_t *emit_arr       = SCENE_set_emit_pt(x0, y0);
+    array_t *diffuse_arr    = MAT_scalar_new(diffuse);
+    array_t *texture_arr    = SCENE_texture_unit();
 
     SCENE_add_uniform("aScale", scale_arr); 
     SCENE_add_uniform("aCamera", camera_arr); 
     SCENE_add_uniform("aColor", color_arr);
     SCENE_add_uniform("emit", emit_arr);
     SCENE_add_uniform("diffuse", diffuse_arr);
+    SCENE_add_uniform("ourTexture", texture_arr);
 }
 
 array_t *SCENE_texture_pos(
@@ -386,7 +378,7 @@ void SCENE_put_texture_to_scene(
     object->name            = "texture";
 
     array_t *scale_arr      = SCENE_set_scale();
-    array_t *texture_arr    = SCENE_id(texture);
+    array_t *texture_arr    = SCENE_texture_unit();
     array_t *camera_arr     = MAT_vec2_new(camera_x, camera_y);
 
     SCENE_add_uniform("aScale", scale_arr); 
@@ -405,7 +397,6 @@ int SCENE_get_screen_multiplication_coef(
 
 // scale cur_buffer to fit on DEFAULT_FRAMEBUFFER (physical screen size) and put such texture on
 // current layer
-// TODO: use custom function and not SCENE_put_texture_to_scene
 void SCENE_draw_scaled_buffer(
 ) {
     int buffer = scene->cur_buffer;

@@ -10,7 +10,6 @@ typedef struct array {
 
 array_t* MAT_new(int rows, int cols);
 array_t* MAT_vec2_new(float a1, float a2);
-array_t* MAT_imat2_new(float a1, float a2);
 array_t* MAT_scalar_new(float a1);
 array_t* MAT_vec4_new(float a1, float a2, float a3, float a4);
 

@@ -186,7 +186,7 @@ void ENTMAN_put_entity_light_to_scene(
             source->light_polygons[i].red,
             source->light_polygons[i].green,
             source->light_polygons[i].blue,
-            source->light_polygons[i].light_power
+            source->light_polygons[i].alpha
         );
     }
 
