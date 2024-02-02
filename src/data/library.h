@@ -87,7 +87,6 @@ enum SPRITE_IDX {
 
 enum LEVEL_IDX {
     LEVEL_SAMPLE,
-    LEVEL_TEST,
     LEVEL_ALL
 };
 

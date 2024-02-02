@@ -156,10 +156,11 @@ void LVL_analyze(
     int size_y = LVL_size_y(level);
 
     segment_t *ptr           = NULL;
-    cell_t cells[size_x][size_y];
-
-    for (int yy=0; yy<size_x; yy++) {
-        for (int xx=0; xx<size_y; xx++) {
+    cell_t cells[size_y][size_x];
+    
+    //mempcy?
+    for (int yy=0; yy<size_y; yy++) {
+        for (int xx=0; xx<size_x; xx++) {
             cells[yy][xx].edge[W] = EMPTY_CELL;
             cells[yy][xx].edge[S] = EMPTY_CELL;
             cells[yy][xx].edge[A] = EMPTY_CELL;
