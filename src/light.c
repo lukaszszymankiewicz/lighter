@@ -1,45 +1,13 @@
-#include "global.h"
-#include "import.h"
-#include "segment.h"
+#include "./data/library.h"
+
 #include "geometry.h"
-#include "source.h"
-#include "gfx.h"
+#include "global.h"
 #include "light.h"
-#include "vertex.h"
-#include "primitives.h"
 #include "point.h"
+#include "segment.h"
+#include "vertex.h"
 
-light_scene_t* LIG_new_light_scene() {
-    light_scene_t* scene = NULL;
-    scene                = (light_scene_t*)malloc(sizeof(light_scene_t));
-
-    scene->n           = 0;
-
-    for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
-        scene->components[i] = NULL;
-    }
-
-    return scene;
-}
-
-void LIG_free_light_scene(
-    light_scene_t* scene
-) {
-    for (int i=0; i<MAX_LIGHT_ON_SCENE; i++) {
-        
-        if (scene->components[i] == NULL) {
-            continue;
-        }
-
-        VRTX_free(scene->components[i]->coords);
-        scene->components[i]->coords = NULL;
-
-        free(scene->components[i]);
-        scene->components[i] = NULL;
-    }
-
-    free(scene);
-}
+#include <stdio.h>
 
 // TODO: replace it with function in geometry.h
 // checks if ray intersects with obstacle
@@ -127,11 +95,12 @@ point_t* LIG_generate_slipover_hit_point(
         return PT_new(SIGN(x2-x1)*SCREEN_WIDTH+1, y2);
     }
 
-    // slipped ray, by now, ends only few pixels from slipped corner. Its end is simply transposed
-    // in such a way, that it is always behind the screen border. This makes sure that such ray will
-    // be checked for every obstacle in a way.
-    // To calculate transposition 'nx' and 'ny' is calculated which is just a number of times ray
-    // needs to be repeated to fall behind the level border.
+    // slipped ray, by now, ends only few pixels from slipped corner. Its end is
+    // simply transposed in such a way, that it is always behind the screen
+    // border. This makes sure that such ray will be checked for every obstacle
+    // in a way. To calculate transposition 'nx' and 'ny' is calculated which is
+    // just a number of times ray needs to be repeated to fall behind the level
+    // border.
     int nx = (int)(SCREEN_WIDTH / abs(dx)) + 1;
     int ny = (int)(SCREEN_HEIGHT / abs(dy)) + 1;
 
@@ -199,6 +168,29 @@ point_t* LIG_generate_aux_hit_points(
     return NULL;
 }
 
+// if ray begins inside of obstacle or it is collinear to obstacle special care is taken to proerly
+// calculate distance between such obstacle to such ray
+int LIG_calculate_dull_ray_end(
+    int r_beg,
+    int r_end,
+    int o_beg,
+    int o_end
+) {
+    // ray begins inside of obstacle
+    if (GEO_value_between_range(r_beg, o_beg, o_end)) {
+        return r_beg;
+    }
+    // if distance between ray and obstacle is still zero it means that they are collinear - one of
+    // the end of obstacle is and hit point
+    int dir = SIGN(r_beg - r_end);
+
+    if (dir == -1) {
+        return MIN(o_beg, o_end);
+    } else {
+        return MAX(o_beg, o_end);
+    }
+}
+
 segment_t* LIG_find_closest_hit_segment_ver(
     segment_t* inter,
     int r_x1,
@@ -232,29 +224,6 @@ segment_t* LIG_find_closest_hit_segment_ver(
     }
 
     return best_seg;
-}
-
-// if ray begins inside of obstacle or it is collinear to obstacle special care is taken to proerly
-// calculate distance between such obstacle to such ray
-int LIG_calculate_dull_ray_end(
-    int r_beg,
-    int r_end,
-    int o_beg,
-    int o_end
-) {
-    // ray begins inside of obstacle
-    if (GEO_value_between_range(r_beg, o_beg, o_end)) {
-        return r_beg;
-    }
-    // if distance between ray and obstacle is still zero it means that they are collinear - one of
-    // the end of obstacle is and hit point
-    int dir = SIGN(r_beg - r_end);
-
-    if (dir == -1) {
-        return MIN(o_beg, o_end);
-    } else {
-        return MAX(o_beg, o_end);
-    }
 }
 
 segment_t* LIG_find_closest_hit_segment_hor(
@@ -473,13 +442,9 @@ vertex_t* LIG_initial_point_of_light(
     float     width,
     vertex_t* light_polygon
 ) {
-    vertex_t* v = NULL;
 
     if (width != 0.0) {
-        v = VRTX_new(x, y, 0.0);
-        VRTX_merge(&light_polygon, v);
-        
-        if (v) { VRTX_free(v); }
+        VRTX_force_first(&light_polygon, x, y);
     }
 
     return light_polygon;
@@ -512,35 +477,6 @@ point_t* LIG_add_border_light_vertices(
 }
 
 // Calculates polygon of shadow which will be rendered on walls (light penetating walls).
-vertex_t* LIG_calc_light_wall_shadow(
-    vertex_t *light_polygon,      // light polygon shape
-    int       penetrating_power,  // range of light penetating wall (in px)
-    int       x,                  // x starting point (hero)
-    int       y                   // y starting point (hero)
-) { 
-    vertex_t *shadow_polygon = NULL;  
-    vertex_t *ptr            = NULL;
-    ptr                      = light_polygon;
-
-    while(ptr) {
-        if ((ptr->x == x) && (ptr->y == y)) {
-            // starting point (hero position) should not be transfomred. This allows to avoid
-            // checking if light has any width (if so this point will occur, if not won`t).
-            VRTX_add_point(&shadow_polygon, x, y, 0);
-        }
-        else {
-            VRTX_add_point(
-                &shadow_polygon,
-                ptr->x - sin(ptr->angle) * penetrating_power,
-                ptr->y - cos(ptr->angle) * penetrating_power,
-                ptr->angle
-            );
-        }
-        ptr=ptr->next;
-    }
-    return shadow_polygon;
-};
-
 // generate list of points which needs to be check for ray casting
 point_t* LIG_generate_hit_points(
     int x,
@@ -596,7 +532,7 @@ point_t* LIG_generate_hit_points(
 }
 
 // calculates shape of light polygon (width of light cone is calculated on a fly)
-vertex_t* LIG_get_light_polygon(
+vertex_t* LIG_calculate(
     int        x,
     int        y,
     float      width,
@@ -627,99 +563,3 @@ vertex_t* LIG_get_light_polygon(
     return light_polygon;
 }
 
-vertex_t* LIG_single_add_light_polygon(
-    int              x,
-    int              y,
-    int              n,
-    lightsource_t   *light,
-    segment_t       *obstacles
-) {
-    int   x_corr;                  // x and y correction values 
-    int   y_corr;                  // x and y correction values
-    float width_corr;              // light width correction (some light polygons can be wider)
-    float wobble_corr;             // angle correction due to wobling
-
-    vertex_t* light_polygon     = NULL;
-    wobble_corr                 = SRC_get_wobble_angle_coef(light);
-    x_corr                      = SRC_get_light_polygon_x_corr(light, n);
-    y_corr                      = SRC_get_light_polygon_y_corr(light, n);
-    width_corr                  = SRC_get_light_polygon_width_corr(light, n);
-
-    light_polygon = LIG_get_light_polygon(
-        x+x_corr,
-        y+y_corr,
-        light->width+width_corr,
-        light->angle+wobble_corr,
-        obstacles
-    );
-
-    return light_polygon;
-
-};
-
-void LIG_add_to_scene(
-    int              x,
-    int              y,
-    int              i,
-    lightsource_t   *light,
-    light_scene_t   *scene,
-    segment_t       *obstacles
-) {
-    vertex_t* vertex = NULL;
-
-    scene->components[scene->n] = (lvertex_t*)malloc(sizeof(lvertex_t));
-
-    vertex = LIG_single_add_light_polygon(x, y, i, light, obstacles);
-
-    scene->components[scene->n]->coords = vertex;
-    scene->components[scene->n]->x0     = x;
-    scene->components[scene->n]->y0     = y;
-    scene->components[scene->n]->red    = light->light_polygons[i].red;
-    scene->components[scene->n]->green  = light->light_polygons[i].green;
-    scene->components[scene->n]->blue   = light->light_polygons[i].blue;
-    scene->components[scene->n]->power  = light->light_polygons[i].light_power;
-
-    scene->n++;
-}
-
-void LIG_fit_scene_on_screen(
-    light_scene_t   *scene,
-    int              i,
-    int              x_corr,
-    int              y_corr
-) {
-    if (scene->components[i] == NULL) { return; }
-
-    scene->components[i]->coords  = VRTX_transpose(scene->components[i]->coords, x_corr, y_corr);
-    scene->components[i]->x0     += x_corr;
-    scene->components[i]->y0     += y_corr;
-}
-
-void LIG_clean_light(
-) {
-    GFX_clean_buffers();
-}
-
-void LIG_compose_light_scene(
-    light_scene_t* scene
-) {
-    for (int i=scene->n-1; i>-1; i--) {
-        GFX_fill_light(
-            GFX_fill_lightbuffer,
-            scene->components[i]->coords,
-            scene->components[i]->red,
-            scene->components[i]->green,
-            scene->components[i]->blue,
-            scene->components[i]->power,
-            scene->components[i]->x0,
-            scene->components[i]->y0
-        );
-    }
-};
-
-void LIG_draw_light_scene(
-    light_scene_t* scene 
-) {
-    GFX_draw_light();
-    GFX_draw_darkness();
-}

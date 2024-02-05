@@ -1,3 +1,6 @@
+#include <stdbool.h>
+#include <stdlib.h>
+
 #include "point.h"
 
 point_t* PT_new(

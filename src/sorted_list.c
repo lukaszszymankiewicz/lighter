@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "global.h"
 #include "sorted_list.h"
 
@@ -55,21 +57,6 @@ int SRTLST_get_last(
     return ptr->value;
 }
 
-int SRTLST_len(
-    sorted_list_t* head
-) {
-    sorted_list_t* ptr = NULL;
-    ptr                = head;
-    int            n   = 0;
-    
-    while(ptr) {
-        n++;
-        ptr=ptr->next;
-    }
-
-    return n;
-}
-
 void SRTLST_free(
     sorted_list_t* head
 ) {
@@ -77,12 +64,12 @@ void SRTLST_free(
         return;
     }
 
-    sorted_list_t* currentRef = head;
+    sorted_list_t* ptr = head;
 
-    while (currentRef != NULL) {
-        sorted_list_t * temp = currentRef->next;
-        free(currentRef);
-        currentRef = temp;
+    while (ptr != NULL) {
+        sorted_list_t *temp = ptr->next;
+        free(ptr);
+        ptr = temp;
     }
 }
 

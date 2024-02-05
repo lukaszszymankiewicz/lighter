@@ -1,7 +1,13 @@
-#include "primitives.h"
+#include <stdbool.h>
 
 #ifndef POINT_H
 #define POINT_H
+
+typedef struct point {
+    int           x;
+    int           y;
+    struct point *next;
+} point_t;
 
 void PT_push(point_t** head, int x, int y);
 void PT_free(point_t* head);

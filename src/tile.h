@@ -1,13 +1,21 @@
+#include <stdbool.h>
+
 #ifndef TILE_H
 #define TILE_H
 
+#define TILE_HEIGHT 32
+#define TILE_WIDTH  32
+
 typedef struct tile {
-  int          x;       // x 
-  int          y;       // y 
-  int          width;   // tile width (default is 32)
-  int          height;  // tile height (default is 32)
+  int            x;
+  int            y;
+  int            row;
+  int            col;
+  bool           obstacle;
+  int            tileset_id;
 } tile_t;
 
-tile_t* TILE_new(int x, int y);
+tile_t* TILE_new(int x, int y, int blueprint_id);
+void TILE_free(tile_t *tile);
 
 #endif

@@ -1,5 +1,21 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "geometry.h"
 #include "segment.h"
+
+int SEG_determine_type(
+    segment_t* seg
+) {
+    if (seg->x1 == seg->x2) {
+        return VER;
+    }
+
+    else if (seg->y1 == seg->y2) {
+        return HOR;
+    }
+    return UNKNOWN;
+}
 
 segment_t* SEG_init(
     int x1, int y1,
@@ -19,20 +35,6 @@ segment_t* SEG_init(
 
     return new_segment;
 }
-
-int SEG_determine_type(
-    segment_t* seg
-) {
-    if (seg->x1 == seg->x2) {
-        return VER;
-    }
-
-    else if (seg->y1 == seg->y2) {
-        return HOR;
-    }
-    return UNKNOWN;
-}
-
 void SEG_push(
     segment_t **head,
     int          x1,
@@ -89,50 +91,6 @@ int SEG_len(
     return i;
 }
 
-segment_t* SEG_find_candidates(
-    segment_t **head,
-    int          y
-) {
-    // gets all obstacles which y_min is equal to scan_y, deletes it from linked list and return
-    segment_t* ptr        = NULL;
-    segment_t* prev       = NULL;
-    segment_t* candidates = NULL;
-    segment_t* temp       = NULL;
-
-    ptr = (*head);
-
-    while(ptr) {
-        if (MIN(ptr->y1, ptr->y2) == y) {
-            if (prev == NULL) {
-                SEG_push(&candidates, ptr->x1, ptr->y1, ptr->x2, ptr->y2);
-                temp = ptr;
-                ptr=ptr->next;
-                (*head) = ptr;
-                free(temp);
-            }
-            else {
-                SEG_push(&candidates, ptr->x1, ptr->y1, ptr->x2, ptr->y2);
-                temp = ptr;
-
-                if (!prev->next) {
-                    free(temp);
-                    break;
-                }
-
-                prev->next = ptr->next;
-                ptr = prev->next;
-                free(temp);
-            }
-        }
-        else {
-            prev = ptr;
-            ptr  = ptr->next;
-        }
-    }
-
-    return candidates;
-}
-
 void SEG_merge(
     segment_t **head,
     segment_t *candidates
@@ -182,27 +140,6 @@ void SEG_delete(
             ptr = ptr->next;
         }
     }
-}
-
-segment_t* SEG_get_segments_of_polygon(
-    vertex_t *poly
-) {
-    // transform vertices into list of obstacles
-    segment_t *segments   = NULL;
-    vertex_t *ptr         = NULL;
-    ptr                   = poly;
-
-    int first_x           = ptr->x;
-    int first_y           = ptr->y;
-
-    while(ptr->next) {
-        SEG_push(&segments, ptr->x, ptr->y, ptr->next->x, ptr->next->y);
-        ptr=ptr->next;
-    }
-
-    SEG_push(&segments, ptr->x, ptr->y, first_x, first_y);
-
-    return segments;
 }
 
 int SEG_common_x(
@@ -259,52 +196,6 @@ bool SEG_contains(
     }
 
     return true;
-}
-
-
-int SEG_dist_to_pt(
-    segment_t* seg,
-    int x,
-    int y
-) {
-    if (seg->type == VER) {
-        return abs(x - seg->x1);
-    } else {
-        return abs(y - seg->y1);
-    }
-}
-
-// gets segment closest to given point
-segment_t* SEG_closest_to_pt(
-    segment_t *seg,
-    int type,
-    int x,
-    int y
-) {
-    int best = 9999;
-    int approx_dist;
-
-    segment_t* best_seg = NULL;
-    segment_t* ptr = NULL;
-
-    ptr = seg;
-
-    if (!ptr) {
-        return NULL;
-    }
-
-    for(; ptr; ptr=ptr->next) {
-        if (ptr->type == type) {
-            approx_dist = SEG_dist_to_pt(ptr, x, y);
-        } 
-
-        if (approx_dist < best) {
-            best = approx_dist;
-            best_seg = ptr;
-        }
-    }
-
-    return best_seg;
 }
 
 void SEG_free(

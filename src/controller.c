@@ -1,77 +1,88 @@
+#include <SDL2/SDL_stdinc.h>
+
+#include <stdbool.h>
+#include <stdlib.h>
+
 #include "controller.h"
+#include "components.h"
 
-controller_t *keyboard = NULL;
-
-controller_t* CON_init(
+void CON_clean(
 ) {
-    controller_t* con          = NULL;
-    con                        = (controller_t*)malloc(sizeof(controller_t));
+    for (int i=0; i<keyboard->len; i++) {
+        keyboard->old_state[i]   = keyboard->state[i];
+    }
 
-    con->available             = true;
-    con->delay                 = KEYBOARD_CONTROLLER_DELAY;
+    for (int i=0; i<keyboard->len; i++) {
+        keyboard->old_state[i]   = 0;
+    }
+}
+
+void CON_init(
+) {
+    keyboard              = NULL;
+    keyboard              = (controller_t*)malloc(sizeof(controller_t));
+
+    keyboard->available   = true;
+    keyboard->delay       = KEYBOARD_CONTROLLER_DELAY;
 
     // get the len of SDL keyboard state array
-    SDL_GetKeyboardState(&(con->len));
+    SDL_GetKeyboardState(&(keyboard->len));
 
-    con->state       = NULL;
-    con->old_state   = NULL;
-    con->counter     = 0;
+    keyboard->state       = NULL;
+    keyboard->old_state   = NULL;
+    keyboard->counter     = 0;
 
-    con->state       = (Uint8*)calloc(con->len, sizeof(Uint8) * con->len);
-    con->old_state   = (Uint8*)calloc(con->len, sizeof(Uint8) * con->len);
+    keyboard->state       = (Uint8*)malloc(sizeof(Uint8) * keyboard->len);
+    keyboard->old_state   = (Uint8*)malloc(sizeof(Uint8) * keyboard->len);
 
-    return con;
+    CON_clean(keyboard);
 }
 
 void CON_update(
-    controller_t* con
 ) {
-    if (con->counter++ >= con->delay) {
-        con->counter     = 0;
+    if (keyboard->counter++ >= keyboard->delay) {
 
-        for (int i=0; i<con->len; i++) {
-            con->old_state[i]   = con->state[i];
+        keyboard->counter     = 0;
+        Uint8* keyboard_state = NULL;
+        keyboard_state        = (Uint8*)SDL_GetKeyboardState(NULL);
+
+        for (int i=0; i<keyboard->len; i++) {
+            keyboard->old_state[i] = keyboard->state[i];
+            keyboard->state[i]     = keyboard_state[i];
         }
-
-        con->state       = NULL;
-        con->state       = (Uint8*)SDL_GetKeyboardState(NULL);
     }
 }
 
 bool CON_button_is_just_pressed(
-    controller_t *con,
     Uint8         key
 ) {
-    return con->state[key] && !(con->old_state[key]);
+    return keyboard->state[key] && !(keyboard->old_state[key]);
 }
 
 bool CON_button_still_pressed(
-    controller_t *con,
     Uint8         key
 ) {
-    return con->state[key];
+    return keyboard->state[key];
 }
 
 bool CON_button_is_just_released(
-    controller_t *con,
     Uint8         key
 ) {
-    return !(con->state[key]) && con->old_state[key];
+    return !(keyboard->state[key]) && keyboard->old_state[key];
 }
 
 void CON_free(
-    controller_t* con
 ) {
-    if (con->state) {
-        free(con->state);
+    if (keyboard->state) {
+        free(keyboard->state);
     }
-    con->state       = NULL;
+    keyboard->state       = NULL;
 
-    if (con->old_state) {
-        free(con->old_state);
+    if (keyboard->old_state) {
+        free(keyboard->old_state);
     }
-    con->old_state   = NULL;
+    keyboard->old_state   = NULL;
 
-    free(con);
-    con = NULL;
+    free(keyboard);
+    keyboard = NULL;
 }

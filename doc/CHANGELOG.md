@@ -1,6 +1,11 @@
 # LIGHTER changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] - XX-XX-2023
+### Changed:
+- graphic engine now works on OpenGL shaders
+- code refactored, still ugly though
+
 ## [0.2.0] - 11-01-2023
 ### Changed:
 - engine can now handle multiple entities

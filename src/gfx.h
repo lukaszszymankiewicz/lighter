@@ -1,62 +1,77 @@
-#include "assets.h"
-#include "global.h"
-#include "primitives.h"
-#include "sorted_list.h"
+#include <GL/gl.h>
+#include <SDL2/SDL.h>
+
+#include <stdbool.h>
 
 #ifndef GFX_H
 #define GFX_H
 
+#define MAX_SHADER_UNIFORMS 8
+#define DEFAULT_TEXTURE_UNIT 0
+
+extern int   camera_x;
+extern int   camera_y;
+
+extern float FRAMEBUFFER_WIDTH;
+extern float FRAMEBUFFER_HEIGHT;
+
 extern SDL_Window *window;
-extern SDL_Surface *surface;
-extern SDL_Renderer *renderer;
 
-extern texture_t         *sprites[ASSET_SPRITE_ALL];
+typedef struct uniform {
+    int   loc;
+    int   type;
+    int   size;
+    char *name;
+} uniform_t;
 
-typedef void (*shader_t)(uint32_t, int, int, int, int, int);
+typedef struct shader_program {
+    int           program;
+    int           vertex_shader_id;
+    int           fragment_shader_id;
+    int           geometry_shader_id;
+    int           n_uniforms;
+    uniform_t    *uniforms[MAX_SHADER_UNIFORMS];
+    unsigned int  vao;
+    unsigned int  vbo;
+} shader_program_t;
 
-void GFX_init_window();
-void GFX_init_renderer();
+typedef struct framebuffer {
+    unsigned int id;
+    unsigned int texture;
+    unsigned int x0;
+    unsigned int y0;
+    unsigned int w;
+    unsigned int h;
+} framebuffer_t;
 
-int GFX_init_graphics();
+typedef struct texture {
+    SDL_Surface *surface;
+    int          id;
+} texture_t;
+
+bool GFX_init_png();
+bool GFX_init_gl_params();
+bool GFX_init_glew();
+bool GFX_init_window();
+bool GFX_init_sdl_with_gl();
+bool GFX_create_gl_context();
+bool GFX_set_viewport();
 
 void GFX_free();
-void GFX_clear_screen();
 void GFX_update();
 
-void GFX_draw_colored_line(int x1, int y1, int x2, int y2, int r, int g, int b, int a);
-void GFX_fill_lightbuffer(uint32_t color, int x, int y, int power, int x0, int y0);
+void GFX_destroy_framebuffer(GLuint id);
+void GFX_free_texture(texture_t* texture);
 
-void GFX_fill_light(
-    void (*pix_fill_fun)(uint32_t, int, int, int, int, int),
-    vertex_t *poly,
-    int r,
-    int g,
-    int b,
-    int power,
-    int x0,
-    int y0
+int GFX_type_size(GLenum type);
+
+texture_t*     GFX_read_texture(const char *filepath);
+framebuffer_t* GFX_create_framebuffer(int id, int w, int h);
+
+shader_program_t* GFX_create_gl_program(
+    const char* vertex_shader_path,
+    const char* fragment_shader_path,
+    const char* geometry_shader_path
 );
-
-void GFX_fill_rect(
-    shader_t shader,
-    int x,
-    int y,
-    int w,
-    int h,
-    int r,
-    int g,
-    int b,
-    int power 
-);
-
-void GFX_draw_rect_border(int x, int y, int w, int h, int r, int g, int b, int a);
-void GFX_render_texture(texture_t* texture, SDL_Rect* clip, int x, int y, bool flip);
-void GFX_render_tile(texture_t* texture, int render_x, int render_y, int x, int y, int w, int h);
-void GFX_free_texture(texture_t *texture);
-void GFX_clean_buffers();
-void GFX_draw_light();
-void GFX_draw_darkness();
-
-texture_t* GFX_read_texture(const char *filepath);
 
 #endif

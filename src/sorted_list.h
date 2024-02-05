@@ -11,6 +11,5 @@ void SRTLST_insert(sorted_list_t** head, int value, int sign);
 void SRTLST_free(sorted_list_t* head);
 
 int SRTLST_get_last(sorted_list_t* head);
-int SRTLST_len (sorted_list_t* head);
 
 #endif
