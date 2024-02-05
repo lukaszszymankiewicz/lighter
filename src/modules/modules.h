@@ -24,6 +24,6 @@ typedef struct gfx_module {
 
 extern gfx_module_t       *gfx_modules[GFX_MODULE_ALL];
 
-void MOD_init(bool use_gfx);
+void MOD_init();
 
 #endif

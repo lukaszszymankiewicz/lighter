@@ -1,10 +1,7 @@
-#include <stdbool.h>
-
 #include "library.h"
 
 
 void LIB_init(
-    bool use_gfx
 ) {
     printf("[RESOURCES]\n");
     LIB_create_entity_library();
@@ -14,10 +11,7 @@ void LIB_init(
     LIB_create_levels_library();
     LIB_create_tile_library();
     LIB_create_tilesets_library();
-
-    if (use_gfx) {
-        LIB_create_shaders_library();
-    }
+    LIB_create_shaders_library();
 }
 
 void LIB_free_all(

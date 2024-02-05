@@ -1,13 +1,11 @@
 CC = gcc
-CFLAGS := --std=c99 -Wall -g
+CFLAGS := --std=c99 -Wall
 LINKS = `pkg-config --cflags --libs sdl2 SDL2_image` 
 LIBS = -lGL -lGLU -lGLEW -lm 
 
 FINAL_OBJ = lighter
 
 SRCDIR = src
-
-MEMORYLOG = memory_check.txt
 
 BUILDDIR = build
 DATADIR = data
@@ -53,16 +51,14 @@ OBJS =                                     \
 	$(BUILDDIR)/vertex.o                   \
 
 $(BUILDDIR)/lighter:	$(OBJS) $(BUILDDIR)/main.o
-	$(CC) $(CFLAGS) $(OBJS) $(BUILDDIR)/main.o -o $(BUILDDIR)/$(FINAL_OBJ)  $(LINKS) $(LIBS)
+	$(CC) $(CFLAGS) $(OBJS) $(BUILDDIR)/main.o -o $(BUILDDIR)/$(FINAL_OBJ) $(LINKS) $(LIBS)
 
 clean:
 	rm -f $(BUILDDIR)/*.o
 	rm -f $(BUILDDIR)/$(DATADIR)/*.o
 	rm -f $(BUILDDIR)/$(MODDIR)/*.o
 	rm -f $(BUILDDIR)/$(FINAL_OBJ)
-	rm -f $(BUILDDIR)/$(FINAL_TEST_OBJ)
 
-# TODO: add creating build/data folder
 lighter:  $(BUILDDIR)/lighter
 
 run_lighter:
@@ -73,7 +69,3 @@ all:
 
 debug: 
 	gdb ./$(BUILDDIR)/$(FINAL_OBJ)
-
-.PHONY: memory_check
-memory_check:
-	valgrind --leak-check=yes --log-file="memory_check.txt" --track-origins=yes ./build/lighter gfx_off one_frame

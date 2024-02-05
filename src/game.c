@@ -27,12 +27,10 @@ void GAME_handle_window_events(
 }
 
 void GAME_init(
-    game_config_t config
 ) {
     game                 = (game_t*)malloc(sizeof(game_t));
     game->loop           = true;
     game->frame          = 0;
-    game->config         = config;
 };
 
 void GAME_start_time(
@@ -49,9 +47,6 @@ void GAME_set_camera(
 
 void GAME_draw_everything(
 ) {
-    if (!(game->config.use_gfx)) {
-        return;
-    }
     printf("\n\nFRAME %d ---------- \n", game->frame);
 
     SCENE_clear();
@@ -124,7 +119,7 @@ void GAME_update_time(
 
 bool GAME_shold_run(
 ) {
-    return (game->loop) && (game->frame != game->config.max_frames);
+    return (game->loop) && (game->frame != -1);
 }
 
 void GAME_loop(
@@ -149,16 +144,15 @@ void GAME_loop(
 }
 
 void GAME_new(
-    game_config_t config
 ) {
-    GAME_init(config);
+    GAME_init();
     COMPONENTS_init();
 
-    MOD_init(config.use_gfx);
-    LIB_init(config.use_gfx);
+    MOD_init();
+    LIB_init();
 
     GAME_fill_scene();
-    LVLMAN_fill(config.level_id);
+    LVLMAN_fill(0);
 }
 
 void GAME_close(
@@ -172,16 +166,12 @@ void GAME_close(
     free(game);
     GFX_free();
     SDL_Quit();
-
-    if (game->config.use_gfx) {
-        SCENE_free();
-    }
+    SCENE_free();
 };
 
 void GAME_run(
-    game_config_t config
 ) {
-    GAME_new(config);
+    GAME_new();
     GAME_loop();
     GAME_close();
 }

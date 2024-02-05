@@ -1,35 +1,8 @@
-#include <stdbool.h>
-
 #include "game.h"
-
-#define  graphic_on         true
-#define  graphic_off        false
-#define  defult_level       0
-#define  defult_max_frames -1
-#define  GAME_COMPLETE      0
-
-game_config_t default_config = (game_config_t) {
-    defult_max_frames,
-    graphic_on,
-    defult_level      
-};
-
-game_config_t no_gfx_config = (game_config_t) {
-    defult_max_frames,
-    graphic_off,
-    defult_level      
-};
-
-game_config_t blit_config = (game_config_t) {
-    1,
-    graphic_on,
-    defult_level      
-};
 
 int main(
 ) {
-    // GAME_run(blit_config);
-    GAME_run(default_config);
+    GAME_run();
 
-    return GAME_COMPLETE;
+    return 0;
 }

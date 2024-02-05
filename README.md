@@ -11,7 +11,17 @@ Shadowcasting + rudimental 2D game engine Proof of Concept.
 
 Written in C, with a little help of OpenGL and SDL library.
 
-This repo contains only game code, development tools are put here: [repo](https://github.com/lukaszszymankiewicz/ltools)
+Code is pretty much a mess - this is a result of treating it as a playground to
+learn new programming language as well as new algorithms. The fact that I barely
+remember that I have such project did not helped at all
+
+There is so much things in here, which I would code better or just dump because
+it is trash, but sometimes it is better to let it go rather than push it up to
+limits. There are few memory leaks here and there, few things which are just
+dumb, but yeah, it is what it is.
+
+I'll propably strip this code to be use as a more robust implementation of 2D
+sidescroller.
 
 Screenshot:
 

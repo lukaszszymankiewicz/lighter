@@ -35,10 +35,6 @@ void MOD_init_gfx(
 }
 
 void MOD_init(
-    bool use_gfx
 ) {
-    if (!use_gfx) {
-        return;
-    }
     MOD_init_gfx();
 }

@@ -92,14 +92,33 @@ enum LEVEL_IDX {
 
 enum TILESET_IDX {
     TILESET_BASIC,
+    TILESET_SEWER,
     TILESET_ALL
 };
 
 enum TILE_IDX {
-    TILE_NOTHING,
-    TILE_WALL,
-    TILE_BROKEN_WALL,
-    TILE_BLACK,
+    TILE_A_LU,
+    TILE_A_MU,
+    TILE_A_RU,
+    TILE_A_LM,
+    TILE_A_MM,
+    TILE_A_RM,
+    TILE_A_LD,
+    TILE_A_MD,
+    TILE_A_RD,
+    TILE_B_LU,
+    TILE_B_MU,
+    TILE_B_RU,
+    TILE_B_LM,
+    TILE_B_MM,
+    TILE_B_RM,
+    TILE_B_LD,
+    TILE_B_MD,
+    TILE_B_RD,
+    TILE_C_L,
+    TILE_C_M,
+    TILE_C_R,
+    TILE_SEWER,
     TILE_ALL
 };
 
@@ -180,7 +199,7 @@ void LIB_create_tilesets_library();
 void LIB_create_tile_library();
 void LIB_create_shaders_library();
 
-void LIB_init(bool use_gfx);
+void LIB_init();
 void LIB_free_all();
 
 #endif

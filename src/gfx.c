@@ -65,11 +65,13 @@ texture_t* GFX_read_texture(
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     if(surface && surface->format->BytesPerPixel == 4) {
+        printf("mode read \n");
         TEXTURE_MODE = GL_RGBA; 
     }
 
     // surface can be NULL, check must be done beforehand
     if (surface) {
+        printf("surface read \n");
         glTexImage2D(
             GL_TEXTURE_2D, 0, TEXTURE_MODE,
             surface->w, surface->h,

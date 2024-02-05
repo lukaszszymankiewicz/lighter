@@ -9,6 +9,11 @@ texture_blueprint_t texture_blueprint_basic = {
     "./src/data/tilesets/basic.png"
 };
 
+texture_blueprint_t texture_blueprint_sewer = {
+    TILESET_SEWER,
+    "./src/data/tilesets/sewer.png"
+};
+
 void LIB_read_tileset_blueprint(
     texture_blueprint_t *blueprint
 ) {
@@ -24,5 +29,6 @@ void LIB_read_tileset_blueprint(
 void LIB_create_tilesets_library(
 ) {
     LIB_read_tileset_blueprint(&texture_blueprint_basic);
+    LIB_read_tileset_blueprint(&texture_blueprint_sewer);
 };
 

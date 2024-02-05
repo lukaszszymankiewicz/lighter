@@ -133,17 +133,27 @@ entity_blueprint_t entity_blueprint_lamp_small = {
 };
 
 entity_blueprint_t entity_blueprint_lamp_big = {
-    "big lamp",
+    "small lamp2",
     ENTITY_LAMP_BIG,
     EMMIT_LIGHT,
     HANDLE_MIDDLE_MIDDLE,
     HANDLE_MIDDLE_MIDDLE,
-    SPRITE_LAMP_BIG,
-    LIGHTSOURCE_WALLLIGHT,
+    SPRITE_LAMP_SMALL,
+    LIGHTSOURCE_LAMP_BIG,
     ENTITY_NO,
-    NOTHING,
+    STANDING,
     {
-        SPRITE_LAMP_BIG, 0, 32, 32, { } 
+        SPRITE_LAMP_SMALL, 1, 32, 32, {
+            1, // len
+            WOBBLE_CIRCLE,
+            {
+                {
+                    (SDL_Rect)       { 0,        0,   32,        32        },
+                    { (SDL_Rect)     { 0,        0,   32,        32        } },
+                    0, 0, 1, 20 
+                },
+            }
+        } 
     }
 };
 

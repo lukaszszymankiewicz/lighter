@@ -742,10 +742,15 @@ void ENT_update_collision(
                entity->x + rect.x + rect.w,
                entity->y + rect.y + rect.h + (1 * Y_DIRECTION)
             );
+            
+            if((x_collision!=-1) || (y_collision!=-1) || (y_falling!=-1)) {
 
+                printf("collision! \n");
+            }
+    
             if (x_collision != -1) { SRTLST_insert(&x_intersections, x_collision, 0); }
-            if (y_collision != -1) { SRTLST_insert(&y_intersections, y_collision, 0); }
-            if (y_falling   != -1) { SRTLST_insert(&falling, y_falling, 0 );         }
+            if (y_collision != -1) { SRTLST_insert(&y_intersections, y_collision+1, 0); }
+            if (y_falling   != -1) { SRTLST_insert(&falling, y_falling+1, 0 );         }
         }
     }
     

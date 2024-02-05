@@ -35,24 +35,26 @@ lightsource_t lighsource_lamp_small = {
     PI/12, 
     6, 
     {
-        (lightpolygon_t){0,   0, 226, 13, 13, 50, 0,   0,        DEFAULT_DIFFUSE * 1.8},
-        (lightpolygon_t){0,  -2, 226, 13, 13, 30, 20,  0+PI/12,   DEFAULT_DIFFUSE * 1.0},
-        (lightpolygon_t){0,  +2, 226, 13, 13, 30, 20,  0-PI/12,   DEFAULT_DIFFUSE * 1.0},
-
-        (lightpolygon_t){0,   0, 226, 13, 13, 50, 0,   PI,       DEFAULT_DIFFUSE * 1.8},
-        (lightpolygon_t){0,  -2, 226, 13, 13, 30, 20,  PI+PI/12,  DEFAULT_DIFFUSE * 1.0},
-        (lightpolygon_t){0,  +2, 226, 13, 13, 30, 20,  PI-PI/12,  DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,   0, 57, 255, 20, 50, 0,   0,         DEFAULT_DIFFUSE * 1.8},
+        (lightpolygon_t){0,  -2, 57, 255, 20, 30, 20,  0+PI/12,   DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,  +2, 57, 255, 20, 30, 20,  0-PI/12,   DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,   0, 57, 255, 20, 50, 0,   PI,        DEFAULT_DIFFUSE * 1.8},
+        (lightpolygon_t){0,  -2, 57, 255, 20, 30, 20,  PI+PI/12,  DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,  +2, 57, 255, 20, 30, 20,  PI-PI/12,  DEFAULT_DIFFUSE * 1.0},
     }
 };
 
 lightsource_t lighsource_lamp_big = {
     LIGHTSOURCE_LAMP_BIG,
-    PI/7, 
-    1, 
+    PI/12, 
+    6, 
     {
-        (lightpolygon_t){0,  0, 200, 200, 120, 50,  0, PI/2, DEFAULT_DIFFUSE},
-        (lightpolygon_t){0, -2, 200, 200, 120, 30, 20, PI/2, DEFAULT_DIFFUSE},
-        (lightpolygon_t){0, +2, 200, 200, 120, 20, 20, PI/2, DEFAULT_DIFFUSE},
+        (lightpolygon_t){0,   0, 255, 87, 51, 50, 0,   0,         DEFAULT_DIFFUSE * 1.8},
+        (lightpolygon_t){0,  -2, 255, 87, 51, 30, 20,  0+PI/12,   DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,  +2, 255, 87, 51, 30, 20,  0-PI/12,   DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,   0, 255, 87, 51, 50, 0,   PI,        DEFAULT_DIFFUSE * 1.8},
+        (lightpolygon_t){0,  -2, 255, 87, 51, 30, 20,  PI+PI/12,  DEFAULT_DIFFUSE * 1.0},
+        (lightpolygon_t){0,  +2, 255, 87, 51, 30, 20,  PI-PI/12,  DEFAULT_DIFFUSE * 1.0},
     }
 };
 
